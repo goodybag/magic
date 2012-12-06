@@ -1,4 +1,0 @@
-magic
-=====
-
-The Goodybag API
