@@ -1,0 +1,9 @@
+{
+  "repl": {
+    "prompt": "gb-api> "
+  , "port": 4337
+  }
+, "http": {
+    "port": 3000
+  }
+}

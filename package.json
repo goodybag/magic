@@ -1,0 +1,22 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "express": "3.0.3",
+    "async": "0.1.x",
+    "moment": "1.7.x",
+    "node.extend": "1.0.x",
+    "noop": "0.2.x",
+    "express-winston": "0.1.x",
+    "winston": "0.6.x",
+    "underscore": "1.4.x",
+    "node-uuid": "1.4.x",
+    "randomstring": "1.0.x",
+    "sql": "0.1.x",
+    "pg": "0.9.x"
+  }
+}
