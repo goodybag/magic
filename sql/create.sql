@@ -1,4 +1,4 @@
-ALTER TABLE "Locations" DROP CONSTRAINT "fk_businesses";
+ALTER TABLE "Locations" DROP CONSTRAINT "fk_locations_businesses";
 
 ALTER TABLE "Businesses"DROP CONSTRAINT "";
 ALTER TABLE "Locations"DROP CONSTRAINT "";
@@ -37,5 +37,5 @@ PRIMARY KEY ("id")
 );
 
 
-ALTER TABLE "Locations" ADD CONSTRAINT "fk_businesses" FOREIGN KEY ("businessId") REFERENCES "Businesses" ("id");
+ALTER TABLE "Locations" ADD CONSTRAINT "fk_locations_businesses" FOREIGN KEY ("businessId") REFERENCES "Businesses" ("id");
 
