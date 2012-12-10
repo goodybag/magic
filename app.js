@@ -94,7 +94,7 @@ app.configure('development', function(){
 
 // Routes stuff goes here
 
-app.get('/users', routes.users.list);
+app.get('/businesses', routes.v1.businesses.list);
 
 app.get('/health', function(req, res){
   res.send({
@@ -137,6 +137,11 @@ if(cluster.isMaster){
     process.exit(1);
   });
 }
+
+httpServer = http.createServer(app).listen(app.get('port'), function(){
+});
+
+return;
 
 /**
  * Clustering

@@ -4,7 +4,7 @@
  */
 
 var
-  users = require('./users')
+  v1 = require('./v1')
 ;
 
-exports.users = users;
+exports.v1 = v1;

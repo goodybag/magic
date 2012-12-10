@@ -6,4 +6,7 @@
 , "http": {
     "port": 3000
   }
+, "postgres": {
+    "connectionString": "tcp://goodybag:g00dybag@localhost/goodybag"
+  }
 }
