@@ -1,0 +1,16 @@
+{
+  "name": "db-setup",
+  "version": "0.0.1",
+  "description": "Sets up goodybag database and tables. Can import data from mongodb.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "mongode": "0.1.4",
+    "pg": "0.9.0"
+  }
+}
