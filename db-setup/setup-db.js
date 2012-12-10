@@ -46,25 +46,29 @@ module.exports = function(callback){
       batch = []
     , getFn = function(name){
         return function(){
-          console.log("Dropping " + name);
-          var query = client.query("drop table if exists " + name);
+          console.log("Dropping Sequence for " + name);
+          var query = client.query("drop sequence if exists " + name + "_id_seq cascade");
 
           query.on('end', function(){
-            console.log("Creating " + name);
+            console.log("Dropping " + name);
+            var query = client.query("drop table if exists " + name + " cascade");
 
-            getSql(name, function(error, file){
-              if (error) return callback(error);
+            query.on('end', function(){
+              console.log("Creating " + name);
 
-              console.log(file);
-              var query = client.query(file);
+              getSql(name, function(error, file){
+                if (error) return callback(error);
 
-              query.on('end', function(){
-                if (batch.length === 0) return onComplete(client, callback);
-                else batch.pop().call();
+                console.log(file);
+                var query = client.query(file);
+
+                query.on('end', function(){
+                  if (batch.length === 0) return onComplete(client, callback);
+                  else batch.pop().call();
+                });
               });
             });
           });
-
         }
       }
     ;
