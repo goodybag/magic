@@ -5,10 +5,7 @@
 
 var
 // Built-in
-  os = require('os')
-, fs = require('fs')
-, path = require('path')
-, cluster = require('cluster')
+  cluster = require('cluster')
 , http = require('http')
 , net = require('net')
 , repl = require('repl')
@@ -16,83 +13,14 @@ var
 // Configuration
 , config = require('./config')
 
-// Logging
-, winston = require('winston')
-, expressWinston = require('express-winston')
-, expressLogger = require('./express-logger')
-, FileRotate = require('./file-rotate')
-
-// Express
-, express = require('express')
-, uuid = require('./middleware/uuid')
-, router = require('./router')
-
 // Module vars
 , workers = {} // Multiple workers per cluster
 , numWorkers = 0
 , httpServer
-, sigterm = false // Did we recieve a sigterm
 ;
 
-var app = express();
+var app = require('./lib/server').createAppServer();
 
-app.configure(function(){
-  app.set('port', process.env.PORT || config.http.port);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.favicon());
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(express.cookieParser(config.cookieSecret));
-  app.use(express.session());
-
-  /**
-   * Custom middleware
-   */
-
-  // Add a uuid to each request object
-  app.use(uuid());
-
-  // Gracefully stop serving if SIGTERM was received
-  app.use(function(req, res, next){
-    if (!sigterm) return next();
-    res.setHeader("Conection", "close");
-    res.send(502, "Server is in the process of restarting");
-  });
-
-  // Custom logger for express
-  app.use(expressLogger({
-    meta: {tag: 'api-express'}
-  , transports: [
-      new FileRotate({
-        json: true
-      , filename: 'all.log'
-      , dirname: 'logs'
-      })
-    ]
-  }));
-
-  app.use(app.router);
-
-  // Configure the error logger
-  app.use(expressWinston.errorLogger({
-    transports: [
-      new winston.transports.Console({
-        json: true
-      })
-    ]
-  }))
-});
-
-// Development environment specific configuration settings for express
-app.configure('development', function(){
-  app.use(express.errorHandler({
-    dumpExceptions: true
-  , showStack: true
-  }));
-});
-
-router.init(app);
 
 /**
  * REPL
@@ -167,7 +95,7 @@ if (cluster.isMaster){
   process.on('message', function(msg){
     if (msg === 'SIGTERM'){
       console.log('Shutting down worker: '+ cluster.worker.id + '(PID: ' + process.pid + ')');
-      sigterm = true;
+      app.sigterm = true;
       httpServer.close(function(){
         console.log('HTTP SHUTDOWN -', process.pid);
         process.send('HTTPTERM');
