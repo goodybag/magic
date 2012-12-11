@@ -21,12 +21,34 @@ router.init = function(app){
   // app.post('/v1/consumers/auth/facebook',                        routes.v1.consumers.fbAuth);
   // app.get ('/v1/consumers/tapins', auth,                         routes.v1.consumers.tapins);
 
-  // Businesses
-  app.get ('/v1/businesses', fields('businesses'),                routes.v1.businesses.list);
-  app.get ('/v1/businessesWithLocations',                         routes.v1.businesses.listWithLocations);
-  // app.post('/v1/businesses',                                      routes.v1.businesses.save);
-  // app.get ('/v1/businesses/:businessId',                          routes.v1.businesses.findOne);
-  // app.get ('/v1/businesses/:businessId/goodies',                  routes.v1.businesses.goodies);
+  app.get(
+    '/v1/businesses'
+  , fields('businesses')
+  , routes.v1.businesses.list
+  );
+
+  app.get(
+    '/v1/businessesWithLocations'
+  , routes.v1.businesses.listWithLocations
+  );
+
+  // app.post(
+  //   '/v1/businesses'
+  // , validate.businesses.save
+  // , routes.v1.businesses.save
+  // );
+
+  // app.get(
+  //   '/v1/businesses/:businessId'
+  // , fields('businesses')
+  // , routes.v1.businesses.findOne
+  // );
+
+  // app.get(
+  //   '/v1/businesses/:businessId/goodies'
+  // , fields('goodies')
+  // , routes.v1.businesses.goodies
+  // );
 };
 
 module.exports = router;
