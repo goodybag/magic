@@ -12,7 +12,6 @@ var
 , config    = require('./config')
 
   // Module Variables
-, defaults  = config.defaults
 , validator = amanda('json')
 
   // Make underscores functionality available on utils
@@ -39,56 +38,6 @@ utils.validate = function(data, schema, options, callback){
 };
 
 /**
- * Expands a flattened query object
- * @param  {Object} doc The flattened document to be expanded
- * @return {Object}     The flattened document
- */
-utils.expandDoc = function(doc){
-  var expanded = {}, parts, deepObj, curr, currKey;
-  for (var key in doc){
-    if (key.indexOf(".")){
-      parts   = key.split('.');
-      deepObj = doc[key];
-      while (parts.length > 1){
-        currKey       = parts.pop();
-        curr          = {};
-        curr[currKey] = deepObj;
-        deepObj       = curr;
-      }
-      expanded[parts[0]] = deepObj;
-    }else expanded[key]  = doc[key];
-  }
-  return expanded;
-};
-
-/**
- * Flattens a query object to be used with mongo queries { "some.thing.else": "blah" }
- * @param  {Object}  doc        The nested query object to be flattened
- * @param  {String}  startPath  Top level key
- * @return {Object}             The flattened document
- */
-utils.flattenDoc = function(doc, startPath){
-  var flat = {},
-  flatten = function(obj, path){
-    if (typeof obj === "object"){
-      (path && (path += ".")) || (path = "");
-      for (var key in obj) flatten(obj[key], path + key);
-    }else if (Object.isArray(obj)){
-      (path && (path += ".")) || (path = "");
-      i = 0;
-      while (i < obj.length){
-        flatten(obj[i], path + i);
-        i++;
-      }
-    }else{
-      flat[path] = obj;
-    }
-    return flat;
-  };
-  return flatten(doc, startPath);
-}
-
-/**
  * Encrypts consumer passwords
  * @param  {String}   password  The password to encrypt
  * @param  {Function} callback  returns the error/data.
@@ -108,7 +57,7 @@ utils.encryptPassword = function(password, callback){
  * @return {Null}
  */
 utils.comparePasswords = function(password, encrypted, callback){
-  var result = crypto.createHash('md5').update(password + defaults.passwordSalt).digest('hex')
+  var result = crypto.createHash('md5').update(password + config.passwordSalt).digest('hex')
   if (callback) return callback(null, result === encrypted);
   return result === encrypted;
 };
@@ -137,22 +86,6 @@ utils.interceptFunctions = function(dom, rest){
     }
   }
   return functions;
-};
-
-/**
- * Adds CORS headers to the response
- * @param  {ServerResponse} res     The response which will receive the headers
- * @param  {Object}         options Configures the headers (optional)
- * @return {undefined}
- */
-utils.setResponseCORS = function(res, options) {
-  options = options || {};
-  res.setHeader('Access-Control-Allow-Origin',      '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods',     options.methods       || 'OPTIONS, HEAD, GET');
-  res.setHeader('Access-Control-Allow-Headers',     options.allowHeaders  || 'Content-type');
-  res.setHeader('Access-Control-Expose-Headers',    options.exposeHeaders || 'Allow, Link, Content-type');
-
 };
 
 utils.sendJSON = function(res, json){
