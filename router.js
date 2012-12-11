@@ -32,11 +32,11 @@ router.init = function(app){
   , routes.v1.businesses.listWithLocations
   );
 
-  // app.post(
-  //   '/v1/businesses'
-  // , validate.businesses.save
-  // , routes.v1.businesses.save
-  // );
+  app.post(
+    '/v1/businesses'
+  , validate.businesses.save
+  , routes.v1.businesses.save
+  );
 
   // app.get(
   //   '/v1/businesses/:businessId'
