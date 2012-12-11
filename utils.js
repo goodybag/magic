@@ -12,7 +12,6 @@ var
 , config    = require('./config')
 
   // Module Variables
-, defaults  = config.defaults
 , validator = amanda('json')
 
   // Make underscores functionality available on utils
@@ -73,7 +72,7 @@ utils.flattenDoc = function(doc, startPath){
     if (typeof obj === "object"){
       (path && (path += ".")) || (path = "");
       for (var key in obj) flatten(obj[key], path + key);
-    }else if (Object.isArray(obj)){
+    }else if (Array.isArray(obj)){
       (path && (path += ".")) || (path = "");
       i = 0;
       while (i < obj.length){
@@ -108,7 +107,7 @@ utils.encryptPassword = function(password, callback){
  * @return {Null}
  */
 utils.comparePasswords = function(password, encrypted, callback){
-  var result = crypto.createHash('md5').update(password + defaults.passwordSalt).digest('hex')
+  var result = crypto.createHash('md5').update(password + config.passwordSalt).digest('hex')
   if (callback) return callback(null, result === encrypted);
   return result === encrypted;
 };
