@@ -56,7 +56,6 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, results);
 
-      utils.setResponseCORS(res);
       return res.json({ error: null, data: results.rows });
     });
   });
