@@ -7,6 +7,7 @@ var
   routes    = require('./routes')
 , validate  = require('./middleware/routes-validator').routes
 , auth      = require('./middleware/auth')
+, fields    = require('./middleware/fields')
 
   // Module Variables
 , router    = {}
@@ -21,7 +22,8 @@ router.init = function(app){
   // app.get ('/v1/consumers/tapins', auth,                         routes.v1.consumers.tapins);
 
   // Businesses
-  app.get ('/v1/businesses',                                      routes.v1.businesses.list);
+  app.get ('/v1/businesses', fields('businesses'),                routes.v1.businesses.list);
+  app.get ('/v1/businessesWithLocations',                         routes.v1.businesses.listWithLocations);
   // app.post('/v1/businesses',                                      routes.v1.businesses.save);
   // app.get ('/v1/businesses/:businessId',                          routes.v1.businesses.findOne);
   // app.get ('/v1/businesses/:businessId/goodies',                  routes.v1.businesses.goodies);

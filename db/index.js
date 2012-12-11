@@ -41,7 +41,7 @@ exports.getClient = function(callback){
 
 exports.tables = {
   businesses: require('./tables/businesses')
-// , locations: require('./tables/locations')
+, locations: require('./tables/locations')
 }
 
 /*
