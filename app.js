@@ -26,6 +26,7 @@ var
 , express = require('express')
 , uuid = require('./middleware/uuid')
 , router = require('./router')
+, corsHeaders = require('./middleware/cors')
 
 // Module vars
 , workers = {} // Multiple workers per cluster
@@ -52,6 +53,9 @@ app.configure(function(){
 
   // Add a uuid to each request object
   app.use(uuid());
+
+  // Add CORS headers
+  app.use(corsHeaders);
 
   // Gracefully stop serving if SIGTERM was received
   app.use(function(req, res, next){
