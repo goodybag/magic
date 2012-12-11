@@ -13,6 +13,7 @@ exports.httpRequest = function httpRequest(options, payload, cb) {
   options.hostname = 'localhost';
   options.port     = 8986;
   options.method   = options.method || 'GET';
+  options.accept   = options.accept || 'application/json';
 
   var req = http.request(options, function(res) {
     var resPayload = '';

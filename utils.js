@@ -88,22 +88,6 @@ utils.interceptFunctions = function(dom, rest){
   return functions;
 };
 
-/**
- * Adds CORS headers to the response
- * @param  {ServerResponse} res     The response which will receive the headers
- * @param  {Object}         options Configures the headers (optional)
- * @return {undefined}
- */
-utils.setResponseCORS = function(res, options) {
-  options = options || {};
-  res.setHeader('Access-Control-Allow-Origin',      '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods',     options.methods       || 'OPTIONS, HEAD, GET');
-  res.setHeader('Access-Control-Allow-Headers',     options.allowHeaders  || 'Content-type');
-  res.setHeader('Access-Control-Expose-Headers',    options.exposeHeaders || 'Allow, Link, Content-type');
-
-};
-
 utils.sendJSON = function(res, json){
   res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
   // res.header('Access-Control-Allow-Origin', 'http://local.goodybag.com');
