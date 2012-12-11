@@ -38,56 +38,6 @@ utils.validate = function(data, schema, options, callback){
 };
 
 /**
- * Expands a flattened query object
- * @param  {Object} doc The flattened document to be expanded
- * @return {Object}     The flattened document
- */
-utils.expandDoc = function(doc){
-  var expanded = {}, parts, deepObj, curr, currKey;
-  for (var key in doc){
-    if (key.indexOf(".")){
-      parts   = key.split('.');
-      deepObj = doc[key];
-      while (parts.length > 1){
-        currKey       = parts.pop();
-        curr          = {};
-        curr[currKey] = deepObj;
-        deepObj       = curr;
-      }
-      expanded[parts[0]] = deepObj;
-    }else expanded[key]  = doc[key];
-  }
-  return expanded;
-};
-
-/**
- * Flattens a query object to be used with mongo queries { "some.thing.else": "blah" }
- * @param  {Object}  doc        The nested query object to be flattened
- * @param  {String}  startPath  Top level key
- * @return {Object}             The flattened document
- */
-utils.flattenDoc = function(doc, startPath){
-  var flat = {},
-  flatten = function(obj, path){
-    if (typeof obj === "object"){
-      (path && (path += ".")) || (path = "");
-      for (var key in obj) flatten(obj[key], path + key);
-    }else if (Array.isArray(obj)){
-      (path && (path += ".")) || (path = "");
-      i = 0;
-      while (i < obj.length){
-        flatten(obj[i], path + i);
-        i++;
-      }
-    }else{
-      flat[path] = obj;
-    }
-    return flat;
-  };
-  return flatten(doc, startPath);
-}
-
-/**
  * Encrypts consumer passwords
  * @param  {String}   password  The password to encrypt
  * @param  {Function} callback  returns the error/data.

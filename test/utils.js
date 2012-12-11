@@ -59,65 +59,6 @@ describe('validate', function() {
 
 });
 
-describe('expandDoc', function() {
-
-  it('should expand a flattened query object', function() {
-    var doc = utils.expandDoc({ 'foo':1, 'foo.bar':2, 'foo.baz':3, 'hi':5 });
-    
-    assert(doc.foo.bar === 2);
-    assert(doc.foo.baz === 3);
-    assert(doc.hi === 5);
-  });
-
-  it('should have no effects on an expanded doc', function() {
-    var doc = utils.expandDoc({ 'foo':{ 'bar':2, 'baz':3 }, 'hi':5 });
-    
-    assert(doc.foo.bar === 2);
-    assert(doc.foo.baz === 3);
-    assert(doc.hi === 5);
-  });
-
-  it('should reverse the effects of flattenDoc', function() {
-    var doc = utils.flattenDoc({ 'foo':{ 'bar':2, 'baz':3 }, 'hi':5 });
-    doc = utils.expandDoc(doc);
-
-    assert(doc.foo.bar === 2);
-    assert(doc.foo.baz === 3);
-    assert(doc.hi === 5);
-  });
-
-});
-
-describe('flattenDoc', function() {
-
-  it('should flatten an expanded query object', function() {
-    var doc = utils.flattenDoc({ 'foo':{ 'bar':2, 'baz':3 }, 'hi':5 });
-
-    assert(doc['foo.bar'] === 2);
-    assert(doc['foo.baz'] === 3);
-    assert(doc.hi === 5);
-  });
-
-  it('should have no effects on a flattened doc', function() {
-    var doc = utils.flattenDoc({ 'foo':1, 'foo.bar':2, 'foo.baz':3, 'hi':5 });
-
-    assert(doc['foo.bar'] === 2);
-    assert(doc['foo.baz'] === 3);
-    assert(doc.hi === 5);
-
-  });
-
-  it('should reverse the effects of expandDoc', function() {
-    var doc = utils.expandDoc({ 'foo':1, 'foo.bar':2, 'foo.baz':3, 'hi':5 });
-    doc = utils.flattenDoc(doc);
-
-    assert(doc['foo.bar'] === 2);
-    assert(doc['foo.baz'] === 3);
-    assert(doc.hi === 5);
-  });
-
-});
-
 describe('encryptPasswords, comparePasswords', function() {
 
   it('should accurately compare a plaintext password with its encrypted form', function() {
