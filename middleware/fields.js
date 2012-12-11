@@ -8,6 +8,7 @@ var
       "anonymous": [
         businesses.id
       , businesses.name
+      , businesses.enabled
       ]
 
     , "client": [

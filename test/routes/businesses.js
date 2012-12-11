@@ -13,7 +13,7 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length == 3);
       assert(payload.data[0].id, 1);
       assert(payload.data[0].name, 'Foobar');
-      // assert(payload.data[0].enabled, true);
+      assert(payload.data[0].enabled, true);
       done();
     });
   });
