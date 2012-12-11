@@ -8,12 +8,12 @@ var
 ;
 
 module.exports = sql.define({
-  name: 'buisnesses'
+  name: 'businesses'
 , columns: [
     'id'
   , 'name'
-  , 'address1'
-  , 'address2'
+  , 'street1'
+  , 'street2'
   , 'city'
   , 'state'
   , 'zip'

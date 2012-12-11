@@ -17,6 +17,7 @@
     "node-uuid": "1.4.x",
     "randomstring": "1.0.x",
     "sql": "0.1.x",
-    "pg": "0.9.x"
+    "pg": "0.9.x",
+    "amanda": "0.4.2"
   }
 }

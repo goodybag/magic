@@ -14,7 +14,7 @@ var
 , repl = require('repl')
 
 // Configuration
-, config = require('./config.json')
+, config = require('./config')
 
 // Logging
 , winston = require('winston')
@@ -25,7 +25,7 @@ var
 // Express
 , express = require('express')
 , uuid = require('./middleware/uuid')
-, routes = require('./routes')
+, router = require('./router')
 
 // Module vars
 , workers = {} // Multiple workers per cluster
@@ -43,7 +43,7 @@ app.configure(function(){
   app.use(express.favicon());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.cookieParser('your secret here'));
+  app.use(express.cookieParser(config.cookieSecret));
   app.use(express.session());
 
   /**
@@ -92,18 +92,7 @@ app.configure('development', function(){
   }));
 });
 
-// Routes stuff goes here
-
-app.get('/businesses', routes.v1.businesses.list);
-
-app.get('/health', function(req, res){
-  res.send({
-      pid: process.pid
-    , memory: process.memoryUsage()
-    , uptime: process.uptime()
-  });
-});
-
+router.init(app);
 
 /**
  * REPL

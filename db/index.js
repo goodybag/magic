@@ -4,14 +4,17 @@
  */
 
 var
-// Configuration
-  config = require('../config.json')
+  // Configuration
+  config = require('../config')
 
-// Database
+  // Database
   pg = require('pg').native
 , sql = require('sql')
 
-// Other packages in use
+  // Promise to fullfil this variable!
+, client = null
+
+  // Other packages in use
 // , pooler = require('generic-pool')
 ;
 
@@ -21,7 +24,11 @@ exports.sql = sql;
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
 
-var client = pg.Client(config.postgres.connectionString);
+pg.connect(config.postgresConnStr, function(error, _client){
+  if (error) throw error;
+
+  client = _client;
+});
 
 exports.getClient = function(callback){
   /*
