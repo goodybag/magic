@@ -15,6 +15,7 @@ before(function() {
 });
 
 require('./routes/businesses');
+require('./routes/locations');
 
 after(function() {
   httpServer.close();
