@@ -15,6 +15,18 @@ describe('GET /v1/businesses', function() {
   });
 });
 
+describe('GET /v1/businesses', function() {
+  it('should respond with a business listing', function(done) {
+    tu.get('/v1/businesses', function(err, payload, res) {
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      done();
+    });
+  });
+});
+
 describe('POST /v1/businesses', function(){
   it('should save a business and return the id', function(done){
     var business = {
@@ -54,7 +66,9 @@ describe('POST /v1/businesses', function(){
       done();
     });
   });
+});
 
+describe('POST /v1/businesses/:id', function(){
   it('should update a business\'s name and url', function(done){
     var business = {
       name: "Poophead McGees"
@@ -76,6 +90,36 @@ describe('POST /v1/businesses', function(){
     };
 
     tu.post('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(results.error);
+      done();
+    });
+  });
+});
+
+describe('PUT /v1/businesses/:id', function(){
+  it('should update a business\'s name and url', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: "http://pmcgee.com"
+    };
+
+    tu.put('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      done();
+    });
+  });
+
+  it('should fail to update a business because of an invalid field', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: 123
+    };
+
+    tu.put('/v1/businesses/' + 1, business, function(error, results){
       assert(!error);
       results = JSON.parse(results);
       assert(results.error);
