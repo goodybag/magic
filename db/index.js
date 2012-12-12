@@ -40,8 +40,8 @@ exports.getClient = function(callback){
 };
 
 exports.tables = {
-  businesses: require('./tables/businesses')
-, locations: require('./tables/locations')
+  businesses: require('./schemas/businesses')
+, locations: require('./schemas/locations')
 }
 
 /*
