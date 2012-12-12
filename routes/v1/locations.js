@@ -39,7 +39,7 @@ module.exports.list = function(req, res){
     );
 
     if (req.param('businessId')) {
-      query.where(locations.businessid.equals(req.param('businessId')));
+      query.where(locations.businessId.equals(req.param('businessId')));
     }
 
     query = query.toQuery();

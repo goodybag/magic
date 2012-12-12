@@ -16,7 +16,7 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data.length > 1);
       assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessid == 1);
+      assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Foohouse');
       done();
     });
@@ -38,7 +38,7 @@ describe('GET /v1/businesses/:id/locations', function() {
       assert(!payload.error);
       assert(payload.data.length == 1);
       assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessid == 1);
+      assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Foohouse');
       done();
     });
@@ -59,7 +59,7 @@ describe('GET /v1/locations/:id', function() {
 
       assert(!payload.error);
       assert(payload.data.id == 1);
-      assert(payload.data.businessid == 1);
+      assert(payload.data.businessId == 1);
       assert(payload.data.name == 'Foohouse');
       done();
     });
@@ -71,7 +71,7 @@ describe('GET /v1/locations/:id', function() {
 describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
-    tu.post('/v1/locations', JSON.stringify({ businessid:2, name:'asdf' }), 'application/json', function(err, payload, res) {
+    tu.post('/v1/locations', JSON.stringify({ businessId:2, name:'asdf' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -92,7 +92,7 @@ describe('POST /v1/locations', function() {
 describe('PATCH /v1/locations/:id', function() {
 
   it('should respond with a 200', function(done) {
-    tu.patch('/v1/locations/2', JSON.stringify({ businessid:2, name:'Barhouse2' }), 'application/json', function(err, payload, res) {
+    tu.patch('/v1/locations/2', JSON.stringify({ businessId:2, name:'Barhouse2' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

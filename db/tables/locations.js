@@ -11,7 +11,7 @@ module.exports = sql.define({
   name: 'locations'
 , columns: [
     'id'
-  , 'businessid'
+  , 'businessId'
   , 'name'
   , 'street1'
   , 'street2'

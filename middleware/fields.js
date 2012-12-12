@@ -37,13 +37,13 @@ var
   , "locations": {
       "anonymous": [
         locations.id
-      , locations.businessid
+      , locations.businessId
       , locations.name
       ]
 
     , "client": [
         locations.id
-      , locations.businessid
+      , locations.businessId
       , locations.name
       , locations.street1
       , locations.street2
@@ -59,7 +59,7 @@ var
 
     , "default": [
         locations.id
-      , locations.businessid
+      , locations.businessId
       , locations.name
       , locations.street1
       , locations.street2
