@@ -53,6 +53,31 @@ module.exports.get = function(req, res){
 };
 
 /**
+ * Delete business
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.del = function(req, res){
+  var TAGS = ['del-business', req.uuid];
+  logger.routes.debug(TAGS, 'deleting business ' + req.params.id, {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = businesses.delete().where(
+      businesses.id.equals(req.params.id)
+    ).toQuery();
+    client.query(query.text + ' cascade', query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
  * List businesses
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
