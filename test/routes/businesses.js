@@ -15,6 +15,32 @@ describe('GET /v1/businesses', function() {
   });
 });
 
+describe('GET /v1/businesses/:id', function() {
+  it('should respond with a single business document', function(done) {
+    var id = 1;
+    tu.get('/v1/businesses/' + id, function(err, payload, res) {
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data.id === id);
+      done();
+    });
+  });
+});
+
+describe('DEL /v1/businesses/:id', function() {
+  it('should delete a single business document', function(done) {
+    var id = 3;
+    tu.del('/v1/businesses/' + id, function(err, payload, res) {
+      assert(!err);
+      console.log(payload);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      done();
+    });
+  });
+});
+
 describe('POST /v1/businesses', function(){
   it('should save a business and return the id', function(done){
     var business = {
@@ -54,7 +80,9 @@ describe('POST /v1/businesses', function(){
       done();
     });
   });
+});
 
+describe('POST /v1/businesses/:id', function(){
   it('should update a business\'s name and url', function(done){
     var business = {
       name: "Poophead McGees"
@@ -76,6 +104,36 @@ describe('POST /v1/businesses', function(){
     };
 
     tu.post('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(results.error);
+      done();
+    });
+  });
+});
+
+describe('PUT /v1/businesses/:id', function(){
+  it('should update a business\'s name and url', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: "http://pmcgee.com"
+    };
+
+    tu.put('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      done();
+    });
+  });
+
+  it('should fail to update a business because of an invalid field', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: 123
+    };
+
+    tu.put('/v1/businesses/' + 1, business, function(error, results){
       assert(!error);
       results = JSON.parse(results);
       assert(results.error);

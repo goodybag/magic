@@ -11,10 +11,14 @@ exports.post = function post(path, payload, ctype, cb) {
 };
 
 exports.put = function post(path, payload, ctype, cb) {
+  if (typeof payload === "object") payload = JSON.stringify(payload);
+  if (typeof ctype === "function") cb = ctype, ctype = 'application/json';
   exports.httpRequest({ method:'PUT', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
 };
 
 exports.patch = function post(path, payload, ctype, cb) {
+  if (typeof payload === "object") payload = JSON.stringify(payload);
+  if (typeof ctype === "function") cb = ctype, ctype = 'application/json';
   exports.httpRequest({ method:'PATCH', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
 };
 
