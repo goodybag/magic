@@ -1,0 +1,3 @@
+-- TODO
+
+INSERT INTO businesses DEFAULT VALUES;
