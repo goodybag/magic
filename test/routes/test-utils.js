@@ -5,7 +5,13 @@ exports.get = function get(path, cb) {
 };
 
 exports.post = function post(path, payload, cb) {
+  if (typeof payload === "object") payload = JSON.stringify(payload);
   exports.httpRequest({ path:path }, payload, cb);
+};
+exports.post = function post(path, payload, ctype, cb) {
+  if (typeof payload === "object") payload = JSON.stringify(payload);
+  if (typeof ctype === "function") cb = ctype, ctype = 'application/json';
+  exports.httpRequest({ method:'POST', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
 };
 
 exports.httpRequest = function httpRequest(options, payload, cb) {

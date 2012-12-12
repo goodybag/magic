@@ -27,15 +27,27 @@ router.init = function(app){
   , routes.v1.businesses.list
   );
 
-  app.get(
-    '/v1/businessesWithLocations'
-  , routes.v1.businesses.listWithLocations
+  app.post(
+    '/v1/businesses'
+  , validate.businesses.create
+  , routes.v1.businesses.create
+  );
+
+  app.put(
+    '/v1/businesses/:id'
+  , validate.businesses.update
+  , routes.v1.businesses.update
   );
 
   app.post(
-    '/v1/businesses'
-  , validate.businesses.save
-  , routes.v1.businesses.save
+    '/v1/businesses/:id'
+  , validate.businesses.update
+  , routes.v1.businesses.update
+  );
+
+  app.get(
+    '/v1/businessesWithLocations'
+  , routes.v1.businesses.listWithLocations
   );
 
   // app.get(
