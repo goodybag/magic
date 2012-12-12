@@ -1,5 +1,5 @@
 var
-  setup = require('./setup-db')
+  setup = require('./index')
 // , importData = require('./import')
 
 , onError = function(error){
@@ -7,7 +7,7 @@ var
   }
 ;
 
-setup(function(error){
+setup({ verbose:true }, function(error){
   if (error) return onError(error);
   console.log('complete!');
   process.exit(0);

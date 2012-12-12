@@ -4,9 +4,9 @@
 
 var
   // Module Dependencies
-  utils     = require('../utils')
-, errors    = require('../errors')
-, logger    = require('../logger')
+  utils     = require('../lib/utils')
+, errors    = require('../lib/errors')
+, logger    = require('../lib/logger')
 
   // Module Variables
 , auth = function(req, res, next){
