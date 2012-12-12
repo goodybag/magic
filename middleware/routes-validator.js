@@ -6,7 +6,7 @@ var
   // Module Dependencies
   config    = require('../config')
 , schemas   = require('../schemas')
-, utils    = require('../utils')
+, utils    = require('../lib/utils')
   // Module Variables
 , compile = function(obj){
     var compiled = {};

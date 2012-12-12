@@ -1,7 +1,7 @@
 var assert = require('better-assert');
 var sinon = require('sinon');
 
-var utils = require('../utils');
+var utils = require('../lib/utils');
 
 describe('validate', function() {
 

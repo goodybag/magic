@@ -1,3 +1,5 @@
+process.env.mode = 'test';
+
 // unit tests
 // ==========
 require('./utils');
@@ -8,13 +10,16 @@ require('./utils');
 var app = require('../lib/server').createAppServer();
 var httpServer;
 
-before(function() {
-  // :TODO: need to set up test DB and make sure it's filled with fixtures
-
-  httpServer = require('http').createServer(app).listen(8986);
+before(function(done) {
+  var setupDb = require('../db/setup/index');
+  setupDb(require('./db-config.js'), function() {
+    httpServer = require('http').createServer(app).listen(8986);
+    done();
+  });
 });
 
 require('./routes/businesses');
+require('./routes/locations');
 
 after(function() {
   httpServer.close();
