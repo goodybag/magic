@@ -15,13 +15,14 @@ describe('GET /v1/businesses', function() {
   });
 });
 
-describe('GET /v1/businesses', function() {
-  it('should respond with a business listing', function(done) {
-    tu.get('/v1/businesses', function(err, payload, res) {
+describe('GET /v1/businesses/:id', function() {
+  it('should respond with a single business document', function(done) {
+    var id = 1;
+    tu.get('/v1/businesses/' + id, function(err, payload, res) {
       assert(!err);
       payload = JSON.parse(payload);
       assert(!payload.error);
-      assert(payload.data.length > 0);
+      assert(payload.data.id === id);
       done();
     });
   });
