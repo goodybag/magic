@@ -30,7 +30,7 @@ describe('GET /v1/businesses/:id', function() {
 
 describe('DEL /v1/businesses/:id', function() {
   it('should delete a single business document', function(done) {
-    var id = 1;
+    var id = 3;
     tu.del('/v1/businesses/' + id, function(err, payload, res) {
       assert(!err);
       console.log(payload);
