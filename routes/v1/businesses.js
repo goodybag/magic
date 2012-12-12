@@ -42,7 +42,7 @@ module.exports.get = function(req, res){
       businesses.id.equals(req.params.id)
     ).toQuery();
 
-    client.query(query.text, function(error, result){
+    client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
