@@ -28,6 +28,19 @@ describe('GET /v1/businesses/:id', function() {
   });
 });
 
+describe('DEL /v1/businesses/:id', function() {
+  it('should delete a single business document', function(done) {
+    var id = 1;
+    tu.del('/v1/businesses/' + id, function(err, payload, res) {
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data.id === id);
+      done();
+    });
+  });
+});
+
 describe('POST /v1/businesses', function(){
   it('should save a business and return the id', function(done){
     var business = {
