@@ -15,7 +15,8 @@ var
 
 router.init = function(app){
     //Users
-//    app.get('/v1/users', fields('users'), routes.v1.users.list) ;
+  app.post('/v1/users', routes.v1.users.list) ;
+
 
   // app.post('/v1/consumers',        validate.consumer.register,   routes.v1.consumers.register);
   // app.post('/v1/consumers/auth',   validate.consumer.auth,       routes.v1.consumers.auth);

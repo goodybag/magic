@@ -2,6 +2,8 @@ var
   db = require('../db')
 , businesses  = db.tables.businesses
 , locations   = db.tables.locations
+, users = db.tables.users
+
 
 , fields = {
     "businesses": {

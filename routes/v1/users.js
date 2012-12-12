@@ -6,16 +6,19 @@ var
     , logger  = {}
 
 // Tables
-    , users = db.tables.user;
+    , users = db.tables.users
+    , groups= db.tables.groups
+    , usergroup=db.tables.usergroup;
 
 // Setup loggers
 logger.routes = require('../../logger')({app: 'api', component: 'routes'});
 logger.db = require('../../logger')({app: 'api', component: 'db'});
 
 
-module.exports.list = function(req, res){
+
+
+module.export.create = function(req, res){
 
 
 };
-
 
