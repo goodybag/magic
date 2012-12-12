@@ -27,6 +27,14 @@ router.init = function(app){
   // app.post('/v1/businesses',                                      routes.v1.businesses.save);
   // app.get ('/v1/businesses/:businessId',                          routes.v1.businesses.findOne);
   // app.get ('/v1/businesses/:businessId/goodies',                  routes.v1.businesses.goodies);
+
+  // Locations
+  app.get  ('/v1/locations',                        fields('locations'), routes.v1.locations.list);
+  app.get  ('/v1/businesses/:businessId/locations', fields('locations'), routes.v1.locations.list);
+  app.post ('/v1/locations',                        fields('locations'), routes.v1.locations.create);
+  app.get  ('/v1/locations/:locationId',            fields('locations'), routes.v1.locations.get);
+  app.patch('/v1/locations/:locationId',            fields('locations'), routes.v1.locations.update);
+  app.del  ('/v1/locations/:locationId',            fields('locations'), routes.v1.locations.del);
 };
 
 module.exports = router;

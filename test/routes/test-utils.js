@@ -4,8 +4,20 @@ exports.get = function get(path, cb) {
   exports.httpRequest({ path:path }, null, cb);
 };
 
-exports.post = function post(path, payload, cb) {
-  exports.httpRequest({ path:path }, payload, cb);
+exports.post = function post(path, payload, ctype, cb) {
+  exports.httpRequest({ method:'POST', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
+};
+
+exports.put = function post(path, payload, ctype, cb) {
+  exports.httpRequest({ method:'PUT', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
+};
+
+exports.patch = function post(path, payload, ctype, cb) {
+  exports.httpRequest({ method:'PATCH', path:path, headers:{ 'Content-type':ctype }}, payload, cb);
+};
+
+exports.del = function get(path, cb) {
+  exports.httpRequest({ method:'DELETE', path:path }, null, cb);
 };
 
 exports.httpRequest = function httpRequest(options, payload, cb) {
