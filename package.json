@@ -8,6 +8,7 @@
   "dependencies": {
     "express": "3.0.3",
     "async": "0.1.x",
+    "when": "1.7.1",
     "moment": "1.7.x",
     "node.extend": "1.0.x",
     "noop": "0.2.x",

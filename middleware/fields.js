@@ -33,6 +33,46 @@ var
       , businesses.cardCode
       ]
     }
+
+  , "locations": {
+      "anonymous": [
+        locations.id
+      , locations.businessId
+      , locations.name
+      ]
+
+    , "client": [
+        locations.id
+      , locations.businessId
+      , locations.name
+      , locations.street1
+      , locations.street2
+      , locations.city
+      , locations.state
+      , locations.zip
+      , locations.country
+      , locations.phone
+      , locations.fax
+      , locations.lat
+      , locations.lng
+      ]
+
+    , "default": [
+        locations.id
+      , locations.businessId
+      , locations.name
+      , locations.street1
+      , locations.street2
+      , locations.city
+      , locations.state
+      , locations.zip
+      , locations.country
+      , locations.phone
+      , locations.fax
+      , locations.lat
+      , locations.lng
+      ]
+    }
   }
 ;
 
