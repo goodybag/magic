@@ -1,3 +1,5 @@
+process.env.mode = 'test';
+
 // unit tests
 // ==========
 require('./utils');

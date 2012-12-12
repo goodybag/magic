@@ -17,11 +17,12 @@ var
 , config   = require('./config')
 
 , client   = null
+, verbose  = false
 ;
 
 function getSql(log, file) {
   return function() {
-    console.log(log);
+    if (verbose) { console.log(log); }
     var sql = when.defer();
     fs.readFile(file, 'utf-8', function(error, data){
       if (error) {
@@ -40,7 +41,7 @@ function query(log, sql) {
     // not given a query to run?
     if (!sql) { sql = paramSql; } // run query returned by last item in the pipeline
     if (!log) { log = sql; }
-    console.log(log);
+    if (verbose) { console.log(log); }
 
     var query = client.query(sql);
     var deferred = when.defer();
@@ -69,7 +70,6 @@ function loadFixture(name) {
 }
 
 module.exports = function(options, callback){
-  console.log('Setting up Goodybag Postgres');
   if (typeof options === 'function') {
     callback = options;
     options = null;
@@ -79,8 +79,10 @@ module.exports = function(options, callback){
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixturefile     = options.fixtureFile     || config.fixtureFile;
 
+  verbose = options.verbose;
+
   // connect to postgres
-  console.log('Connecting to Postgres database');
+  if (verbose) { console.log('Connecting to Postgres database'); }
   pg.connect(options.postgresConnStr, function(error, pgClient) {
     if (error) return callback(error);
     client = pgClient;

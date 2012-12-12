@@ -5,8 +5,8 @@
 
 var
   db      = require('../../db')
-, utils   = require('../../utils')
-, errors  = require('../../errors')
+, utils   = require('../../lib/utils')
+, errors  = require('../../lib/errors')
 
 , logger  = {}
 
@@ -15,8 +15,8 @@ var
 ;
 
 // Setup loggers
-logger.routes = require('../../logger')({app: 'api', component: 'routes'});
-logger.db = require('../../logger')({app: 'api', component: 'db'});
+logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
+logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**

@@ -7,7 +7,7 @@ var
   }
 ;
 
-setup(function(error){
+setup({ verbose:true }, function(error){
   if (error) return onError(error);
   console.log('complete!');
   process.exit(0);

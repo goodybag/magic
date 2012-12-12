@@ -55,3 +55,4 @@ for (var key in config.dev){
 }
 
 module.exports = config[process.env.mode || 'dev'];
+console.log('Loading '+(process.env.mode || 'dev')+' config');
