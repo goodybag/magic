@@ -67,7 +67,8 @@ module.exports.del = function(req, res){
     var query = businesses.delete().where(
       businesses.id.equals(req.params.id)
     ).toQuery();
-    client.query(query.text + ' cascade', query.values, function(error, result){
+
+    client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
