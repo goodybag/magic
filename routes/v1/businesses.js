@@ -7,6 +7,7 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, schemas = require('../../schemas/routes')
 
 , logger  = {}
 
@@ -163,37 +164,66 @@ module.exports.listWithLocations = function(req, res){
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
-module.exports.save = function(req, res){
-  var TAGS = ['save-business', req.uuid];
+module.exports.create = function(req, res){
+  var TAGS = ['create-business', req.uuid];
 
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
-    }
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = businesses.select(
-      businesses.id
-    , businesses.name
-    , businesses.street1
-    , businesses.street2
-    , businesses.city
-    , businesses.state
-    , businesses.zip
-    , businesses.enabled
-    ).from(businesses).toQuery();
+    if (!req.body.cardCode) req.body.cardCode = "000000";
+    if (!req.body.enabled) req.body.enabled = true;
+
+    utils.validate(req.body, schemas.businesses.model, function(error){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      var query = businesses.insert({
+        'name'      :    req.body.name
+      , 'url'       :    req.body.url
+      , 'street1'   :    req.body.street1
+      , 'street2'   :    req.body.street2
+      , 'city'      :    req.body.city
+      , 'state'     :    req.body.state
+      , 'zip'       :    req.body.zip
+      , 'enabled'   :    req.body.enabled
+      , 'cardCode'  :    req.body.cardCode
+      }).toQuery();
+
+      // logger.db.debug(TAGS, query.text);
+
+      client.query(query.text + " RETURNING id", query.values, function(error, result){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        logger.db.debug(TAGS, result);
+
+        return res.json({ error: null, data: result.rows[0] });
+      });
+    });
+  });
+};
+
+/**
+ * Update business - there's no data modification here, so no need to validate
+ * since we've already validated in the middleware
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.update = function(req, res){
+  var TAGS = ['update-business', req.uuid];
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = businesses.update(req.body).where(
+      businesses.id.equals(req.params.id)
+    ).toQuery();
 
     logger.db.debug(TAGS, query.text);
 
-    client.query(query, function(error, results){
-      if (error){
-        logger.routes.error(TAGS, error);
-        return res.json({ error: error, data: null });
-      }
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, results);
+      logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: results.rows });
+      return res.json({ error: null, data: null });
     });
   });
 };
