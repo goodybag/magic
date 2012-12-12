@@ -9,6 +9,7 @@
  * corresponds to the actual collection name in the database.
  */
 
+    console.log("make sure it runs")
 var
   fs      = require('fs')
 , pg      = require('pg')
@@ -33,8 +34,10 @@ var
     });
   }
 ;
+console.log("call function")
 
 module.exports = function(callback){
+
   console.log("Setting up Goodybag Postgres");
 
   console.log("Connecting to Postgres database");
@@ -57,7 +60,8 @@ module.exports = function(callback){
               console.log("Creating " + name);
 
               getSql(name, function(error, file){
-                if (error) return callback(error);
+                if (error)
+                    return callback(error);
 
                 console.log(file);
                 var query = client.query(file);
@@ -75,10 +79,12 @@ module.exports = function(callback){
 
     // go through each file and execte create table query
     for (var i = files.length - 1; i >= 0; i--){
+        console.log("Read file");
       batch.push(getFn(files[i]));
     }
 
     // Kick off the batch
+      console.log("pop file");
     batch.pop().call();
   });
 };

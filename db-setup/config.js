@@ -4,5 +4,8 @@ module.exports = {
 , schemaFiles: [
     'businesses'
   , 'locations'
+  , 'users'
+  , 'groups'
+  , 'usergroup'
   ]
 };
