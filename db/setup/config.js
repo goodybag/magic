@@ -5,4 +5,5 @@ module.exports = {
     'businesses'
   , 'locations'
   ]
+, fixtureFile: 'test'
 };
