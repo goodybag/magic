@@ -25,6 +25,7 @@ function getSql(log, file) {
     var sql = when.defer();
     fs.readFile(file, 'utf-8', function(error, data){
       if (error) {
+        console.log('Error loading', file, error);
         sql.reject(error);
       } else {
         sql.resolve(data);
@@ -52,7 +53,7 @@ function loadSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists ' + name + '_id_seq cascade'),
     query( 'Dropping ' + name,              'drop table if exists ' + name + ' cascade'),
-    getSql('Creating ' + name,              '../schemas/' + name + '.sql'),
+    getSql('Creating ' + name,              __dirname + '/../schemas/' + name + '.sql'),
     query() // will run what getSql returns
   ]);
 }
@@ -61,12 +62,11 @@ function loadFixture(name) {
   return function() {
     if (!name) { return; }
     return pipeline([
-      getSql('Loading fixture', '../fixtures/'+name+'.sql'),
+      getSql('Loading fixture', __dirname+'/../fixtures/'+name+'.sql'),
       query()
     ]);
   }
 }
-
 
 module.exports = function(options, callback){
   console.log('Setting up Goodybag Postgres');
