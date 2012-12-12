@@ -10,6 +10,8 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function(require){
   return {
-    consumer: require('./consumer')
+    consumer:   require('./consumer')
+  , businesses: require('./businesses')
+  , locations: require('./locations')
   };
 });

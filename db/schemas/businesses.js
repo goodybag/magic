@@ -12,11 +12,13 @@ module.exports = sql.define({
 , columns: [
     'id'
   , 'name'
+  , 'url'
   , 'street1'
   , 'street2'
   , 'city'
   , 'state'
   , 'zip'
+  , 'cardCode'
   , 'enabled'
   , 'createdAt'
   , 'updatedAt'
