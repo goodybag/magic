@@ -84,7 +84,22 @@ describe('POST /v1/locations', function() {
     });
   });
 
-  it('should respond to an invalid payload with errors');
+  it('should respond to an invalid payload with errors', function(done) {
+    tu.post('/v1/locations', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(payload.error);
+      assert(payload.error.length === 1);
+      assert(payload.error[0].property == 'businessId');
+      assert(payload.error[0].attributeName == 'type');
+      assert(payload.error[0].attributeValue == 'number');
+      done();
+    });
+  });
 
 });
 
@@ -101,7 +116,22 @@ describe('PATCH /v1/locations/:id', function() {
     });
   });
 
-  it('should respond to an invalid payload with errors');
+  it('should respond to an invalid payload with errors', function(done) {
+    tu.patch('/v1/locations/2', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(payload.error);
+      assert(payload.error.length === 1);
+      assert(payload.error[0].property == 'businessId');
+      assert(payload.error[0].attributeName == 'type');
+      assert(payload.error[0].attributeValue == 'number');
+      done();
+    });
+  });
 
 });
 
