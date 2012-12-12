@@ -5,8 +5,8 @@
 
 var
   db      = require('../../db')
-, utils   = require('../../utils')
-, errors  = require('../../errors')
+, utils   = require('../../lib/utils')
+, errors  = require('../../lib/errors')
 , schemas = require('../../schemas/routes')
 
 , logger  = {}
