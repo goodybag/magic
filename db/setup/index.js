@@ -23,7 +23,7 @@ function getSql(log, file) {
   return function() {
     console.log(log);
     var sql = when.defer();
-    fs.readFile('../schemas/' + file + '.sql', 'utf-8', function(error, data){
+    fs.readFile(file, 'utf-8', function(error, data){
       if (error) {
         sql.reject(error);
       } else {
@@ -37,7 +37,7 @@ function getSql(log, file) {
 function query(log, sql) {
   return function(paramSql) {
     // not given a query to run?
-    if (!sql) { sql = paramSql; }// run query returned by last item in the pipeline
+    if (!sql) { sql = paramSql; } // run query returned by last item in the pipeline
     if (!log) { log = sql; }
     console.log(log);
 
@@ -50,16 +50,26 @@ function query(log, sql) {
 
 function loadSchema(name) {
   return pipeline([
-    query( "Dropping Sequence for " + name, "drop sequence if exists " + name + "_id_seq cascade"),
-    query( "Dropping " + name,              "drop table if exists " + name + " cascade"),
-    getSql("Creating " + name,              name),
+    query( 'Dropping Sequence for ' + name, 'drop sequence if exists ' + name + '_id_seq cascade'),
+    query( 'Dropping ' + name,              'drop table if exists ' + name + ' cascade'),
+    getSql('Creating ' + name,              '../schemas/' + name + '.sql'),
     query() // will run what getSql returns
   ]);
 }
 
+function loadFixture(name) {
+  return function() {
+    if (!name) { return; }
+    return pipeline([
+      getSql('Loading fixture', '../fixtures/'+name+'.sql'),
+      query()
+    ]);
+  }
+}
+
 
 module.exports = function(options, callback){
-  console.log("Setting up Goodybag Postgres");
+  console.log('Setting up Goodybag Postgres');
   if (typeof options === 'function') {
     callback = options;
     options = null;
@@ -67,15 +77,18 @@ module.exports = function(options, callback){
   options = options || {};
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
+  options.fixturefile     = options.fixtureFile     || config.fixtureFile;
 
-  console.log("Connecting to Postgres database");
+  // connect to postgres
+  console.log('Connecting to Postgres database');
   pg.connect(options.postgresConnStr, function(error, pgClient) {
     if (error) return callback(error);
     client = pgClient;
 
     // run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
-      .then(function(queries) { callback(null, queries); }, callback)
+      .then(loadFixture(options.fixtureFile))
+      .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;
 
