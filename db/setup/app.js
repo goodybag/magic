@@ -1,5 +1,5 @@
 var
-  setup = require('./setup-db')
+  setup = require('./index')
 // , importData = require('./import')
 
 , onError = function(error){
