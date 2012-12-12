@@ -2,7 +2,7 @@
 
 CREATE TABLE locations (
   "id"                     serial primary key,
-  "businessId"                int references businesses(id),
+  "businessId"                int references businesses(id) on delete cascade,
   "name"                     text,
   "street1"                  text,
   "street2"                  text,
@@ -13,5 +13,5 @@ CREATE TABLE locations (
   "phone"                    text,
   "fax"                      text,
   "lat"                       int,
-  "lng"                       int
+  "lon"                       int
 );
