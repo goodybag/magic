@@ -22,6 +22,37 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
+ * Get business
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.get = function(req, res){
+  var TAGS = ['get-business', req.uuid];
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id, {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = businesses.select.apply(
+      businesses
+    , req.fields
+    ).from(
+      businesses
+    ).where(
+      businesses.id.equals(req.params.id)
+    ).toQuery();
+
+    client.query(query.text, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
+
+/**
  * List businesses
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
