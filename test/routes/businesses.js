@@ -54,4 +54,32 @@ describe('POST /v1/businesses', function(){
       done();
     });
   });
+
+  it('should update a business\'s name and url', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: "http://pmcgee.com"
+    };
+
+    tu.post('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      done();
+    });
+  });
+
+  it('should fail to update a business because of an invalid field', function(done){
+    var business = {
+      name: "Poophead McGees"
+    , url: 123
+    };
+
+    tu.post('/v1/businesses/' + 1, business, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(results.error);
+      done();
+    });
+  });
 });

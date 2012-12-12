@@ -213,17 +213,17 @@ module.exports.update = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = businesses.update(req.body).where(
-      post.id.equals(req.params.id)
+      businesses.id.equals(req.params.id)
     ).toQuery();
 
     logger.db.debug(TAGS, query.text);
 
-    client.query(query.text, query.values, function(error, results){
+    client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] });
+      return res.json({ error: null, data: null });
     });
   });
 };
