@@ -35,6 +35,7 @@ define(function(require){
     , city: {
         required: true
       , type: "string"
+      , minLength: 1
       }
     , state: {
         required: true
@@ -43,7 +44,7 @@ define(function(require){
       }                 
     , zip: {
         required: true
-      , type: "number"
+      , type: ["number", "null"]
       , length: 5
       }
     , country: {
@@ -60,11 +61,11 @@ define(function(require){
       }
     , lat: {
         required: false
-      , type: "string"
+      , type: ["number", "null"]
       }
-    , lng: {
+    , lon: {
         required: false
-      , type: "string"
+      , type: ["number", "null"]
       }
     }
   };
@@ -94,6 +95,13 @@ define(function(require){
   function unrequireAll(target) {
     unrequire(target, Object.keys(target.properties));
   }
+  function ensureMinLengths(target) {
+    for (var prop in locations.model.properties) {
+      if (locations.model.properties[prop].required && !target.properties[prop].minLength && !target.properties[prop].length) {
+        target.properties[prop].minLength = 1;
+      }
+    }    
+  }
 
   // create schema
   // =============
@@ -103,6 +111,7 @@ define(function(require){
   };
   copyAllExcept(locations.create, []);
   unrequireAll(locations.create);
+  ensureMinLengths(locations.create);
 
   // update schema
   // =============
@@ -112,6 +121,7 @@ define(function(require){
   };
   copyAllExcept(locations.update, []);
   unrequireAll(locations.update);
+  ensureMinLengths(locations.update);
 
 
   return locations;
