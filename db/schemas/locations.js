@@ -23,5 +23,6 @@ module.exports = sql.define({
   , 'fax'
   , 'lat'
   , 'lon'
+  , 'enabled'
   ]
 });

@@ -67,6 +67,10 @@ define(function(require){
         required: false
       , type: ["number", "null"]
       }
+    , enabled: {
+        required: true
+      , type: "boolean"
+      }
     }
   };
 

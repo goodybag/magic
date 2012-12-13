@@ -67,6 +67,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
+      , locations.enabled
       ]
 
     , "client": [
@@ -83,6 +84,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
+      , locations.enabled
       ]
 
     , "sales": [
@@ -115,6 +117,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
+      , locations.enabled
       ]
     }
   }
