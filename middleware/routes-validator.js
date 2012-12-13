@@ -16,27 +16,37 @@ var
     }
     return compiled;
   }
+, isOfType = function(prop, type) {
+    if (Array.isArray(prop.type)) {
+      return (prop.type.indexOf(type) !== -1);
+    }
+    return prop.type === type;
+  }
 , createValidator = function(schema){
     return function(req, res, next){
 
-      // coerce into types
+      // extract out relevant data
+      var data = {};
       for (var key in schema.properties) {
         var value = req.body[key];
-        switch (schema.properties[key].type) {
-          case 'number':
-            value = parseInt(value, 10);
-            if (isNaN(value)) { value = 0; }
-            if (value == req.body[key]) {
-              req.body[key] = value;
-            }
-            break;
-        }
-      }
 
-      // extract out relevant values
-      var data = {};
-      for (var key in schema.properties){
-        data[key] = req.body[key];
+        // coerce into types        
+        if (isOfType(schema.properties[key], 'boolean')) {
+          // :TODO:
+        }
+        else if (isOfType(schema.properties[key], 'number')) {
+          if (value === '') {
+            value = null;
+          } else {
+            value = parseInt(value, 10);
+            if (value != req.body[key]) {  // if !=, then information was lost ('asdf' != NaN, '123 asdf' != 123) so it must not be a #
+              value = req.body[key];
+            }
+          }
+        }
+
+        // store
+        data[key] = req.body[key] = value;
       }
 
       // validate

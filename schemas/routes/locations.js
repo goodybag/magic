@@ -43,7 +43,7 @@ define(function(require){
       }                 
     , zip: {
         required: true
-      , type: "number"
+      , type: ["number", "null"]
       , length: 5
       }
     , country: {
@@ -60,11 +60,11 @@ define(function(require){
       }
     , lat: {
         required: false
-      , type: "number"
+      , type: ["number", "null"]
       }
     , lon: {
         required: false
-      , type: "number"
+      , type: ["number", "null"]
       }
     }
   };
