@@ -60,11 +60,11 @@ define(function(require){
       }
     , lat: {
         required: false
-      , type: "string"
+      , type: "number"
       }
-    , lng: {
+    , lon: {
         required: false
-      , type: "string"
+      , type: "number"
       }
     }
   };
