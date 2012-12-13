@@ -8,7 +8,13 @@ var
       "default": [
         businesses.id
       , businesses.name
+      , businesses.street1
+      , businesses.street2
+      , businesses.city
+      , businesses.state
+      , businesses.zip
       , businesses.enabled
+      , businesses.cardCode
       ]
 
     , "client": [
@@ -51,6 +57,16 @@ var
         locations.id
       , locations.businessId
       , locations.name
+      , locations.street1
+      , locations.street2
+      , locations.city
+      , locations.state
+      , locations.zip
+      , locations.country
+      , locations.phone
+      , locations.fax
+      , locations.lat
+      , locations.lon
       ]
 
     , "client": [
@@ -66,7 +82,7 @@ var
       , locations.phone
       , locations.fax
       , locations.lat
-      , locations.lng
+      , locations.lon
       ]
 
     , "sales": [
@@ -82,7 +98,7 @@ var
       , locations.phone
       , locations.fax
       , locations.lat
-      , locations.lng
+      , locations.lon
       ]
 
     , "admin": [
@@ -98,7 +114,7 @@ var
       , locations.phone
       , locations.fax
       , locations.lat
-      , locations.lng
+      , locations.lon
       ]
     }
   }
