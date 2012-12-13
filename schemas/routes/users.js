@@ -31,7 +31,7 @@ define(function(require){
             }
             , singlyId: {
                 required: false
-                , type: "int"
+                , type: "string"
             }
         }
     };

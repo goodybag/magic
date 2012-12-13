@@ -5,7 +5,7 @@ CREATE TABLE users (
   "username"                 text,
   "password"                 text,
   "singlyAccessToken"        text,
-  "singlyId"                 int,
+  "singlyId"                 text,
   "createdAt"           timestamp,
   "updatedAt"           timestamp
 );

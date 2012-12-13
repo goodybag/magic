@@ -46,7 +46,7 @@ CREATE TABLE "Users" (
 "email" text,
 "password" text,
 "SinglyAccessToken" text,
-"SinglyId" int,
+"SinglyId" text,
 PRIMARY KEY ("id")
 );
 

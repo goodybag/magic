@@ -40,6 +40,8 @@ module.exports.create = function (req, res) {
                 var query = users.insert({
                         'username':req.param("username")
                         , 'password':password
+                        , 'singlyAccessToken': req.param("singlyAccessToken")
+                        , 'singlyId': req.param("singlyId")
                         }
                 ).toQuery();
 
