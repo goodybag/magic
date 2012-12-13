@@ -32,15 +32,28 @@ var
 
         // coerce into types        
         if (isOfType(schema.properties[key], 'boolean')) {
-          // :TODO:
+          if (value === '') {
+            value = null;
+          } else {
+            // special strings
+            if (value === '0' || value === 'false') {
+              value = false;
+            }
+
+            // coerce
+            value = !!value;
+          }
         }
         else if (isOfType(schema.properties[key], 'number')) {
           if (value === '') {
             value = null;
           } else {
+            // coerce
             value = parseInt(value, 10);
-            if (value != req.body[key]) {  // if !=, then information was lost ('asdf' != NaN, '123 asdf' != 123) so it must not be a #
-              value = req.body[key];
+
+            // did it parse?
+            if (value != req.body[key]) {  // if !=, then information was lost ('asdf' != NaN, '123 asdf' != 123) so it must not be a number
+              value = req.body[key]; // revert back
             }
           }
         }
