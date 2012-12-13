@@ -35,7 +35,7 @@ module.exports.create = function (req, res) {
         utils.validate(req.body, schemas.users.model, function (error) {
             if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-            utils.encryptPassword(req.param("password"), function (password) {
+            utils.encryptPassword(req.param("password"), function (error, password) {
 
                 var query = users.insert({
                         'username':req.param("username")
