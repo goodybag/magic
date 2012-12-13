@@ -30,7 +30,7 @@ define(function(require){
       }
     , street2: {
         required: false
-      , type: "string"
+      , type: ["string", "null"]
       }
     , city: {
         required: true
@@ -53,11 +53,11 @@ define(function(require){
       }
     , phone: {
         required: false
-      , type: "string"
+      , type: ["string", "null"]
       }
     , fax: {
         required: false
-      , type: "string"
+      , type: ["string", "null"]
       }
     , lat: {
         required: false
