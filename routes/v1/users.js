@@ -12,7 +12,6 @@ var
 
 // Tables
     , users = db.tables.users
-    , groups = db.tables.groups
     , usergroup = db.tables.groups
     ;
 
@@ -42,7 +41,7 @@ module.exports.create = function (req, res) {
             utils.encryptPassword(req.param("password"), function (password) {
 
                 var query = users.insert({
-                        'email':req.param("email"), 'password':password}
+                        'username':req.param("email"), 'password':password}
                 ).toQuery();
 
                 logger.db.debug(TAGS, query.text);
@@ -62,7 +61,7 @@ module.exports.create = function (req, res) {
 }
 
 /**
- * List users
+ * Get users
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
@@ -70,13 +69,14 @@ module.exports.create = function (req, res) {
 module.exports.list = function (req, res) {
     console.log("get clients");
     var TAGS = ['list-users', req.uuid];
-    logger.routes.debug(TAGS, 'fetching list of users', {uid:'more'});
+    logger.routes.debug(TAGS, 'fetching list of users'+ req.params.id, {uid:'more'});
 
     db.getClient(function (error, client) {
         if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-        var query = users.select(
-            users.id
+        var query = users.select.apply(
+            users
+            , req.fields
         ).from(
             users
         ).toQuery();

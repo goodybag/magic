@@ -2,7 +2,7 @@
 
 CREATE TABLE users (
   "id"                     serial primary key,
-  "email"                    text,
+  "username"                 text,
   "password"                 text,
   "singlyAccessToken"        text,
   "singlyId"                 int,

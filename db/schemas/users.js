@@ -10,7 +10,7 @@ module.exports = sql.define({
     name: 'users'
     , columns: [
         'id'
-        , 'name'
+        , 'username'
         , 'password'
         , 'singlyAccessToken'
         , 'singlyId'

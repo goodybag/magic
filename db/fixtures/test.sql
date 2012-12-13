@@ -20,7 +20,7 @@ SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance
 -- USERS
 
 BEGIN;
-INSERT INTO "users" VALUES ('1',  'abc@gmail.com', '123456',  null, null, null, null);
+INSERT INTO "users" VALUES ('1', 'abc@gmail.com', '123456',  'dagfdhsdhgdfh', '123', null, null);
 INSERT INTO "users" VALUES ('2', 'def@yahoo.com', 'afgshgdhd', null, null, null, null);
 INSERT INTO "users" VALUES ('3', 'dsfasg@hotmail.com', 'nevergiveup',  null, null, null, null);
 COMMIT;

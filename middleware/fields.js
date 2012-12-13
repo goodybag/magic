@@ -98,9 +98,21 @@ var
                 , locations.lat
                 , locations.lng
             ]
-        }
-
+        },
+        "users":{
+            "default":[
+                users.id
+                , users.username
+                , users.password
+            ], "admin":[
+                users.id
+                , users.username
+                , users.password
+                , users.singlyAccessToken
+                , users.singlyId
+            ]
     }
+}
     ;
 
 module.exports = function(collection){
