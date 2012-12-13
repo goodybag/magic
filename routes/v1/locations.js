@@ -103,7 +103,7 @@ module.exports.create = function(req, res){
 
     logger.db.debug(TAGS, query.text);
 
-    client.query(query.text + 'RETURNING id', query.values, function(error, result){
+    client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
