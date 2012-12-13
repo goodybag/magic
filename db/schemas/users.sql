@@ -4,7 +4,7 @@ CREATE TABLE users (
   "id"                     serial primary key,
   "name"                     text,
   "password"                 text,
-  "enabled"               boolean,
+  "email"                    text,
   "createdAt"           timestamp,
   "updatedAt"           timestamp
 );

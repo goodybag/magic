@@ -12,7 +12,7 @@ module.exports = sql.define({
         'id'
         , 'name'
         , 'password'
-        , 'enable'
+        , 'email'
         , 'createdAt'
         , 'updatedAt'
 

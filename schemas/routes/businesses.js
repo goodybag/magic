@@ -63,17 +63,17 @@ define(function(require){
     }
   };
 
-  // Create route doesn't need to have cardCode or enabled properties
-  businesses.create = {
-    type: 'object'
-  , properties: {}
-  };
+      // Create route doesn't need to have cardCode or enabled properties
+      businesses.create = {
+        type: 'object'
+      , properties: {}
+      };
 
-  // Update can't have any required fields
-  businesses.update = {
-    type: 'object'
-  , properties: {}
-  };
+      // Update can't have any required fields
+      businesses.update = {
+        type: 'object'
+      , properties: {}
+      };
 
   for (var key in businesses.model.properties){
     businesses.create.properties[key] = businesses.model.properties[key];
