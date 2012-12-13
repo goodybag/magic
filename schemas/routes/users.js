@@ -14,7 +14,7 @@ define(function(require){
     users.model = {
         type: 'object'
         , properties: {
-            email: {
+            username: {
                 required: true
                 , type: "string"
                 , minLength: 3

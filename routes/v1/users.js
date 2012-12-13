@@ -27,10 +27,7 @@ logger.db = require('../../lib/logger')({app:'api', component:'db'});
 
 module.exports.create = function (req, res) {
     var TAGS = ['create-user', req.uuid];
-    if (error) {
-        logger.routes.error(TAGS, error);
-        return res.json({ error:error, data:null });
-    }
+
     console.log("get client")
     db.getClient(function (error, client) {
         if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
@@ -41,7 +38,9 @@ module.exports.create = function (req, res) {
             utils.encryptPassword(req.param("password"), function (password) {
 
                 var query = users.insert({
-                        'username':req.param("email"), 'password':password}
+                        'username':req.param("username")
+                        , 'password':password
+                        }
                 ).toQuery();
 
                 logger.db.debug(TAGS, query.text);

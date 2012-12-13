@@ -3,12 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="b25b0f59-d034-44d9-b1bb-7144eb751a44" name="Default" comment="Merge branch 'master' into usersapi&#10;&#10;Conflicts:&#10;&#9;middleware/fields.js&#10;">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/fixtures/test.sql" afterPath="$PROJECT_DIR$/db/fixtures/test.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/schemas/users.js" afterPath="$PROJECT_DIR$/db/schemas/users.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/schemas/users.sql" afterPath="$PROJECT_DIR$/db/schemas/users.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/router.js" afterPath="$PROJECT_DIR$/lib/router.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/middleware/fields.js" afterPath="$PROJECT_DIR$/middleware/fields.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/v1/users.js" afterPath="$PROJECT_DIR$/routes/v1/users.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/schemas/routes/users.js" afterPath="$PROJECT_DIR$/schemas/routes/users.js" />
     </list>
     <ignored path="magic.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,21 +26,19 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf>
-          <file leaf-file-name="users.js" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="users.js" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/routes/v1/users.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="78" column="24" selection-start="2350" selection-end="2350" vertical-scroll-proportion="-11.615385">
-                  <folding>
-                    <element signature="n#!!doc" expanded="true" />
-                  </folding>
+                <state line="45" column="38" selection-start="1337" selection-end="1347" vertical-scroll-proportion="0.36460555">
+                  <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="fields.js" pinned="false" current="true" current-in-tab="true">
+          <file leaf-file-name="fields.js" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/middleware/fields.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="112" column="13" selection-start="3290" selection-end="3290" vertical-scroll-proportion="3.1053605">
+                <state line="112" column="13" selection-start="3290" selection-end="3290" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -72,9 +66,7 @@
             <entry file="file://$PROJECT_DIR$/lib/router.js">
               <provider selected="true" editor-type-id="text-editor">
                 <state line="62" column="0" selection-start="2280" selection-end="2280" vertical-scroll-proportion="0.0">
-                  <folding>
-                    <element signature="n#!!doc" expanded="true" />
-                  </folding>
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -131,8 +123,19 @@
           <file leaf-file-name="businesses.js" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/routes/v1/businesses.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="30" column="49" selection-start="706" selection-end="721" vertical-scroll-proportion="0.24545455">
+                <state line="30" column="49" selection-start="706" selection-end="721" vertical-scroll-proportion="-5.682281">
                   <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="users.js" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/schemas/routes/users.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="18" column="32" selection-start="408" selection-end="408" vertical-scroll-proportion="0.0">
+                  <folding>
+                    <element signature="n#!!doc" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -157,7 +160,6 @@
         <option value="$PROJECT_DIR$/routes/v1/businesses.js" />
         <option value="$PROJECT_DIR$/schemas/routes/index.js" />
         <option value="$PROJECT_DIR$/routes/v1/index.js" />
-        <option value="$PROJECT_DIR$/schemas/routes/users.js" />
         <option value="$PROJECT_DIR$/routes/v1/locations.js" />
         <option value="$PROJECT_DIR$/sql/create.sql" />
         <option value="$PROJECT_DIR$/node_modules/express/lib/router/index.js" />
@@ -165,9 +167,10 @@
         <option value="$PROJECT_DIR$/db/schemas/users.sql" />
         <option value="$PROJECT_DIR$/db/schemas/users.js" />
         <option value="$PROJECT_DIR$/middleware/fields.js" />
-        <option value="$PROJECT_DIR$/routes/v1/users.js" />
         <option value="$PROJECT_DIR$/lib/router.js" />
         <option value="$PROJECT_DIR$/db/fixtures/test.sql" />
+        <option value="$PROJECT_DIR$/schemas/routes/users.js" />
+        <option value="$PROJECT_DIR$/routes/v1/users.js" />
       </list>
     </option>
   </component>
@@ -498,8 +501,8 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/app.js" />
     <property name="restartRequiresConfirmation" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/app.js" />
     <property name="FullScreen" value="false" />
     <property name="GoToClass.includeJavaFiles" value="false" />
   </component>
@@ -544,22 +547,22 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1920" height="998" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992035" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287827" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14865577" sideWeight="0.67121726" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39590445" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14865577" sideWeight="0.6040956" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39590445" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3287827" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32764506" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287827" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -616,7 +619,29 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="10" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/v1/users.js</url>
+          <line>31</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/v1/users.js</url>
+          <line>39</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/v1/users.js</url>
+          <line>28</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/v1/users.js</url>
+          <line>32</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="15" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -624,15 +649,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="46" column="0" selection-start="920" selection-end="920" vertical-scroll-proportion="0.0">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/schemas/routes/users.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.32738096">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -659,21 +675,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/routes/businesses.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="3" selection-start="788" selection-end="788" vertical-scroll-proportion="-2.125">
-          <folding />
-        </state>
+        <state line="28" column="3" selection-start="788" selection-end="788" vertical-scroll-proportion="-2.125" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/routes/test-utils.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="32" column="45" selection-start="1343" selection-end="1343" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/routes/v1/businesses.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -706,21 +713,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/routes/v1/users.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="24" selection-start="2350" selection-end="2350" vertical-scroll-proportion="-11.615385">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/router.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="62" column="0" selection-start="2280" selection-end="2280" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -731,9 +727,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/schemas/routes/users.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="32" selection-start="408" selection-end="408" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/middleware/fields.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="112" column="13" selection-start="3290" selection-end="3290" vertical-scroll-proportion="3.1053605">
+        <state line="112" column="13" selection-start="3290" selection-end="3290" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/v1/businesses.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/v1/users.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="45" column="38" selection-start="1337" selection-end="1347" vertical-scroll-proportion="0.36460555">
           <folding />
         </state>
       </provider>
