@@ -76,8 +76,12 @@ define(function(require){
   };
 
   for (var key in businesses.model.properties){
-    businesses.create.properties[key] = businesses.model.properties[key];
-    businesses.update.properties[key] = businesses.model.properties[key];
+    businesses.create.properties[key] = {};
+    businesses.update.properties[key] = {};
+    for (var p in businesses.model.properties[key]) {
+      businesses.create.properties[key][p] = businesses.model.properties[key][p];
+      businesses.update.properties[key][p] = businesses.model.properties[key][p];
+    }
 
     businesses.update.properties[key].required = false;
   }
