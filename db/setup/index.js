@@ -77,7 +77,7 @@ module.exports = function(options, callback){
   options = options || {};
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
-  options.fixturefile     = options.fixtureFile     || config.fixtureFile;
+  options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
 
   verbose = options.verbose;
 

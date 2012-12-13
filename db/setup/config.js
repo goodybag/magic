@@ -8,4 +8,5 @@ module.exports = {
   , 'groups'
   , 'usergroup'
   ]
+, fixtureFile: 'test'
 };

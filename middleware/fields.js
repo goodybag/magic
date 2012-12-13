@@ -7,7 +7,7 @@ var
 
 , fields = {
     "businesses": {
-      "anonymous": [
+      "default": [
         businesses.id
       , businesses.name
       , businesses.enabled
@@ -23,7 +23,19 @@ var
       , businesses.zip
       ]
 
-    , "default": [
+    , "sales": [
+        businesses.id
+      , businesses.name
+      , businesses.street1
+      , businesses.street2
+      , businesses.city
+      , businesses.state
+      , businesses.zip
+      , businesses.enabled
+      , businesses.cardCode
+      ]
+
+    , "admin": [
         businesses.id
       , businesses.name
       , businesses.street1
@@ -37,7 +49,7 @@ var
     }
 
   , "locations": {
-      "anonymous": [
+      "default": [
         locations.id
       , locations.businessId
       , locations.name
@@ -59,7 +71,23 @@ var
       , locations.lng
       ]
 
-    , "default": [
+    , "sales": [
+        locations.id
+      , locations.businessId
+      , locations.name
+      , locations.street1
+      , locations.street2
+      , locations.city
+      , locations.state
+      , locations.zip
+      , locations.country
+      , locations.phone
+      , locations.fax
+      , locations.lat
+      , locations.lng
+      ]
+
+    , "admin": [
         locations.id
       , locations.businessId
       , locations.name
@@ -80,7 +108,7 @@ var
 
 module.exports = function(collection){
   return function(req, res, next){
-    var group = "anonymous";
+    var group = "default";
     if (req.session && req.session.user) group = req.session.user.group;
     if (fields[collection] && fields[collection][group]){
       if (fields[collection][group].length === 0) return res.json({ error: null, data: [] });
