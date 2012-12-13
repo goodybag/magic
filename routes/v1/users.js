@@ -66,6 +66,7 @@ module.exports.create = function (req, res) {
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
+
 module.exports.list = function (req, res) {
     console.log("get clients");
     var TAGS = ['list-users', req.uuid];
@@ -74,9 +75,8 @@ module.exports.list = function (req, res) {
     db.getClient(function (error, client) {
         if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-        var query = users.select.apply(
-            users
-            , req.fields
+        var query = users.select(
+            users.id
         ).from(
             users
         ).toQuery();
