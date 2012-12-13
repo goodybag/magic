@@ -20,9 +20,9 @@ SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance
 -- USERS
 
 BEGIN;
-INSERT INTO "users" VALUES ('1', '1', 'abcd1', 'abc@gmail.com', null, null);
-INSERT INTO "users" VALUES ('2', '2', 'fshdghs', 'def@yahoo.com', null, null);
-INSERT INTO "users" VALUES ('3', '3', 'adfagsfga3', 'dsfasg@hotmail.com', null, null);
+INSERT INTO "users" VALUES ('1',  'abc@gmail.com', '123456',  null, null, null, null);
+INSERT INTO "users" VALUES ('2', 'def@yahoo.com', 'afgshgdhd', null, null, null, null);
+INSERT INTO "users" VALUES ('3', 'dsfasg@hotmail.com', 'nevergiveup',  null, null, null, null);
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 

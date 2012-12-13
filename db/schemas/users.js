@@ -12,7 +12,8 @@ module.exports = sql.define({
         'id'
         , 'name'
         , 'password'
-        , 'email'
+        , 'singlyAccessToken'
+        , 'singlyId'
         , 'createdAt'
         , 'updatedAt'
 

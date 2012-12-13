@@ -14,12 +14,7 @@ define(function(require){
     users.model = {
         type: 'object'
         , properties: {
-            screenName: {
-                required: true
-                , type: "string"
-                , minLength: 4
-            }
-            , email: {
+            email: {
                 required: true
                 , type: "string"
                 , minLength: 3
@@ -29,6 +24,14 @@ define(function(require){
                 required: true
                 , type: "string"
                 , minLength: 6
+            }
+            , singlyAccessToken: {
+                required: false
+                , type: "string"
+            }
+            , singlyId: {
+                required: false
+                , type: "int"
             }
         }
     };

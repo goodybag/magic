@@ -21,7 +21,7 @@ logger.routes = require('../../lib/logger')({app:'api', component:'routes'});
 logger.db = require('../../lib/logger')({app:'api', component:'db'});
 
 /**
- * Insert Users
+ * Insert New Users
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
@@ -32,39 +32,65 @@ module.exports.create = function (req, res) {
         logger.routes.error(TAGS, error);
         return res.json({ error:error, data:null });
     }
-
-    db.getClient(function(error, client){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        utils.validate(req.body, schemas.users.model, function (error) {
+    console.log("get client")
+    db.getClient(function (error, client) {
         if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-        utils.encryptPassword(req.param("password"), function (password) {
+        utils.validate(req.body, schemas.users.model, function (error) {
+            if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-            var query = users.insert({
-                  'name':req.param("name")
-                , 'email': req.param("email")
-                , 'password':password}
-            ).toQuery();
+            utils.encryptPassword(req.param("password"), function (password) {
 
-            logger.db.debug(TAGS, query.text);
+                var query = users.insert({
+                        'email':req.param("email"), 'password':password}
+                ).toQuery();
 
-            client.query(query.text + 'RETURNING id', query.values, function (error, result) {
-                if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
+                logger.db.debug(TAGS, query.text);
 
-                logger.db.debug(TAGS, result);
+                client.query(query.text + 'RETURNING id', query.values, function (error, result) {
+                    if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
 
-                return res.json({ error:null, data:result.rows[0] });
+                    logger.db.debug(TAGS, result);
+
+                    return res.json({ error:null, data:result.rows[0] });
+                });
             });
-        });
 
+        });
     });
-});
 
 }
 
 /**
- *
+ * List users
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
  */
+module.exports.list = function (req, res) {
+    console.log("get clients");
+    var TAGS = ['list-users', req.uuid];
+    logger.routes.debug(TAGS, 'fetching list of users', {uid:'more'});
+
+    db.getClient(function (error, client) {
+        if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
+
+        var query = users.select.apply(
+            users
+            , req.fields
+        ).from(
+            users
+        ).toQuery();
+
+        client.query(query.text, function (error, result) {
+            if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
+
+            logger.db.debug(TAGS, result);
+
+            return res.json({ error:null, data:result.rows });
+        });
+    });
+};
+
+
 
 

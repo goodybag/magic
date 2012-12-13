@@ -2,9 +2,10 @@
 
 CREATE TABLE users (
   "id"                     serial primary key,
-  "name"                     text,
-  "password"                 text,
   "email"                    text,
+  "password"                 text,
+  "singlyAccessToken"        text,
+  "singlyId"                 int,
   "createdAt"           timestamp,
   "updatedAt"           timestamp
 );
