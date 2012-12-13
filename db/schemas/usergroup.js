@@ -1,4 +1,3 @@
-
 /**
  * Group Users
  */
@@ -8,8 +7,7 @@ var
     ;
 
 module.exports = sql.define({
-    name: 'group-user'
-    , columns: [
+    name:'group-user', columns:[
         'id'
         , 'groupId'
         , 'userId'
