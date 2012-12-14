@@ -36,6 +36,14 @@ var
       // validate
       utils.validate(data, schema, function(error){
         if (error) return utils.sendError(res, error);
+
+        // convert blank strings to null for postgres' sake
+        for (var k in data) {
+          if (data[k] === '') {
+            data[k] = null;
+          }
+        }
+
         req.body = data;
         next();
       });
