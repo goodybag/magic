@@ -36,12 +36,15 @@ exports.getClient = function(callback){
     callback(err, client);
   });
 */
-  callback(null, client);
+  var a = callback(null, client);
 };
 
 exports.tables = {
   businesses: require('./schemas/businesses')
 , locations: require('./schemas/locations')
+, users: require('./schemas/users')
+, groups: require('./schemas/groups')
+, usergroup: require('./schemas/usergroup')
 }
 
 /*
