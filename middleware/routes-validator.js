@@ -28,7 +28,7 @@ var
       // extract out relevant data
       var data = {};
       for (var key in schema.properties) {
-        if (typeof req.body[key] !== 'undefined') {
+        if (typeof req.body[key] !== 'undefined' && req.body[key] !== null) {
           data[key] = ''+req.body[key]; // NOTE: converting to string for validation
         }
       }
@@ -36,6 +36,14 @@ var
       // validate
       utils.validate(data, schema, function(error){
         if (error) return utils.sendError(res, error);
+
+        // convert blank strings to null for postgres' sake
+        for (var k in data) {
+          if (data[k] === '') {
+            data[k] = null;
+          }
+        }
+
         req.body = data;
         next();
       });

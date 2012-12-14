@@ -71,7 +71,7 @@ describe('GET /v1/locations/:id', function() {
 describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
-    tu.post('/v1/locations', JSON.stringify({ businessId:2, name:'asdf' }), 'application/json', function(err, payload, res) {
+    tu.post('/v1/locations', JSON.stringify({ businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -93,9 +93,7 @@ describe('POST /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(payload.error);
-      assert(payload.error.length === 1);
-      assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'pattern');
+      assert(payload.error.length > 0);
       done();
     });
   });
