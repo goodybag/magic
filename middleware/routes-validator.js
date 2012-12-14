@@ -28,7 +28,7 @@ var
       // extract out relevant data
       var data = {};
       for (var key in schema.properties) {
-        if (typeof req.body[key] !== 'undefined') {
+        if (typeof req.body[key] !== 'undefined' && req.body[key] !== null) {
           data[key] = ''+req.body[key]; // NOTE: converting to string for validation
         }
       }
