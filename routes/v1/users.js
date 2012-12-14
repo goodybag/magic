@@ -39,10 +39,7 @@ module.exports.create = function (req, res) {
       utils.encryptPassword(req.param("password"), function (error, password) {
 
         var query = users.insert({
-                                   'username':req.param("username")
-                                   , 'password':password
-                                   , 'singlyAccessToken': req.param("singlyAccessToken")
-                                   , 'singlyId': req.param("singlyId")
+                                   'username':req.param("username"), 'password':password, 'singlyAccessToken':req.param("singlyAccessToken"), 'singlyId':req.param("singlyId")
                                  }
         ).toQuery();
 
@@ -61,7 +58,6 @@ module.exports.create = function (req, res) {
   };
 
 
-
   // a callback that is executed when the db client is retrieved successfully
   db.getClient(callback);
 
@@ -76,7 +72,7 @@ module.exports.create = function (req, res) {
 module.exports.list = function (req, res) {
   console.log("get clients");
   var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of users'+ req.params.id, {uid:'more'});
+  logger.routes.debug(TAGS, 'fetching list of users' + req.params.id, {uid:'more'});
 
   db.getClient(function (error, client) {
     if (error) return res.json({ error:error, data:null }), logger.routes.error(TAGS, error);
