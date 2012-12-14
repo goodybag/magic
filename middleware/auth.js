@@ -43,12 +43,12 @@ auth.allow = function(groups){
 
   return function(req, res, next){
     var TAGS = [req.uuid];
-    if (!req.session || req.session.user)
-      return logger.error(TAGS, error), res.json({ error: errors.auth.NOT_AUTHENTICATED, data: null });
 
-    if (req.session.user.groups.length === 0 || !isUserAllowed(req.session.user, groups))
-      return logger.error(TAGS, error), res.json({ error: errors.auth.NOT_ALLOWED, data: null });
+    if (!req.session || !req.session.user)
+      return logger.error(TAGS, errors.auth.NOT_AUTHENTICATED), res.json({ error: errors.auth.NOT_AUTHENTICATED, data: null });
 
+    if (!req.session.user.groups || req.session.user.groups.length === 0 || !isUserAllowed(req.session.user, groups))
+      return logger.error(TAGS, errors.auth.NOT_ALLOWED), res.json({ error: errors.auth.NOT_ALLOWED, data: null });
     next();
   };
 };
