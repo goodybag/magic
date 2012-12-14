@@ -15,50 +15,35 @@ define(function(require){
   , properties: {
       name: {
         required: true
-      , type: "string"
       }
     , url: {
         required: false
-      , type: "string"
       , pattern: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
       }
     , cardCode: {
         required: true
-      , type: "string"
-      , minLength: 6
-      , maxLength: 6
+      , length: 6
       }
     , street1: {
         required: true
-      , type: "string"
       }
     , street2: {
         required: true
-      , type: "string"
       }
     , city: {
         required: true
-      , type: "string"
       }
     , state: {
         required: true
-      , type: "string"
-      , minLength: 2
-      , maxLength: 2
+      , length: 2
       }
     , zip: {
         required: true
-      , type: "number"
-      , minLength: 5
-      , maxLength: 5
-      }
-    , state: {
-        required: true
-      , type: "string"
+      , pattern: /[0-9]{5}/
       }
     , enabled: {
         required: true
-      , type: "boolean"
+      , pattern: /true|false|0|1/
       }
     }
   };
