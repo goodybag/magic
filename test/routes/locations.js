@@ -95,8 +95,7 @@ describe('POST /v1/locations', function() {
       assert(payload.error);
       assert(payload.error.length === 1);
       assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'type');
-      assert(payload.error[0].attributeValue == 'number');
+      assert(payload.error[0].attributeName == 'pattern');
       done();
     });
   });
@@ -127,8 +126,7 @@ describe('PATCH /v1/locations/:id', function() {
       assert(payload.error);
       assert(payload.error.length === 1);
       assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'type');
-      assert(payload.error[0].attributeValue == 'number');
+      assert(payload.error[0].attributeName == 'pattern');
       done();
     });
   });

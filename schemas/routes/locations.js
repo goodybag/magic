@@ -18,58 +18,51 @@ define(function(require){
   , properties: {
       businessId: {
         required: true
-      , type: "number"
+      , pattern: /^[0-9]*$/
       }
     , name: {
         required: true
-      , type: "string"
       }
     , street1: {
         required: true
-      , type: "string"
       }
     , street2: {
         required: false
-      , type: ["string", "null"]
       }
     , city: {
         required: true
-      , type: "string"
       , minLength: 1
       }
     , state: {
         required: true
-      , type: "string"
       , length: 2
-      }                 
+      }
     , zip: {
         required: true
-      , type: ["number", "null"]
-      , length: 5
+      , pattern: /[0-9]{5}/
       }
     , country: {
         required: true
-      , type: "string"
       }
     , phone: {
         required: false
-      , type: ["string", "null"]
+      , pattern: /[0-9\-\(\)]*/
       }
     , fax: {
         required: false
-      , type: ["string", "null"]
+      , pattern: /[0-9\-\(\)]*/
       }
     , lat: {
         required: false
-      , type: ["number", "null"]
+      , pattern: /[0-9]*/
       }
     , lon: {
         required: false
-      , type: ["number", "null"]
+      , pattern: /[0-9]*/
       }
     , enabled: {
         required: true
-      , type: "boolean"
+      , pattern: /true|false|1|0/
       }
     }
   };
