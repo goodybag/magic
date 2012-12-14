@@ -36,7 +36,7 @@ exports.getClient = function(callback){
     callback(err, client);
   });
 */
-  callback(null, client);
+  var a = callback(null, client);
 };
 
 exports.tables = {
