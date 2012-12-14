@@ -41,7 +41,10 @@ exports.getClient = function(callback){
 
 exports.tables = {
   businesses: require('./schemas/businesses')
-, locations: require('./schemas/locations')
+, locations:  require('./schemas/locations')
+, users:      require('./schemas/users')
+, groups:     require('./schemas/groups')
+, userGroups: require('./schemas/userGroups')
 }
 
 /*

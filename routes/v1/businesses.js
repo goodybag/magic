@@ -1,6 +1,5 @@
-
-/*
- * GET users listing.
+/**
+ * Businesses
  */
 
 var

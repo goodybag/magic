@@ -2,6 +2,7 @@ var
   db = require('../db')
 , businesses  = db.tables.businesses
 , locations   = db.tables.locations
+, users       = db.tables.users
 
 , fields = {
     "businesses": {
@@ -120,6 +121,19 @@ var
       , locations.enabled
       ]
     }
+
+  , "users": {
+      "default": [
+        users.id
+      ]
+
+    , "admin": [
+        users.id
+      , users.email
+      , users.password
+      ]
+    }
+
   }
 ;
 
