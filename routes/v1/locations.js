@@ -4,15 +4,15 @@
  */
 
 var
-  db      = require('../../db')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
+    db      = require('../../db')
+    , utils   = require('../../lib/utils')
+    , errors  = require('../../lib/errors')
 
-, logger  = {}
+    , logger  = {}
 
-  // Tables
-, locations  = db.tables.locations
-;
+// Tables
+    , locations  = db.tables.locations
+    ;
 
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
@@ -32,10 +32,10 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = locations.select.apply(
-      locations
-    , req.fields
+        locations
+        , req.fields
     ).from(
-      locations
+        locations
     );
 
     if (req.param('businessId')) {
@@ -67,12 +67,12 @@ module.exports.get = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = locations.select.apply(
-      locations
-    , req.fields
+        locations
+        , req.fields
     ).from(
-      locations
+        locations
     ).where(
-      locations.id.equals(req.param('locationId'))
+        locations.id.equals(req.param('locationId'))
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
@@ -128,9 +128,9 @@ module.exports.update = function(req, res){
     }
 
     var query = locations
-      .update(req.body)
-      .where(locations.id.equals(req.param('locationId')))
-      .toQuery();
+        .update(req.body)
+        .where(locations.id.equals(req.param('locationId')))
+        .toQuery();
 
     logger.db.debug(TAGS, query.text);
 
@@ -159,9 +159,9 @@ module.exports.del = function(req, res){
     }
 
     var query = locations
-      .delete()
-      .where(locations.id.equals(req.param('locationId')))
-      .toQuery();
+        .delete()
+        .where(locations.id.equals(req.param('locationId')))
+        .toQuery();
 
     logger.db.debug(TAGS, query.text);
 
