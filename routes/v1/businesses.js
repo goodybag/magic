@@ -4,17 +4,17 @@
  */
 
 var
-  db      = require('../../db')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
-, schemas = require('../../schemas/routes')
+    db      = require('../../db')
+    , utils   = require('../../lib/utils')
+    , errors  = require('../../lib/errors')
+    , schemas = require('../../schemas/routes')
 
-, logger  = {}
+    , logger  = {}
 
-  // Tables
-, businesses = db.tables.businesses
-, locations  = db.tables.locations
-;
+// Tables
+    , businesses = db.tables.businesses
+    , locations  = db.tables.locations
+    ;
 
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
@@ -34,12 +34,12 @@ module.exports.get = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = businesses.select.apply(
-      businesses
-    , req.fields
+        businesses
+        , req.fields
     ).from(
-      businesses
+        businesses
     ).where(
-      businesses.id.equals(req.params.id)
+        businesses.id.equals(req.params.id)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
@@ -65,7 +65,7 @@ module.exports.del = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = businesses.delete().where(
-      businesses.id.equals(req.params.id)
+        businesses.id.equals(req.params.id)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
@@ -91,10 +91,10 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = businesses.select.apply(
-      businesses
-    , req.fields
+        businesses
+        , req.fields
     ).from(
-      businesses
+        businesses
     ).toQuery();
 
     client.query(query.text, function(error, result){
@@ -126,38 +126,38 @@ module.exports.listWithLocations = function(req, res){
 
     var bFields = [
       'id'
-    , 'name'
-    , 'street1'
-    , 'street2'
-    , 'city'
-    , 'state'
-    , 'zip'
-    , 'enabled'
-    , 'cardCode'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'enabled'
+      , 'cardCode'
     ], lFields = [
       'id'
-    , 'name'
-    , 'street1'
-    , 'street2'
-    , 'city'
-    , 'state'
-    , 'zip'
-    , 'country'
-    , 'phone'
-    , 'fax'
-    , 'lat'
-    , 'lng'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'country'
+      , 'phone'
+      , 'fax'
+      , 'lat'
+      , 'lng'
     ];
 
     query = {
       text: 'select '
-            + bFields.map(function(a){ return "\"b\".\"" + a + "\""; }).join(", ")
-            + ', '
-            + lFields.map(function(a){ return "\"l\".\"" + a + "\" as \"location_" + a + "\""; }).join(", ")
-            + ' from businesses as b'
-            + ' inner join locations as l'
-            + ' on ("b"."id" = "l"."businessId")'
-            + ' order by id desc'
+          + bFields.map(function(a){ return "\"b\".\"" + a + "\""; }).join(", ")
+          + ', '
+          + lFields.map(function(a){ return "\"l\".\"" + a + "\" as \"location_" + a + "\""; }).join(", ")
+          + ' from businesses as b'
+          + ' inner join locations as l'
+          + ' on ("b"."id" = "l"."businessId")'
+          + ' order by id desc'
     };
 
     logger.db.debug(TAGS, query.text);
@@ -169,33 +169,33 @@ module.exports.listWithLocations = function(req, res){
       }
 
       var
-        bindex = {}
-      , set = []
-      , getLocFromResult = function(result){
-          return {
-            id:       result.location_id
-          , name:     result.location_name
-          , street1:  result.location_street1
-          , street2:  result.location_street2
-          , city:     result.location_city
-          , state:    result.location_state
-          , zip:      result.location_zip
-          , country:  result.location_country
-          , phone:    result.location_phone
-          , fax:      result.location_fax
-          , lat:      result.location_lat
-          , lng:      result.location_lng
-          };
-        }
-      , getBizFromResult = function(result){
-          var biz = {};
-          for (var i = bFields.length - 1; i >= 0; i--){
-            biz[bFields[i]] = result[bFields[i]];
+          bindex = {}
+          , set = []
+          , getLocFromResult = function(result){
+            return {
+              id:       result.location_id
+              , name:     result.location_name
+              , street1:  result.location_street1
+              , street2:  result.location_street2
+              , city:     result.location_city
+              , state:    result.location_state
+              , zip:      result.location_zip
+              , country:  result.location_country
+              , phone:    result.location_phone
+              , fax:      result.location_fax
+              , lat:      result.location_lat
+              , lng:      result.location_lng
+            };
           }
-          biz.locations = [];
-          return biz;
-        }
-      ;
+          , getBizFromResult = function(result){
+            var biz = {};
+            for (var i = bFields.length - 1; i >= 0; i--){
+              biz[bFields[i]] = result[bFields[i]];
+            }
+            biz.locations = [];
+            return biz;
+          }
+          ;
       // Massage data
       for (var i = 0, result, loc, biz; i < results.rows.length; i++){
         result = results.rows[i];
@@ -235,14 +235,14 @@ module.exports.create = function(req, res){
 
       var query = businesses.insert({
         'name'      :    req.body.name
-      , 'url'       :    req.body.url
-      , 'street1'   :    req.body.street1
-      , 'street2'   :    req.body.street2
-      , 'city'      :    req.body.city
-      , 'state'     :    req.body.state
-      , 'zip'       :    req.body.zip
-      , 'enabled'   :    req.body.enabled
-      , 'cardCode'  :    req.body.cardCode
+        , 'url'       :    req.body.url
+        , 'street1'   :    req.body.street1
+        , 'street2'   :    req.body.street2
+        , 'city'      :    req.body.city
+        , 'state'     :    req.body.state
+        , 'zip'       :    req.body.zip
+        , 'enabled'   :    req.body.enabled
+        , 'cardCode'  :    req.body.cardCode
       }).toQuery();
 
       // logger.db.debug(TAGS, query.text);
@@ -270,7 +270,7 @@ module.exports.update = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = businesses.update(req.body).where(
-      businesses.id.equals(req.params.id)
+        businesses.id.equals(req.params.id)
     ).toQuery();
 
     logger.db.debug(TAGS, query.text);

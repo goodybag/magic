@@ -1,127 +1,127 @@
 var
-  db = require('../db')
-, businesses  = db.tables.businesses
-, locations   = db.tables.locations
+    db = require('../db')
+    , businesses  = db.tables.businesses
+    , locations   = db.tables.locations
 
-, fields = {
-    "businesses": {
-      "default": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.enabled
-      , businesses.cardCode
-      ]
+    , fields = {
+      "businesses": {
+        "default": [
+          businesses.id
+          , businesses.name
+          , businesses.street1
+          , businesses.street2
+          , businesses.city
+          , businesses.state
+          , businesses.zip
+          , businesses.enabled
+          , businesses.cardCode
+        ]
 
-    , "client": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      ]
+        , "client": [
+          businesses.id
+          , businesses.name
+          , businesses.street1
+          , businesses.street2
+          , businesses.city
+          , businesses.state
+          , businesses.zip
+        ]
 
-    , "sales": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.enabled
-      , businesses.cardCode
-      ]
+        , "sales": [
+          businesses.id
+          , businesses.name
+          , businesses.street1
+          , businesses.street2
+          , businesses.city
+          , businesses.state
+          , businesses.zip
+          , businesses.enabled
+          , businesses.cardCode
+        ]
 
-    , "admin": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.enabled
-      , businesses.cardCode
-      ]
+        , "admin": [
+          businesses.id
+          , businesses.name
+          , businesses.street1
+          , businesses.street2
+          , businesses.city
+          , businesses.state
+          , businesses.zip
+          , businesses.enabled
+          , businesses.cardCode
+        ]
+      }
+
+      , "locations": {
+        "default": [
+          locations.id
+          , locations.businessId
+          , locations.name
+          , locations.street1
+          , locations.street2
+          , locations.city
+          , locations.state
+          , locations.zip
+          , locations.country
+          , locations.phone
+          , locations.fax
+          , locations.lat
+          , locations.lon
+          , locations.enabled
+        ]
+
+        , "client": [
+          locations.id
+          , locations.businessId
+          , locations.name
+          , locations.street1
+          , locations.street2
+          , locations.city
+          , locations.state
+          , locations.zip
+          , locations.country
+          , locations.phone
+          , locations.fax
+          , locations.lat
+          , locations.lon
+          , locations.enabled
+        ]
+
+        , "sales": [
+          locations.id
+          , locations.businessId
+          , locations.name
+          , locations.street1
+          , locations.street2
+          , locations.city
+          , locations.state
+          , locations.zip
+          , locations.country
+          , locations.phone
+          , locations.fax
+          , locations.lat
+          , locations.lon
+        ]
+
+        , "admin": [
+          locations.id
+          , locations.businessId
+          , locations.name
+          , locations.street1
+          , locations.street2
+          , locations.city
+          , locations.state
+          , locations.zip
+          , locations.country
+          , locations.phone
+          , locations.fax
+          , locations.lat
+          , locations.lon
+          , locations.enabled
+        ]
+      }
     }
-
-  , "locations": {
-      "default": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.enabled
-      ]
-
-    , "client": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.enabled
-      ]
-
-    , "sales": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      ]
-
-    , "admin": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.enabled
-      ]
-    }
-  }
-;
+    ;
 
 module.exports = function(collection){
   return function(req, res, next){
