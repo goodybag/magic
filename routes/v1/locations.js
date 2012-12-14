@@ -31,13 +31,11 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = locations.select.apply(
-        locations
-        , req.fields
-    ).from(
-        locations
-    );
+    var query = locations
+        .select.apply(locations, req.fields)
+        .from(locations);
 
+    // filter by businessId, if given as a path param
     if (req.param('businessId')) {
       query.where(locations.businessId.equals(req.param('businessId')));
     }
@@ -66,14 +64,12 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = locations.select.apply(
-        locations
-        , req.fields
-    ).from(
-        locations
-    ).where(
-        locations.id.equals(req.param('locationId'))
-    ).toQuery();
+    var query = locations
+        .select.apply(locations, req.fields)
+        .from(locations)
+        .where(locations.id.equals(req.param('locationId')))
+        .toQuery();
+
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -103,7 +99,7 @@ module.exports.create = function(req, res){
 
     logger.db.debug(TAGS, query.text);
 
-    client.query(query.text + 'RETURNING id', query.values, function(error, result){
+    client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

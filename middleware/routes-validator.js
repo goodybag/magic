@@ -59,12 +59,13 @@ var
         }
 
         // store
-        data[key] = req.body[key] = value;
+        data[key] = value;
       }
 
       // validate
       utils.validate(data, schema, function(error){
         if (error) return utils.sendError(res, error);
+        req.body = data;
         next();
       });
     };
