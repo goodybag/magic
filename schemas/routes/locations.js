@@ -41,7 +41,7 @@ define(function(require){
         required: true
       , type: "string"
       , length: 2
-      }
+      }                 
     , zip: {
         required: true
       , type: ["number", "null"]
@@ -104,7 +104,7 @@ define(function(require){
       if (locations.model.properties[prop].required && !target.properties[prop].minLength && !target.properties[prop].length) {
         target.properties[prop].minLength = 1;
       }
-    }
+    }    
   }
 
   // create schema

@@ -1,3 +1,3 @@
 module.exports = {
-    consumer:require('./consumer')
+  consumer: require('./consumer')
 };
