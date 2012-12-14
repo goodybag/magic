@@ -61,7 +61,7 @@ define(function(require){
       , pattern: /[0-9]*/
       }
     , enabled: {
-        required: true
+        required: false
       , pattern: /true|false|1|0/
       }
     }
@@ -107,8 +107,6 @@ define(function(require){
   , properties: {}
   };
   copyAllExcept(locations.create, []);
-  unrequireAll(locations.create);
-  ensureMinLengths(locations.create);
 
   // update schema
   // =============
