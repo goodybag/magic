@@ -1,5 +1,5 @@
 /**
- * Routes Schemas Businesses
+ * Businesses Validator
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {

@@ -1,7 +1,7 @@
 var assert = require('better-assert');
 var sinon = require('sinon');
 
-var tu = require('./test-utils');
+var tu = require('../../lib/test-utils');
 
 describe('GET /v1/businesses', function() {
   it('should respond with a business listing', function(done) {

@@ -19,8 +19,13 @@ var
 , httpServer
 ;
 
+// instantiate HTTP server
 var app = require('./lib/server').createAppServer();
 
+// import resources
+app.use(require('./collections/businesses/server'));
+app.use(require('./collections/locations/server'));
+app.use(require('./collections/products/server'));
 
 /**
  * REPL

@@ -54,7 +54,7 @@ function loadSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists ' + name + '_id_seq cascade'),
     query( 'Dropping ' + name,              'drop table if exists ' + name + ' cascade'),
-    getSql('Creating ' + name,              __dirname + '/../schemas/' + name + '.sql'),
+    getSql('Creating ' + name,              __dirname + '/../collections/' + name + '/schema/definition.sql'),
     query() // will run what getSql returns
   ]);
 }
@@ -63,7 +63,7 @@ function loadFixture(name) {
   return function() {
     if (!name) { return; }
     return pipeline([
-      getSql('Loading fixture', __dirname+'/../fixtures/'+name+'.sql'),
+      getSql('Loading fixture', __dirname+'/fixtures/'+name+'.sql'),
       query()
     ]);
   }

@@ -1,27 +1,10 @@
 /*
-  Routes Validator Middleware
+  Request-body Validation Middleware
 */
 
 var
-  // Module Dependencies
-  config    = require('../config')
-, schemas   = require('../schemas')
-, utils    = require('../lib/utils')
-  // Module Variables
-, compile = function(obj){
-    var compiled = {};
-    if (obj.hasOwnProperty('type')) return createValidator(obj);
-    for (var key in obj){
-      compiled[key] = compile(obj[key]);
-    }
-    return compiled;
-  }
-, isOfType = function(prop, type) {
-    if (Array.isArray(prop.type)) {
-      return (prop.type.indexOf(type) !== -1);
-    }
-    return prop.type === type;
-  }
+  config = require('../config')
+, utils  = require('../lib/utils')
 , createValidator = function(schema){
     return function(req, res, next){
 
@@ -50,4 +33,4 @@ var
     };
   }
 ;
-module.exports = compile(schemas);
+module.exports = createValidator;
