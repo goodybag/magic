@@ -8,7 +8,7 @@ var
 ;
 
 module.exports = sql.define({
-  name: 'users'
+  name: 'userGroups'
 , columns: [
     'id'
   , 'userId'
