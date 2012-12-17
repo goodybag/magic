@@ -20,6 +20,7 @@ before(function(done) {
 
 require('./routes/businesses');
 require('./routes/locations');
+require('./routes/products');
 
 after(function() {
   httpServer.close();

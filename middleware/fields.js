@@ -2,6 +2,7 @@ var
   db = require('../db')
 , businesses  = db.tables.businesses
 , locations   = db.tables.locations
+, products    = db.tables.products
 
 , fields = {
     "businesses": {
@@ -13,7 +14,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
 
@@ -35,7 +36,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
 
@@ -47,7 +48,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
     }
@@ -67,7 +68,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
       ]
 
     , "client": [
@@ -84,7 +85,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
       ]
 
     , "sales": [
@@ -117,7 +118,53 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
+      ]
+    }
+
+  , "products": {
+      "default": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.description
+      , products.price
+      , products.isVerified
+      , products.isArchived
+      , products.isEnabled
+      ]
+
+    , "client": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.description
+      , products.price
+      , products.isVerified
+      , products.isArchived
+      , products.isEnabled
+      ]
+
+    , "sales": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.description
+      , products.price
+      , products.isVerified
+      , products.isArchived
+      , products.isEnabled
+      ]
+
+    , "admin": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.description
+      , products.price
+      , products.isVerified
+      , products.isArchived
+      , products.isEnabled
       ]
     }
   }
