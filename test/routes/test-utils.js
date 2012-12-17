@@ -1,4 +1,28 @@
-var http = require('http'), cookie;
+var
+  http = require('http')
+, config = require('./../../config')
+, utils = require('./../../lib/utils')
+, baseUrl = config.baseUrl
+, cookie
+;
+
+exports.loginAsAdmin = function(callback){
+  exports.login({ email: 'admin@goodybag.com', password: 'password' }, callback);
+};
+
+exports.loginAsSales = function(callback){
+  exports.login({ email: 'sales@goodybag.com', password: 'password' }, callback);
+};
+
+exports.login = function(user, callback){
+  utils.post(baseUrl + '/v1/auth', user, function(error, request, results){
+    callback(error || results.error, results.data);
+  });
+};
+
+exports.logout = function(callback){
+  utils.get(baseUrl + '/v1/logout', callback);
+};
 
 exports.get = function get(path, cb) {
   exports.httpRequest({ path:path }, null, cb);

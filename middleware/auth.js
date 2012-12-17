@@ -28,8 +28,8 @@ var
 , isUserAllowed = function(user, groups){
     var alloweds = 0;
     for (var i = groups.length - 1; i >= 0; i--)
-      if (user.groups.indexOf(groups[i]) > -1) alloweds++;
-    return user.groups.length === alloweds;
+      if (user.groups.indexOf(groups[i]) > -1) return true;
+    return false;
   }
 ;
 
