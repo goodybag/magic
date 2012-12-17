@@ -1,13 +1,13 @@
 
 /*
- * GET users listing.
+ * Business routes
  */
 
 var
-  db      = require('../../db')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
-, schemas = require('../../schemas/routes')
+  db         = require('../../db')
+, utils      = require('../../lib/utils')
+, errors     = require('../../lib/errors')
+, validators = require('./schema/validators')
 
 , logger  = {}
 
@@ -230,7 +230,7 @@ module.exports.create = function(req, res){
     if (!req.body.cardCode) req.body.cardCode = "000000";
     if (!req.body.isEnabled) req.body.isEnabled = true;
 
-    utils.validate(req.body, schemas.businesses.model, function(error){
+    utils.validate(req.body, validators.model, function(error){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       var query = businesses.insert({

@@ -40,9 +40,23 @@ exports.getClient = function(callback){
 };
 
 exports.tables = {
-  businesses: require('./schemas/businesses')
-, locations: require('./schemas/locations')
-, products: require('./schemas/products')
+  businesses : require('../collections/businesses/schema/definition')
+, locations  : require('../collections/locations/schema/definition')
+, products   : require('../collections/products/schema/definition')
+};
+
+// Application behavior
+// (when run from the command-line, do setup)
+if (require.main === module) {
+  /**
+   * Runs DB setup
+   */
+
+  require('./setup')({ verbose:true }, function(error){
+    if (error) throw error;
+    console.log('complete!');
+    process.exit(0);
+  });
 }
 
 /*
