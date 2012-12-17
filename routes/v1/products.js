@@ -96,7 +96,7 @@ module.exports.create = function(req, res){
     }
 
     // defaults
-    req.body.enabled = true;
+    if (!req.body.isEnabled) req.body.isEnabled = true;
 
     var query = products.insert(req.body).toQuery();
 

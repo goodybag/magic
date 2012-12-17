@@ -19,7 +19,7 @@ module.exports = sql.define({
   , 'state'
   , 'zip'
   , 'cardCode'
-  , 'enabled'
+  , 'isEnabled'
   , 'createdAt'
   , 'updatedAt'
   , 'locations' // Number of locations

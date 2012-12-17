@@ -60,7 +60,7 @@ define(function(require){
         required: false
       , pattern: /[0-9]*/
       }
-    , enabled: {
+    , isEnabled: {
         required: false
       , pattern: /true|false|1|0/
       }
