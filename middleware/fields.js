@@ -14,7 +14,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
 
@@ -36,7 +36,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
 
@@ -48,7 +48,7 @@ var
       , businesses.city
       , businesses.state
       , businesses.zip
-      , businesses.enabled
+      , businesses.isEnabled
       , businesses.cardCode
       ]
     }
@@ -68,7 +68,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
       ]
 
     , "client": [
@@ -85,7 +85,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
       ]
 
     , "sales": [
@@ -118,7 +118,7 @@ var
       , locations.fax
       , locations.lat
       , locations.lon
-      , locations.enabled
+      , locations.isEnabled
       ]
     }
 
@@ -130,7 +130,7 @@ var
       , products.description
       , products.price
       , products.isVerified
-      , products.enabled
+      , products.isEnabled
       ]
 
     , "client": [
@@ -140,7 +140,7 @@ var
       , products.description
       , products.price
       , products.isVerified
-      , products.enabled
+      , products.isEnabled
       ]
 
     , "sales": [
@@ -150,7 +150,7 @@ var
       , products.description
       , products.price
       , products.isVerified
-      , products.enabled
+      , products.isEnabled
       ]
 
     , "admin": [
@@ -160,7 +160,7 @@ var
       , products.description
       , products.price
       , products.isVerified
-      , products.enabled
+      , products.isEnabled
       ]
     }
   }

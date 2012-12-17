@@ -41,7 +41,7 @@ define(function(require){
         required: true
       , pattern: /[0-9]{5}/
       }
-    , enabled: {
+    , isEnabled: {
         required: true
       , pattern: /true|false|0|1/
       }
@@ -78,7 +78,7 @@ define(function(require){
   // Don't require some stuff
   businesses.create.properties.street2.required   = false;
   businesses.create.properties.cardCode.required  = false;
-  businesses.create.properties.enabled.required   = false;
+  businesses.create.properties.isEnabled.required   = false;
 
   return businesses;
 });
