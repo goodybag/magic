@@ -14,5 +14,5 @@ CREATE TABLE locations (
   "fax"                      text,
   "lat"                       int,
   "lon"                       int,
-  "enabled"               boolean
+  "isEnabled"             boolean
 );

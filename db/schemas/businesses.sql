@@ -10,7 +10,7 @@ CREATE TABLE businesses (
   "city"                     text,
   "state"                    text,
   "zip"                       int,
-  "enabled"               boolean,
+  "isEnabled"             boolean,
   "createdAt"           timestamp,
   "updatedAt"           timestamp
 );

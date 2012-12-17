@@ -34,7 +34,7 @@ define(function(require){
         required: false
       , pattern: /true|false|1|0/
     }
-    , enabled: {
+    , isEnabled: {
         required: false
       , pattern: /true|false|1|0/
       }
