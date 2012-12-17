@@ -3,6 +3,10 @@ var sinon = require('sinon');
 
 var tu = require('./test-utils');
 
+var utils = require('./../../lib/utils');
+
+var baseUrl = "http://localhost:8986";
+
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
     tu.get('/v1/users', function(error, results) {
@@ -46,12 +50,30 @@ describe('POST /v1/users', function() {
 
 describe('DEL /v1/users/:id', function() {
   it('should delete a single user document', function(done) {
-    var id = 6; // Dumb user not used for anything
-    tu.del('/v1/users/' + id, function(error, results) {
+    // First need to login
+    var user = {
+      email:    "admin@goodybag.com"
+    , password: "password"
+    };
+    utils.post(baseUrl + '/v1/auth', user, function(error, request, results){
+      var id = 6; // Dumb user not used for anything
+
+      // Make sure there were no login errors
       assert(!error);
-      results = JSON.parse(results);
       assert(!results.error);
-      done();
+      assert(results.data.id);
+
+      utils.del(baseUrl + '/v1/users/' + id, function(error, request, results) {
+        assert(!error);
+        console.log(results.error);
+        assert(!results.error);
+
+        // Logout
+        utils.get(baseUrl + '/v1/logout', function(error){
+          assert(!error);
+          done();
+        });
+      });
     });
   });
 });
