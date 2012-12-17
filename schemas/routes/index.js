@@ -13,5 +13,6 @@ define(function(require){
     consumer:   require('./consumer')
   , businesses: require('./businesses')
   , locations: require('./locations')
+  , products: require('./products')
   };
 });

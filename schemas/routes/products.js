@@ -1,5 +1,5 @@
 /**
- * Routes Schemas Locations
+ * Routes Schemas Products
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,11 +9,11 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var locations = {};
+  var products = {};
 
   // base model schema
   // =================
-  locations.model = {
+  products.model = {
     type: 'object'
   , properties: {
       businessId: {
@@ -23,43 +23,17 @@ define(function(require){
     , name: {
         required: true
       }
-    , street1: {
-        required: true
-      }
-    , street2: {
+    , description: {
         required: false
       }
-    , city: {
+    , price: {
         required: true
-      , minLength: 1
+      , pattern: /^[0-9\.]*$/
       }
-    , state: {
-        required: true
-      , length: 2
-      }  
-    , zip: {
-        required: true
-      , pattern: /[0-9]{5}/
-      }
-    , country: {
-        required: true
-      }
-    , phone: {
+    , isVerified: {
         required: false
-      , pattern: /[0-9\-\(\)]*/
-      }
-    , fax: {
-        required: false
-      , pattern: /[0-9\-\(\)]*/
-      }
-    , lat: {
-        required: false
-      , pattern: /[0-9]*/
-      }
-    , lon: {
-        required: false
-      , pattern: /[0-9]*/
-      }
+      , pattern: /true|false|1|0/
+    }
     , enabled: {
         required: false
       , pattern: /true|false|1|0/
@@ -71,15 +45,15 @@ define(function(require){
   function copy(target, prop) {
     target.properties[prop] = {};
     // copy over by property, so no objects are shared between schemas
-    for (var k in locations.model.properties[prop]) {
-      target.properties[prop][k] = locations.model.properties[prop][k];
+    for (var k in products.model.properties[prop]) {
+      target.properties[prop][k] = products.model.properties[prop][k];
     }
   }
   function copies(target, props) {
     props.forEach(function(prop) { copy(target, prop); });
   }
   function copyAllExcept(target, exclusions) {
-    for (var prop in locations.model.properties) {
+    for (var prop in products.model.properties) {
       if (exclusions.indexOf(prop) !== -1) { continue; }
       copy(target, prop);
     }
@@ -93,31 +67,30 @@ define(function(require){
     unrequire(target, Object.keys(target.properties));
   }
   function ensureMinLengths(target) {
-    for (var prop in locations.model.properties) {
-      if (locations.model.properties[prop].required && !target.properties[prop].minLength && !target.properties[prop].length) {
+    for (var prop in products.model.properties) {
+      if (products.model.properties[prop].required && !target.properties[prop].minLength && !target.properties[prop].length) {
         target.properties[prop].minLength = 1;
       }
-    }    
+    }
   }
 
   // create schema
   // =============
-  locations.create = {
+  products.create = {
     type: 'object'
   , properties: {}
   };
-  copyAllExcept(locations.create, []);
+  copyAllExcept(products.create, []);
 
   // update schema
   // =============
-  locations.update = {
+  products.update = {
     type: 'object'
   , properties: {}
   };
-  copyAllExcept(locations.update, []);
-  unrequireAll(locations.update);
-  ensureMinLengths(locations.update);
+  copyAllExcept(products.update, []);
+  unrequireAll(products.update);
+  ensureMinLengths(products.update);
 
-
-  return locations;
+  return products;
 });
