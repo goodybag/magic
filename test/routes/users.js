@@ -43,3 +43,15 @@ describe('POST /v1/users', function() {
     });
   });
 });
+
+describe('DEL /v1/users/:id', function() {
+  it('should delete a single user document', function(done) {
+    var id = 6; // Dumb user not used for anything
+    tu.del('/v1/users/' + id, function(error, results) {
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      done();
+    });
+  });
+});

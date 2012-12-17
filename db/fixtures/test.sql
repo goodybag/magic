@@ -25,6 +25,7 @@ INSERT INTO "users" (id, email, password) VALUES ('2', 'sales@goodybag.com', 'pa
 INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'password');
 INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'password');
 INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'password');
+INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'password');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 

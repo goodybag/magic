@@ -22,98 +22,58 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
- * Get user
+ * Email Authentication
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.get = function(req, res){
-  var TAGS = ['get-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching user ' + req.params.id, {uid: 'more'});
+module.exports.authenticate = function(req, res){
+  var TAGS = ['email-authentication', req.uuid];
+  logger.routes.debug(TAGS, 'attempting to authenticate', {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = users.select.apply(
-      users
-    , req.fields
-    ).from(
-      users
-    ).where(
-      users.id.equals(req.params.id)
+    // First check for user existence
+    var query = users.select(
+      users.id, users.email, users.password
+    ).from(users).where(
+      users.email.equals(req.body.email)
     ).toQuery();
 
-    return res.send(query.text);
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] });
-    });
-  });
-};
+      if (result.rows.length === 0)
+        return res.json({ error: errors.auth.INVALID_EMAIL, data: null }), logger.routes.error(TAGS, error);
 
-/**
- * List users
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res HTTP Result Object
- */
-module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id, {uid: 'more'});
+      var user = result.rows[0];
 
-  db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, "Comparing passwords");
 
-    var query = users.select.apply(
-      users
-    , req.fields
-    ).from(
-      users
-    ).toQuery();
+      // Compare passwords
+      utils.comparePasswords(req.body.password, user.password, function(error, success){
+        if (error)
+          return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (!success)
+          return res.json({ error: errors.auth.INVALID_PASSWORD, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+        // Remove password
+        delete user.password;
 
-      return res.json({ error: null, data: result.rows });
-    });
-  });
-};
+        // Setup groups
+        query = userGroups.select(
+          groups.name
+        );
 
-/**
- * Create users
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res HTTP Result Object
- */
-module.exports.create = function(req, res){
-  var TAGS = ['create-users', req.uuid];
-  logger.routes.debug(TAGS, 'creating user ' + req.params.id, {uid: 'more'});
-
-  db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-    var user = {
-      email:    req.body.email
-    , password: req.body.password
-    };
-
-    utils.encryptPassword(user.password, function(error, password){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-      user.password = passsword;
-
-      var query = users.insert(user).toQuery();
-
-      client.query(query.text, query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
+        return res.send(query.text);
 
         return res.json({ error: null, data: result.rows[0] });
       });
+
     });
   });
 };

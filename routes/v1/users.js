@@ -115,3 +115,68 @@ module.exports.create = function(req, res){
     });
   });
 };
+
+/**
+ * Delete user
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.del = function(req, res){
+  var TAGS = ['del-user', req.uuid];
+  logger.routes.debug(TAGS, 'deleting user ' + req.params.id, {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = users.delete().where(
+      users.id.equals(req.params.id)
+    ).toQuery();
+
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
+ * Update user - there's no data modification here, so no need to validate
+ * since we've already validated in the middleware
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.update = function(req, res){
+  var TAGS = ['update-user', req.uuid];
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // Don't let them update the id
+    delete req.body.id;
+
+    // Only let them update certain fields
+    var data;
+    if (req.fields){
+      data = {};
+      for (var key in req.body){
+        if (req.fields.hasOwnProperty(key)) data[key] = req.body[key];
+      }
+    }
+
+    var query = users.update(data || req.body).where(
+      users.id.equals(req.params.id)
+    ).toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+};
