@@ -16,6 +16,7 @@ module.exports = sql.define({
   , 'description'
   , 'price'
   , 'isVerified'
+  , 'isArchived'
   , 'isEnabled'
   ]
 });

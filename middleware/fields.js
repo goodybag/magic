@@ -130,6 +130,7 @@ var
       , products.description
       , products.price
       , products.isVerified
+      , products.isArchived
       , products.isEnabled
       ]
 
@@ -140,6 +141,7 @@ var
       , products.description
       , products.price
       , products.isVerified
+      , products.isArchived
       , products.isEnabled
       ]
 
@@ -150,6 +152,7 @@ var
       , products.description
       , products.price
       , products.isVerified
+      , products.isArchived
       , products.isEnabled
       ]
 
@@ -160,6 +163,7 @@ var
       , products.description
       , products.price
       , products.isVerified
+      , products.isArchived
       , products.isEnabled
       ]
     }

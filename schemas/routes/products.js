@@ -34,6 +34,10 @@ define(function(require){
         required: false
       , pattern: /true|false|1|0/
     }
+    , isArchived: {
+        required: false
+      , pattern: /true|false|1|0/
+    }
     , isEnabled: {
         required: false
       , pattern: /true|false|1|0/

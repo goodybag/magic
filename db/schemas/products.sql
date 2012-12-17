@@ -7,5 +7,6 @@ CREATE TABLE products (
   "description"              text,
   "price"                    real,
   "isVerified"            boolean,
+  "isArchived"            boolean,
   "isEnabled"             boolean
 );
