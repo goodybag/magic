@@ -45,7 +45,6 @@ exports.tables = {
 , users:      require('./schemas/users')
 , groups:     require('./schemas/groups')
 , userGroups: require('./schemas/userGroups')
-, locations: require('./schemas/locations')
 , products: require('./schemas/products')
 }
 
