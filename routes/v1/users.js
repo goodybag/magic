@@ -159,10 +159,18 @@ module.exports.update = function(req, res){
     // Only let them update certain fields
     var data;
     if (req.fields){
+      var fieldsAvailable = 0;
       data = {};
       for (var key in req.body){
-        if (req.fields.hasOwnProperty(key)) data[key] = req.body[key];
+        if (req.fieldFieldNames.indexOf(key) > -1){
+          data[key] = req.body[key];
+          fieldsAvailable++;
+        }
       }
+
+      // Trying to update things they're not allowed to
+      if (fieldsAvailable === 0)
+        return res.json({ error: errors.auth.NOT_ALLOWED, data: null }), logger.routes.error(TAGS, errors.auth.NOT_ALLOWED);
     }
 
     var query = users.update(data || req.body).where(
