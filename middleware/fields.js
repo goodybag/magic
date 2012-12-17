@@ -12,6 +12,7 @@ var
     businesses : db.tables.businesses
   , locations  : db.tables.locations
   , users      : db.tables.users
+  , products   : db.tables.products
   }
 
 
@@ -25,7 +26,7 @@ var
       , 'city'
       , 'state'
       , 'zip'
-      , 'enabled'
+      , 'isEnabled'
       ]
 
     , client: [
@@ -46,7 +47,7 @@ var
       , 'city'
       , 'state'
       , 'zip'
-      , 'enabled'
+      , 'isEnabled'
       , 'cardCode'
       ]
 
@@ -58,7 +59,7 @@ var
       , 'city'
       , 'state'
       , 'zip'
-      , 'enabled'
+      , 'isEnabled'
       , 'cardCode'
       ]
     }
@@ -78,7 +79,7 @@ var
       , 'fax'
       , 'lat'
       , 'lon'
-      , 'enabled'
+      , 'isEnabled'
       ]
 
     , client: [
@@ -95,7 +96,7 @@ var
       , 'fax'
       , 'lat'
       , 'lon'
-      , 'enabled'
+      , 'isEnabled'
       ]
 
     , sales: [
@@ -128,7 +129,7 @@ var
       , 'fax'
       , 'lat'
       , 'lon'
-      , 'enabled'
+      , 'isEnabled'
       ]
     }
 
@@ -145,48 +146,48 @@ var
     }
 
   , "products": {
-      "default": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+      default: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "client": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , client: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "sales": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , sales: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "admin": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , admin: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
     }
   }
