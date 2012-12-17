@@ -131,7 +131,7 @@ module.exports.listWithLocations = function(req, res){
     , 'city'
     , 'state'
     , 'zip'
-    , 'enabled'
+    , 'isEnabled'
     , 'cardCode'
     ], lFields = [
       'id'
@@ -227,7 +227,7 @@ module.exports.create = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     if (!req.body.cardCode) req.body.cardCode = "000000";
-    if (!req.body.enabled) req.body.enabled = true;
+    if (!req.body.isEnabled) req.body.isEnabled = true;
 
     utils.validate(req.body, schemas.businesses.model, function(error){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -240,7 +240,7 @@ module.exports.create = function(req, res){
       , 'city'      :    req.body.city
       , 'state'     :    req.body.state
       , 'zip'       :    req.body.zip
-      , 'enabled'   :    req.body.enabled
+      , 'isEnabled' :    req.body.isEnabled
       , 'cardCode'  :    req.body.cardCode
       }).toQuery();
 

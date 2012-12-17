@@ -50,4 +50,13 @@ INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
 INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
 INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
 COMMIT;
-SELECT setval('"userGroups_id_seq"', (SELECT MAX(id) from "userGroups")); -- advance the sequence past the IDs just used
+SELECT setval('"userGroups_id_seq"', (SELECT MAX(id) from "userGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
+
+-- PRODUCTS
+
+BEGIN;
+INSERT INTO "products" VALUES ('1', '1', 'Product 1', 'A product', 55.55, true, false, true);
+INSERT INTO "products" VALUES ('2', '2', 'Product 2', 'A product', 55.55, true, false, true);
+INSERT INTO "products" VALUES ('3', '3', 'Product 3', 'A product', 55.55, true, false, true);
+COMMIT;
+SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used

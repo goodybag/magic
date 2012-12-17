@@ -47,6 +47,7 @@ describe('POST /v1/businesses', function(){
     , url: "http://ballersinc.com"
     , cardCode: "123456"
     , street1: "123 Sesame St"
+    , street2: 'asdf'
     , city: "Austin"
     , state: "TX"
     , zip: 78756

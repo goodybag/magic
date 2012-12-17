@@ -15,50 +15,35 @@ define(function(require){
   , properties: {
       name: {
         required: true
-      , type: "string"
       }
     , url: {
         required: false
-      , type: "string"
       , pattern: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
       }
     , cardCode: {
         required: true
-      , type: "string"
-      , minLength: 6
-      , maxLength: 6
+      , length: 6
       }
     , street1: {
         required: true
-      , type: "string"
       }
     , street2: {
         required: true
-      , type: "string"
       }
     , city: {
         required: true
-      , type: "string"
       }
     , state: {
         required: true
-      , type: "string"
-      , minLength: 2
-      , maxLength: 2
+      , length: 2
       }
     , zip: {
         required: true
-      , type: "number"
-      , minLength: 5
-      , maxLength: 5
+      , pattern: /[0-9]{5}/
       }
-    , state: {
+    , isEnabled: {
         required: true
-      , type: "string"
-      }
-    , enabled: {
-        required: true
-      , type: "boolean"
+      , pattern: /true|false|0|1/
       }
     }
   };
@@ -76,8 +61,12 @@ define(function(require){
   };
 
   for (var key in businesses.model.properties){
-    businesses.create.properties[key] = businesses.model.properties[key];
-    businesses.update.properties[key] = businesses.model.properties[key];
+    businesses.create.properties[key] = {};
+    businesses.update.properties[key] = {};
+    for (var p in businesses.model.properties[key]) {
+      businesses.create.properties[key][p] = businesses.model.properties[key][p];
+      businesses.update.properties[key][p] = businesses.model.properties[key][p];
+    }
 
     businesses.update.properties[key].required = false;
   }
@@ -89,7 +78,7 @@ define(function(require){
   // Don't require some stuff
   businesses.create.properties.street2.required   = false;
   businesses.create.properties.cardCode.required  = false;
-  businesses.create.properties.enabled.required   = false;
+  businesses.create.properties.isEnabled.required   = false;
 
   return businesses;
 });

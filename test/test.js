@@ -22,6 +22,7 @@ require('./routes/businesses');
 require('./routes/locations');
 require('./routes/users');
 require('./routes/auth');
+require('./routes/products');
 
 after(function() {
   httpServer.close();

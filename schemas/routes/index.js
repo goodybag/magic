@@ -14,5 +14,7 @@ define(function(require){
   , businesses: require('./businesses')
   , locations:  require('./locations')
   , users:      require('./users')
+  , locations: require('./locations')
+  , products: require('./products')
   };
 });
