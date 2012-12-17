@@ -64,16 +64,32 @@ module.exports.authenticate = function(req, res){
         // Remove password
         delete user.password;
 
+        logger.db.debug(TAGS, "Getting groups and setting on user");
+
         // Setup groups
         query = userGroups.select(
           groups.name
-        );
+        ).from(
+          userGroups.join(groups).on(
+            userGroups.groupId.equals(groups.id)
+          )
+        ).where(
+          userGroups.userId.equals(user.id)
+        ).toQuery();
 
-        return res.send(query.text);
+        client.query(query.text, query.values, function(error, results){
+          if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-        return res.json({ error: null, data: result.rows[0] });
-      });
+          user.groups = results.rows.map(function(group){ return group.name; });
 
-    });
-  });
+          // Save user in session
+          req.session.user = user;
+
+          // TODO: get user info based on groups
+
+          return res.json({ error: null, data: user });
+        }); // End setup groups query
+      }); // End compare passwords
+    }); // End User existence query
+  }); // End getClient
 };
