@@ -127,6 +127,9 @@ var
         products.id
       , products.businessId
       , products.name
+      , products.description
+      , products.price
+      , products.isVerified
       , products.enabled
       ]
 
@@ -134,6 +137,9 @@ var
         products.id
       , products.businessId
       , products.name
+      , products.description
+      , products.price
+      , products.isVerified
       , products.enabled
       ]
 
@@ -141,6 +147,9 @@ var
         products.id
       , products.businessId
       , products.name
+      , products.description
+      , products.price
+      , products.isVerified
       , products.enabled
       ]
 
@@ -148,6 +157,9 @@ var
         products.id
       , products.businessId
       , products.name
+      , products.description
+      , products.price
+      , products.isVerified
       , products.enabled
       ]
     }

@@ -71,7 +71,7 @@ describe('GET /v1/products/:id', function() {
 describe('POST /v1/products', function() {
 
   it('should respond with the id of a new product', function(done) {
-    tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf' }), 'application/json', function(err, payload, res) {
+    tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:12.34 }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

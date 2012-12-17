@@ -13,6 +13,9 @@ module.exports = sql.define({
     'id'
   , 'businessId'
   , 'name'
+  , 'description'
+  , 'price'
+  , 'isVerified'
   , 'enabled'
   ]
 });

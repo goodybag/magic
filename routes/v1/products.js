@@ -95,6 +95,9 @@ module.exports.create = function(req, res){
       return res.json({ error: error, data: null });
     }
 
+    // defaults
+    req.body.enabled = true;
+
     var query = products.insert(req.body).toQuery();
 
     logger.db.debug(TAGS, query.text);

@@ -23,6 +23,17 @@ define(function(require){
     , name: {
         required: true
       }
+    , description: {
+        required: false
+      }
+    , price: {
+        required: true
+      , pattern: /^[0-9\.]*$/
+      }
+    , isVerified: {
+        required: false
+      , pattern: /true|false|1|0/
+    }
     , enabled: {
         required: false
       , pattern: /true|false|1|0/
