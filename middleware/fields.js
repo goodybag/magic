@@ -2,6 +2,7 @@ var
   db = require('../db')
 , businesses  = db.tables.businesses
 , locations   = db.tables.locations
+, products    = db.tables.products
 
 , fields = {
     "businesses": {
@@ -118,6 +119,36 @@ var
       , locations.lat
       , locations.lon
       , locations.enabled
+      ]
+    }
+
+  , "products": {
+      "default": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.enabled
+      ]
+
+    , "client": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.enabled
+      ]
+
+    , "sales": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.enabled
+      ]
+
+    , "admin": [
+        products.id
+      , products.businessId
+      , products.name
+      , products.enabled
       ]
     }
   }

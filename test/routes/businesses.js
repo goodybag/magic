@@ -33,7 +33,6 @@ describe('DEL /v1/businesses/:id', function() {
     var id = 3;
     tu.del('/v1/businesses/' + id, function(err, payload, res) {
       assert(!err);
-      console.log(payload);
       payload = JSON.parse(payload);
       assert(!payload.error);
       done();
