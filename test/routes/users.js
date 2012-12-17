@@ -65,8 +65,35 @@ describe('DEL /v1/users/:id', function() {
 
       utils.del(baseUrl + '/v1/users/' + id, function(error, request, results) {
         assert(!error);
-        console.log(results.error);
         assert(!results.error);
+
+        // Logout
+        utils.get(baseUrl + '/v1/logout', function(error){
+          assert(!error);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail to delete a single user document because of lack of permissions', function(done) {
+    // First need to login
+    var user = {
+      email:    "sales@goodybag.com"
+    , password: "password"
+    };
+    utils.post(baseUrl + '/v1/auth', user, function(error, request, results){
+      var id = 6; // Dumb user not used for anything
+
+      // Make sure there were no login errors
+      assert(!error);
+      assert(!results.error);
+      assert(results.data.id);
+
+      utils.del(baseUrl + '/v1/users/' + id, function(error, request, results) {
+        assert(!error);
+        assert(results.error);
+        assert(results.error.name === "NOT_ALLOWED");
 
         // Logout
         utils.get(baseUrl + '/v1/logout', function(error){

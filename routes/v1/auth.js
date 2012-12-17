@@ -103,3 +103,12 @@ module.exports.logout = function(req, res){
   req.session.user = null;
   res.json({ error: null, data: null });
 };
+
+/**
+ * Gets current user object in session
+ * @param  {Object} req HTTP request object
+ * @param  {Object} res HTTP result object
+ */
+module.exports.session = function(req, res){
+  res.json({ error: null, data: req.session ? req.session.user : null });
+};
