@@ -18,14 +18,15 @@ COMMIT;
 SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 
 -- USERS
+--   password: "password"
 
 BEGIN;
-INSERT INTO "users" (id, email, password) VALUES ('1', 'admin@goodybag.com', 'password');
-INSERT INTO "users" (id, email, password) VALUES ('2', 'sales@goodybag.com', 'password');
-INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'password');
-INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'password');
-INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'password');
-INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'password');
+INSERT INTO "users" (id, email, password) VALUES ('1', 'admin@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('2', 'sales@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
