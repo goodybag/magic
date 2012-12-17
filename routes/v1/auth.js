@@ -93,3 +93,13 @@ module.exports.authenticate = function(req, res){
     }); // End User existence query
   }); // End getClient
 };
+
+/**
+ * Destroys the current session
+ * @param  {Object} req HTTP request object
+ * @param  {Object} res HTTP result object
+ */
+module.exports.logout = function(req, res){
+  req.session.user = null;
+  res.json({ error: null, data: null });
+};
