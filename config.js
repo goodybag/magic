@@ -42,7 +42,8 @@ var config = {
     }
 
   , passwordSalt: "$G00DYBAGR0CK$!"
-  , consumerPasswordSaltLength: 10 
+  , consumerPasswordSaltLength: 10
+  , baseUrl: "http://localhost:8986"
   }
 
 , production: {

@@ -12,7 +12,8 @@ define(function(require){
   return {
     consumer:   require('./consumer')
   , businesses: require('./businesses')
-  , locations: require('./locations')
+  , locations:  require('./locations')
+  , users:      require('./users')
   , products: require('./products')
   };
 });

@@ -22,6 +22,7 @@
     "amanda": "0.4.2",
     "mocha": "1.7.4",
     "better-assert": "0.1.0",
-    "sinon": "1.5.2"
+    "sinon": "1.5.2",
+    "request": "2.12.x"
   }
 }

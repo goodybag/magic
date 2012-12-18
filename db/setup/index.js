@@ -42,7 +42,6 @@ function query(log, sql) {
     if (!sql) { sql = paramSql; } // run query returned by last item in the pipeline
     if (!log) { log = sql; }
     if (verbose) { console.log(log); }
-
     var query = client.query(sql);
     var deferred = when.defer();
     query.on('end', deferred.resolve);
@@ -52,8 +51,8 @@ function query(log, sql) {
 
 function loadSchema(name) {
   return pipeline([
-    query( 'Dropping Sequence for ' + name, 'drop sequence if exists ' + name + '_id_seq cascade'),
-    query( 'Dropping ' + name,              'drop table if exists ' + name + ' cascade'),
+    query( 'Dropping Sequence for ' + name, 'drop sequence if exists "' + name + '_id_seq" cascade'),
+    query( 'Dropping ' + name,              'drop table if exists "' + name + '" cascade'),
     getSql('Creating ' + name,              __dirname + '/../schemas/' + name + '.sql'),
     query() // will run what getSql returns
   ]);
