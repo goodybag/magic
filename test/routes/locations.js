@@ -1,13 +1,18 @@
-var assert = require('better-assert');
-var sinon = require('sinon');
+var
+  assert  = require('better-assert')
+, sinon   = require('sinon')
+, utils   = require('./../../lib/utils')
+, tu      = require('./test-utils')
+, config  = require('./../../config')
 
-var tu = require('./test-utils');
+, baseUrl = config.baseUrl
+;
 
 describe('GET /v1/locations', function() {
 
   it('should respond with a location listing', function(done) {
     tu.get('/v1/locations', function(err, payload, res) {
-      
+
       assert(!err);
       assert(res.statusCode == 200);
 
@@ -29,7 +34,7 @@ describe('GET /v1/businesses/:id/locations', function() {
 
   it('should respond with a location listing', function(done) {
     tu.get('/v1/businesses/1/locations', function(err, payload, res) {
-      
+
       assert(!err);
       assert(res.statusCode == 200);
 
@@ -51,7 +56,7 @@ describe('GET /v1/locations/:id', function() {
 
   it('should respond with a location', function(done) {
     tu.get('/v1/locations/1', function(err, payload, res) {
-      
+
       assert(!err);
       assert(res.statusCode == 200);
 
@@ -71,30 +76,33 @@ describe('GET /v1/locations/:id', function() {
 describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
-    tu.post('/v1/locations', JSON.stringify({ businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf' }), 'application/json', function(err, payload, res) {
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
 
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.id);
-      done();
+        assert(!payload.error);
+        assert(payload.data.id);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
   it('should respond to an invalid payload with errors', function(done) {
-    tu.post('/v1/locations', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/locations', { businessId:'foobar' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
 
-      assert(!err);
-      assert(res.statusCode == 200);
+        assert(payload.error);
+        assert(payload.error.length > 0);
+        tu.logout(function(){
+          done();
+        });
+      });
 
-      payload = JSON.parse(payload);
-
-      assert(payload.error);
-      assert(payload.error.length > 0);
-      done();
     });
   });
 
@@ -104,28 +112,33 @@ describe('POST /v1/locations', function() {
 describe('PATCH /v1/locations/:id', function() {
 
   it('should respond with a 200', function(done) {
-    tu.patch('/v1/locations/2', JSON.stringify({ businessId:2, name:'Barhouse2' }), 'application/json', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.patch(baseUrl + '/v1/locations/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
+        assert(!payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
   it('should respond to an invalid payload with errors', function(done) {
-    tu.patch('/v1/locations/2', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+    tu.loginAsSales(function(error, user){
+      utils.patch(baseUrl + '/v1/locations/2', { businessId:'foobar' }, function(err, res, payload) {
 
-      assert(!err);
-      assert(res.statusCode == 200);
+        assert(!err);
+        assert(res.statusCode == 200);
 
-      payload = JSON.parse(payload);
-
-      assert(payload.error);
-      assert(payload.error.length === 1);
-      assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'pattern');
-      done();
+        assert(payload.error);
+        assert(payload.error.length === 1);
+        assert(payload.error[0].property == 'businessId');
+        assert(payload.error[0].attributeName == 'pattern');
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
@@ -133,14 +146,16 @@ describe('PATCH /v1/locations/:id', function() {
 
 
 describe('DELETE /v1/locations/:id', function() {
-
   it('should respond with a 200', function(done) {
-    tu.del('/v1/locations/2', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.del(baseUrl + '/v1/locations/2', function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
+        assert(!payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 

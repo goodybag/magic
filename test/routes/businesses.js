@@ -1,13 +1,17 @@
-var assert = require('better-assert');
-var sinon = require('sinon');
+var
+  assert  = require('better-assert')
+, sinon   = require('sinon')
+, utils   = require('./../../lib/utils')
+, tu      = require('./test-utils')
+, config  = require('./../../config')
 
-var tu = require('./test-utils');
+, baseUrl = config.baseUrl
+;
 
 describe('GET /v1/businesses', function() {
   it('should respond with a business listing', function(done) {
-    tu.get('/v1/businesses', function(err, payload, res) {
+    utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
       assert(!err);
-      payload = JSON.parse(payload);
       assert(!payload.error);
       assert(payload.data.length > 0);
       done();
@@ -18,9 +22,8 @@ describe('GET /v1/businesses', function() {
 describe('GET /v1/businesses/:id', function() {
   it('should respond with a single business document', function(done) {
     var id = 1;
-    tu.get('/v1/businesses/' + id, function(err, payload, res) {
+    utils.get(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
       assert(!err);
-      payload = JSON.parse(payload);
       assert(!payload.error);
       assert(payload.data.id === id);
       done();
@@ -30,12 +33,27 @@ describe('GET /v1/businesses/:id', function() {
 
 describe('DEL /v1/businesses/:id', function() {
   it('should delete a single business document', function(done) {
+    tu.loginAsAdmin(function(error, user){
+      var id = 3;
+      utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
+        assert(!err);
+        assert(!payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail to delete a single business document because not logged in', function(done) {
     var id = 3;
-    tu.del('/v1/businesses/' + id, function(err, payload, res) {
+    utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
       assert(!err);
-      payload = JSON.parse(payload);
-      assert(!payload.error);
-      done();
+      assert(payload.error);
+      assert(payload.error.name === "NOT_AUTHENTICATED");
+      tu.logout(function(){
+        done();
+      });
     });
   });
 });
@@ -53,12 +71,15 @@ describe('POST /v1/businesses', function(){
     , zip: 78756
     };
 
-    tu.post('/v1/businesses', business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      assert(results.data.id);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses', business, function(error, request, results){
+        assert(!error);
+        assert(!results.error);
+        assert(results.data.id);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
@@ -73,11 +94,14 @@ describe('POST /v1/businesses', function(){
     , zip: 78756
     };
 
-    tu.post('/v1/businesses', business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(results.error);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses', business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 });
@@ -89,11 +113,14 @@ describe('POST /v1/businesses/:id', function(){
     , url: "http://pmcgee.com"
     };
 
-    tu.post('/v1/businesses/' + 1, business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, results){
+        assert(!error);
+        assert(!results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
@@ -102,12 +129,14 @@ describe('POST /v1/businesses/:id', function(){
       name: "Poophead McGees"
     , url: 123
     };
-
-    tu.post('/v1/businesses/' + 1, business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(results.error);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 });
@@ -119,11 +148,14 @@ describe('PUT /v1/businesses/:id', function(){
     , url: "http://pmcgee.com"
     };
 
-    tu.put('/v1/businesses/' + 1, business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.put(baseUrl + '/v1/businesses/' + 1, business, function(error, results){
+        assert(!error);
+        assert(!results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 
@@ -132,12 +164,14 @@ describe('PUT /v1/businesses/:id', function(){
       name: "Poophead McGees"
     , url: 123
     };
-
-    tu.put('/v1/businesses/' + 1, business, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(results.error);
-      done();
+    tu.loginAsSales(function(error, user){
+      utils.put(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
     });
   });
 });

@@ -1,183 +1,249 @@
+/**
+ * Narrows down available fields based on current permissions
+ *
+ * req.fields - An array of sql table fields available
+ * req.fieldNames - An array of field names that are available
+ */
+
 var
   db = require('../db')
-, businesses  = db.tables.businesses
-, locations   = db.tables.locations
-, products    = db.tables.products
+
+, tables = {
+    businesses : db.tables.businesses
+  , locations  : db.tables.locations
+  , users      : db.tables.users
+  , products   : db.tables.products
+  }
+
 
 , fields = {
     "businesses": {
-      "default": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.isEnabled
-      , businesses.cardCode
+      default: [
+        'id'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'isEnabled'
       ]
 
-    , "client": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
+    , client: [
+        'id'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
       ]
 
-    , "sales": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.isEnabled
-      , businesses.cardCode
+    , sales: [
+        'id'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'isEnabled'
+      , 'cardCode'
       ]
 
-    , "admin": [
-        businesses.id
-      , businesses.name
-      , businesses.street1
-      , businesses.street2
-      , businesses.city
-      , businesses.state
-      , businesses.zip
-      , businesses.isEnabled
-      , businesses.cardCode
+    , admin: [
+        'id'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'isEnabled'
+      , 'cardCode'
       ]
     }
 
   , "locations": {
-      "default": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.isEnabled
+      default: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'country'
+      , 'phone'
+      , 'fax'
+      , 'lat'
+      , 'lon'
+      , 'isEnabled'
       ]
 
-    , "client": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.isEnabled
+    , client: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'country'
+      , 'phone'
+      , 'fax'
+      , 'lat'
+      , 'lon'
+      , 'isEnabled'
       ]
 
-    , "sales": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
+    , sales: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'country'
+      , 'phone'
+      , 'fax'
+      , 'lat'
+      , 'lon'
       ]
 
-    , "admin": [
-        locations.id
-      , locations.businessId
-      , locations.name
-      , locations.street1
-      , locations.street2
-      , locations.city
-      , locations.state
-      , locations.zip
-      , locations.country
-      , locations.phone
-      , locations.fax
-      , locations.lat
-      , locations.lon
-      , locations.isEnabled
+    , admin: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'street1'
+      , 'street2'
+      , 'city'
+      , 'state'
+      , 'zip'
+      , 'country'
+      , 'phone'
+      , 'fax'
+      , 'lat'
+      , 'lon'
+      , 'isEnabled'
+      ]
+    }
+
+  , "users": {
+      default: [
+        'id'
+      ]
+
+    , admin: [
+        'id'
+      , 'email'
+      , 'password'
       ]
     }
 
   , "products": {
-      "default": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+      default: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "client": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , client: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "sales": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , sales: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
 
-    , "admin": [
-        products.id
-      , products.businessId
-      , products.name
-      , products.description
-      , products.price
-      , products.isVerified
-      , products.isArchived
-      , products.isEnabled
+    , admin: [
+        'id'
+      , 'businessId'
+      , 'name'
+      , 'description'
+      , 'price'
+      , 'isVerified'
+      , 'isArchived'
+      , 'isEnabled'
       ]
     }
   }
+
+, sqlFields = {}
 ;
 
-module.exports = function(collection){
-  return function(req, res, next){
-    var group = "default";
-    if (req.session && req.session.user) group = req.session.user.group;
-    if (fields[collection] && fields[collection][group]){
-      if (fields[collection][group].length === 0) return res.json({ error: null, data: [] });
-      req.fields = fields[collection][group];
-      next();
+// Make a version of fields that uses the node-sql objects
+var groupFields;
+for (var collection in fields){
+  sqlFields[collection] = {};
+  for (var group in fields[collection]){
+    sqlFields[collection][group] = [];
+    groupFields = fields[collection][group];
+    for (var i = 0; i < groupFields.length; i++){
+      sqlFields[collection][group].push(
+        tables[collection][groupFields[i]]
+      );
     }
+  }
+}
+
+// This whole thing could be a lot more efficient
+module.exports = function(collectionName){
+  return function(req, res, next){
+    var
+      groups              = ["default"]
+    , collection          = fields[collectionName]
+    , sqlCollection       = sqlFields[collectionName]
+    , availableFields     = []
+    , availableFieldNames = []
+    ;
+
+    if (req.session && req.session.user) groups = req.session.user.groups;
+
+    /**
+     * This is a particularly slow algorithm
+     * But it's ok because the dataset is super small
+     */
+
+    // Merge the fields available based on groups
+    for (var i = groups.length - 1; i >= 0; i--){
+      for (var n = collection[groups[i]].length - 1; n >= 0; n--){
+        if (availableFields.indexOf(collection[groups[i]][n]) === -1){
+          availableFields.push(sqlCollection[groups[i]][n]);
+          availableFieldNames.push(collection[groups[i]][n]);
+        }
+      }
+    }
+
+    if (availableFieldNames.length === 0) return res.json({ error: null, data: [] });
+    req.fields = availableFields;
+    req.fieldNames = availableFieldNames;
+    next();
   };
 };
+
+module.exports.fields = fields;
+module.exports.sqlFields = sqlFields;

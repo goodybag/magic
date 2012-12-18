@@ -4,6 +4,9 @@ module.exports = {
 , schemaFiles: [
     'businesses'
   , 'locations'
+  , 'users'
+  , 'groups'
+  , 'userGroups'
   , 'products'
   ]
 , fixtureFile: 'test'
