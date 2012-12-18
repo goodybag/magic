@@ -1,4 +1,5 @@
-var products = require('../schema/definition');
+var db = require('../../../db');
+var products = db.tables.products;
 
 module.exports = {
   "default": [

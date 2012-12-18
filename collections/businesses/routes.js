@@ -7,7 +7,7 @@ var
   db         = require('../../db')
 , utils      = require('../../lib/utils')
 , errors     = require('../../lib/errors')
-, validators = require('./schema/validators')
+, validators = require('./validators')
 
 , logger  = {}
 

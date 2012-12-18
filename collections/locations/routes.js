@@ -7,6 +7,7 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, validators = require('./validators')
 
 , logger  = {}
 
@@ -94,17 +95,21 @@ module.exports.create = function(req, res){
       logger.routes.error(TAGS, error);
       return res.json({ error: error, data: null });
     }
-
-    var query = locations.insert(req.body).toQuery();
-
-    logger.db.debug(TAGS, query.text);
-
-    client.query(query.text+' RETURNING id', query.values, function(error, result){
+    
+    utils.validate(req.body, validators.model, function(error) {
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      var query = locations.insert(req.body).toQuery();
 
-      return res.json({ error: null, data: result.rows[0] });
+      logger.db.debug(TAGS, query.text);
+
+      client.query(query.text+' RETURNING id', query.values, function(error, result){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        logger.db.debug(TAGS, result);
+
+        return res.json({ error: null, data: result.rows[0] });
+      });
     });
   });
 };

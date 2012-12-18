@@ -1,4 +1,5 @@
-var locations = require('../schema/definition');
+var db = require('../../../db');
+var locations = db.tables.locations;
 
 module.exports = {
   "default": [

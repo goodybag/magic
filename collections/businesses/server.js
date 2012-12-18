@@ -5,8 +5,9 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var validators = require('./schema/validators');
+var validators = require('./validators');
 var fields = require('./auth/fields');
+
 
 // Businesses.get
 server.get(

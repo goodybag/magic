@@ -25,9 +25,9 @@ before(function(done) {
 });
 
 // collection resources
-require('../collections/businesses/tests');
-require('../collections/locations/tests');
-require('../collections/products/tests');
+require('./collections/businesses');
+require('./collections/locations');
+require('./collections/products');
 
 after(function() {
   httpServer.close();

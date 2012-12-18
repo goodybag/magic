@@ -22,6 +22,8 @@ define(function(require){
       }
     , cardCode: {
         required: true
+      , validators: { isEmail:true, len:[6,64] }
+      , sanitizers: { trim:true }
       , length: 6
       }
     , street1: {

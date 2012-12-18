@@ -40,9 +40,9 @@ exports.getClient = function(callback){
 };
 
 exports.tables = {
-  businesses : require('../collections/businesses/schema/definition')
-, locations  : require('../collections/locations/schema/definition')
-, products   : require('../collections/products/schema/definition')
+  businesses : require('./schemas/businesses')
+, locations  : require('./schemas/locations')
+, products   : require('./schemas/products')
 };
 
 // Application behavior
