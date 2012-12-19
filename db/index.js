@@ -45,7 +45,21 @@ exports.tables = {
 , users:      require('./schemas/users')
 , groups:     require('./schemas/groups')
 , userGroups: require('./schemas/userGroups')
-, products: require('./schemas/products')
+, products:   require('./schemas/products')
+};
+
+// Application behavior
+// (when run from the command-line, do setup)
+if (require.main === module) {
+  /**
+   * Runs DB setup
+   */
+
+  require('./setup')({ verbose:true }, function(error){
+    if (error) throw error;
+    console.log('complete!');
+    process.exit(0);
+  });
 }
 
 /*
