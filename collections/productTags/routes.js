@@ -1,6 +1,6 @@
 
 /*
- * Photo resources
+ * Product Tags resources
  */
 
 var
@@ -12,7 +12,7 @@ var
 , logger  = {}
 
   // Tables
-, photos  = db.tables.photos
+, productTags  = db.tables.productTags
 , products = db.tables.products
 ;
 
@@ -22,25 +22,25 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
- * List photos
+ * List productTags
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-photos', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of photos', {uid: 'more'});
+  var TAGS = ['list-productTags', req.uuid];
+  logger.routes.debug(TAGS, 'fetching list of productTags', {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(photos, req.fields)
-      .from(photos.join(products).on(products.id.equals(photos.id)));
+    var query = utils.selectAsMap(productTags, req.fields)
+      .from(productTags);
 
     // filters
     var filters = null; // :TEMPORARY:
-    ['businessId', 'productId', 'consumerId'].forEach(function(filterName) {
+    ['businessId', 'productId'].forEach(function(filterName) {
       if (req.param(filterName)) {
-        var filter = photos[filterName].equals(req.param(filterName));
+        var filter = productTags[filterName].equals(req.param(filterName));
         if (!filters) {
           filters = filter;
         } else {
@@ -65,21 +65,22 @@ module.exports.list = function(req, res){
 };
 
 /**
- * Get photo
+ * Get productTag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.get = function(req, res){
-  var TAGS = ['get-photo', req.uuid];
-  logger.routes.debug(TAGS, 'fetching photo', {uid: 'more'});
+  var TAGS = ['get-productTag', req.uuid];
+  logger.routes.debug(TAGS, 'fetching productTag', {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(photos, req.fields)
-      .from(photos.join(products).on(products.id.equals(photos.id)))
-      .where(photos.id.equals(req.param('photoId')))
+    var query = utils.selectAsMap(productTags, req.fields)
+      .from(productTags)
+      .where(productTags.id.equals(req.param('productTagId')))
       .toQuery();
+
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -92,12 +93,12 @@ module.exports.get = function(req, res){
 };
 
 /**
- * Insert photo
+ * Insert productTag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
 module.exports.create = function(req, res){
-  var TAGS = ['create-photo', req.uuid];
+  var TAGS = ['create-productTag', req.uuid];
 
   db.getClient(function(error, client){
     if (error){
@@ -108,7 +109,7 @@ module.exports.create = function(req, res){
     utils.validate(req.body, validators.model, function(error) {
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = photos.insert(req.body).toQuery();
+      var query = productTags.insert(req.body).toQuery();
 
       logger.db.debug(TAGS, query.text);
 
@@ -124,12 +125,12 @@ module.exports.create = function(req, res){
 };
 
 /**
- * Update photo
+ * Update productTag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
 module.exports.update = function(req, res){
-  var TAGS = ['update-photo', req.uuid];
+  var TAGS = ['update-productTag', req.uuid];
 
   db.getClient(function(error, client){
     if (error){
@@ -137,9 +138,9 @@ module.exports.update = function(req, res){
       return res.json({ error: error, data: null });
     }
 
-    var query = photos
+    var query = productTags
       .update(req.body)
-      .where(photos.id.equals(req.param('photoId')))
+      .where(productTags.id.equals(req.param('productTagId')))
       .toQuery();
 
     logger.db.debug(TAGS, query.text);
@@ -155,12 +156,12 @@ module.exports.update = function(req, res){
 };
 
 /**
- * Delete photo
+ * Delete productTag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
 module.exports.del = function(req, res){
-  var TAGS = ['delete-photo', req.uuid];
+  var TAGS = ['delete-productTag', req.uuid];
 
   db.getClient(function(error, client){
     if (error){
@@ -168,9 +169,9 @@ module.exports.del = function(req, res){
       return res.json({ error: error, data: null });
     }
 
-    var query = photos
+    var query = productTags
       .delete()
-      .where(photos.id.equals(req.param('photoId')))
+      .where(productTags.id.equals(req.param('productTagId')))
       .toQuery();
 
     logger.db.debug(TAGS, query.text);
