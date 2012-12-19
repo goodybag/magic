@@ -1,6 +1,6 @@
 module.exports = {
-  mongoConnStr:     "mongodb://localhost/goodybag-test"
-, postgresConnStr:  "postgres://localhost:5432/goodybag-test"
+  mongoConnStr:     "mongodb://localhost/goodybag"
+, postgresConnStr:  "postgres://localhost:5432/goodybag"
 , schemaFiles: [
     'businesses'
   , 'locations'

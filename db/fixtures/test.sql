@@ -17,6 +17,41 @@ INSERT INTO "locations" VALUES ('3', '3', 'Location 3', '123 Foobar St', '#1', '
 COMMIT;
 SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 
+-- USERS
+--   password: "password"
+
+BEGIN;
+INSERT INTO "users" (id, email, password) VALUES ('1', 'admin@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('2', 'sales@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+COMMIT;
+SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
+
+-- GROUPS
+
+BEGIN;
+INSERT INTO "groups" (id, name) VALUES ('1', 'admin');
+INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
+INSERT INTO "groups" (id, name) VALUES ('3', 'tablet');
+INSERT INTO "groups" (id, name) VALUES ('4', 'client');
+INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
+COMMIT;
+SELECT setval('groups_id_seq', (SELECT MAX(id) from "groups")); -- advance the sequence past the IDs just used
+
+-- USER GROUPS
+
+BEGIN;
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('1', '1', '1');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('2', '2', '2');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
+COMMIT;
+SELECT setval('"userGroups_id_seq"', (SELECT MAX(id) from "userGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
+
 -- PRODUCTS
 
 BEGIN;
