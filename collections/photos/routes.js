@@ -35,9 +35,15 @@ module.exports.list = function(req, res){
     var query = utils.selectAsMap(photos, req.fields)
       .from(photos);
 
-    // filter by businessId, if given as a path param
+    // filters
     if (req.param('businessId')) {
       query.where(photos.businessId.equals(req.param('businessId')));
+    }
+    if (req.param('productId')) {
+      query.where(photos.productId.equals(req.param('productId')));
+    }
+    if (req.param('consumerId')) {
+      query.where(photos.consumerId.equals(req.param('consumerId')));
     }
 
     query = query.toQuery();

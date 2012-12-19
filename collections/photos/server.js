@@ -22,6 +22,13 @@ server.get(
 , routes.list
 );
 
+// Photos.list
+server.get(
+  '/v1/products/:productId/photos'
+, middleware.fields(fields)
+, routes.list
+);
+
 // Photos.create
 server.post(
   '/v1/photos'
