@@ -36,14 +36,19 @@ module.exports.list = function(req, res){
       .from(photos);
 
     // filters
-    if (req.param('businessId')) {
-      query.where(photos.businessId.equals(req.param('businessId')));
-    }
-    if (req.param('productId')) {
-      query.where(photos.productId.equals(req.param('productId')));
-    }
-    if (req.param('consumerId')) {
-      query.where(photos.consumerId.equals(req.param('consumerId')));
+    var filters = null; // :TEMPORARY:
+    ['businessId', 'productId', 'consumerId'].forEach(function(filterName) {
+      if (req.param(filterName)) {
+        var filter = photos.businessId.equals(req.param(filterName));
+        if (!filters) {
+          filters = filter;
+        } else {
+          filters = filters.and(filter);
+        }
+      }
+    });
+    if (filters) {
+      query.where(filters);
     }
 
     query = query.toQuery();
