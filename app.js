@@ -28,6 +28,7 @@ app.use(require('./collections/businesses/server'));
 app.use(require('./collections/locations/server'));
 app.use(require('./collections/products/server'));
 app.use(require('./collections/users/server'));
+app.use(require('./collections/photos/server'));
 
 /**
  * REPL
