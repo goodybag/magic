@@ -10,14 +10,14 @@ var fields = require('./auth/fields');
 
 // ProductTags.list
 server.get(
-  '/v1/productTags'
+  '/v1/product-tags'
 , middleware.fields(fields)
 , routes.list
 );
 
 // ProductTags.list
 server.get(
-  '/v1/businesses/:businessId/tags'
+  '/v1/businesses/:businessId/product-tags'
 , middleware.fields(fields)
 , routes.list
 );
@@ -31,42 +31,42 @@ server.get(
 
 // ProductTags.create
 server.post(
-  '/v1/productTags'
+  '/v1/product-tags'
 , middleware.validate(validators.create)
 , routes.create
 );
 
 // ProductTags.get
 server.get(
-  '/v1/productTags/:productTagId'
+  '/v1/product-tags/:productTagId'
 , middleware.fields(fields)
 , routes.get
 );
 
 // ProductTags.update
 server.patch(
-  '/v1/productTags/:productTagId'
+  '/v1/product-tags/:productTagId'
 , middleware.validate(validators.update)
 , routes.update
 );
 
 // ProductTags.update
 server.put(
-  '/v1/productTags/:productTagId'
+  '/v1/product-tags/:productTagId'
 , middleware.validate(validators.update)
 , routes.update
 );
 
 // ProductTags.update
 server.post(
-  '/v1/productTags/:productTagId'
+  '/v1/product-tags/:productTagId'
 , middleware.validate(validators.update)
 , routes.update
 );
 
 // ProductTags.delete
 server.del(
-  '/v1/productTags/:productTagId'
+  '/v1/product-tags/:productTagId'
 , middleware.auth.allow('admin', 'sales')
 , routes.del
 );

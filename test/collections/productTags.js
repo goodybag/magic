@@ -8,10 +8,10 @@ var
 , baseUrl = config.baseUrl
 ;
 
-describe('GET /v1/productTags', function() {
+describe('GET /v1/product-tags', function() {
 
   it('should respond with a productTag listing', function(done) {
-    tu.get('/v1/productTags', function(err, payload, res) {
+    tu.get('/v1/product-tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -28,10 +28,10 @@ describe('GET /v1/productTags', function() {
 });
 
 
-describe('GET /v1/businesses/:id/tags', function() {
+describe('GET /v1/businesses/:id/product-tags', function() {
 
   it('should respond with a productTag listing', function(done) {
-    tu.get('/v1/businesses/1/tags', function(err, payload, res) {
+    tu.get('/v1/businesses/1/product-tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -48,10 +48,10 @@ describe('GET /v1/businesses/:id/tags', function() {
 });
 
 
-describe('GET /v1/productTags/:id', function() {
+describe('GET /v1/product-tags/:id', function() {
 
   it('should respond with a productTag', function(done) {
-    tu.get('/v1/productTags/1', function(err, payload, res) {
+    tu.get('/v1/product-tags/1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -67,11 +67,11 @@ describe('GET /v1/productTags/:id', function() {
 });
 
 
-describe('POST /v1/productTags', function() {
+describe('POST /v1/product-tags', function() {
 
   it('should respond with the id of a new productTag', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/productTags', { businessId:1, productId:1, tag:'foobar' }, function(err, res, payload) {
+      utils.post(baseUrl + '/v1/product-tags', { businessId:1, productId:1, tag:'foobar' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -86,7 +86,7 @@ describe('POST /v1/productTags', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/productTags', { businessId:'foobar' }, function(err, res, payload) {
+      utils.post(baseUrl + '/v1/product-tags', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -103,11 +103,11 @@ describe('POST /v1/productTags', function() {
 });
 
 
-describe('PATCH /v1/productTags/:id', function() {
+describe('PATCH /v1/product-tags/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/productTags/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);
@@ -120,7 +120,7 @@ describe('PATCH /v1/productTags/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/productTags/2', { businessId:'foobar' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -139,10 +139,10 @@ describe('PATCH /v1/productTags/:id', function() {
 });
 
 
-describe('DELETE /v1/productTags/:id', function() {
+describe('DELETE /v1/product-tags/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.del(baseUrl + '/v1/productTags/2', function(err, res, payload) {
+      utils.del(baseUrl + '/v1/product-tags/2', function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);
