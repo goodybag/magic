@@ -15,6 +15,7 @@ app.use(require('../collections/businesses/server'));
 app.use(require('../collections/locations/server'));
 app.use(require('../collections/products/server'));
 app.use(require('../collections/users/server'));
+app.use(require('../collections/photos/server'));
 
 var httpServer;
 
@@ -32,6 +33,7 @@ require('./collections/locations');
 require('./collections/users');
 require('./collections/auth');
 require('./collections/products');
+require('./collections/photos');
 
 after(function() {
   httpServer.close();
