@@ -13,6 +13,7 @@ var
 
   // Tables
 , photos  = db.tables.photos
+, products = db.tables.products
 ;
 
 // Setup loggers
@@ -33,13 +34,13 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(photos, req.fields)
-      .from(photos);
+      .from(photos.join(products).on(products.id.equals(photos.id)));
 
     // filters
     var filters = null; // :TEMPORARY:
     ['businessId', 'productId', 'consumerId'].forEach(function(filterName) {
       if (req.param(filterName)) {
-        var filter = photos.businessId.equals(req.param(filterName));
+        var filter = photos[filterName].equals(req.param(filterName));
         if (!filters) {
           filters = filter;
         } else {
