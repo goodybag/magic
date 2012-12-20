@@ -1,19 +1,31 @@
-
 /**
- * Users Sql definition
+ * Users Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'users'
-, columns: [
-    'id'
-  , 'email'
-  , 'password'
-  , 'singlyAccessToken'
-  , 'singlyId'
-  ]
+define(function(require){
+  var users = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , email: {
+      type: 'text'
+    }
+  , password: {
+      type: 'text'
+    }
+  , singlyAccessToken: {
+      type: 'text'
+    }
+  , signlyId: {
+      type: 'text'
+    }
+  };
+  return users;
 });

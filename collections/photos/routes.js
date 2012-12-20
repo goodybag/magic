@@ -7,7 +7,6 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
-, validators = require('./validators')
 
 , logger  = {}
 
@@ -105,20 +104,19 @@ module.exports.create = function(req, res){
       return res.json({ error: error, data: null });
     }
     
-    utils.validate(req.body, validators.model, function(error) {
+    var error = utils.validate(req.body, db.schemas.photos);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = photos.insert(req.body).toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = photos.insert(req.body).toQuery();
+      logger.db.debug(TAGS, result);
 
-      logger.db.debug(TAGS, query.text);
-
-      client.query(query.text+' RETURNING id', query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

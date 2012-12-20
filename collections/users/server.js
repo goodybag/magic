@@ -5,8 +5,8 @@
 var server     = require('express')();
 var middleware = require('../../middleware');
 var routes     = require('./routes');
-var validators = require('./validators');
-var fields     = require('./auth/fields');
+var schema     = require('../../db').schemas.users;
+var fields     = require('./fields');
 
 // Users.list
 server.get(
@@ -25,14 +25,14 @@ server.get(
 // Users.create
 server.post(
   '/v1/users'
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
 );
 
 // Users.create
 server.post(
   '/v1/users/:id'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
