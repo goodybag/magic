@@ -4,9 +4,9 @@
 
 var server = require('express')();
 var middleware = require('../../middleware');
+var schema = require('../../db').schemas.locations;
 var routes = require('./routes');
-var validators = require('./validators');
-var fields = require('./auth/fields');
+var fields = require('./fields');
 
 // Locations.list
 server.get(
@@ -26,7 +26,7 @@ server.get(
 server.post(
   '/v1/locations'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
 );
 
@@ -41,15 +41,7 @@ server.get(
 server.patch(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
-, routes.update
-);
-
-// Locations.update
-server.put(
-  '/v1/locations/:locationId'
-, middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
@@ -57,7 +49,7 @@ server.put(
 server.post(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 

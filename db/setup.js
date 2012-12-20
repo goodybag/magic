@@ -20,7 +20,7 @@ var
 , verbose  = false
 ;
 
-function getSql(log, file) {
+function loadFile(log, file) {
   return function() {
     if (verbose) { console.log(log); }
     var sql = when.defer();
@@ -33,6 +33,23 @@ function getSql(log, file) {
       }
     });
     return sql.promise;
+  }
+}
+
+function buildSql(log, name) {
+  return function() {
+    if (verbose) { console.log(log); }
+    var sql = [];
+    var schema = require(__dirname + '/schemas/' + name);
+    // assemble the CREATE command from the schema structure
+    for (var field in schema) {
+      var parts = ['"'+field+'"', schema[field].type];
+      if (schema[field].meta) {
+        parts.push(schema[field].meta);
+      }
+      sql.push(parts.join(' '));
+    }
+    return 'CREATE TABLE "'+name+'" ( '+sql.join(', ')+' );';
   }
 }
 
@@ -53,7 +70,7 @@ function loadSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists "' + name + '_id_seq" cascade'),
     query( 'Dropping ' + name,              'drop table if exists "' + name + '" cascade'),
-    getSql('Creating ' + name,              __dirname + '/schemas/' + name + '.sql'),
+    buildSql('Creating ' + name,              name),
     query() // will run what getSql returns
   ]);
 }
@@ -62,7 +79,7 @@ function loadFixture(name) {
   return function() {
     if (!name) { return; }
     return pipeline([
-      getSql('Loading fixture', __dirname+'/fixtures/'+name+'.sql'),
+      loadFile('Loading fixture', __dirname+'/fixtures/'+name+'.sql'),
       query()
     ]);
   }

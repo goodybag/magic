@@ -6,7 +6,6 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
-, schemas = require('./validators')
 
 , logger  = {}
 
@@ -104,18 +103,17 @@ module.exports.create = function(req, res){
     , name:       req.body.name
     };
 
-    utils.validate(category, schemas.model, function(error){
+    var error = utils.validate(category, db.schemas.productCategories);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = productCategories.insert(category).toQuery();
+
+    client.query(query.text + "RETURNING id", query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = productCategories.insert(category).toQuery();
+      logger.db.debug(TAGS, result);
 
-      client.query(query.text + "RETURNING id", query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

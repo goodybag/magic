@@ -39,7 +39,7 @@ exports.getClient = function(callback){
   // callback(null, client);
 };
 
-exports.tables = {
+exports.schemas = {
   businesses:           require('./schemas/businesses')
 , locations:            require('./schemas/locations')
 , users:                require('./schemas/users')
@@ -50,6 +50,22 @@ exports.tables = {
 , photos:               require('./schemas/photos')
 , productTags:          require('./schemas/productTags')
 };
+
+function buildTable(name, schema) {
+  var columns = [];
+  for (var field in schema) {
+    columns.push(field);
+  }
+  return sql.define({
+    name: name
+  , columns: columns
+  });
+}
+
+exports.tables = {};
+for (var name in exports.schemas) {
+  exports.tables[name] = buildTable(name, exports.schemas[name])
+}
 
 // Application behavior
 // (when run from the command-line, do setup)

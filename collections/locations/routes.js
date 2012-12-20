@@ -7,12 +7,12 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
-, validators = require('./validators')
 
 , logger  = {}
 
   // Tables
 , locations  = db.tables.locations
+, schemas    = db.schemas
 ;
 
 // Setup loggers
@@ -94,20 +94,19 @@ module.exports.create = function(req, res){
       return res.json({ error: error, data: null });
     }
     
-    utils.validate(req.body, validators.model, function(error) {
+    var error = utils.validate(req.body, schemas.locations);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = locations.insert(req.body).toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = locations.insert(req.body).toQuery();
+      logger.db.debug(TAGS, result);
 
-      logger.db.debug(TAGS, query.text);
-
-      client.query(query.text+' RETURNING id', query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

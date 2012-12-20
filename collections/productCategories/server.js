@@ -2,13 +2,15 @@
  * Product Categories server
  */
 
-var server = require('express')();
-var middleware = require('../../middleware');
-var routes = require('./routes');
-var validators = require('./validators');
-var fields = require('./auth/fields');
-var auth = middleware.auth;
-var validate = middleware.validate;
+var
+  server      = require('express')()
+, middleware  = require('../../middleware')
+, routes      = require('./routes')
+, schema      = require('../../db').schemas.productCategories
+, fields      = require('./fields')
+, auth        = middleware.auth
+, validate    = middleware.validate
+;
 
 // ProductCategories.list
 server.get(
@@ -22,7 +24,7 @@ server.post(
   '/v1/productCategories'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.create)
+, validate(schema)
 , routes.create
 );
 
@@ -38,7 +40,7 @@ server.patch(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 
@@ -47,7 +49,7 @@ server.put(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 
@@ -56,7 +58,7 @@ server.post(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 
@@ -80,7 +82,7 @@ server.post(
   '/v1/businesses/:businessId/productCategories'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.create)
+, validate(schema)
 , routes.create
 );
 
@@ -96,7 +98,7 @@ server.patch(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 
@@ -105,7 +107,7 @@ server.put(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 
@@ -114,7 +116,7 @@ server.post(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, validate(validators.update)
+, validate(schema)
 , routes.update
 );
 

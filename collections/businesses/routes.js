@@ -6,13 +6,13 @@ var
   db         = require('../../db')
 , utils      = require('../../lib/utils')
 , errors     = require('../../lib/errors')
-, validators = require('./validators')
 
 , logger  = {}
 
   // Tables
 , businesses = db.tables.businesses
 , locations  = db.tables.locations
+, schemas    = db.schemas
 ;
 
 // Setup loggers
@@ -222,30 +222,29 @@ module.exports.create = function(req, res){
     if (!req.body.cardCode) req.body.cardCode = "000000";
     if (!req.body.isEnabled) req.body.isEnabled = true;
 
-    utils.validate(req.body, validators.model, function(error){
+    var error = utils.validate(req.body, schemas.businesses);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = businesses.insert({
+      'name'      :    req.body.name
+    , 'url'       :    req.body.url
+    , 'street1'   :    req.body.street1
+    , 'street2'   :    req.body.street2
+    , 'city'      :    req.body.city
+    , 'state'     :    req.body.state
+    , 'zip'       :    req.body.zip
+    , 'isEnabled' :    req.body.isEnabled
+    , 'cardCode'  :    req.body.cardCode
+    }).toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    client.query(query.text + " RETURNING id", query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = businesses.insert({
-        'name'      :    req.body.name
-      , 'url'       :    req.body.url
-      , 'street1'   :    req.body.street1
-      , 'street2'   :    req.body.street2
-      , 'city'      :    req.body.city
-      , 'state'     :    req.body.state
-      , 'zip'       :    req.body.zip
-      , 'isEnabled' :    req.body.isEnabled
-      , 'cardCode'  :    req.body.cardCode
-      }).toQuery();
+      logger.db.debug(TAGS, result);
 
-      logger.db.debug(TAGS, query.text);
-
-      client.query(query.text + " RETURNING id", query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };
