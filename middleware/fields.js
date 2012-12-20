@@ -8,7 +8,7 @@ module.exports = function(fields) {
     ;
 
     // get user groups
-    if (req.session && req.session.user) groups = req.session.user.groups;
+    if (req.session && req.session.user) groups = groups.concat(req.session.user.groups);
 
     // merge the fields available based on groups
     for (var i = groups.length - 1; i >= 0; i--){

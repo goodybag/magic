@@ -60,3 +60,32 @@ INSERT INTO "products" VALUES ('2', '2', 'Product 2', 'A product', 55.55, true, 
 INSERT INTO "products" VALUES ('3', '3', 'Product 3', 'A product', 55.55, true, false, true);
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
+
+-- PRODUCT CATEGORIES
+
+BEGIN;
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('1', '1', '1', 'Category 1', true);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('2', '1', '2', 'Category 2', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('3', '2', '1', 'Category 1', true);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('4', '3', '1', 'DUMB CATEGORY WILL BE DELETED', true);
+COMMIT;
+SELECT setval('"productCategories_id_seq"', (SELECT MAX(id) from "productCategories")); -- advance the sequence past the IDs just used
+
+-- PHOTOS
+
+BEGIN;
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('1', '1', '1', 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('2', '1', null, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
+COMMIT;
+SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used
+
+-- PRODUCT TAGS
+
+BEGIN;
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('1', '1', '1', 'food');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('2', '1', '1', 'apparel');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('3', '2', '2', 'food');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('4', '3', '3', 'food');
+COMMIT;
+SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used

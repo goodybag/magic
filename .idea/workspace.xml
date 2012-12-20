@@ -2,76 +2,42 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b25b0f59-d034-44d9-b1bb-7144eb751a44" name="Default" comment="Merge branch 'master' into usersapi&#10;&#10;Conflicts:&#10;&#9;middleware/fields.js&#10;">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/auth/routes.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/auth/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/businesses/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/businesses/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/businesses/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/businesses/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/locations/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/locations/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/locations/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/locations/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/products/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/products/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/products/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/products/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/routes.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/users/validators.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/groups.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/groups.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/userGroups.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/userGroups.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/users.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/users.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/middleware/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/auth.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/businesses.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/users.js" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/db/setup/app.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/routes/index.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/routes/users.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/routes/v1/index.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/schemas/db/consumer.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/schemas/db/index.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/schemas/index.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/schemas/routes/consumer.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/schemas/routes/index.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sql/create.sql" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/routes/businesses.js" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/db/setup/config.js" afterPath="$PROJECT_DIR$/db/config.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/db/setup/import.js" afterPath="$PROJECT_DIR$/db/import.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/db/setup/index.js" afterPath="$PROJECT_DIR$/db/setup.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/db/setup/package.json" afterPath="$PROJECT_DIR$/db/package.json" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/middleware/routes-validator.js" afterPath="$PROJECT_DIR$/middleware/validate.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/routes/v1/businesses.js" afterPath="$PROJECT_DIR$/collections/businesses/routes.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/routes/v1/locations.js" afterPath="$PROJECT_DIR$/collections/locations/routes.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/routes/v1/products.js" afterPath="$PROJECT_DIR$/collections/products/routes.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/schemas/routes/businesses.js" afterPath="$PROJECT_DIR$/collections/businesses/validators.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/schemas/routes/locations.js" afterPath="$PROJECT_DIR$/collections/locations/validators.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/schemas/routes/products.js" afterPath="$PROJECT_DIR$/collections/products/validators.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/routes/locations.js" afterPath="$PROJECT_DIR$/test/collections/locations.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/routes/products.js" afterPath="$PROJECT_DIR$/test/collections/products.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/routes/test-utils.js" afterPath="$PROJECT_DIR$/lib/test-utils.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/auth/fields.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/auth/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/routes.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/server.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/validators.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/auth/fields.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/auth/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/routes.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/server.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/validators.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/auth/fields.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/auth/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/index.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/routes.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/server.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/validators.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/photos.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/photos.sql" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productCategories.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productCategories.sql" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productTags.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productTags.sql" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/photos.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/productCategories.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/productTags.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.js" afterPath="$PROJECT_DIR$/config.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/collections/index.js" afterPath="$PROJECT_DIR$/collections/index.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/config.js" afterPath="$PROJECT_DIR$/db/config.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/fixtures/test.sql" afterPath="$PROJECT_DIR$/db/fixtures/test.sql" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/index.js" afterPath="$PROJECT_DIR$/db/index.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/errors.js" afterPath="$PROJECT_DIR$/lib/errors.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/router.js" afterPath="$PROJECT_DIR$/lib/router.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/server.js" afterPath="$PROJECT_DIR$/lib/server.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/utils.js" afterPath="$PROJECT_DIR$/lib/utils.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/middleware/auth.js" afterPath="$PROJECT_DIR$/middleware/auth.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/test-utils.js" afterPath="$PROJECT_DIR$/lib/test-utils.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/middleware/fields.js" afterPath="$PROJECT_DIR$/middleware/fields.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/db-config.js" afterPath="$PROJECT_DIR$/test/db-config.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/test.js" afterPath="$PROJECT_DIR$/test/test.js" />
     </list>
@@ -105,7 +71,7 @@
       <file leaf-file-name=".gitignore" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="5" selection-start="137" selection-end="137" vertical-scroll-proportion="0.31764707">
+            <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.6127886">
               <folding />
             </state>
           </provider>
@@ -202,6 +168,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -210,22 +177,45 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="collections" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="recentsLimit" value="5" />
     <property name="options.lastSelected" value="preferences.sourceCode.JavaScript" />
-    <property name="restartRequiresConfirmation" value="true" />
+    <property name="recentsLimit" value="5" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/app.js" />
+    <property name="restartRequiresConfirmation" value="true" />
     <property name="FullScreen" value="false" />
-    <property name="GoToClass.includeJavaFiles" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="GoToClass.includeJavaFiles" value="false" />
   </component>
   <component name="RunManager" selected="Node.js.app.js">
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
@@ -305,17 +295,18 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1920" height="998" extended-state="0" />
-    <editor active="true" />
+    <frame x="0" y="22" width="1920" height="998" extended-state="6" />
+    <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3287827" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34015927" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14918292" sideWeight="0.6704675" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14918292" sideWeight="0.67121726" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39578715" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32705098" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -324,7 +315,6 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -391,6 +381,27 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="5" selection-start="127" selection-end="127" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="23" selection-start="837" selection-end="837" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/middleware/fields.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="2" selection-start="0" selection-end="1105" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
         <state line="18" column="0" selection-start="132" selection-end="132" vertical-scroll-proportion="0.0">
           <folding />
         </state>
@@ -419,7 +430,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="5" selection-start="137" selection-end="137" vertical-scroll-proportion="0.31764707">
+        <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.6127886">
           <folding />
         </state>
       </provider>
