@@ -24,19 +24,19 @@ exports.sql = sql;
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
 
-pg.connect(config.postgresConnStr, function(error, _client){
-  if (error) throw error;
+// pg.connect(config.postgresConnStr, function(error, _client){
+//   if (error) throw error;
 
-  client = _client;
-});
+//   client = _client;
+// });
 
 exports.getClient = function(callback){
-  /*
-  pg.connect(config.postgres.connectionString, function(err, client){
+
+  pg.connect(config.postgresConnStr, function(err, client){
     callback(err, client);
   });
-*/
-  callback(null, client);
+
+  // callback(null, client);
 };
 
 exports.tables = {
