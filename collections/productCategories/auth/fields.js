@@ -1,12 +1,12 @@
 var db = require('../../../db');
-var products = db.tables.productCategories;
+var productCategories = db.tables.productCategories;
 
 module.exports = {
-  default: [
-    'id'
-  , 'name'
-  , 'businessId'
-  , 'isFeatured'
-  , 'order'
-  ]
+  default: {
+    'id':         productCategories.id
+  , 'name':       productCategories.name
+  , 'businessId': productCategories.businessId
+  , 'isFeatured': productCategories.isFeatured
+  , 'order':      productCategories.order
+  }
 };

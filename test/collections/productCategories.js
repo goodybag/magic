@@ -2,7 +2,7 @@ var
   assert  = require('better-assert')
 , sinon   = require('sinon')
 , utils   = require('./../../lib/utils')
-, tu      = require('./test-utils')
+, tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
 
 , baseUrl = config.baseUrl
