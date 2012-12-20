@@ -141,7 +141,7 @@ describe('POST /v1/businesses/:id', function(){
   });
 });
 
-describe('PUT /v1/businesses/:id', function(){
+describe('PATCH /v1/businesses/:id', function(){
   it('should update a business\'s name and url', function(done){
     var business = {
       name: "Poophead McGees"
@@ -149,7 +149,7 @@ describe('PUT /v1/businesses/:id', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      utils.put(baseUrl + '/v1/businesses/' + 1, business, function(error, results){
+      utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(!results.error);
         tu.logout(function(){
@@ -165,7 +165,7 @@ describe('PUT /v1/businesses/:id', function(){
     , url: 123
     };
     tu.loginAsSales(function(error, user){
-      utils.put(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+      utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(results.error);
         tu.logout(function(){

@@ -1,22 +1,42 @@
-
 /**
- * Products
+ * Products Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'products'
-, columns: [
-    'id'
-  , 'businessId'
-  , 'name'
-  , 'description'
-  , 'price'
-  , 'isVerified'
-  , 'isArchived'
-  , 'isEnabled'
-  ]
+define(function(require){
+  var products = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses(id) on delete cascade'
+    }
+  , name: {
+      type: 'text'
+    , sanitizers: { trim: true }
+    }
+  , description: {
+      type: 'text'
+    }
+  , price: {
+      type: 'real'
+    }
+  , isVerified: {
+      type: 'boolean'
+    }
+  , isArchived: {
+      type: 'boolean'
+    }
+  , isEnabled: {
+      type: 'boolean'
+    }
+  };
+  return products;
 });

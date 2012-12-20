@@ -19,7 +19,7 @@
     "randomstring": "1.0.x",
     "sql": "0.1.x",
     "pg": "0.9.x",
-    "amanda": "0.4.2",
+    "validator": "0.4.19",
     "mocha": "1.7.4",
     "better-assert": "0.1.0",
     "sinon": "1.5.2",

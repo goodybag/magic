@@ -4,10 +4,9 @@
 
 var server     = require('express')();
 var middleware = require('../../middleware');
+var schema     = require('../../db').schemas.businesses;
+var fields     = require('./fields');
 var routes     = require('./routes');
-var validators = require('./validators');
-var fields     = require('./auth/fields');
-
 
 // Businesses.get
 server.get(
@@ -34,23 +33,15 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
-);
-
-// Businesses.update
-server.put(
-  '/v1/businesses/:id'
-, middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
-, routes.update
 );
 
 // Businesses.update
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
@@ -58,7 +49,7 @@ server.patch(
 server.post(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
