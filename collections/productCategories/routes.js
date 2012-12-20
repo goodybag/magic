@@ -97,7 +97,7 @@ module.exports.create = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var category = {
-      businessId: req.body.businessId
+      businessId: req.body.businessId || req.params.businessId
     , order     : req.body.order      || 0
     , isFeatured: req.body.isFeatured || false
     , name:       req.body.name

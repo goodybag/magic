@@ -31,11 +31,11 @@ pg.connect(config.postgresConnStr, function(error, _client){
 });
 
 exports.getClient = function(callback){
-  /*
-  pg.connect(config.postgres.connectionString, function(err, client){
-    callback(err, client);
-  });
-*/
+
+  // pg.connect(config.postgresConnStr, function(err, client){
+  //   callback(err, client);
+  // });
+
   callback(null, client);
 };
 
