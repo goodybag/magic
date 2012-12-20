@@ -1,24 +1,50 @@
-
 /**
- * Photos
+ * Photos Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'photos'
-, columns: [
-    'id'
-  , 'businessId'
-  , 'productId'
-  , 'consumerId'
-  , 'url'
-  , 'notes'
-  , 'lat'
-  , 'lon'
-  , 'isEnabled'
-  , 'createdAt'
-  ]
+define(function(require){
+  var photos = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses(id) on delete cascade'
+    }
+  , productId: {
+      type: 'int'
+    , meta: 'references products(id) on delete cascade'
+    }
+  , consumerId: {
+      type: 'int'
+    // :TODO: , meta: 'references businesses(id) on delete cascade'
+    }
+  , url: {
+      type: 'text'
+    , validators: { isUrl: true }
+    }
+  , notes: {
+      type: 'text'
+    }
+  , lat: {
+      type: 'int'
+    }
+  , lon: {
+      type: 'int'
+    }
+  , isEnabled: {
+      type: 'boolean'
+    }
+  , createdAt: {
+      type: 'timestamp'
+    }
+  };
+  return photos;
 });

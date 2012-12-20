@@ -97,7 +97,6 @@ describe('POST /v1/locations', function() {
         assert(res.statusCode == 200);
 
         assert(payload.error);
-        assert(payload.error.length > 0);
         tu.logout(function(){
           done();
         });
@@ -132,9 +131,6 @@ describe('PATCH /v1/locations/:id', function() {
         assert(res.statusCode == 200);
 
         assert(payload.error);
-        assert(payload.error.length === 1);
-        assert(payload.error[0].property == 'businessId');
-        assert(payload.error[0].attributeName == 'pattern');
         tu.logout(function(){
           done();
         });

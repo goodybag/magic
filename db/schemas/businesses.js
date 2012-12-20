@@ -1,27 +1,56 @@
-
 /**
- * Module dependencies
+ * Businesses Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'businesses'
-, columns: [
-    'id'
-  , 'name'
-  , 'url'
-  , 'street1'
-  , 'street2'
-  , 'city'
-  , 'state'
-  , 'zip'
-  , 'cardCode'
-  , 'isEnabled'
-  , 'createdAt'
-  , 'updatedAt'
-  , 'locations' // Number of locations
-  ]
+define(function(require){
+  var businesses = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , name: {
+      type: 'text'
+    , sanitizers: { trim: true }
+    }
+  , url: {
+      type: 'text'
+    , validators: { isUrl: true }
+    }
+  , cardCode: {
+      type: 'text'
+    }
+  , street1: {
+      type: 'text'
+    }
+  , street2: {
+      type: 'text'
+    }
+  , city: {
+      type: 'text'
+    }
+  , state: {
+      type: 'text'
+    , validators: { len: 2 }
+    }
+  , zip: {
+      type: 'int'
+    , validators: { len: 5 }
+    }
+  , isEnabled: {
+      type: 'boolean'
+    }
+  , createdAt: {
+      type: 'timestamp'
+    }
+  , updatedAt: {
+      type: 'timestamp'
+    }
+  };
+  return businesses;
 });

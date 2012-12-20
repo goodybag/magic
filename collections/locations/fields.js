@@ -1,4 +1,4 @@
-var db = require('../../../db');
+var db = require('../../db');
 var locations = db.tables.locations;
 
 module.exports = {
