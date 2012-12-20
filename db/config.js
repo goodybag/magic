@@ -8,6 +8,7 @@ module.exports = {
   , 'groups'
   , 'userGroups'
   , 'products'
+  , 'productCategories'
   , 'photos'
   ]
 , fixtureFile: 'test'
