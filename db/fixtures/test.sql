@@ -69,3 +69,13 @@ INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('
 INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
 COMMIT;
 SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used
+
+-- PRODUCT TAGS
+
+BEGIN;
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('1', '1', '1', 'food');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('2', '1', '1', 'apparel');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('3', '2', '2', 'food');
+INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('4', '3', '3', 'food');
+COMMIT;
+SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used
