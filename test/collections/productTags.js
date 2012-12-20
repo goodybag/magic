@@ -8,10 +8,10 @@ var
 , baseUrl = config.baseUrl
 ;
 
-describe('GET /v1/photos', function() {
+describe('GET /v1/product-tags', function() {
 
-  it('should respond with a photo listing', function(done) {
-    tu.get('/v1/photos', function(err, payload, res) {
+  it('should respond with a productTag listing', function(done) {
+    tu.get('/v1/product-tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -19,7 +19,7 @@ describe('GET /v1/photos', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length > 0);
+      assert(payload.data.length > 1);
       assert(payload.data[0].id == 1);
       done();
     });
@@ -28,10 +28,10 @@ describe('GET /v1/photos', function() {
 });
 
 
-describe('GET /v1/businesses/:id/photos', function() {
+describe('GET /v1/businesses/:id/product-tags', function() {
 
-  it('should respond with a photo listing', function(done) {
-    tu.get('/v1/businesses/1/photos', function(err, payload, res) {
+  it('should respond with a productTag listing', function(done) {
+    tu.get('/v1/businesses/1/product-tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -39,7 +39,7 @@ describe('GET /v1/businesses/:id/photos', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 1);
+      assert(payload.data.length == 2);
       assert(payload.data[0].id == 1);
       done();
     });
@@ -48,10 +48,10 @@ describe('GET /v1/businesses/:id/photos', function() {
 });
 
 
-describe('GET /v1/photos/:id', function() {
+describe('GET /v1/product-tags/:id', function() {
 
-  it('should respond with a photo', function(done) {
-    tu.get('/v1/photos/1', function(err, payload, res) {
+  it('should respond with a productTag', function(done) {
+    tu.get('/v1/product-tags/1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -67,11 +67,11 @@ describe('GET /v1/photos/:id', function() {
 });
 
 
-describe('POST /v1/photos', function() {
+describe('POST /v1/product-tags', function() {
 
-  it('should respond with the id of a new photo', function(done) {
+  it('should respond with the id of a new productTag', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/photos', { businessId:2, url:'http://placekitten.com/400/300' }, function(err, res, payload) {
+      utils.post(baseUrl + '/v1/product-tags', { businessId:1, productId:1, tag:'foobar' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -86,7 +86,7 @@ describe('POST /v1/photos', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/photos', { businessId:'foobar' }, function(err, res, payload) {
+      utils.post(baseUrl + '/v1/product-tags', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -103,11 +103,11 @@ describe('POST /v1/photos', function() {
 });
 
 
-describe('PATCH /v1/photos/:id', function() {
+describe('PATCH /v1/product-tags/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/photos/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);
@@ -120,7 +120,7 @@ describe('PATCH /v1/photos/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/photos/2', { businessId:'foobar' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -139,10 +139,10 @@ describe('PATCH /v1/photos/:id', function() {
 });
 
 
-describe('DELETE /v1/photos/:id', function() {
+describe('DELETE /v1/product-tags/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.del(baseUrl + '/v1/photos/2', function(err, res, payload) {
+      utils.del(baseUrl + '/v1/product-tags/2', function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);

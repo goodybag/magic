@@ -47,6 +47,7 @@ exports.tables = {
 , userGroups: require('./schemas/userGroups')
 , products:   require('./schemas/products')
 , photos:     require('./schemas/photos')
+, productTags:require('./schemas/productTags')
 };
 
 // Application behavior
