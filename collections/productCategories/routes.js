@@ -31,7 +31,7 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = productCategories.select.apply(
+    var query = utils.selectAsMap(
       productCategories
     , req.fields
     ).from(
@@ -62,7 +62,7 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = productCategories.select.apply(
+    var query = utils.selectAsMap(
       productCategories
     , req.fields
     ).from(
@@ -74,8 +74,6 @@ module.exports.list = function(req, res){
     }
 
     query = query.toQuery();
-
-return res.send(query.text);
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -106,7 +104,7 @@ module.exports.create = function(req, res){
     , name:       req.body.name
     };
 
-    utils.validate(category, schemas.productCategories.model, function(error){
+    utils.validate(category, schemas.model, function(error){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       var query = productCategories.insert(category).toQuery();

@@ -12,7 +12,6 @@ describe('GET /v1/productCategories', function() {
   it('should respond with a productCategory listing', function(done) {
     utils.get(baseUrl + '/v1/productCategories', function(error, response, results) {
       assert(!error);
-      console.log(results.error);
       assert(!results.error);
       assert(results.data.length > 0);
       // Check to make sure the correct fields exist
