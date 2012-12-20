@@ -2,7 +2,7 @@ var
   assert  = require('better-assert')
 , sinon   = require('sinon')
 , utils   = require('./../../lib/utils')
-, tu      = require('./test-utils')
+, tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
 
 , baseUrl = config.baseUrl
@@ -12,6 +12,7 @@ describe('GET /v1/productCategories', function() {
   it('should respond with a productCategory listing', function(done) {
     utils.get(baseUrl + '/v1/productCategories', function(error, response, results) {
       assert(!error);
+      console.log(results.error);
       assert(!results.error);
       assert(results.data.length > 0);
       // Check to make sure the correct fields exist
