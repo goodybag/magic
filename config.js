@@ -48,14 +48,15 @@ var config = {
 , staging: {
     postgresConnStr: process.env['DATABASE_URL']
   }
+
 , production: {
 
   }
 };
 
 
-var mode = process.env['GB_ENV'] || 'dev';
-if (mode == null || !config.hasOwnProperty(mode)) mode = 'dev';
+var GB_ENV = process.env['GB_ENV'] = process.env['GB_ENV'] || 'dev';
+if (GB_ENV == null || !config.hasOwnProperty(GB_ENV)) GB_ENV = 'dev';
 
-module.exports = _.extend(config.defaults, config[mode]);
-console.log('Loading ' + mode + ' config');
+module.exports = _.extend(config.defaults, config[GB_ENV]);
+console.log('Loading ' + GB_ENV + ' config');
