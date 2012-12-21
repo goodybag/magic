@@ -15,10 +15,12 @@ server.post(
 , routes.authenticate
 );
 
+/*
 server.post(
   '/v1/oauth-session'
 , routes.oauthAuthenticate
 );
+*/
 
 server.del(
   '/v1/session'
@@ -36,3 +38,4 @@ server.get(
 );
 
 module.exports = server;
+
