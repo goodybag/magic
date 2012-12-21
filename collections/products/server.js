@@ -11,14 +11,14 @@ var fields = require('./fields');
 // Products.list
 server.get(
   '/v1/products'
-, middleware.fields(fields)
+, middleware.fields(fields.products)
 , routes.list
 );
 
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
-, middleware.fields(fields)
+, middleware.fields(fields.products)
 , routes.list
 );
 
@@ -32,7 +32,7 @@ server.post(
 // Products.get
 server.get(
   '/v1/products/:productId'
-, middleware.fields(fields)
+, middleware.fields(fields.product)
 , routes.get
 );
 
@@ -54,6 +54,25 @@ server.post(
 server.del(
   '/v1/products/:productId'
 , routes.del
+);
+
+// Products.listCategories
+server.get(
+  '/v1/products/:productId/categories'
+, middleware.fields(fields.productCategory)
+, routes.listCategories
+);
+
+// Products.addCategory
+server.post(
+  '/v1/products/:productId/categories'
+, routes.addCategory
+);
+
+// Products.delCategory
+server.del(
+  '/v1/products/:productId/categories/:categoryId'
+, routes.delCategory
 );
 
 module.exports = server;
