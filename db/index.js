@@ -40,15 +40,16 @@ exports.getClient = function(callback){
 };
 
 exports.schemas = {
-  businesses:           require('./schemas/businesses')
-, locations:            require('./schemas/locations')
-, users:                require('./schemas/users')
-, groups:               require('./schemas/groups')
-, userGroups:           require('./schemas/userGroups')
-, products:             require('./schemas/products')
-, productCategories:    require('./schemas/productCategories')
-, photos:               require('./schemas/photos')
-, productTags:          require('./schemas/productTags')
+  businesses:                require('./schemas/businesses')
+, locations:                 require('./schemas/locations')
+, users:                     require('./schemas/users')
+, groups:                    require('./schemas/groups')
+, userGroups:                require('./schemas/userGroups')
+, products:                  require('./schemas/products')
+, productCategories:         require('./schemas/productCategories')
+, productsProductCategories: require('./schemas/productsProductCategories')
+, photos:                    require('./schemas/photos')
+, productTags:               require('./schemas/productTags')
 };
 
 function buildTable(name, schema) {

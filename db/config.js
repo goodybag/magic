@@ -9,6 +9,7 @@ module.exports = {
   , 'userGroups'
   , 'products'
   , 'productCategories'
+  , 'productsProductCategories'
   , 'photos'
   , 'productTags'
   ]
