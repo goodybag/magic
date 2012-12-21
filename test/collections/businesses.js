@@ -14,6 +14,8 @@ describe('GET /v1/businesses', function() {
       assert(!err);
       assert(!payload.error);
       assert(payload.data.length > 0);
+      assert(payload.data[0].id);
+      assert(payload.data[0].name.length > 0);
       done();
     });
   });

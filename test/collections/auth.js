@@ -62,7 +62,7 @@ describe('GET v1/oauth', function(){
       assert(!error);
       assert(!results.error);
       results = JSON.parse(results);
-     assert(results.data.toString().indexOf("service=facebook") !== -1)
+      assert(results.data.toString().indexOf("service=facebook") !== -1)
       done();
     });
   });
@@ -88,6 +88,12 @@ describe('GET v1/callback', function(){
 //      c(null, "Bar");
 //    });
 //
+//    var url = callbackUrl + "?code=ohaidosautrahir90347";
+//    tu.get(url,function(error, results){
+//      assert(!error);
+//      results = JSON.parse(results);
+//      assert(results.data.id >= 0);
+//    })
 //  });
 })
 
