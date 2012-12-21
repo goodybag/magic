@@ -60,7 +60,7 @@ module.exports.singlyCallback =  function(req, res){
         function(err, profiles){
 
           // check for singlyId existence
-          var singlyIdQuery = users.select(users.singlyId).from(users).where(users.singlyId.equals(profiles.body.id)).toQuery();
+          var singlyIdQuery = users.select(users.id).from(users).where(users.singlyId.equals(profiles.body.id)).toQuery();
 
           client.query(singlyIdQuery.text, singlyIdQuery.values, function(error,result){
 
