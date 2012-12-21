@@ -2,44 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b25b0f59-d034-44d9-b1bb-7144eb751a44" name="Default" comment="Merge branch 'master' into usersapi&#10;&#10;Conflicts:&#10;&#9;middleware/fields.js&#10;">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/routes.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/photos/validators.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/routes.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productCategories/validators.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/auth/fields.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/auth/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/index.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/routes.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/server.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/collections/productTags/validators.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/photos.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/photos.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productCategories.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productCategories.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productTags.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/schemas/productTags.sql" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/photos.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/productCategories.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/collections/productTags.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/collections/index.js" afterPath="$PROJECT_DIR$/collections/index.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/config.js" afterPath="$PROJECT_DIR$/db/config.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/fixtures/test.sql" afterPath="$PROJECT_DIR$/db/fixtures/test.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/index.js" afterPath="$PROJECT_DIR$/db/index.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/test-utils.js" afterPath="$PROJECT_DIR$/lib/test-utils.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/middleware/fields.js" afterPath="$PROJECT_DIR$/middleware/fields.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/db-config.js" afterPath="$PROJECT_DIR$/test/db-config.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/test.js" afterPath="$PROJECT_DIR$/test/test.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/collections/auth/routes.js" afterPath="$PROJECT_DIR$/collections/auth/routes.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/collections/auth/server.js" afterPath="$PROJECT_DIR$/collections/auth/server.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.js" afterPath="$PROJECT_DIR$/config.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/errors.js" afterPath="$PROJECT_DIR$/lib/errors.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
     </list>
     <ignored path="magic.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -68,10 +36,55 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name=".gitignore" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name=".gitignore" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.6127886">
+            <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="package.json" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="26" column="21" selection-start="600" selection-end="600" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="config.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/config.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="55" column="41" selection-start="1336" selection-end="1336" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="errors.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/errors.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="77" column="2" selection-start="1938" selection-end="1938" vertical-scroll-proportion="0.8951613">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="server.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/collections/auth/server.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="35" column="2" selection-start="429" selection-end="429" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="routes.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/collections/auth/routes.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="99" column="13" selection-start="3321" selection-end="3321" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -80,7 +93,7 @@
       <file leaf-file-name="utils.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/utils.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="23" selection-start="837" selection-end="837" vertical-scroll-proportion="0.0">
+            <state line="47" column="23" selection-start="827" selection-end="827" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -99,11 +112,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/sql/create.sql" />
-        <option value="$PROJECT_DIR$/db/schemas/businesses.js" />
-        <option value="$PROJECT_DIR$/db/schemas/usergroup.js" />
-        <option value="$PROJECT_DIR$/db/schemas/users.js" />
-        <option value="$PROJECT_DIR$/schemas/db/index.js" />
         <option value="$PROJECT_DIR$/schemas/routes/index.js" />
         <option value="$PROJECT_DIR$/test/routes/users.js" />
         <option value="$PROJECT_DIR$/schemas/db/consumer.js" />
@@ -115,6 +123,11 @@
         <option value="$PROJECT_DIR$/schemas/routes/locations.js" />
         <option value="$PROJECT_DIR$/test/routes/businesses.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/config.js" />
+        <option value="$PROJECT_DIR$/collections/auth/routes.js" />
+        <option value="$PROJECT_DIR$/collections/auth/server.js" />
+        <option value="$PROJECT_DIR$/lib/errors.js" />
       </list>
     </option>
   </component>
@@ -122,9 +135,9 @@
     <option name="WHITESPACES" value="true" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="22" />
+    <option name="x" value="1920" />
     <option name="width" value="1920" />
-    <option name="height" value="998" />
+    <option name="height" value="1080" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -168,7 +181,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -197,27 +209,60 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="collections" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="magic" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="collections" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="auth" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="preferences.sourceCode.JavaScript" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/app.js" />
+    <property name="options.lastSelected" value="preferences.sourceCode.JavaScript" />
     <property name="restartRequiresConfirmation" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/node_modules/mocha/bin/_mocha" />
     <property name="FullScreen" value="false" />
-    <property name="options.searchVisible" value="true" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="GoToClass.includeJavaFiles" value="false" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
-  <component name="RunManager" selected="Node.js.app.js">
+  <component name="RunManager" selected="Node.js.Mocha">
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
       <setting name="configLocationType" value="CONFIG_FILE" />
       <setting name="settingsFile" value="" />
@@ -235,16 +280,22 @@
       <ConfigurationWrapper RunnerId="NodeJS.run" />
       <method />
     </configuration>
-    <configuration default="false" name="app.js" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="app.js" working-dir="$PROJECT_DIR$" coffeescript-run="false">
+    <configuration default="false" name="app.js" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="app.js" working-dir="$PROJECT_DIR$">
       <RunnerSettings RunnerId="NodeJS.debug" />
       <RunnerSettings RunnerId="NodeJS.run" />
       <ConfigurationWrapper RunnerId="NodeJS.debug" />
       <ConfigurationWrapper RunnerId="NodeJS.run" />
       <method />
     </configuration>
-    <list size="2">
+    <configuration default="false" name="Mocha" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="node_modules/mocha/bin/_mocha" working-dir="$PROJECT_DIR$">
+      <RunnerSettings RunnerId="NodeJS.run" />
+      <ConfigurationWrapper RunnerId="NodeJS.run" />
+      <method />
+    </configuration>
+    <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Node.js.db-app.js" />
       <item index="1" class="java.lang.String" itemvalue="Node.js.app.js" />
+      <item index="2" class="java.lang.String" itemvalue="Node.js.Mocha" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -295,17 +346,17 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1920" height="998" extended-state="6" />
-    <editor active="false" />
+    <frame x="1920" y="0" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3287827" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32778355" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34015927" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14918292" sideWeight="0.67121726" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14918292" sideWeight="0.67325705" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39578715" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32705098" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32674298" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -372,6 +423,20 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="23" selection-start="827" selection-end="827" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/middleware/fields.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="36" column="2" selection-start="0" selection-end="1105" vertical-scroll-proportion="0.0">
@@ -416,7 +481,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/utils.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="23" selection-start="837" selection-end="837" vertical-scroll-proportion="0.0">
+        <state line="47" column="23" selection-start="827" selection-end="827" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -430,7 +495,42 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.6127886">
+        <state line="23" column="0" selection-start="155" selection-end="155" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="21" selection-start="600" selection-end="600" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/collections/auth/routes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="99" column="13" selection-start="3321" selection-end="3321" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/collections/auth/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="35" column="2" selection-start="429" selection-end="429" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="55" column="41" selection-start="1336" selection-end="1336" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/errors.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="77" column="2" selection-start="1938" selection-end="1938" vertical-scroll-proportion="0.8951613">
           <folding />
         </state>
       </provider>

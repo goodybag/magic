@@ -6,6 +6,7 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, config = require('../../config')
 
 , logger  = {}
 
@@ -13,13 +14,95 @@ var
 , users       = db.tables.users
 , groups      = db.tables.groups
 , userGroups  = db.tables.userGroups
+
+//singly variables
+, clientId      = config.singly.clientId
+, clientSecret  = config.singly.clientSecret
+, callbackUrl   = config.singly.callbackUrl
+, apiBaseUrl    = config.singly.apiBaseUrl
+, singly        = require('singly')(clientId, clientSecret,callbackUrl);
 ;
+
 
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
+/**
+ * Service Redirect, return redirect url
+ * @param req
+ * @param res
+ */
 
+module.exports.singlyRedirect = function (req, res){
+  //get service
+  var service = req.param('service');
+  var url = apiBaseUrl+'/oauth/authorize?client_id='+clientId+'&service='+service+'&redirect_uri='+callbackUrl;
+  return res.json({error: null, data: url});
+};
+
+module.exports.singlyCallback =  function(req, res){
+
+  var TAGS = ['create-singly-user', req.uuid];
+  // if callback doesn't return code then return SINGLY CALLBACK error
+  if(!req.param('code')){
+    logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
+  }
+  db.getClient( function(error, client){
+    var code = req.param('code');
+
+    //get access token from callback
+    singly.getAccessToken(code, function(err, accessTokenRes, token){
+
+      // get singly Id form profile
+      singly.get('/profiles', {access_token: token.access_token},
+
+        function(err, profiles){
+
+          // check for singlyId existence
+          var singlyIdQuery = users.select(users.singlyId).from(users).where(users.singlyId.equals(profiles.body.id)).toQuery();
+
+          client.query(singlyIdQuery.text, singlyIdQuery.values, function(error,result){
+
+            if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
+
+            // if singlyId is in the users table then update singlyAccessToken column, else create new user
+            if(result.rows.length === 0){
+
+              var insertQuery = users.insert({
+                'singlyAccessToken': token.access_token
+                , 'singlyId': profiles.body.id
+              }).toQuery();
+
+              logger.db.debug(TAGS, insertQuery.text);
+
+              client.query(insertQuery.text + 'RETURNING id', insertQuery.values, function(error, result){
+                if (error) return res.json({error: error, data: null}), logger.routes.error(TAGS, error);
+
+                logger.db.debug(TAGS, result);
+
+                return res.json({error: null, data:result.rows[0]});
+
+              });
+
+            } else {
+              var updateQuery = users.update({
+                'singlyAccessToken': token.access_token
+              }).where(users.singlyId.equals(profiles.body.id)).toQuery();
+
+              logger.db.debug(TAGS, updateQuery.text);
+
+              client.query(updateQuery.text, updateQuery.values, function(error,result){
+                if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
+
+                return res.json({error: null, data:result.rows[0]});
+              });
+            }
+          });
+        });
+    });
+  });
+};
 /**
  * Email Authentication
  * @param  {Object} req HTTP Request Object
