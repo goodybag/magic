@@ -1,4 +1,4 @@
-var db = require('../../../db');
+var db = require('../../db');
 var photos = db.tables.photos;
 var products = db.tables.products;
 

@@ -1,4 +1,4 @@
-var db = require('../../../db');
+var db = require('../../db');
 var products = db.tables.products;
 
 module.exports = {

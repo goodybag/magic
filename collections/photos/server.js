@@ -4,9 +4,9 @@
 
 var server = require('express')();
 var middleware = require('../../middleware');
+var schema = require('../../db').schemas.photos;
 var routes = require('./routes');
-var validators = require('./validators');
-var fields = require('./auth/fields');
+var fields = require('./fields');
 
 // Photos.list
 server.get(
@@ -32,7 +32,7 @@ server.get(
 // Photos.create
 server.post(
   '/v1/photos'
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
 );
 
@@ -46,21 +46,14 @@ server.get(
 // Photos.update
 server.patch(
   '/v1/photos/:photoId'
-, middleware.validate(validators.update)
-, routes.update
-);
-
-// Photos.update
-server.put(
-  '/v1/photos/:photoId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
 // Photos.update
 server.post(
   '/v1/photos/:photoId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 

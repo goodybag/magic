@@ -1,16 +1,23 @@
-
 /**
- * Groups Sql definition
+ * Groups Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'groups'
-, columns: [
-    'id'
-  , 'name'
-  ]
+define(function(require){
+  var groups = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , name: {
+      type: 'text'
+    , sanitizers: { trim: true }
+    }
+  };
+  return groups;
 });

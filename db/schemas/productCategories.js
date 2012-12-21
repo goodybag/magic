@@ -1,19 +1,33 @@
-
 /**
- * Product Categories
+ * Product Categories Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'productCategories'
-, columns: [
-    'id'
-  , 'businessId'
-  , 'order'
-  , 'isFeatured'
-  , 'name'
-  ]
+define(function(require){
+  var productCategories = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses(id) on delete cascade'
+    }
+  , order: {
+      type: 'int'
+    }
+  , isFeatured: {
+      type: 'boolean'
+    }
+  , name: {
+      type: 'text'
+    , sanitizers: { trim: true }
+    }
+  };
+  return productCategories;
 });

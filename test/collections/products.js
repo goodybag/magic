@@ -93,7 +93,6 @@ describe('POST /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(payload.error);
-      assert(payload.error.length > 0);
       done();
     });
   });
@@ -122,9 +121,6 @@ describe('PATCH /v1/products/:id', function() {
       payload = JSON.parse(payload);
 
       assert(payload.error);
-      assert(payload.error.length === 1);
-      assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'pattern');
       done();
     });
   });

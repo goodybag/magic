@@ -1,17 +1,25 @@
-
 /**
- * User Groups Sql definition
+ * User Groups Schema
  */
 
-var
-  sql = require('sql')
-;
+if (typeof module === 'object' && typeof define !== 'function') {
+  var define = function (factory) {
+    module.exports = factory(require, exports, module);
+  };
+}
 
-module.exports = sql.define({
-  name: 'userGroups'
-, columns: [
-    'id'
-  , 'userId'
-  , 'groupId'
-  ]
+define(function(require){
+  var userGroups = {
+    id: {
+      type: 'serial'
+    , meta: 'primary key'
+    }
+  , userId: {
+      type: 'int'
+    }
+  , groupId: {
+      type: 'int'
+    }
+  };
+  return userGroups;
 });
