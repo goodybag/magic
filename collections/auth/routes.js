@@ -100,10 +100,10 @@ module.exports.singlyCallback =  function(req, res){
                 return res.json({error: null, data:result.rows[0]});
               });
             }
-          });
-        });
-    });
-   }
+          }); //singlyIdQuery
+        }); // end of singly.get
+      }); // end of singly.getAccessToken
+    } // end of test callback url condition
   });
 
 };
