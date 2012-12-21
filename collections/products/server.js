@@ -5,55 +5,48 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var validators = require('./validators');
-var fields = require('./auth/fields');
+var schema = require('../../db').schemas.products;
+var fields = require('./fields');
 
 // Products.list
 server.get(
   '/v1/products'
-, middleware.fields(fields)
+, middleware.fields(fields.products)
 , routes.list
 );
 
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
-, middleware.fields(fields)
+, middleware.fields(fields.products)
 , routes.list
 );
 
 // Products.create
 server.post(
   '/v1/products'
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
 );
 
 // Products.get
 server.get(
   '/v1/products/:productId'
-, middleware.fields(fields)
+, middleware.fields(fields.product)
 , routes.get
 );
 
 // Products.update
 server.patch(
   '/v1/products/:productId'
-, middleware.validate(validators.update)
-, routes.update
-);
-
-// Products.update
-server.put(
-  '/v1/products/:productId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
 // Products.update
 server.post(
   '/v1/products/:productId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
@@ -61,6 +54,25 @@ server.post(
 server.del(
   '/v1/products/:productId'
 , routes.del
+);
+
+// Products.listCategories
+server.get(
+  '/v1/products/:productId/categories'
+, middleware.fields(fields.productCategory)
+, routes.listCategories
+);
+
+// Products.addCategory
+server.post(
+  '/v1/products/:productId/categories'
+, routes.addCategory
+);
+
+// Products.delCategory
+server.del(
+  '/v1/products/:productId/categories/:categoryId'
+, routes.delCategory
 );
 
 module.exports = server;

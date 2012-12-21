@@ -5,8 +5,8 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var validators = require('./validators');
-var fields = require('./auth/fields');
+var schema = require('../../db').schemas.productTags;
+var fields = require('./fields');
 
 // ProductTags.list
 server.get(
@@ -32,7 +32,7 @@ server.get(
 // ProductTags.create
 server.post(
   '/v1/product-tags'
-, middleware.validate(validators.create)
+, middleware.validate(schema)
 , routes.create
 );
 
@@ -46,21 +46,14 @@ server.get(
 // ProductTags.update
 server.patch(
   '/v1/product-tags/:productTagId'
-, middleware.validate(validators.update)
-, routes.update
-);
-
-// ProductTags.update
-server.put(
-  '/v1/product-tags/:productTagId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 
 // ProductTags.update
 server.post(
   '/v1/product-tags/:productTagId'
-, middleware.validate(validators.update)
+, middleware.validate(schema)
 , routes.update
 );
 

@@ -1,5 +1,5 @@
 /**
- * Groups Schema
+ * Product Categories Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,15 +9,25 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var groups = {
+  var productCategories = {
     id: {
       type: 'serial'
     , meta: 'primary key'
+    }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses(id) on delete cascade'
+    }
+  , order: {
+      type: 'int'
+    }
+  , isFeatured: {
+      type: 'boolean'
     }
   , name: {
       type: 'text'
     , sanitizers: { trim: true }
     }
   };
-  return groups;
+  return productCategories;
 });

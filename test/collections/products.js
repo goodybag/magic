@@ -93,7 +93,6 @@ describe('POST /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(payload.error);
-      assert(payload.error.length > 0);
       done();
     });
   });
@@ -122,9 +121,6 @@ describe('PATCH /v1/products/:id', function() {
       payload = JSON.parse(payload);
 
       assert(payload.error);
-      assert(payload.error.length === 1);
-      assert(payload.error[0].property == 'businessId');
-      assert(payload.error[0].attributeName == 'pattern');
       done();
     });
   });
@@ -136,6 +132,96 @@ describe('DELETE /v1/products/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.del('/v1/products/2', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      done();
+    });
+  });
+
+});
+
+
+describe('GET /v1/products/:id/categories', function() {
+
+  it('should respond with a category listing', function(done) {
+    tu.get('/v1/products/1/categories', function(err, payload, res) {
+      
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 1);
+      assert(payload.data[0].id == 1);
+      assert(payload.data[0].name == 'Category 1');
+      done();
+    });
+  });
+
+});
+
+
+describe('POST /v1/products/:id/categories', function() {
+
+  it('should respond with an ok', function(done) {
+    tu.post('/v1/products/1/categories', JSON.stringify({ id:3 }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      done();
+    });
+  });
+
+  it('should not duplicate existing category relations', function(done) {
+    tu.post('/v1/products/1/categories', JSON.stringify({ id:3 }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+
+      tu.get('/v1/products/1/categories', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.length === 3);
+        done();
+      });
+    });
+  });
+
+  it('should respond to an invalid payload with errors', function(done) {
+    tu.post('/v1/products/1/categories', JSON.stringify({ id:'foobar' }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(payload.error);
+      done();
+    });
+  });
+
+});
+
+describe('DELETE /v1/products/:id/categories/:id', function() {
+
+  it('should respond with a 200', function(done) {
+    tu.del('/v1/products/1/categories/3', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

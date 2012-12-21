@@ -1,5 +1,5 @@
 /**
- * Product Tags Schema
+ * Products <-> ProductCategories Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,25 +9,19 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var productTags = {
+  var productsProductCategories = {
     id: {
       type: 'serial'
     , meta: 'primary key'
-    }
-  , businessId: {
-      type: 'int'
-    , meta: 'references businesses(id) on delete cascade'
     }
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
     }
-  , tag: {
-      type: 'text'
-    }
-  , createdAt: {
-      type: 'timestamp'
+  , productCategoryId: {
+      type: 'int'
+    , meta: 'references "productCategories"(id) on delete cascade'
     }
   };
-  return productTags;
+  return productsProductCategories;
 });

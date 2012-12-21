@@ -31,24 +31,42 @@ pg.connect(config.postgresConnStr, function(error, _client){
 });
 
 exports.getClient = function(callback){
-  /*
-  pg.connect(config.postgres.connectionString, function(err, client){
-    callback(err, client);
-  });
-*/
+
+  // pg.connect(config.postgresConnStr, function(err, client){
+  //   callback(err, client);
+  // });
+
   callback(null, client);
 };
 
-exports.tables = {
-  businesses: require('./schemas/businesses')
-, locations:  require('./schemas/locations')
-, users:      require('./schemas/users')
-, groups:     require('./schemas/groups')
-, userGroups: require('./schemas/userGroups')
-, products:   require('./schemas/products')
-, photos:     require('./schemas/photos')
-, productTags:require('./schemas/productTags')
+exports.schemas = {
+  businesses:                require('./schemas/businesses')
+, locations:                 require('./schemas/locations')
+, users:                     require('./schemas/users')
+, groups:                    require('./schemas/groups')
+, userGroups:                require('./schemas/userGroups')
+, products:                  require('./schemas/products')
+, productCategories:         require('./schemas/productCategories')
+, productsProductCategories: require('./schemas/productsProductCategories')
+, photos:                    require('./schemas/photos')
+, productTags:               require('./schemas/productTags')
 };
+
+function buildTable(name, schema) {
+  var columns = [];
+  for (var field in schema) {
+    columns.push(field);
+  }
+  return sql.define({
+    name: name
+  , columns: columns
+  });
+}
+
+exports.tables = {};
+for (var name in exports.schemas) {
+  exports.tables[name] = buildTable(name, exports.schemas[name])
+}
 
 // Application behavior
 // (when run from the command-line, do setup)

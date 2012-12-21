@@ -7,12 +7,13 @@ var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
-, validators = require('./validators')
 
 , logger  = {}
 
   // Tables
-, products  = db.tables.products
+, products                  = db.tables.products
+, productCategories         = db.tables.productCategories
+, productsProductCategories = db.tables.productsProductCategories
 ;
 
 // Setup loggers
@@ -65,17 +66,33 @@ module.exports.get = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(products, req.fields)
-      .from(products)
+      // :DEBUG: node-sql cant support this yet
+      /*.from(products
+        .join(productsProductCategories)
+          .on(productsProductCategories.productId.equals(products.id))
+        .join(productCategories)
+          .on(productCategories.id.equals(productsProductCategories.productCategoryId))
+        )*/
+      .from('products LEFT JOIN "productsProductCategories" ppc ON ppc."productId" = products.id LEFT JOIN "productCategories" ON "productCategories".id = ppc."productCategoryId"')
       .where(products.id.equals(req.param('productId')))
       .toQuery();
-
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] });
+      var product = result.rows[0];
+      // pull categories out of the rows and into an embedded array
+      product.categories = [];
+      for (var i=0, ii=result.rows.length; i < ii; i++) {
+        product.categories.push({ id:result.rows[i].categoryId, name:result.rows[i].categoryName });
+      }
+      // remove the pre-extraction category data
+      delete product.categoryId;
+      delete product.categoryName;
+
+      return res.json({ error: null, data: product });
     });
   });
 };
@@ -97,20 +114,19 @@ module.exports.create = function(req, res){
     // defaults
     if (!req.body.isEnabled) req.body.isEnabled = true;
 
-    utils.validate(req.body, validators.model, function(error){
+    var error = utils.validate(req.body, db.schemas.products);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    var query = products.insert(req.body).toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      var query = products.insert(req.body).toQuery();
+      logger.db.debug(TAGS, result);
 
-      logger.db.debug(TAGS, query.text);
-
-      client.query(query.text+' RETURNING id', query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };
@@ -176,3 +192,114 @@ module.exports.del = function(req, res){
     });
   });
 };
+
+/**
+ * List categories related to the product
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.listCategories = function(req, res) {
+  var TAGS = ['list-product-productcategory-relations', req.uuid];
+  logger.routes.debug(TAGS, 'fetching list of product\'s categories', {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // build query
+    var query = utils.selectAsMap(productsProductCategories, req.fields)
+      .from(productsProductCategories
+        .join(productCategories)
+          .on(productCategories.id.equals(productsProductCategories.productCategoryId))
+        )
+      .where(productsProductCategories.productId.equals(req.param('productId')))
+      .toQuery();
+
+    // run query
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: result.rows });
+    });
+  });
+
+};
+
+/**
+ * Add a category relation to the product
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.addCategory = function(req, res) {
+  var TAGS = ['create-product-productcategory-relation', req.uuid];
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // :TODO: make sure the product exists?
+
+    // validate
+    var data = { productId:req.param('productId'), productCategoryId:req.body.id };
+    var error = utils.validate(data, db.schemas.productsProductCategories);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // build query
+    var query = {
+      text: 'INSERT INTO "productsProductCategories" ("productId", "productCategoryId") '+
+              'SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM "productsProductCategories" WHERE "productId" = $1 AND "productCategoryId" = $2)' // create only if DNE
+    , values: [data.productId, data.productCategoryId]
+    }
+
+    logger.db.debug(TAGS, query.text);
+
+    // run query
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
+ * Remove a category relation from the product
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.delCategory = function(req, res) {
+  var TAGS = ['delete-product-productcategory-relation', req.uuid];
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // :TODO: make sure the product exists?
+
+    // validate
+    var data = { productId:req.param('productId'), productCategoryId:req.param('categoryId') };
+    var error = utils.validate(data, db.schemas.productsProductCategories);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // build query
+    var query = productsProductCategories
+      .delete()
+      .where(productsProductCategories.productId.equals(data.productId))
+      .and(productsProductCategories.productCategoryId.equals(data.productCategoryId))
+      .toQuery();
+
+    logger.db.debug(TAGS, query.text);
+
+    // run query
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+
+};
+
