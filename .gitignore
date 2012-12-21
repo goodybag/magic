@@ -13,4 +13,11 @@ logs
 results
 node_modules/
 
+
 npm-debug.log
+
+db-setup/node_modules/
+.idea
+
+npm-debug.log
+

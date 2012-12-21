@@ -18,6 +18,8 @@
     "randomstring": "1.0.x",
     "sql": "0.1.x",
     "validator": "0.4.19",
+    "singly": "0.3.x",
+
     "request": "2.12.x",
     "underscore": "1.4.x",
     "when": "1.7.x",
@@ -38,3 +40,4 @@
   },
   "author": "Goodybag Engineering <engineering@goodybag.com>"
 }
+
