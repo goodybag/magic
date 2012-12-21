@@ -1,29 +1,40 @@
 {
-  "name": "application-name",
+  "name": "magic",
   "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app"
+  "description": "Goodybag API",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
   },
   "dependencies": {
-    "express": "3.0.3",
     "async": "0.1.x",
-    "when": "1.7.1",
+    "express": "3.0.x",
+    "express-winston": "0.1.x",
     "moment": "1.7.x",
+    "node-uuid": "1.4.x",
     "node.extend": "1.0.x",
     "noop": "0.2.x",
-    "express-winston": "0.1.x",
-    "winston": "0.6.x",
-    "underscore": "1.4.x",
-    "node-uuid": "1.4.x",
+    "pg": "0.9.x",
     "randomstring": "1.0.x",
     "sql": "0.1.x",
-    "pg": "0.9.x",
-    "validator": "0.4.19",
-    "mocha": "1.7.4",
-    "better-assert": "0.1.0",
-    "sinon": "1.5.2",
+    "validator": "0.4.x",
     "request": "2.12.x",
-    "lodash": "1.0.0-rc.3"
-  }
+    "underscore": "1.4.x",
+    "when": "1.7.x",
+    "winston": "0.6.x",
+    "lodash": "1.0.x"
+  },
+  "devDependencies": {
+    "better-assert": "0.1.x",
+    "sinon": "1.5.x",
+    "mocha": "1.7.x"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/goodybag/magic.git"
+  },
+  "author": "Goodybag Engineering <engineering@goodybag.com>"
 }
