@@ -71,6 +71,15 @@ INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeature
 COMMIT;
 SELECT setval('"productCategories_id_seq"', (SELECT MAX(id) from "productCategories")); -- advance the sequence past the IDs just used
 
+-- PRODUCTS <-> PRODUCT CATEGORIES
+
+BEGIN;
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('1', '1', '1');
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('2', '1', '2');
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('3', '2', '3');
+COMMIT;
+SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "productsProductCategories")); -- advance the sequence past the IDs just used
+
 -- PHOTOS
 
 BEGIN;
