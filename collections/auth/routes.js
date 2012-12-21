@@ -44,11 +44,13 @@ module.exports.singlyRedirect = function (req, res){
 module.exports.singlyCallback =  function(req, res){
 
   var TAGS = ['create-singly-user', req.uuid];
-  // if callback doesn't return code then return SINGLY CALLBACK error
-  if(!req.param('code')){
-    logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
-  }
+
   db.getClient( function(error, client){
+    // if callback doesn't return code then return SINGLY CALLBACK error
+    if(req.toString().indexOf('code') === -1){
+      logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
+      return res.json({error: errors.auth.SINGLY_CALLBACK });
+    } else{
     var code = req.param('code');
 
     //get access token from callback
@@ -101,7 +103,9 @@ module.exports.singlyCallback =  function(req, res){
           });
         });
     });
+   }
   });
+
 };
 /**
  * Email Authentication
