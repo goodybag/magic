@@ -1,4 +1,4 @@
-process.env.mode = 'test';
+process.env['GB_ENV'] = 'test';
 
 // unit tests
 // ==========
