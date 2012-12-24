@@ -65,7 +65,9 @@ if(cluster.isMaster){
   });
 }
 
-httpServer = http.createServer(app).listen(app.get('port'), function(){
+httpServer = http.createServer(app).listen(config.http.port, function(err){
+  if(err) throw err;
+  console.log("HTTP started on port", config.http.port);
 });
 
 return;
@@ -98,8 +100,8 @@ if (cluster.isMaster){
     workers[newWorker.pid] = newWorker;
   });
 } else{
-  httpServer = http.createServer(app).listen(app.get('port'), function(){
-    console.log('worker', cluster.worker.id+' (PID: ' + process.pid + '):', "Express server listening on port", app.get('port'));
+  httpServer = http.createServer(app).listen(config.http.port, function(){
+    console.log('worker', cluster.worker.id+' (PID: ' + process.pid + '):', "Express server listening on port", config.http.port);
   });
 
   process.on('message', function(msg){
