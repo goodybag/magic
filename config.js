@@ -14,7 +14,8 @@ var config = {
       port: 3000
     }
   , repl: {
-      prompt: "gb-api> "
+      enabled: true
+    , prompt: "gb-api> "
     , port: 4337
     }
   , numWorkers: os.cpus().length
@@ -46,7 +47,13 @@ var config = {
   }
 
 , staging: {
-    postgresConnStr: process.env['DATABASE_URL']
+    http: {
+      port: process.env['PORT'] || 5000
+    }
+  , postgresConnStr: process.env['DATABASE_URL']
+  , repl: {
+      enabled: false
+    }
   }
 
 , production: {
