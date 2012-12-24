@@ -4,5 +4,5 @@ before_script:
   - psql -d "goodybag-test" -a -f db/fixtures/test.sql
 env:
   - GB_ENV=test mode=test PG_CON="postgres://postgres@127.0.0.1/goodybag-test"
-- node_js:
+node_js:
   - 0.8
