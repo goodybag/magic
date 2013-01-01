@@ -1,25 +1,31 @@
+
+/**
+ * Module dependencies
+ */
+
+var
+  os = require('os')
+, _ = require('lodash')
+;
+
 var config = {
-  dev: {
-    postgresConnStr:  "postgres://localhost:5432/goodybag"
-  , cookieSecret: "g00dybagr0cks!"
-  , numWorkers: 4
+  defaults: {
+    http: {
+      port: 3000
+    }
   , repl: {
       prompt: "gb-api> "
     , port: 4337
     }
-  , http: {
-      port: 3000
-    }
-  , validationOptions: {
-      singleError: false
-    }
+  , numWorkers: os.cpus().length
+  , cookieSecret: "g00dybagr0ck$!"
   , facebook: {
       id: "159340790837933"
     , openGraphUrl: "https://graph.facebook.com/"
     }
-
   , passwordSalt: "$G00DYBAGR0CK$!"
   , consumerPasswordSaltLength: 10
+
   , singly: {
       clientId: "e8171ccd4a3b90f15bbb41088efccc06"
     , clientSecret: "73fa4013446e9985e9217455479d3c3c"
@@ -39,16 +45,24 @@ var config = {
   , http: {
       port: 8986
     }
+
   , validationOptions: {
       singleError: false
     }
-  , facebook: {
-      id: "159340790837933"
-    , openGraphUrl: "https://graph.facebook.com/"
-    }
+  }
 
-  , passwordSalt: "$G00DYBAGR0CK$!"
-  , consumerPasswordSaltLength: 10
+, dev: {
+    http: {
+      port: 3000
+    }
+  , postgresConnStr:  "postgres://localhost:5432/goodybag"
+  }
+
+, test: {
+    http: {
+      port: 8986
+    }
+  , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
   , singly: {
       clientId: "e8171ccd4a3b90f15bbb41088efccc06"
@@ -58,14 +72,18 @@ var config = {
     }
   }
 
+, staging: {
+    postgresConnStr: process.env['DATABASE_URL']
+  }
+
 , production: {
 
   }
 };
 
-for (var key in config.dev){
-  config.production[key] = config.dev;
-}
 
-module.exports = config[process.env.mode || 'dev'];
-console.log('Loading '+(process.env.mode || 'dev')+' config');
+var GB_ENV = process.env['GB_ENV'] = process.env['GB_ENV'] || 'dev';
+if (GB_ENV == null || !config.hasOwnProperty(GB_ENV)) GB_ENV = 'dev';
+
+module.exports = _.extend(config.defaults, config[GB_ENV]);
+console.log('Loading ' + GB_ENV + ' config');

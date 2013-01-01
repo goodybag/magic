@@ -1,4 +1,4 @@
-process.env.mode = 'test';
+process.env['GB_ENV'] = 'test';
 
 // unit tests
 // ==========
@@ -19,14 +19,14 @@ app.use(require('../collections/users/server'));
 app.use(require('../collections/photos/server'));
 app.use(require('../collections/productTags/server'));
 
-var httpServer;
-
 before(function(done) {
+  var self = this;
   var setupDb = require('../db/setup');
   setupDb(require('./db-config.js'), function() {
-    httpServer = require('http').createServer(app).listen(8986);
-
-    done();
+    self.httpServer = require('http').createServer(app).listen(8986, function(err){
+      if (err) throw err;
+      done();
+    });
   });
 });
 
@@ -40,5 +40,5 @@ require('./collections/photos');
 require('./collections/productTags');
 
 after(function() {
-  httpServer.close();
+  this.httpServer.close();
 });
