@@ -31,6 +31,16 @@ describe('GET /v1/businesses/:id', function() {
       done();
     });
   });
+
+  it('should fail if the id is not in the database', function(done){
+    var id = 5;
+    utils.get(baseUrl + '/v1/business' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.data === undefined);
+      done();
+    });
+  });
+
 });
 
 describe('DEL /v1/businesses/:id', function() {
