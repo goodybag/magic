@@ -33,7 +33,7 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(photos, req.fields)
-      .from(photos.join(products).on(products.id.equals(photos.id)));
+      .from(photos.leftJoin(products).on(products.id.equals(photos.id)));
 
     // filters
     var filters = null; // :TEMPORARY:
