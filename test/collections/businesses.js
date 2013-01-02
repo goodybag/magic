@@ -41,6 +41,14 @@ describe('GET /v1/businesses/:id', function() {
     });
   });
 
+  it('should fail if the id is not in correct type', function(done){
+    var id = "abcd";
+    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.error.severity === "ERROR");
+      done();
+    });
+  });
 });
 
 describe('DEL /v1/businesses/:id', function() {
@@ -116,6 +124,7 @@ describe('POST /v1/businesses', function(){
       });
     });
   });
+
 });
 
 describe('POST /v1/businesses/:id', function(){
