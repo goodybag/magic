@@ -363,6 +363,7 @@ module.exports.update = function(req, res){
 
 /**
  * Delete product
+ * TODO: remove product category relations too
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
