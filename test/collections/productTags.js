@@ -106,7 +106,7 @@ describe('PATCH /v1/product-tags/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:2, tag:'Barhouse2' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);

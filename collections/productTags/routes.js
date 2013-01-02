@@ -104,7 +104,7 @@ module.exports.create = function(req, res){
       logger.routes.error(TAGS, error);
       return res.json({ error: error, data: null });
     }
-    
+
     var error = utils.validate(req.body, db.schemas.productTags);
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
