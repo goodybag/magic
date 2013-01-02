@@ -79,22 +79,6 @@ describe('GET v1/callback', function(){
     })
   });
 
-//  it('should insert values into table', function(done){
-//    sinon.stub(singly, "getAccessToken", function (code, c) {
-//      c(null, null, "FOO");
-//    });
-//
-//    sinon.stub(singly, "get", function (url, options, c) {
-//      c(null, "Bar");
-//    });
-//
-//    var url = callbackUrl + "?code=ohaidosautrahir90347";
-//    tu.get(url,function(error, results){
-//      assert(!error);
-//      results = JSON.parse(results);
-//      assert(results.data.id >= 0);
-//    })
-//  });
 })
 
 

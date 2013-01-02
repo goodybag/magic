@@ -46,6 +46,19 @@ describe('POST /v1/users', function() {
       done();
     });
   });
+
+  it('should not create new user if user email existing', function(done){
+    var user = {
+      email: "consumer@goodybag.com"
+    , password: "password"
+    };
+
+    utils.post(baseUrl + '/v1/users', user, function(error, res, payload){
+      assert(!error);
+      assert(payload.error != null);
+      done();
+    })
+  });
 });
 
 describe('DEL /v1/users/:id', function() {
