@@ -164,7 +164,7 @@ module.exports.update = function(req, res){
       var fieldsAvailable = 0;
       data = {};
       for (var key in req.body){
-        if (req.fieldFieldNames.indexOf(key) > -1){
+        if (req.fields.hasOwnProperty(key)){
           data[key] = req.body[key];
           fieldsAvailable++;
         }
