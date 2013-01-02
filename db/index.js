@@ -60,8 +60,50 @@ exports.getClient = function(callback){
   // callback(null, client);
 };
 
+exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, cb) {
+  client.query('BEGIN');
+  client.query(updateQuery, updateValues, function(error, result) {
+    if (error) {
+      client.query('COMMIT'); // no changes were made
+      return cb(error);
+    }
+
+    // did the update succeed?
+    if (result.rowCount === 1) {
+      // then we're done
+      client.query('COMMIT');
+      return cb();
+    }
+
+    client.query('SAVEPOINT upsert');
+    client.query(insertQuery, insertValues, function(error, result) {
+      if (error) {
+        client.query('COMMIT'); // no changes were made
+        return cb(error);
+      }
+
+      // did the insert succeed?
+      if (result.rowCount === 1) {
+        // then we're done
+        client.query('COMMIT');
+        return cb();
+      }
+
+      // no, the session was created since we failed the update
+      client.query('ROLLBACK TO upsert');
+      client.query(updateQuery, updateValues, function(error) {
+        client.query('COMMIT');
+
+        if (error) { return cb(error); }
+        cb();
+      });
+    });
+  });
+};
+
 exports.schemas = {
-  businesses:                require('./schemas/businesses')
+  sessions:                  require('./schemas/sessions')
+, businesses:                require('./schemas/businesses')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , groups:                    require('./schemas/groups')
