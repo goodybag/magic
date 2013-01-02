@@ -226,27 +226,139 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-product', req.uuid];
 
-  db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+  var stage = {
+    // Once we receive the client, kick everything off by
+    clientReceived: function(error, client){
+      if (error){
+        logger.routes.error(TAGS, error);
+        return res.json({ error: error, data: null });
+      }
+
+      stage.ensureCategories(client);
     }
 
-    var query = products
-      .update(req.body)
-      .where(products.id.equals(req.param('productId')))
-      .toQuery();
+    // Ensure the categories provided in the body belong to the business
+    // If they didn't provide categories, move on to the next step
+  , ensureCategories: function(client){
+      if (!req.body.categories || req.body.categories.length === 0)
+        return stage.updateProduct(client);
 
-    logger.db.debug(TAGS, query.text);
+      // Not sure if node-sql supports what I'm trying to do
+      // var query = products.select(
+      //   productCategories.id
+      // ).where(
+      //   products.businessId.equals(productCategories.businessId).and(
+      //     products.id.equals(req.params.businessId)
+      //   )
+      // ).toQuery();
 
-    client.query(query.text, query.values, function(error, result){
+      // I know I know awful but temporary!
+      var query = 'select pc.id from products p, "productCategories" pc where p."businessId" = pc."businessId" and p.id = ' + req.params.productId;
+
+      client.query(query, function(error, results){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        // Send to check categories an array of category ids
+        stage.checkCategories(client, results.rows.map(function(a){ return a.id; }));
+      });
+    }
+
+    // Checks the provided categories against the categories we got back from the
+    // query in ensureCategories. If we're good, move on to updateProduct,
+    // If we're not good, send an invalid_category_ids error
+  , checkCategories: function(client, categories){
+      for (var i = req.body.categories.length - 1; i >= 0; i--){
+        // Business does not have category
+        if (categories.indexOf(req.body.categories[i]) === -1){
+          res.json({ error: errors.products.INVALID_CATEGORY_IDS, data: null });
+          return logger.routes.error(TAGS, errors.products.INVALID_CATEGORY_IDS);
+        }
+      }
+      stage.updateProduct(client);
+    }
+
+    // Validate and insert the provided product
+  , updateProduct: function(client){
+      // defaults
+      if (!req.body.isEnabled) req.body.isEnabled = true;
+
+      var error = utils.validate(req.body, db.schemas.products);
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      // We don't want to try and insert categories
+      var categories = req.body.categories;
+      delete req.body.categories;
 
-      return res.json({ error: null, data: null });
-    });
-  });
+      var query = products
+        .update(req.body)
+        .where(products.id.equals(req.param('productId')))
+        .toQuery();
+
+      logger.db.debug(TAGS, query.text);
+
+      client.query(query.text, query.values, function(error, results){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        // If they didn't provide categories, stop here
+        if (!categories || categories.length === 0)
+          return res.json({ error: null, data: null });
+
+        // Move on to next stage
+        stage.removePreviousProductCategoriesRelations(client, req.param('productId'), categories);
+      });
+    }
+
+    // Remove previous product category relations to start from a clean slate
+  , removePreviousProductCategoriesRelations: function(client, productId, categories){
+      var query = productsProductCategories.delete().where(
+        productsProductCategories.productId.equals(productId)
+      ).toQuery();
+
+      client.query(query.text, query.values, function(error){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        stage.updateProductCategoriesRelations(client, productId, categories);
+      });
+    }
+
+    // Setup the relations between the provided categories
+  , updateProductCategoriesRelations: function(client, productId, categories){
+      var
+        isObj   = !!categories[0].id
+
+        // Array of functions to execute in parallel
+      , queries = []
+
+        // Returns a function that executes a query to be executed in parallel via async
+      , getQueryFunction = function(values){
+          return function(complete){
+            var query = productsProductCategories.insert(values).toQuery();
+
+            client.query(query.text, query.values, complete);
+          };
+        }
+      ;
+
+      // Queue up query functions
+      for (var i = categories.length - 1; i >= 0; i--){
+        queries.push(
+          getQueryFunction({
+            productId: productId
+          , productCategoryId: isObj ? categories[i].id : categories[i]
+          })
+        );
+      }
+
+      // That's it!
+      utils.parallel(queries, function(error, results){
+        if (error) logger.routes.error(TAGS, error);
+        return res.json({ error: error, data: null });
+      });
+    }
+  };
+
+  // Kick it off
+  db.getClient(stage.clientReceived);
 };
 
 /**
