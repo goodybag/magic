@@ -104,33 +104,33 @@ describe('POST /v1/photos', function() {
 
 describe('PATCH /v1/photos/:id', function() {
 
-  // it('should respond with a 200', function(done) {
-  //   tu.loginAsSales(function(error, user){
-  //     utils.patch(baseUrl + '/v1/photos/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
-  //       assert(!err);
-  //       assert(res.statusCode == 200);
-  //       assert(!payload.error);
-  //       tu.logout(function(){
-  //         done();
-  //       });
-  //     });
-  //   });
-  // });
+  it('should respond with a 200', function(done) {
+    tu.loginAsSales(function(error, user){
+      utils.patch(baseUrl + '/v1/photos/2', { businessId:2, name:'Barhouse2' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
+        assert(!payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
 
-  // it('should respond to an invalid payload with errors', function(done) {
-  //   tu.loginAsSales(function(error, user){
-  //     utils.patch(baseUrl + '/v1/photos/2', { businessId:'foobar' }, function(err, res, payload) {
+  it('should respond to an invalid payload with errors', function(done) {
+    tu.loginAsSales(function(error, user){
+      utils.patch(baseUrl + '/v1/photos/2', { businessId:'foobar' }, function(err, res, payload) {
 
-  //       assert(!err);
-  //       assert(res.statusCode == 200);
+        assert(!err);
+        assert(res.statusCode == 200);
 
-  //       assert(payload.error);
-  //       tu.logout(function(){
-  //         done();
-  //       });
-  //     });
-  //   });
-  // });
+        assert(payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
 
 });
 
