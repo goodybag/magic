@@ -65,6 +65,16 @@ describe('GET /v1/products/:id', function() {
     });
   });
 
+  it('should return null if product id is not in database', function(done){
+    tu.get('/v1/products/100', function(err, payload, res) {
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data == null);
+      done();
+    });
+  });
+
 });
 
 
