@@ -58,6 +58,42 @@ describe('POST /v1/productCategories', function() {
   });
 });
 
+describe('POST /v1/productCategories/:id', function() {
+  it('should update a productCategory and respond with no error', function(done) {
+    tu.loginAsSales(function(error, user){
+      var category = {
+        id: 1
+      , isFeatured: false
+      };
+      utils.post(baseUrl + '/v1/productCategories/' + category.id, category, function(error, response, results) {
+        assert(!error);
+        assert(!results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+});
+
+describe('POST /v1/productCategories/:id', function() {
+  it('Should fail to update category because it does not exist', function(done) {
+    tu.loginAsSales(function(error, user){
+      var category = {
+        id: 99999999999
+      , isFeatured: false
+      };
+      utils.post(baseUrl + '/v1/productCategories/' + category.id, category, function(error, response, results) {
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+});
+
 describe('DEL /v1/productCategories/:id', function() {
   it('should delete a single user document', function(done) {
     tu.loginAsSales(function(error, user){
