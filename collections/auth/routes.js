@@ -102,10 +102,9 @@ module.exports.singlyCallback =  function(req, res){
             }
           });
         });
-    });
-   }
+      });
+    }
   });
-
 };
 /**
  * Email Authentication

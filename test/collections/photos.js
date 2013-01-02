@@ -24,7 +24,6 @@ describe('GET /v1/photos', function() {
       done();
     });
   });
-
 });
 
 
@@ -54,8 +53,7 @@ describe('GET /v1/businesses/:id/photos', function() {
       assert(payload.data.length == 0);
       done();
     });
-  })
-
+  });
 });
 
 
@@ -74,7 +72,6 @@ describe('GET /v1/photos/:id', function() {
       done();
     });
   });
-
 });
 
 
@@ -106,10 +103,8 @@ describe('POST /v1/photos', function() {
           done();
         });
       });
-
     });
   });
-
 });
 
 
@@ -159,5 +154,4 @@ describe('DELETE /v1/photos/:id', function() {
       });
     });
   });
-
 });
