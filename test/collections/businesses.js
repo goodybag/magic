@@ -125,6 +125,7 @@ describe('POST /v1/businesses', function(){
     });
   });
 
+
 });
 
 describe('POST /v1/businesses/:id', function(){
@@ -151,6 +152,22 @@ describe('POST /v1/businesses/:id', function(){
     , url: 123
     };
     tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail because user not allow to update information', function(done){
+    var business = {
+      name: "Poophead McGees"
+      , url: "http://www.google.com"
+    };
+    tu.loginAsClient(function(error, user){
       utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(results.error);
@@ -187,6 +204,22 @@ describe('PATCH /v1/businesses/:id', function(){
     };
     tu.loginAsSales(function(error, user){
       utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail because user not allow to update information', function(done){
+    var business = {
+      name: "Poophead McGees"
+      , url: "http://www.google.com"
+    };
+    tu.loginAsClient(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(results.error);
         tu.logout(function(){

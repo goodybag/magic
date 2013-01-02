@@ -116,7 +116,7 @@ module.exports.create = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] });
+      return res.json({ error: null, data: result.rows[0]|| null });
     });
   });
 };

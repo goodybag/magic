@@ -44,6 +44,17 @@ describe('GET /v1/businesses/:id/products', function() {
     });
   });
 
+  it('should return empty with invalid businesses id', function(done){
+    tu.get('/v1/businesses/100/products', function(err, payload) {
+
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data.length == 0);
+      done();
+    });
+  })
+
 });
 
 
@@ -107,6 +118,16 @@ describe('POST /v1/products', function() {
     });
   });
 
+  it('should fail to post new product because of invalid field', function (done){
+    tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi" }), 'application/json', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.error);
+      done();
+    });
+  });
+
 });
 
 
@@ -130,6 +151,16 @@ describe('PATCH /v1/products/:id', function() {
 
       payload = JSON.parse(payload);
 
+      assert(payload.error);
+      done();
+    });
+  });
+
+  it('should fail to update product because of invalid field', function (done){
+    tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi", description: "" }), 'application/json', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
       assert(payload.error);
       done();
     });
@@ -167,6 +198,20 @@ describe('GET /v1/products/:id/categories', function() {
       assert(payload.data.length > 1);
       assert(payload.data[0].id == 1);
       assert(payload.data[0].name == 'Category 1');
+      done();
+    });
+  });
+
+  it('should respond empty result with invalid id', function(done) {
+    tu.get('/v1/products/100/categories', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length == 0);
       done();
     });
   });
@@ -235,7 +280,6 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 
       assert(!err);
       assert(res.statusCode == 200);
-
       done();
     });
   });
