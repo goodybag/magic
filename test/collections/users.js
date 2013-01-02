@@ -30,6 +30,24 @@ describe('GET /v1/users/:id', function() {
       done();
     });
   });
+
+  it('should return null if the id is not in the database', function(done){
+    var id = 5;
+    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.data === null);
+      done();
+    });
+  });
+
+  it('should fail if the id is not in correct type', function(done){
+    var id = "abcd";
+    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.error.severity === "ERROR");
+      done();
+    });
+  });
 });
 
 describe('POST /v1/users', function() {
@@ -49,7 +67,7 @@ describe('POST /v1/users', function() {
 
   it('should not create new user if user email existing', function(done){
     var user = {
-      email: "consumer@goodybag.com"
+      email: "sales@goodybag.com"
     , password: "password"
     };
 

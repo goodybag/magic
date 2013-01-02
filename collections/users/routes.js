@@ -41,8 +41,7 @@ module.exports.get = function(req, res){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
-
-      return res.json({ error: null, data: result.rows[0] });
+      return res.json({ error: null, data: result.rows[0] || null});
     });
   });
 };

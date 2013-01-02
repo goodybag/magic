@@ -88,7 +88,7 @@ describe('GET /v1/locations/:id', function() {
   it('should respond nothing with invalid location id', function(done) {
     utils.get(baseUrl + '/v1/locations/100', function(error, res, payload) {
       assert(!error);
-      assert(payload.data === undefined);
+      assert(payload.data === null);
       done();
     });
   });

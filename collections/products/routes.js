@@ -66,13 +66,7 @@ module.exports.get = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(products, req.fields)
-      // :DEBUG: node-sql cant support this yet
-      /*.from(products
-        .join(productsProductCategories)
-          .on(productsProductCategories.productId.equals(products.id))
-        .join(productCategories)
-          .on(productCategories.id.equals(productsProductCategories.productCategoryId))
-        )*/
+
       .from('products LEFT JOIN "productsProductCategories" ppc ON ppc."productId" = products.id LEFT JOIN "productCategories" ON "productCategories".id = ppc."productCategoryId"')
       .where(products.id.equals(req.param('productId')))
       .toQuery();
@@ -81,6 +75,7 @@ module.exports.get = function(req, res){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
+      if(result.rows.length > 0){
 
       var product = result.rows[0];
       // pull categories out of the rows and into an embedded array
@@ -93,6 +88,9 @@ module.exports.get = function(req, res){
       delete product.categoryName;
 
       return res.json({ error: null, data: product });
+      } else {
+        return  res.json({ error: null, data: null});
+      }
     });
   });
 };
