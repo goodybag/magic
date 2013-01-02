@@ -438,6 +438,7 @@ module.exports.addCategory = function(req, res) {
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
+    // :TODO: make sure product categorys businessId is the same as products
 
     // validate
     var data = { productId:req.param('productId'), productCategoryId:req.body.id };
