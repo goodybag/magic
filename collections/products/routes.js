@@ -105,30 +105,117 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-product', req.uuid];
 
-  db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+  var stage = {
+    // Once we receive the client, kick everything off by
+    clientReceived: function(error, client){
+      if (error){
+        logger.routes.error(TAGS, error);
+        return res.json({ error: error, data: null });
+      }
+
+      stage.ensureCategories(client);
     }
 
-    // defaults
-    if (!req.body.isEnabled) req.body.isEnabled = true;
+    // Ensure the categories provided in the body belong to the business
+    // If they didn't provide categories, move on to the next step
+  , ensureCategories: function(client){
+      if (!req.body.categories || req.body.categories.length === 0)
+        return stage.insertProduct(client);
 
-    var error = utils.validate(req.body, db.schemas.products);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      var query = productCategories.select(
+        productCategories.id
+      ).where(
+        productCategories.businessId.equals(req.body.businessId)
+      ).toQuery();
 
-    var query = products.insert(req.body).toQuery();
+      client.query(query.text, query.values, function(error, results){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    logger.db.debug(TAGS, query.text);
+        // Send to check categories an array of category ids
+        stage.checkCategories(client, results.rows.map(function(a){ return a.id; }));
+      });
+    }
 
-    client.query(query.text+' RETURNING id', query.values, function(error, result){
+    // Checks the provided categories against the categories we got back from the
+    // query in ensureCategories. If we're good, move on to insertProduct,
+    // If we're not good, send an invalid_category_ids error
+  , checkCategories: function(client, categories){
+      for (var i = req.body.categories.length - 1; i >= 0; i--){
+        // Business does not have category
+        if (categories.indexOf(req.body.categories[i]) === -1){
+          res.json({ error: errors.products.INVALID_CATEGORY_IDS, data: null });
+          return logger.routes.error(TAGS, errors.products.INVALID_CATEGORY_IDS);
+        }
+      }
+      stage.insertProduct(client);
+    }
+
+    // Validate and insert the provided product
+  , insertProduct: function(client){
+      // defaults
+      if (!req.body.isEnabled) req.body.isEnabled = true;
+
+      var error = utils.validate(req.body, db.schemas.products);
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      // We don't want to try and insert categories
+      var categories = req.body.categories;
+      delete req.body.categories;
 
-      return res.json({ error: null, data: result.rows[0] });
-    });
-  });
+      var query = products.insert(req.body).toQuery();
+
+      logger.db.debug(TAGS, query.text);
+
+      client.query(query.text+' RETURNING id', query.values, function(error, results){
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        // If they didn't provide categories, stop here
+        if (!categories || categories.length === 0)
+          return res.json({ error: null, data: results.rows[0] });
+
+        // Move on to next stage
+        stage.insertProductCategoriesRelations(client, results.rows[0].id, categories);
+      });
+    }
+
+    // Setup the relations between the provided categories
+  , insertProductCategoriesRelations: function(client, productId, categories){
+      var
+        isObj       = !!categories[0].id
+
+        // Array of functions to execute in parallel
+      , queries     = []
+
+        // Returns a function that executes a query to be executed in parallel via async
+      , getQueryFunction = function(values){
+          return function(complete){
+            var query = productsProductCategories.insert(values).toQuery();
+
+            client.query(query.text, query.values, complete);
+          };
+        }
+      ;
+
+      // Queue up query functions
+      for (var i = categories.length - 1; i >= 0; i--){
+        queries.push(
+          getQueryFunction({
+            productId: productId
+          , productCategoryId: isObj ? categories[i].id : categories[i]
+          })
+        );
+      }
+
+      // That's it!
+      utils.parallel(queries, function(error, results){
+        if (error) logger.routes.error(TAGS, error);
+        return res.json({ error: error, data: { id: productId } });
+      });
+    }
+  };
+
+  // Kick it off
+  db.getClient(stage.clientReceived);
 };
 
 /**
