@@ -39,7 +39,7 @@ describe('GET /v1/businesses/:id/photos', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 1);
+      assert(payload.data.length == 2);
       assert(payload.data[0].id == 1);
       done();
     });
