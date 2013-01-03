@@ -60,6 +60,7 @@ module.exports.singlyCallback =  function(req, res){
       singly.get('/profiles', {access_token: token.access_token},
 
         function(err, profiles){
+          var query ={};
 
           // check for singlyId existence
           var singlyIdQuery = users.select(users.id).from(users).where(users.singlyId.equals(profiles.body.id)).toQuery();
@@ -71,35 +72,48 @@ module.exports.singlyCallback =  function(req, res){
             // if singlyId is in the users table then update singlyAccessToken column, else create new user
             if(result.rows.length === 0){
 
-              var insertQuery = users.insert({
+              query = users.insert({
                 'singlyAccessToken': token.access_token
                 , 'singlyId': profiles.body.id
               }).toQuery();
+            } else {
 
-              logger.db.debug(TAGS, insertQuery.text);
+              query = users.update({
+                'singlyAccessToken': token.access_token
+              }).where(users.singlyId.equals(profiles.body.id)).toQuery();
 
-              client.query(insertQuery.text + 'RETURNING id', insertQuery.values, function(error, result){
+            }
+            var user = result.rows[0];
+
+            logger.db.debug(TAGS, query.text);
+
+            client.query(query.text + 'RETURNING id', query.values, function(error, result){
                 if (error) return res.json({error: error, data: null}), logger.routes.error(TAGS, error);
 
                 logger.db.debug(TAGS, result);
 
-                return res.json({error: null, data:result.rows[0]});
+              // Setup groups
+              var groupQuery = userGroups.select(
+                groups.name
+              ).from(
+                userGroups.join(groups).on(
+                  userGroups.groupId.equals(groups.id)
+                )
+              ).where(
+                userGroups.userId.equals(user.id)
+              ).toQuery();
 
+              client.query(groupQuery.text, groupQuery.values, function(error, results){
+                if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+                user.groups = results.rows.map(function(group){ return group.name; });
+
+                // Save user in session
+                req.session.user = user;
+
+                return res.json({error: null, data:user});
               });
-
-            } else {
-              var updateQuery = users.update({
-                'singlyAccessToken': token.access_token
-              }).where(users.singlyId.equals(profiles.body.id)).toQuery();
-
-              logger.db.debug(TAGS, updateQuery.text);
-
-              client.query(updateQuery.text, updateQuery.values, function(error,result){
-                if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
-
-                return res.json({error: null, data:result.rows[0]});
-              });
-            }
+            });
           });
         });
       });

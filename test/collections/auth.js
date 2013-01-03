@@ -79,7 +79,8 @@ describe('GET v1/callback', function(){
     })
   });
 
-})
+
+});
 
 
 
