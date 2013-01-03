@@ -36,7 +36,7 @@ app.use(require('./collections/productTags/server'));
  * REPL
  */
 
-if(cluster.isMaster){
+if(config.repl.enabled && cluster.isMaster){
   net.createServer(function(socket){
     var r = repl.start({
       prompt: config.repl.prompt
