@@ -8,5 +8,6 @@ module.exports = {
   , 'businessId': productCategories.businessId
   , 'isFeatured': productCategories.isFeatured
   , 'order':      productCategories.order
+  , 'categories': true // allow categories to come through
   }
 };

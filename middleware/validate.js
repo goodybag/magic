@@ -7,12 +7,16 @@ var
 , utils  = require('../lib/utils')
 , createValidator = function(schema){
     return function(req, res, next){
-
       // extract out relevant data
       var data = {};
       for (var key in schema) {
-        if (typeof req.body[key] !== 'undefined' && req.body[key] !== null) {
+        if (typeof req.body[key] === 'undefined' || req.body[key] === null) continue;
+
+        // Ensure we're not convering an object or array
+        if (!utils.isArray(req.body[key]) && !utils.isObject(req.body[key])) {
           data[key] = ''+req.body[key]; // NOTE: converting to string for validation
+        }else{
+          data[key] = req.body[key];
         }
       }
 
@@ -27,7 +31,6 @@ var
         }
       }
 
-      req.body = data;
       next();
     };
   }

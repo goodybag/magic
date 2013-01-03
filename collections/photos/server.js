@@ -33,6 +33,7 @@ server.get(
 server.post(
   '/v1/photos'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.create
 );
 
@@ -47,6 +48,7 @@ server.get(
 server.patch(
   '/v1/photos/:photoId'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.update
 );
 
@@ -54,6 +56,7 @@ server.patch(
 server.post(
   '/v1/photos/:photoId'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.update
 );
 
