@@ -25,7 +25,8 @@ module.exports = function(fields) {
 
     // filter request body based on allowed fields
     var data = {};
-    for (var fieldName in allowedFields) {
+    for (var fieldName in req.body) {
+      if (!allowedFields.hasOwnProperty(fieldName)) continue;
       data[fieldName] = req.body[fieldName];
     }
 

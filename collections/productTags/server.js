@@ -33,6 +33,7 @@ server.get(
 server.post(
   '/v1/product-tags'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.create
 );
 
@@ -47,6 +48,7 @@ server.get(
 server.patch(
   '/v1/product-tags/:productTagId'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.update
 );
 
@@ -54,6 +56,7 @@ server.patch(
 server.post(
   '/v1/product-tags/:productTagId'
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.update
 );
 
@@ -61,6 +64,7 @@ server.post(
 server.del(
   '/v1/product-tags/:productTagId'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , routes.del
 );
 
