@@ -1,6 +1,7 @@
+var appConfig = require('../config');
 module.exports = {
   mongoConnStr:     "mongodb://localhost/goodybag"
-, postgresConnStr:  "postgres://localhost:5432/goodybag"
+, postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
     'businesses'
   , 'locations'
