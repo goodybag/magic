@@ -46,12 +46,12 @@ module.exports.singlyCallback =  function(req, res){
   var TAGS = ['create-singly-user', req.uuid];
 
   db.getClient( function(error, client){
+    var code = req.param('code');
     // if callback doesn't return code then return SINGLY CALLBACK error
-    if(req.toString().indexOf('code') === -1){
+    if(!code){
       logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
       return res.json({error: errors.auth.SINGLY_CALLBACK });
-    } else{
-    var code = req.param('code');
+    } else {
 
     //get access token from callback
     singly.getAccessToken(code, function(err, accessTokenRes, token){

@@ -182,7 +182,7 @@ describe('PATCH /v1/locations/:id', function() {
 
   it('should return error of validation', function(done){
     tu.loginAsClient(function(error, user){
-      utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'dagsg', country:'' }, function(err, res, payload) {
+      utils.post(baseUrl + '/v1/locations', { businessId:2, name:'rtwtrw', street1:'wtyt4', zip:"12345" }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(payload.error);
