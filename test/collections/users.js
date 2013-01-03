@@ -67,19 +67,10 @@ describe('POST /v1/users', function() {
 
   it('should not create new user if user email existing', function(done){
 
-    before(function(){
-      var user = {
-        email: "tests@goodybag.com"
-      , password: "password"
-      };
-    utils.post(baseUrl + '/v1/users', user, function(error, res,payload){
-
-    })
-    })
     var user = {
-      email: "tests@goodybag.com"
+      email: "sales@goodybag.com"
     , password: "password"
-    };
+    }
 
     utils.post(baseUrl + '/v1/users', user, function(error, res, payload){
       assert(!error);
