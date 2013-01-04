@@ -300,7 +300,7 @@ module.exports.update = function(req, res){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
         // If they didn't provide categories, stop here
-        if (!categories || categories.length === 0)
+        if (!categories)
           return res.json({ error: null, data: null });
 
         // Move on to next stage
@@ -316,6 +316,9 @@ module.exports.update = function(req, res){
 
       client.query(query.text, query.values, function(error){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        // If we're deleting the categories, we're done
+        if (categories.length === 0) return;
 
         stage.updateProductCategoriesRelations(client, productId, categories);
       });
