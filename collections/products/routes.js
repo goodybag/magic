@@ -66,7 +66,13 @@ module.exports.get = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(products, req.fields)
-
+      // :DEBUG: node-sql cant support this yet
+      /*.from(products
+        .join(productsProductCategories)
+          .on(productsProductCategories.productId.equals(products.id))
+        .join(productCategories)
+          .on(productCategories.id.equals(productsProductCategories.productCategoryId))
+        )*/
       .from('products LEFT JOIN "productsProductCategories" ppc ON ppc."productId" = products.id LEFT JOIN "productCategories" ON "productCategories".id = ppc."productCategoryId"')
       .where(products.id.equals(req.param('productId')))
       .toQuery();

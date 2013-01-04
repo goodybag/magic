@@ -66,7 +66,6 @@ describe('GET /v1/businesses/:id/locations', function() {
   });
 });
 
-
 describe('GET /v1/locations/:id', function() {
 
   it('should respond with a location', function(done) {
@@ -100,9 +99,7 @@ describe('GET /v1/locations/:id', function() {
       done();
     });
   });
-
 });
-
 
 describe('POST /v1/locations', function() {
 

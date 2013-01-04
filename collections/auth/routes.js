@@ -23,7 +23,6 @@ var
 , singly        = require('singly')(clientId, clientSecret,callbackUrl);
 ;
 
-
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});

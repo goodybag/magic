@@ -54,9 +54,7 @@ describe('GET /v1/businesses/:id/products', function() {
       done();
     });
   })
-
 });
-
 
 describe('GET /v1/products/:id', function() {
 
@@ -85,9 +83,7 @@ describe('GET /v1/products/:id', function() {
       done();
     });
   });
-
 });
-
 
 describe('POST /v1/products', function() {
 
@@ -127,7 +123,6 @@ describe('POST /v1/products', function() {
       done();
     });
   });
-
 
   it('should create a product with categories and respond with the id of the new product', function(done) {
     tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2] }), 'application/json', function(err, payload, res) {
@@ -258,9 +253,7 @@ describe('GET /v1/products/:id/categories', function() {
       done();
     });
   });
-
 });
-
 
 describe('POST /v1/products/:id/categories', function() {
 

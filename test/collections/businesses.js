@@ -124,8 +124,6 @@ describe('POST /v1/businesses', function(){
       });
     });
   });
-
-
 });
 
 describe('POST /v1/businesses/:id', function(){

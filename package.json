@@ -24,9 +24,7 @@
     "singly": "0.3.x",
 
     "sql": "https://github.com/brianc/node-sql/tarball/master",
-
     "validator": "0.4.x",
-
     "request": "2.12.x",
     "underscore": "1.4.x",
     "when": "1.7.x",
@@ -48,4 +46,3 @@
   },
   "author": "Goodybag Engineering <engineering@goodybag.com>"
 }
-
