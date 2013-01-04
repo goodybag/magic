@@ -17,14 +17,17 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
+    , validators: { isInt: true }
     }
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
+    , validators: { isInt: true }
     }
   , consumerId: {
       type: 'int'
     // :TODO: , meta: 'references businesses(id) on delete cascade'
+    , validators: { isInt: true }
     }
   , url: {
       type: 'text'
@@ -41,6 +44,7 @@ define(function(require){
     }
   , isEnabled: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   , createdAt: {
       type: 'timestamp'

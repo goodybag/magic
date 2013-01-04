@@ -138,7 +138,7 @@ describe('POST /v1/products', function() {
     });
   });
 
-  it('should fail to create a product with categories because of invalid cateogories', function(done) {
+  it('should fail to create a product with categories because of invalid categories', function(done) {
     tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [9999, 99999] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
