@@ -65,12 +65,6 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
-  , singly: {
-      clientId: "e8171ccd4a3b90f15bbb41088efccc06"
-    , clientSecret: "73fa4013446e9985e9217455479d3c3c"
-    , callbackUrl: "http://localhost:8986/v1/callback"
-    , apiBaseUrl: "https://api.singly.com"
-    }
   }
 
 , staging: {
