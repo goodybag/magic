@@ -45,12 +45,13 @@ module.exports.singlyCallback =  function(req, res){
   var TAGS = ['create-singly-user', req.uuid];
 
   db.getClient( function(error, client){
+    var code = req.param('code');
     // if callback doesn't return code then return SINGLY CALLBACK error
-    if(req.toString().indexOf('code') === -1){
+    if(!code){
       logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
       return res.json({error: errors.auth.SINGLY_CALLBACK });
-    } else{
-    var code = req.param('code');
+    }
+    else {
 
     //get access token from callback
     singly.getAccessToken(code, function(err, accessTokenRes, token){
@@ -64,47 +65,56 @@ module.exports.singlyCallback =  function(req, res){
           var singlyIdQuery = users.select(users.id).from(users).where(users.singlyId.equals(profiles.body.id)).toQuery();
 
           client.query(singlyIdQuery.text, singlyIdQuery.values, function(error,result){
-
+            var query = {};
             if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
 
             // if singlyId is in the users table then update singlyAccessToken column, else create new user
             if(result.rows.length === 0){
-
-              var insertQuery = users.insert({
+              query = users.insert({
                 'singlyAccessToken': token.access_token
                 , 'singlyId': profiles.body.id
               }).toQuery();
+            }
+            else{
+               query = users.update({
+                  'singlyAccessToken': token.access_token
+                }).where(users.singlyId.equals(profiles.body.id)).toQuery();
+              }
 
-              logger.db.debug(TAGS, insertQuery.text);
+              var user = result.rows[0];
+              logger.db.debug(TAGS, query.text);
 
-              client.query(insertQuery.text + 'RETURNING id', insertQuery.values, function(error, result){
+              client.query(query.text + 'RETURNING id', query.values, function(error, result){
                 if (error) return res.json({error: error, data: null}), logger.routes.error(TAGS, error);
 
                 logger.db.debug(TAGS, result);
 
-                return res.json({error: null, data:result.rows[0]});
+                // Setup groups
+                query = userGroups.select(
+                  groups.name
+                ).from(
+                  userGroups.join(groups).on(
+                    userGroups.groupId.equals(groups.id)
+                  )
+                ).where(
+                  userGroups.userId.equals(user.id)
+                ).toQuery();
 
+                client.query(query.text, query.values, function(error, results){
+                  if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+                  user.groups = results.rows.map(function(group){ return group.name; });
+
+                  // Save user in session
+                  req.session.user = user;
+                  return res.json({ error: null, data: user });
               });
-
-            } else {
-              var updateQuery = users.update({
-                'singlyAccessToken': token.access_token
-              }).where(users.singlyId.equals(profiles.body.id)).toQuery();
-
-              logger.db.debug(TAGS, updateQuery.text);
-
-              client.query(updateQuery.text, updateQuery.values, function(error,result){
-                if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
-
-                return res.json({error: null, data:result.rows[0]});
-              });
-            }
+            });
           });
         });
-    });
-   }
+      });
+    }
   });
-
 };
 /**
  * Email Authentication
