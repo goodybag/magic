@@ -17,7 +17,7 @@ var config = {
       , fileRotate: true
       }
     }
-    http: {
+  , http: {
       port: 3000
     }
   , repl: {
@@ -63,7 +63,7 @@ var config = {
 , staging: {
     logging: {
       enabled: true
-      transports: {
+    , transports: {
         console: true
       }
     }
