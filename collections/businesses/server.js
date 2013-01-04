@@ -33,6 +33,7 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.create
 );
@@ -41,6 +42,7 @@ server.post(
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );
@@ -50,6 +52,7 @@ server.post(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.validate(schema)
+, middleware.fields(fields)
 , routes.update
 );
 

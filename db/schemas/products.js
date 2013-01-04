@@ -17,9 +17,11 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
+    , validators: { isInt: true }
     }
   , name: {
       type: 'text'
+    , validators: { len:[1] }
     , sanitizers: { trim: true }
     }
   , description: {
@@ -27,15 +29,19 @@ define(function(require){
     }
   , price: {
       type: 'real'
+    , validators: { isDecimal: true }
     }
   , isVerified: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   , isArchived: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   , isEnabled: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   };
   return products;

@@ -25,6 +25,7 @@ server.get(
 // Products.create
 server.post(
   '/v1/products'
+, middleware.fields(fields.products)
 , middleware.validate(schema)
 , routes.create
 );
@@ -39,6 +40,7 @@ server.get(
 // Products.update
 server.patch(
   '/v1/products/:productId'
+, middleware.fields(fields.product)
 , middleware.validate(schema)
 , routes.update
 );
@@ -46,6 +48,7 @@ server.patch(
 // Products.update
 server.post(
   '/v1/products/:productId'
+, middleware.fields(fields.product)
 , middleware.validate(schema)
 , routes.update
 );
@@ -66,6 +69,7 @@ server.get(
 // Products.addCategory
 server.post(
   '/v1/products/:productId/categories'
+, middleware.fields(fields.productCategory)
 , routes.addCategory
 );
 

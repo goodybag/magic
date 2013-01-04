@@ -16,6 +16,7 @@ define(function(require){
     }
   , name: {
       type: 'text'
+    , validators: { len:[1] }
     , sanitizers: { trim: true }
     }
   , url: {
@@ -44,6 +45,7 @@ define(function(require){
     }
   , isEnabled: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   , createdAt: {
       type: 'timestamp'

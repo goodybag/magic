@@ -17,6 +17,7 @@ module.exports = {
   , lat        : locations.lat
   , lon        : locations.lon
   , isEnabled  : locations.isEnabled
+  , $postRequires : ['businessId', 'name']
   }
 
 , client: {
@@ -34,6 +35,7 @@ module.exports = {
   , lat        : locations.lat
   , lon        : locations.lon
   , isEnabled  : locations.isEnabled
+  , $postRequires : ['businessId', 'name']
   }
 
 , sales: {
@@ -51,6 +53,7 @@ module.exports = {
   , lat        : locations.lat
   , lon        : locations.lon
   , isEnabled  : locations.isEnabled
+  , $postRequires : ['businessId', 'name']
   }
 
 , admin: {
@@ -68,5 +71,6 @@ module.exports = {
   , lat        : locations.lat
   , lon        : locations.lon
   , isEnabled  : locations.isEnabled
+  , $postRequires : ['businessId', 'name']
   }
 };

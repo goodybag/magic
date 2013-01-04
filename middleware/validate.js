@@ -22,7 +22,7 @@ var
 
       // validate
       var error = utils.validate(data, schema);
-      if (error) return utils.sendError(res, error);
+      if (error) return utils.sendError(res, "0201", error);
 
       // convert blank strings to null for postgres' sake
       for (var k in data) {

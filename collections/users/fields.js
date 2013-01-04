@@ -9,15 +9,18 @@ module.exports = {
     id       : users.id
   , email    : users.email
   , password : users.password
+  , $postRequires : ['email', 'password']
   }
 , sales: {
     id       : users.id
   , email    : users.email
   , password : users.password
+  , $postRequires : ['email', 'password']
   }
 , admin: {
     id       : users.id
   , email    : users.email
   , password : users.password
+  , $postRequires : ['email', 'password']
   }
 };
