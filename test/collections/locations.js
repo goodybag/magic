@@ -49,6 +49,21 @@ describe('GET /v1/businesses/:id/locations', function() {
     });
   });
 
+  it('should respond nothing with invalid business id', function(done) {
+    utils.get(baseUrl + '/v1/businesses/100/locations', function(error, res, payload) {
+      assert(!error);
+      assert(payload.data.length == 0);
+      done();
+    });
+  });
+
+  it('should respond error of invalid business id type', function(done) {
+    utils.get(baseUrl + '/v1/businesses/abcd/locations', function(error, res, payload) {
+      assert(!error);
+      assert(payload.error);
+      done();
+    });
+  });
 });
 
 
@@ -66,6 +81,22 @@ describe('GET /v1/locations/:id', function() {
       assert(payload.data.id == 1);
       assert(payload.data.businessId == 1);
       assert(payload.data.name == 'Location 1');
+      done();
+    });
+  });
+
+  it('should respond nothing with invalid location id', function(done) {
+    utils.get(baseUrl + '/v1/locations/100', function(error, res, payload) {
+      assert(!error);
+      assert(payload.data === null);
+      done();
+    });
+  });
+
+  it('should respond error of invalid business id type', function(done) {
+    utils.get(baseUrl + '/v1/locations/abcd', function(error, res, payload) {
+      assert(!error);
+      assert(payload.error != null);
       done();
     });
   });
@@ -101,10 +132,21 @@ describe('POST /v1/locations', function() {
           done();
         });
       });
-
     });
   });
 
+  it('should return error of validation', function(done){
+    tu.loginAsClient(function(error, user){
+      utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'', country:'' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
+        assert(payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
 });
 
 
@@ -130,6 +172,19 @@ describe('PATCH /v1/locations/:id', function() {
         assert(!err);
         assert(res.statusCode == 200);
 
+        assert(payload.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should return error of validation', function(done){
+    tu.loginAsClient(function(error, user){
+      utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'dagsg', country:'' }, function(err, res, payload) {
+        assert(!err);
+        assert(res.statusCode == 200);
         assert(payload.error);
         tu.logout(function(){
           done();

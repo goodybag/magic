@@ -23,7 +23,7 @@ define(function(require){
   , singlyAccessToken: {
       type: 'text'
     }
-  , signlyId: {
+  , singlyId: {
       type: 'text'
     }
   };
