@@ -81,6 +81,7 @@ module.exports.get = function(req, res){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
+      if(result.rows.length > 0){
 
       var product = result.rows[0];
       // pull categories out of the rows and into an embedded array
@@ -93,6 +94,9 @@ module.exports.get = function(req, res){
       delete product.categoryName;
 
       return res.json({ error: null, data: product });
+      } else {
+        return  res.json({ error: null, data: null});
+      }
     });
   });
 };
