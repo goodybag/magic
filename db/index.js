@@ -11,12 +11,15 @@ var
   pg = require('pg')
 , sql = require('sql')
 , pooler = require('generic-pool')
+, Transaction = require('pg-transaction')
 
   // Promise to fullfil this variable!
 , client = null
 
   // Other packages in use
 // , pooler = require('generic-pool')
+, async = require('async')
+, logger = require('../lib/logger')({app: 'api', component: 'db'});
 ;
 
 exports.pg = pg;
@@ -60,8 +63,79 @@ exports.getClient = function(callback){
   // callback(null, client);
 };
 
+exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb) {
+  var tx = new Transaction(client);
+  var savePointed = false;
+  var stage = ''; // for logging
+
+  // checks into our upsert to see if we've finished or not
+  var checkResults = function(continueCb) {
+    return function(err, results) {
+      if (err) {
+        logger.log(['upsert'], 'Failed during "'+stage+'" stage: ', err);
+        // an error, abort
+        if (savePointed) { tx.release('upsert'); }
+        tx.abort(function() { originalCb(err); });
+      } else {
+        if (results[1].rowCount === 1) {
+          // success, we're done
+          if (savePointed) { tx.release('upsert'); }
+          tx.commit(originalCb);
+        } else {
+          // carry on
+          continueCb && continueCb();
+        }
+      }
+    };
+  };
+
+  // try to update first
+  async.series([
+    function(cb) {
+      // init transaction
+      stage = 'begin';
+      tx.begin(cb);
+    },
+    function(cb) {
+      // run update
+      stage = 'update1';
+      tx.query(updateQuery, updateValues, cb);
+    }
+  ], checkResults(function() {
+    // update failed, attempt an insert
+    async.series([
+      function(cb) {
+        // make a savepoint
+        stage = 'savepoint';
+        tx.savepoint('upsert', cb);
+      },
+      function(cb) {
+        // run insert
+        savePointed = true;
+        stage = 'insert';
+        tx.query(insertQuery, insertValues, cb);
+      }
+    ], checkResults(function() {
+      // insert failed; the session must have been created since the time that we failed the update
+      async.series([
+        function(cb) {
+          // rollback to the savepoint
+          stage = 'rollback';
+          tx.rollback('upsert', cb);
+        },
+        function(cb) {
+          // update again
+          stage = 'update2';
+          tx.query(updateQuery, updateValues, cb);
+        }
+      ], checkResults());
+    }));
+  }));
+};
+
 exports.schemas = {
-  businesses:                require('./schemas/businesses')
+  sessions:                  require('./schemas/sessions')
+, businesses:                require('./schemas/businesses')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , groups:                    require('./schemas/groups')
