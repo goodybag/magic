@@ -3,7 +3,8 @@ module.exports = {
   mongoConnStr:     "mongodb://localhost/goodybag"
 , postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
-    'businesses'
+    'sessions'
+  , 'businesses'
   , 'locations'
   , 'users'
   , 'groups'

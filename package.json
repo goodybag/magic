@@ -19,6 +19,7 @@
     "node.extend": "1.0.x",
     "noop": "0.2.x",
     "pg": "0.10.x",
+    "pg-transaction": "0.1.x",
     "randomstring": "1.0.x",
 
     "singly": "0.3.x",
