@@ -24,7 +24,6 @@ describe('GET /v1/photos', function() {
       done();
     });
   });
-
 });
 
 
@@ -45,6 +44,16 @@ describe('GET /v1/businesses/:id/photos', function() {
     });
   });
 
+  it('should return empty with invalid businesses id', function(done){
+    tu.get('/v1/businesses/100/photos', function(err, payload) {
+
+      assert(!err);
+      payload = JSON.parse(payload);
+      assert(!payload.error);
+      assert(payload.data.length == 0);
+      done();
+    });
+  });
 });
 
 
@@ -63,7 +72,6 @@ describe('GET /v1/photos/:id', function() {
       done();
     });
   });
-
 });
 
 
@@ -95,10 +103,8 @@ describe('POST /v1/photos', function() {
           done();
         });
       });
-
     });
   });
-
 });
 
 
@@ -148,5 +154,4 @@ describe('DELETE /v1/photos/:id', function() {
       });
     });
   });
-
 });

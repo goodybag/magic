@@ -3,8 +3,9 @@ var
 , sinon   = require('sinon')
 , utils   = require('./../../lib/utils')
 , config  = require('./../../config')
-
+, tu = require('../../lib/test-utils')
 , baseUrl = config.baseUrl
+, callbackUrl = config.singly.callbackUrl
 ;
 
 describe('POST /v1/session', function() {
@@ -54,3 +55,32 @@ describe('POST /v1/session', function() {
     });
   });
 });
+
+describe('GET v1/oauth', function(){
+  it('should return callback url', function(done){
+    tu.get(baseUrl+'/v1/oauth?service=facebook', function(error, results){
+      assert(!error);
+      assert(!results.error);
+      results = JSON.parse(results);
+      assert(results.data.toString().indexOf("service=facebook") !== -1)
+      done();
+    });
+  });
+});
+
+describe('GET v1/callback', function(){
+  it('should returns error when no code', function(done){
+    var url = callbackUrl + "?error=ohaidosautrahir90347";
+    tu.get(url, function(error, results){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(results.error.name === "SINGLY_CALLBACK");
+      done();
+    })
+  });
+
+
+});
+
+
+

@@ -41,8 +41,7 @@ module.exports.get = function(req, res){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
-
-      return res.json({ error: null, data: result.rows[0] });
+      return res.json({ error: null, data: result.rows[0] || null});
     });
   });
 };
@@ -90,6 +89,14 @@ module.exports.create = function(req, res){
     , password: req.body.password
     };
 
+    var userEmail = users.select(users.id).from(users).where(users.email.equals(req.body.email)).toQuery();
+
+    client.query(userEmail.text, userEmail.values, function(error,result){
+
+      if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
+
+    if(result.rows.length == 0){
+
     utils.encryptPassword(user.password, function(error, password){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
@@ -104,6 +111,12 @@ module.exports.create = function(req, res){
 
         return res.json({ error: null, data: result.rows[0] });
       });
+    });
+    }
+    else
+      {
+        return res.json({error: errors.registration.EMAIL_REGISTERED});
+      }
     });
   });
 };

@@ -49,6 +49,8 @@ INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('2', '2', '2');
 INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
 INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
 INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('6', '6', '5');
+INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('7', '7', '5');
 COMMIT;
 SELECT setval('"userGroups_id_seq"', (SELECT MAX(id) from "userGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 

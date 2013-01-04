@@ -14,6 +14,8 @@ describe('GET /v1/businesses', function() {
       assert(!err);
       assert(!payload.error);
       assert(payload.data.length > 0);
+      assert(payload.data[0].id);
+      assert(payload.data[0].name.length > 0);
       done();
     });
   });
@@ -26,6 +28,24 @@ describe('GET /v1/businesses/:id', function() {
       assert(!err);
       assert(!payload.error);
       assert(payload.data.id === id);
+      done();
+    });
+  });
+
+  it('should fail if the id is not in the database', function(done){
+    var id = 5;
+    utils.get(baseUrl + '/v1/business' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.data === undefined);
+      done();
+    });
+  });
+
+  it('should fail if the id is not in correct type', function(done){
+    var id = "abcd";
+    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+      assert(!error);
+      assert(payload.error.severity === "ERROR");
       done();
     });
   });
@@ -104,6 +124,8 @@ describe('POST /v1/businesses', function(){
       });
     });
   });
+
+
 });
 
 describe('POST /v1/businesses/:id', function(){
@@ -130,6 +152,22 @@ describe('POST /v1/businesses/:id', function(){
     , url: 123
     };
     tu.loginAsSales(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail because user not allow to update information', function(done){
+    var business = {
+      name: "Poophead McGees"
+      , url: "http://www.google.com"
+    };
+    tu.loginAsClient(function(error, user){
       utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(results.error);
@@ -166,6 +204,22 @@ describe('PATCH /v1/businesses/:id', function(){
     };
     tu.loginAsSales(function(error, user){
       utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+        assert(!error);
+        assert(results.error);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail because user not allow to update information', function(done){
+    var business = {
+      name: "Poophead McGees"
+      , url: "http://www.google.com"
+    };
+    tu.loginAsClient(function(error, user){
+      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
         assert(!error);
         assert(results.error);
         tu.logout(function(){

@@ -26,8 +26,36 @@ var config = {
     }
   , passwordSalt: "$G00DYBAGR0CK$!"
   , consumerPasswordSaltLength: 10
+
+  , singly: {
+      clientId: "e8171ccd4a3b90f15bbb41088efccc06"
+    , clientSecret: "73fa4013446e9985e9217455479d3c3c"
+    , callbackUrl: "http://localhost:3000/v1/callback"
+    , apiBaseUrl: "https://api.singly.com"
+    }
+  }
+
+, test: {
+    postgresConnStr:  "postgres://localhost:5432/goodybag-test"
+  , cookieSecret: "g00dybagr0cks!"
+  , numWorkers: 4
+  , repl: {
+      prompt: "gb-api> "
+    , port: 4337
+    }
+  , http: {
+      port: 8986
+    }
+
   , validationOptions: {
       singleError: false
+    }
+
+  , singly: {
+      clientId: "e8171ccd4a3b90f15bbb41088efccc06"
+    , clientSecret: "73fa4013446e9985e9217455479d3c3c"
+    , callbackUrl: "http://localhost:8986/v1/callback"
+    , apiBaseUrl: "https://api.singly.com"
     }
   }
 
@@ -44,6 +72,12 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
+  , singly: {
+      clientId: "e8171ccd4a3b90f15bbb41088efccc06"
+    , clientSecret: "73fa4013446e9985e9217455479d3c3c"
+    , callbackUrl: "http://localhost:8986/v1/callback"
+    , apiBaseUrl: "https://api.singly.com"
+    }
   }
 
 , staging: {
