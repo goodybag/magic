@@ -26,6 +26,7 @@ define(function(require){
     }
   , tag: {
       type: 'text'
+    , validators: { len:[1] }
     }
   , createdAt: {
       type: 'timestamp'

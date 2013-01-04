@@ -29,6 +29,7 @@ define(function(require){
     }
   , name: {
       type: 'text'
+    , validators: { len:[1] }
     , sanitizers: { trim: true }
     }
   };
