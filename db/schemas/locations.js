@@ -17,6 +17,7 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
+    , validators: { isInt: true }
     }
   , name: {
       type: 'text'
@@ -56,6 +57,7 @@ define(function(require){
     }
   , isEnabled: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   };
   return locations;

@@ -44,6 +44,7 @@ define(function(require){
     }
   , isEnabled: {
       type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
     }
   , createdAt: {
       type: 'timestamp'

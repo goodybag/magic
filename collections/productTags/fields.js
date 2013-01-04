@@ -9,6 +9,7 @@ module.exports = {
   , productId  : productTags.productId
   , tag        : productTags.tag
   , createdAt  : productTags.createdAt
+  , $postRequires : ['businessId', 'tag']
   }
 
 , client: {
@@ -17,6 +18,7 @@ module.exports = {
   , productId  : productTags.productId
   , tag        : productTags.tag
   , createdAt  : productTags.createdAt
+  , $postRequires : ['businessId', 'tag']
   }
 
 , sales: {
@@ -25,6 +27,7 @@ module.exports = {
   , productId  : productTags.productId
   , tag        : productTags.tag
   , createdAt  : productTags.createdAt
+  , $postRequires : ['businessId', 'tag']
   }
 
 , admin: {
@@ -33,5 +36,6 @@ module.exports = {
   , productId  : productTags.productId
   , tag        : productTags.tag
   , createdAt  : productTags.createdAt
+  , $postRequires : ['businessId', 'tag']
   }
 };

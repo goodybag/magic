@@ -26,6 +26,7 @@ server.get(
 server.post(
   '/v1/locations'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.create
 );
@@ -41,6 +42,7 @@ server.get(
 server.patch(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );
@@ -49,6 +51,7 @@ server.patch(
 server.post(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );

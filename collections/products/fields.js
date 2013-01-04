@@ -5,47 +5,55 @@ var productCategories = db.tables.productCategories;
 module.exports = {
   products: {
     "default": {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , client: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , sales: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , admin: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
   }
   
@@ -61,6 +69,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , categories   : true
     }
 
   , client: {
@@ -74,6 +83,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , categories   : true
     }
 
   , sales: {
@@ -87,6 +97,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , categories   : true
     }
 
   , admin: {
@@ -100,6 +111,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , categories   : true
     }
   }
 
