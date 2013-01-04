@@ -42,23 +42,6 @@ var config = {
     }
   }
 
-, test: {
-    postgresConnStr:  "postgres://localhost:5432/goodybag-test"
-  , cookieSecret: "g00dybagr0cks!"
-  , numWorkers: 4
-  , repl: {
-      prompt: "gb-api> "
-    , port: 4337
-    }
-  , http: {
-      port: 8986
-    }
-
-  , validationOptions: {
-      singleError: false
-    }
-  }
-
 , dev: {
     http: {
       port: 3000
