@@ -1,6 +1,7 @@
 var db = require('../../db');
 var products = db.tables.products;
 var productCategories = db.tables.productCategories;
+var productTags = db.tables.productTags;
 
 module.exports = {
   products: {
@@ -48,7 +49,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     }
   }
-  
+
 , product: {
     "default": {
       id           : products.id
@@ -61,6 +62,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
     }
 
   , client: {
@@ -74,6 +76,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
     }
 
   , sales: {
@@ -87,6 +90,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
     }
 
   , admin: {
@@ -100,6 +104,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
     }
   }
 
