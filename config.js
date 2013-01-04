@@ -10,6 +10,13 @@ var
 
 var config = {
   defaults: {
+    logging: {
+      enabled: true
+    , transports: {
+        console: false
+      , fileRotate: true
+      }
+    }
     http: {
       port: 3000
     }
@@ -60,7 +67,10 @@ var config = {
   }
 
 , test: {
-    http: {
+    logging: {
+      enabled: false
+    }
+  , http: {
       port: 8986
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
@@ -68,7 +78,13 @@ var config = {
   }
 
 , staging: {
-    http: {
+    logging: {
+      enabled: true
+      transports: {
+        console: true
+      }
+    }
+  , http: {
       port: process.env['PORT'] || 5000
     }
   , postgresConnStr: process.env['DATABASE_URL']
