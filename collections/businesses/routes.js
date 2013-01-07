@@ -82,22 +82,32 @@ module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of businesses', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(businesses, req.fields)
       .from(businesses);
 
+    // add query filters
     if (req.param('filter')) {
       query = query.where(businesses.name.like('%'+req.param('filter')+'%'))
     }
+    query = utils.paginateQuery(req, query);
 
-    client.query(query.toQuery(), function(error, result){
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      logger.db.debug(TAGS, dataResult);
 
-      return res.json({ error: null, data: result.rows });
+      // run count query
+      client.query('SELECT COUNT(*) as count FROM businesses', function(error, countResult) {
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };

@@ -20,6 +20,17 @@ describe('GET /v1/productCategories', function() {
       // the existence of all of our fields returned based on
       // logged in user
       assert(results.data[0].name);
+      assert(results.meta.total > 1);
+      done();
+    });
+  });
+  it('should paginate', function(done) {
+    utils.get(baseUrl + '/v1/productCategories?offset=1&limit=1', function(error, response, results) {
+      assert(!error);
+      assert(!results.error);
+      assert(results.data.length === 1);
+      assert(results.data[0].name);
+      assert(results.meta.total > 1);
       done();
     });
   });
