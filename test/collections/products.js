@@ -18,6 +18,7 @@ describe('GET /v1/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -32,6 +33,7 @@ describe('GET /v1/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -54,6 +56,7 @@ describe('GET /v1/businesses/:id/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -108,6 +111,7 @@ describe('GET /v1/products/:id', function() {
 
       assert(!payload.error);
       assert(payload.data.length == 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });

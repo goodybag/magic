@@ -21,6 +21,7 @@ describe('GET /v1/photos', function() {
       assert(!payload.error);
       assert(payload.data.length > 0);
       assert(payload.data[0].id == 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -35,6 +36,7 @@ describe('GET /v1/photos', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -55,6 +57,7 @@ describe('GET /v1/businesses/:id/photos', function() {
       assert(!payload.error);
       assert(payload.data.length == 2);
       assert(payload.data[0].id == 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -80,6 +83,7 @@ describe('GET /v1/businesses/:id/photos', function() {
 
       assert(!payload.error);
       assert(payload.data.length == 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });

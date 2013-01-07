@@ -27,9 +27,11 @@ module.exports.get = function(req, res){
   var TAGS = ['get-productCategory', req.uuid];
   logger.routes.debug(TAGS, 'fetching product category ' + req.params.id, {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(
       productCategories
     , req.fields
@@ -39,6 +41,7 @@ module.exports.get = function(req, res){
       productCategories.id.equals(req.params.id)
     ).toQuery();
 
+    // run data query
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
@@ -58,9 +61,11 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productCategories', req.uuid];
   logger.routes.debug(TAGS, 'fetching product categories', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(
       productCategories
     , req.fields
@@ -68,17 +73,28 @@ module.exports.list = function(req, res){
       productCategories
     );
 
+    // add query filters
     if (req.params.businessId){
-      query = query.where(productCategories.businessId.equals(req.params.businessId));
+      query.where(productCategories.businessId.equals(req.params.businessId));
     }
-    query = utils.paginateQuery(req, query);
+    utils.paginateQuery(req, query);
 
-    client.query(query.toQuery(), function(error, result){
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      logger.db.debug(TAGS, dataResult);
 
-      return res.json({ error: null, data: result.rows });
+      // run count query
+      query = productCategories.select('COUNT(*) as count');
+      if (req.param('businessId')) {
+        query.where(productCategories.businessId.equals(req.param('businessId')));
+      }
+      client.query(query.toQuery(), function(error, countResult) {
+        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };

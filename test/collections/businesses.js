@@ -16,6 +16,7 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);      
       done();
     });
   });
@@ -34,6 +35,7 @@ describe('GET /v1/businesses', function() {
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);
       done();
     });
   });

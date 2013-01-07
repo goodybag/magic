@@ -23,6 +23,7 @@ describe('GET /v1/locations', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -38,6 +39,7 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name == 'Location 2');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -60,6 +62,7 @@ describe('GET /v1/businesses/:id/locations', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -91,6 +94,7 @@ describe('GET /v1/businesses/:id/locations', function() {
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name);
+      assert(payload.meta.total > 1);
       done();
     });
   });

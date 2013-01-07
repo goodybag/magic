@@ -20,6 +20,7 @@ describe('GET /v1/productCategories', function() {
       // the existence of all of our fields returned based on
       // logged in user
       assert(results.data[0].name);
+      assert(results.meta.total > 1);
       done();
     });
   });
@@ -29,6 +30,7 @@ describe('GET /v1/productCategories', function() {
       assert(!results.error);
       assert(results.data.length === 1);
       assert(results.data[0].name);
+      assert(results.meta.total > 1);
       done();
     });
   });
