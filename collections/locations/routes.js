@@ -35,14 +35,14 @@ module.exports.list = function(req, res){
     var query = utils.selectAsMap(locations, req.fields)
       .from(locations);
 
-    // filter by businessId, if given as a path param
+    // add query filters
     if (req.param('businessId')) {
       query.where(locations.businessId.equals(req.param('businessId')));
     }
+    query = utils.paginateQuery(req, query);
 
-    query = query.toQuery();
-
-    client.query(query.text, query.values, function(error, result){
+    // run query
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

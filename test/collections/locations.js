@@ -27,6 +27,21 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should paginate', function(done) {
+    tu.get('/v1/locations?page=2&pagesize=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name == 'Location 2');
+      done();
+    });
+  });
+
 });
 
 
@@ -41,7 +56,7 @@ describe('GET /v1/businesses/:id/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 1);
+      assert(payload.data.length > 0);
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
@@ -61,6 +76,21 @@ describe('GET /v1/businesses/:id/locations', function() {
     utils.get(baseUrl + '/v1/businesses/abcd/locations', function(error, res, payload) {
       assert(!error);
       assert(payload.error);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/locations?page=2&pagesize=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name);
       done();
     });
   });

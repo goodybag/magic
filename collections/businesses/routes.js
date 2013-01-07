@@ -88,9 +88,11 @@ module.exports.list = function(req, res){
     var query = utils.selectAsMap(businesses, req.fields)
       .from(businesses);
 
+    // add query filters
     if (req.param('filter')) {
       query = query.where(businesses.name.like('%'+req.param('filter')+'%'))
     }
+    query = utils.paginateQuery(req, query);
 
     client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);

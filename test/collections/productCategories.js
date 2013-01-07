@@ -23,6 +23,15 @@ describe('GET /v1/productCategories', function() {
       done();
     });
   });
+  it('should paginate', function(done) {
+    utils.get(baseUrl + '/v1/productCategories?page=2&pagesize=1', function(error, response, results) {
+      assert(!error);
+      assert(!results.error);
+      assert(results.data.length === 1);
+      assert(results.data[0].name);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/productCategories/:id', function() {

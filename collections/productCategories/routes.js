@@ -71,10 +71,9 @@ module.exports.list = function(req, res){
     if (req.params.businessId){
       query = query.where(productCategories.businessId.equals(req.params.businessId));
     }
+    query = utils.paginateQuery(req, query);
 
-    query = query.toQuery();
-
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

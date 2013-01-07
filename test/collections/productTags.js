@@ -25,6 +25,20 @@ describe('GET /v1/product-tags', function() {
     });
   });
 
+  it('should paginate', function(done) {
+    tu.get('/v1/product-tags?page=2&pagesize=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      done();
+    });
+  });
+
 });
 
 
@@ -41,6 +55,20 @@ describe('GET /v1/businesses/:id/product-tags', function() {
       assert(!payload.error);
       assert(payload.data.length == 2);
       assert(payload.data[0].id == 1);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/product-tags?page=2&pagesize=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
       done();
     });
   });

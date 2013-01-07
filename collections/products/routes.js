@@ -40,6 +40,7 @@ module.exports.list = function(req, res){
     if (req.param('businessId')) {
       query.where(products.businessId.equals(req.param('businessId')));
     }
+    query = utils.paginateQuery(req, query);
 
     query = query.toQuery();
 

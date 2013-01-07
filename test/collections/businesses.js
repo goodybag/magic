@@ -19,6 +19,24 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+  it('should filter', function(done) {
+    utils.get(baseUrl + '/v1/businesses?filter=2', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      done();
+    });
+  });
+  it('should paginate', function(done) {
+    utils.get(baseUrl + '/v1/businesses?page=2&pagesize=1', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/businesses/:id', function() {
