@@ -16,6 +16,26 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);      
+      done();
+    });
+  });
+  it('should filter', function(done) {
+    utils.get(baseUrl + '/v1/businesses?filter=2', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      done();
+    });
+  });
+  it('should paginate', function(done) {
+    utils.get(baseUrl + '/v1/businesses?offset=1&limit=1', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);
       done();
     });
   });
