@@ -47,7 +47,19 @@ define(function(require){
       type: 'int'
     , validators: { len: 5 }
     }
+  , isGB: {
+      type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
+    }
+  , isVerified: {
+      type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
+    }
   , isEnabled: {
+      type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
+    }
+  , isDeleted: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
     }

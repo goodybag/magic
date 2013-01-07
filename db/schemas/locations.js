@@ -52,12 +52,10 @@ define(function(require){
     }
   , lat: {
       type: 'int'
-    , meta: 'default 0'
     , sanitizers: { ifNull:0 }
     }
   , lon: {
       type: 'int'
-    , meta: 'default 0'
     , sanitizers: { ifNull:0 }
     }
   , isEnabled: {
