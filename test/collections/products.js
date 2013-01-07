@@ -137,7 +137,7 @@ describe('POST /v1/products', function() {
     tu.post('/v1/products', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -149,7 +149,7 @@ describe('POST /v1/products', function() {
   it('should fail to post new product because of invalid field', function (done){
     tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi" }), 'application/json', function(err, payload, res) {
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
       payload = JSON.parse(payload);
       assert(payload.error);
       done();
@@ -172,9 +172,8 @@ describe('POST /v1/products', function() {
 
   it('should fail to create a product with categories because of invalid categories', function(done) {
     tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [9999, 99999] }), 'application/json', function(err, payload, res) {
-
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -206,7 +205,7 @@ describe('PATCH /v1/products/:id', function() {
     tu.patch('/v1/products/2', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -218,7 +217,7 @@ describe('PATCH /v1/products/:id', function() {
   it('should fail to update product because of invalid field', function (done){
     tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi", description: "" }), 'application/json', function(err, payload, res) {
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
       payload = JSON.parse(payload);
       assert(payload.error);
       done();

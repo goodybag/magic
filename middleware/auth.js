@@ -49,7 +49,7 @@ auth.allow = function(groups){
       return logger.error(TAGS, errors.auth.NOT_AUTHENTICATED), res.json({ error: errors.auth.NOT_AUTHENTICATED, data: null });
 
     if (!req.session.user.groups || req.session.user.groups.length === 0 || !isUserAllowed(req.session.user, groups))
-      return logger.error(TAGS, errors.auth.NOT_ALLOWED), res.json({ error: errors.auth.NOT_ALLOWED, data: null });
+      return logger.error(TAGS, errors.auth.NOT_ALLOWED), utils.sendError(res, "0002");
     next();
   };
 };
