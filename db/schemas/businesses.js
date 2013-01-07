@@ -49,22 +49,18 @@ define(function(require){
     }
   , isGB: {
       type: 'boolean'
-    , meta: 'default FALSE'
     , validators: { is:/true|false|1|0/ }
     }
   , isVerified: {
       type: 'boolean'
-    , meta: 'default FALSE'
     , validators: { is:/true|false|1|0/ }
     }
   , isEnabled: {
       type: 'boolean'
-    , meta: 'default TRUE'
     , validators: { is:/true|false|1|0/ }
     }
   , isDeleted: {
       type: 'boolean'
-    , meta: 'default FALSE'
     , validators: { is:/true|false|1|0/ }
     }
   , createdAt: {

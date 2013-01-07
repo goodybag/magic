@@ -247,7 +247,8 @@ module.exports.create = function(req, res){
     , 'city'      :    req.body.city
     , 'state'     :    req.body.state
     , 'zip'       :    req.body.zip
-    , 'isEnabled' :    req.body.isEnabled
+    , 'isEnabled' :    ('isEnabled' in req.body) ? req.body.isEnabled : true
+    , 'isDeleted' :    false
     , 'cardCode'  :    req.body.cardCode
     }).toQuery();
 
