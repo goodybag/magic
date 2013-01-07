@@ -6,6 +6,7 @@ module.exports = {
     "default": {
       id        : businesses.id
     , name      : businesses.name
+    , logoUrl   : businesses.logoUrl
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -13,6 +14,7 @@ module.exports = {
   , client: {
       id        : businesses.id
     , name      : businesses.name
+    , logoUrl   : businesses.logoUrl
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -20,6 +22,7 @@ module.exports = {
   , sales: {
       id        : businesses.id
     , name      : businesses.name
+    , logoUrl   : businesses.logoUrl
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -27,6 +30,7 @@ module.exports = {
   , admin: {
       id        : businesses.id
     , name      : businesses.name
+    , logoUrl   : businesses.logoUrl
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -36,6 +40,7 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , url       : businesses.url
+    , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
     , city      : businesses.city
@@ -50,6 +55,7 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , url       : businesses.url
+    , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
     , city      : businesses.city
@@ -62,6 +68,7 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , url       : businesses.url
+    , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
     , city      : businesses.city
@@ -76,6 +83,7 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , url       : businesses.url
+    , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
     , city      : businesses.city
