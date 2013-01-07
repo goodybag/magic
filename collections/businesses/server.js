@@ -8,17 +8,17 @@ var schema     = require('../../db').schemas.businesses;
 var fields     = require('./fields');
 var routes     = require('./routes');
 
-// Businesses.get
+// Businesses.list
 server.get(
   '/v1/businesses'
-, middleware.fields(fields)
+, middleware.fields(fields.businesses)
 , routes.list
 );
 
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
-, middleware.fields(fields)
+, middleware.fields(fields.business)
 , routes.get
 );
 
@@ -33,7 +33,7 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.fields(fields.business)
 , middleware.validate(schema)
 , routes.create
 );
@@ -42,7 +42,7 @@ server.post(
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.fields(fields.business)
 , middleware.validate(schema)
 , routes.update
 );
@@ -52,7 +52,7 @@ server.post(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.validate(schema)
-, middleware.fields(fields)
+, middleware.fields(fields.business)
 , routes.update
 );
 
