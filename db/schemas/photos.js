@@ -17,21 +17,21 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , consumerId: {
       type: 'int'
     // :TODO: , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , url: {
       type: 'text'
-    , validators: { isUrl: true }
+    , validators: { isUrl:[] }
     }
   , notes: {
       type: 'text'

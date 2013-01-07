@@ -17,15 +17,15 @@ define(function(require){
   , name: {
       type: 'text'
     , validators: { len:[1] }
-    , sanitizers: { trim: true }
+    , sanitizers: { trim:[] }
     }
   , url: {
       type: 'text'
-    , validators: { isUrl: true }
+    , validators: { isUrl:[] }
     }
   , logoUrl: {
       type: 'text'
-    , validators: { isUrl: true }
+    , validators: { isUrl:[] }
     }
   , cardCode: {
       type: 'text'
@@ -41,11 +41,11 @@ define(function(require){
     }
   , state: {
       type: 'text'
-    , validators: { len: 2 }
+    , validators: { len:2 }
     }
   , zip: {
       type: 'int'
-    , validators: { len: 5 }
+    , validators: { len:5 }
     }
   , isGB: {
       type: 'boolean'

@@ -17,12 +17,12 @@ define(function(require){
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , productCategoryId: {
       type: 'int'
     , meta: 'references "productCategories"(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   };
   return productsProductCategories;
