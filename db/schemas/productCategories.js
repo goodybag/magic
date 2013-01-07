@@ -17,11 +17,11 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , order: {
       type: 'int'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , isFeatured: {
       type: 'boolean'
@@ -30,7 +30,7 @@ define(function(require){
   , name: {
       type: 'text'
     , validators: { len:[1] }
-    , sanitizers: { trim: true }
+    , sanitizers: { trim:[] }
     }
   };
   return productCategories;

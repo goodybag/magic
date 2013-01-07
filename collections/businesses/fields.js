@@ -7,6 +7,8 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , logoUrl   : businesses.logoUrl
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -15,6 +17,8 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , logoUrl   : businesses.logoUrl
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -23,6 +27,8 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , logoUrl   : businesses.logoUrl
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -31,6 +37,8 @@ module.exports = {
       id        : businesses.id
     , name      : businesses.name
     , logoUrl   : businesses.logoUrl
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , $postRequires : ['name']
     }
@@ -46,6 +54,8 @@ module.exports = {
     , city      : businesses.city
     , state     : businesses.state
     , zip       : businesses.zip
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , cardCode  : businesses.cardCode
     , $postRequires : ['name']
@@ -61,6 +71,8 @@ module.exports = {
     , city      : businesses.city
     , state     : businesses.state
     , zip       : businesses.zip
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , $postRequires : ['name']
     }
 
@@ -74,6 +86,8 @@ module.exports = {
     , city      : businesses.city
     , state     : businesses.state
     , zip       : businesses.zip
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , cardCode  : businesses.cardCode
     , $postRequires : ['name']
@@ -89,6 +103,8 @@ module.exports = {
     , city      : businesses.city
     , state     : businesses.state
     , zip       : businesses.zip
+    , isGB      : businesses.isGB
+    , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
     , cardCode  : businesses.cardCode
     , $postRequires : ['name']
