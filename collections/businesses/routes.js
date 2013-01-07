@@ -86,10 +86,13 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses)
-      .toQuery();
+      .from(businesses);
 
-    client.query(query.text, function(error, result){
+    if (req.param('filter')) {
+      query = query.where(businesses.name.like('%'+req.param('filter')+'%'))
+    }
+
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
