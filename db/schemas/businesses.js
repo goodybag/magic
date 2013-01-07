@@ -23,6 +23,10 @@ define(function(require){
       type: 'text'
     , validators: { isUrl: true }
     }
+  , logoUrl: {
+      type: 'text'
+    , validators: { isUrl: true }
+    }
   , cardCode: {
       type: 'text'
     }
