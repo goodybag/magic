@@ -26,7 +26,7 @@ describe('GET /v1/product-tags', function() {
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/product-tags?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/product-tags?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -60,7 +60,7 @@ describe('GET /v1/businesses/:id/product-tags', function() {
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/businesses/1/product-tags?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/businesses/1/product-tags?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

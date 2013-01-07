@@ -23,7 +23,7 @@ describe('GET /v1/products', function() {
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/products?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/products?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -99,7 +99,7 @@ describe('GET /v1/products/:id', function() {
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/businesses/1/products?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/businesses/1/products?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

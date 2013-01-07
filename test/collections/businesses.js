@@ -29,7 +29,7 @@ describe('GET /v1/businesses', function() {
     });
   });
   it('should paginate', function(done) {
-    utils.get(baseUrl + '/v1/businesses?page=2&pagesize=1', function(err, res, payload) {
+    utils.get(baseUrl + '/v1/businesses?offset=1&limit=1', function(err, res, payload) {
       assert(!err);
       assert(!payload.error);
       assert(payload.data.length === 1);

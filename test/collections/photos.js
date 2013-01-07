@@ -26,7 +26,7 @@ describe('GET /v1/photos', function() {
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/photos?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/photos?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -71,7 +71,7 @@ describe('GET /v1/businesses/:id/photos', function() {
   })
 
   it('should paginate', function(done) {
-    tu.get('/v1/businesses/1/photos?page=2&pagesize=1', function(err, payload, res) {
+    tu.get('/v1/businesses/1/photos?offset=1&limit=1', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

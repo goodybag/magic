@@ -24,7 +24,7 @@ describe('GET /v1/productCategories', function() {
     });
   });
   it('should paginate', function(done) {
-    utils.get(baseUrl + '/v1/productCategories?page=2&pagesize=1', function(error, response, results) {
+    utils.get(baseUrl + '/v1/productCategories?offset=1&limit=1', function(error, response, results) {
       assert(!error);
       assert(!results.error);
       assert(results.data.length === 1);
