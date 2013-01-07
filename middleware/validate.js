@@ -5,6 +5,7 @@
 var
   config = require('../config')
 , utils  = require('../lib/utils')
+, sanitize = require('validator').sanitize
 , createValidator = function(schema){
     return function(req, res, next){
       // extract out relevant data
@@ -24,10 +25,15 @@ var
       var error = utils.validate(data, schema);
       if (error) return utils.sendError(res, "0201", error);
 
-      // convert blank strings to null for postgres' sake
-      for (var k in data) {
-        if (data[k] === '') {
-          data[k] = null;
+      // run sanitizers
+      for (var key in data) {
+        if (schema[key].sanitizers) {
+          var v = data[key];
+          for (var s in schema[key].sanitizers) {
+            var sv = sanitize(v);
+            v = sv[s].apply(sv, [].concat(schema[key].sanitizers[s]));
+          }
+          req.body[key] = v;
         }
       }
 
