@@ -54,7 +54,7 @@ describe('GET /v1/businesses/:id/product-tags', function() {
 
       assert(!payload.error);
       assert(payload.data.length >= 1);
-      assert(payload.data[0].id >= 1);
+      assert(payload.data[0].tag);
       assert(payload.meta.total > 1);
       done();
     });
@@ -78,65 +78,11 @@ describe('GET /v1/businesses/:id/product-tags', function() {
 });
 
 
-describe('GET /v1/product-tags/:id', function() {
-
-  it('should respond with a productTag', function(done) {
-    tu.get('/v1/product-tags/7', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.id == 7);
-      done();
-    });
-  });
-
-});
-
-
-describe('POST /v1/product-tags', function() {
-
-  it('should respond with the id of a new productTag', function(done) {
-    tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/product-tags', { businessId:1, productId:1, tag:'foobar' }, function(err, res, payload) {
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        assert(!payload.error);
-        assert(payload.data.id);
-        tu.logout(function(){
-          done();
-        });
-      });
-    });
-  });
-
-  it('should respond to an invalid payload with errors', function(done) {
-    tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/product-tags', { businessId:'foobar' }, function(err, res, payload) {
-        assert(!err);
-        assert(res.statusCode == 400);
-
-        assert(payload.error);
-        tu.logout(function(){
-          done();
-        });
-      });
-
-    });
-  });
-
-});
-
-
-describe('PATCH /v1/product-tags/:id', function() {
+describe('PATCH /v1/product-tags/:tag', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:2, tag:'Barhouse2' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/apparel', { tag:'clothes' }, function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);
@@ -149,7 +95,7 @@ describe('PATCH /v1/product-tags/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/product-tags/2', { businessId:'foobar' }, function(err, res, payload) {
+      utils.patch(baseUrl + '/v1/product-tags/clothes', { tag:null }, function(err, res, payload) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -165,10 +111,10 @@ describe('PATCH /v1/product-tags/:id', function() {
 });
 
 
-describe('DELETE /v1/product-tags/:id', function() {
+describe('DELETE /v1/product-tags/:tag', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      utils.del(baseUrl + '/v1/product-tags/2', function(err, res, payload) {
+      utils.del(baseUrl + '/v1/product-tags/clothes', function(err, res, payload) {
         assert(!err);
         assert(res.statusCode == 200);
         assert(!payload.error);

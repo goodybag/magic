@@ -4,38 +4,18 @@ var products = db.tables.products;
 
 module.exports = {
   "default": {
-    id         : productTags.id
-  , businessId : productTags.businessId
-  , productId  : productTags.productId
-  , tag        : productTags.tag
-  , createdAt  : productTags.createdAt
-  , $postRequires : ['businessId', 'tag']
+    tag : productTags.tag
   }
 
 , client: {
-    id         : productTags.id
-  , businessId : productTags.businessId
-  , productId  : productTags.productId
-  , tag        : productTags.tag
-  , createdAt  : productTags.createdAt
-  , $postRequires : ['businessId', 'tag']
+    tag : productTags.tag
   }
 
 , sales: {
-    id         : productTags.id
-  , businessId : productTags.businessId
-  , productId  : productTags.productId
-  , tag        : productTags.tag
-  , createdAt  : productTags.createdAt
-  , $postRequires : ['businessId', 'tag']
+    tag : productTags.tag
   }
 
 , admin: {
-    id         : productTags.id
-  , businessId : productTags.businessId
-  , productId  : productTags.productId
-  , tag        : productTags.tag
-  , createdAt  : productTags.createdAt
-  , $postRequires : ['businessId', 'tag']
+    tag : productTags.tag
   }
 };

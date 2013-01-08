@@ -34,23 +34,15 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(productTags, req.fields)
+    var query = productTags.select('DISTINCT tag')
       .from(productTags);
 
     // filters
-    var filters = null; // :TEMPORARY:
-    ['businessId', 'productId'].forEach(function(filterName) {
-      if (req.param(filterName)) {
-        var filter = productTags[filterName].equals(req.param(filterName));
-        if (!filters) {
-          filters = filter;
-        } else {
-          filters = filters.and(filter);
-        }
-      }
-    });
-    if (filters) {
-      query.where(filters);
+    if (req.param('businessId')) {
+      query.where(productTags.businessId.equals(req.param('businessId')));
+    }
+    if (req.param('productId')) {
+      query.where(productTags.productId.equals(req.param('productId')));
     }
     query = utils.paginateQuery(req, query);
 
@@ -60,73 +52,30 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, dataResult);
 
+      // collect count filters
+      var filters = [];
+      if (req.param('businessId')) {
+        filters.push('"businessId" = \'' + parseInt(req.param('businessId'), 10) + '\'');
+      }
+      if (req.param('productId')) {
+        filters.push('"productId" = \'' + parseInt(req.param('productId'), 10) + '\'');
+      }
+      filters = (filters.length > 0) ? ('WHERE ' + filters.join(' AND ')) : '';
+
+      // build count query
+      var query = [
+        'WITH agg AS (',
+          'SELECT DISTINCT(tag) FROM "productTags"', (filters), 'GROUP BY tag',
+        ')',
+        'SELECT COUNT(*) as count FROM agg;'
+      ].join(' ')
+
       // run count query
-      query = productTags.select('COUNT(*) as count');
-      if (filters) { query.where(filters); }
-      client.query(query.toQuery(), function(error, countResult) {
+      client.query(query, function(error, countResult) {
         if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
-    });
-  });
-};
-
-/**
- * Get productTag
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res HTTP Result Object
- */
-module.exports.get = function(req, res){
-  var TAGS = ['get-productTag', req.uuid];
-  logger.routes.debug(TAGS, 'fetching productTag', {uid: 'more'});
-
-  db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-    var query = utils.selectAsMap(productTags, req.fields)
-      .from(productTags)
-      .where(productTags.id.equals(req.param('productTagId')))
-      .toQuery();
-
-
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
-      return res.json({ error: null, data: result.rows[0] || null });
-    });
-  });
-};
-
-/**
- * Insert productTag
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res [description]
- */
-module.exports.create = function(req, res){
-  var TAGS = ['create-productTag', req.uuid];
-
-  db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
-    }
-
-    var error = utils.validate(req.body, db.schemas.productTags);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-    var query = productTags.insert(req.body).toQuery();
-
-    logger.db.debug(TAGS, query.text);
-
-    client.query(query.text+' RETURNING id', query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
-      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };
@@ -139,20 +88,28 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-productTag', req.uuid];
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.json({ error: error, data: null });
     }
 
+    // build query
     var query = productTags
       .update(req.body)
-      .where(productTags.id.equals(req.param('productTagId')))
-      .toQuery();
+      .where(productTags.tag.equals(req.param('tag')));
 
-    logger.db.debug(TAGS, query.text);
+    // add filters
+    if (req.param('businessId')) {
+      query.where(productTags.businessId.equals(req.param('businessId')));
+    }
+    if (req.param('productId')) {
+      query.where(productTags.productId.equals(req.param('productId')));
+    }
 
-    client.query(query.text, query.values, function(error, result){
+    // run query
+    client.query(query.toQuery(), query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -170,20 +127,28 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-productTag', req.uuid];
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.json({ error: error, data: null });
     }
 
+    // build query
     var query = productTags
       .delete()
-      .where(productTags.id.equals(req.param('productTagId')))
-      .toQuery();
+      .where(productTags.tag.equals(req.param('tag')))
 
-    logger.db.debug(TAGS, query.text);
+    // add filters
+    if (req.param('businessId')) {
+      query.where(productTags.businessId.equals(req.param('businessId')));
+    }
+    if (req.param('productId')) {
+      query.where(productTags.productId.equals(req.param('productId')));
+    }
 
-    client.query(query.text, query.values, function(error, result){
+    // run query
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
