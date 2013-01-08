@@ -10,7 +10,14 @@ var
 
 var config = {
   defaults: {
-    http: {
+    logging: {
+      enabled: true
+    , transports: {
+        console: false
+      , fileRotate: true
+      }
+    }
+  , http: {
       port: 3000
     }
   , repl: {
@@ -35,23 +42,6 @@ var config = {
     }
   }
 
-, test: {
-    postgresConnStr:  "postgres://localhost:5432/goodybag-test"
-  , cookieSecret: "g00dybagr0cks!"
-  , numWorkers: 4
-  , repl: {
-      prompt: "gb-api> "
-    , port: 4337
-    }
-  , http: {
-      port: 8986
-    }
-
-  , validationOptions: {
-      singleError: false
-    }
-  }
-
 , dev: {
     http: {
       port: 3000
@@ -60,7 +50,10 @@ var config = {
   }
 
 , test: {
-    http: {
+    logging: {
+      enabled: false
+    }
+  , http: {
       port: 8986
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
@@ -68,7 +61,13 @@ var config = {
   }
 
 , staging: {
-    http: {
+    logging: {
+      enabled: true
+    , transports: {
+        console: true
+      }
+    }
+  , http: {
       port: process.env['PORT'] || 5000
     }
   , postgresConnStr: process.env['DATABASE_URL']

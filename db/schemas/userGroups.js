@@ -16,9 +16,11 @@ define(function(require){
     }
   , userId: {
       type: 'int'
+    , validators: { isInt: true }
     }
   , groupId: {
       type: 'int'
+    , validators: { isInt: true }
     }
   };
   return userGroups;

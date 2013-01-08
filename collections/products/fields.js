@@ -6,47 +6,55 @@ var productTags = db.tables.productTags;
 module.exports = {
   products: {
     "default": {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , client: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , sales: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
 
   , admin: {
-      id           : products.id
-    , businessId   : products.businessId
-    , name         : products.name
-    , description  : products.description
-    , price        : products.price
-    , isVerified   : products.isVerified
-    , isArchived   : products.isArchived
-    , isEnabled    : products.isEnabled
+      id            : products.id
+    , businessId    : products.businessId
+    , name          : products.name
+    , description   : products.description
+    , price         : products.price
+    , isVerified    : products.isVerified
+    , isArchived    : products.isArchived
+    , isEnabled     : products.isEnabled
+    , categories    : true
+    , $postRequires : ['name']
     }
   }
 
@@ -63,6 +71,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , categories   : true
     }
 
   , client: {
@@ -77,6 +86,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , categories   : true
     }
 
   , sales: {
@@ -91,6 +101,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , categories   : true
     }
 
   , admin: {
@@ -105,6 +116,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , categories   : true
     }
   }
 

@@ -15,6 +15,7 @@ module.exports = {
   , lon         : photos.lon
   , isEnabled   : photos.isEnabled
   , createdAt   : photos.createdAt
+  , $postRequires : ['url']
   }
 
 , client: {
@@ -29,6 +30,7 @@ module.exports = {
   , lon         : photos.lon
   , isEnabled   : photos.isEnabled
   , createdAt   : photos.createdAt
+  , $postRequires : ['url']
   }
 
 , sales: {
@@ -43,6 +45,7 @@ module.exports = {
   , lon         : photos.lon
   , isEnabled   : photos.isEnabled
   , createdAt   : photos.createdAt
+  , $postRequires : ['url']
   }
 
 , admin: {
@@ -57,5 +60,6 @@ module.exports = {
   , lon         : photos.lon
   , isEnabled   : photos.isEnabled
   , createdAt   : photos.createdAt
+  , $postRequires : ['url']
   }
 };

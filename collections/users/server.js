@@ -25,6 +25,7 @@ server.get(
 // Users.create
 server.post(
   '/v1/users'
+// , middleware.fields(fields) :TODO:
 , middleware.validate(schema)
 , routes.create
 );
@@ -32,6 +33,7 @@ server.post(
 // Users.create
 server.post(
   '/v1/users/:id'
+// , middleware.fields(fields) :TODO:
 , middleware.validate(schema)
 , routes.update
 );

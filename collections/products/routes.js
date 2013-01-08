@@ -331,8 +331,8 @@ module.exports.update = function(req, res){
       for (var i = req.body.categories.length - 1; i >= 0; i--){
         // Business does not have category
         if (categories.indexOf(req.body.categories[i]) === -1){
-          res.json({ error: errors.products.INVALID_CATEGORY_IDS, data: null });
-          return logger.routes.error(TAGS, errors.products.INVALID_CATEGORY_IDS);
+          res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+          return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
         }
       }
       stage.updateProduct(client);
@@ -361,7 +361,7 @@ module.exports.update = function(req, res){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
         // If they didn't provide categories, stop here
-        if (!categories || categories.length === 0)
+        if (!categories)
           return res.json({ error: null, data: null });
 
         // Move on to next stage
@@ -377,6 +377,9 @@ module.exports.update = function(req, res){
 
       client.query(query.text, query.values, function(error){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        // If we're deleting the categories, we're done
+        if (categories.length === 0) return;
 
         stage.updateProductCategoriesRelations(client, productId, categories);
       });
