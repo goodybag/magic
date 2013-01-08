@@ -156,7 +156,7 @@ describe('POST /v1/locations', function() {
     tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -167,10 +167,10 @@ describe('POST /v1/locations', function() {
   });
 
   it('should return error of validation', function(done){
-    tu.loginAsClient(function(error, user){
+    tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'', country:'' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
         assert(payload.error);
         tu.logout(function(){
           done();
@@ -201,7 +201,7 @@ describe('PATCH /v1/locations/:id', function() {
       utils.patch(baseUrl + '/v1/locations/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -212,10 +212,10 @@ describe('PATCH /v1/locations/:id', function() {
   });
 
   it('should return error of validation', function(done){
-    tu.loginAsClient(function(error, user){
+    tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', zip:'dagsg', country:'' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
         assert(payload.error);
         tu.logout(function(){
           done();
