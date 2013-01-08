@@ -50,7 +50,7 @@ module.exports = function(fields) {
       }
     }
     if (hasRequireErrors) return utils.sendError(res, errors.input.VALIDATION_FAILED, requireErrors);
-console.log(req.body, data);
+
     // attach field-data to the request
     req.fields = allowedFields;
     req.body   = data;
