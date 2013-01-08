@@ -5,6 +5,7 @@
 var
   config = require('../config')
 , utils  = require('../lib/utils')
+, errors = require('../lib/errors')
 , sanitize = require('validator').sanitize
 , createValidator = function(schema){
     return function(req, res, next){
@@ -23,7 +24,7 @@ var
 
       // validate
       var error = utils.validate(data, schema);
-      if (error) return utils.sendError(res, "0201", error);
+      if (error) return res.error(errors.input.VALIDATION_FAILED, error);
 
       // run sanitizers
       for (var key in data) {
