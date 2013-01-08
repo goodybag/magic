@@ -350,76 +350,25 @@ module.exports.update = function(req, res){
     // Ensure the categories and tags provided in the body belong to the business
     // If they didn't provide categories or tags, move on to the next step
   , ensureCategoriesAndTags: function(client){
-      // Run these guys in parallel and ensure in the end they both work
-      utils.parallel({
-        categories: function(done){
-          if (!checkCategories) return done();
-
-          // I keep getting cryptic errors with this
-          // var query = productCategories.select(
-          //   'count("productCategories"."id")'
-          // ).where(
-          //   productCategories.businessId.equals(
-          //     req.body.businessId
-          //   ).and(
-          //     '"productCategories"."id" in ('
-          //     + req.body.categories.join(', ')
-          //     + ')'
-          //   )
-          // ).toQuery();
-
-          var query = 'select count("productCategories"."id") as count'
-                    + ' from "productCategories"'
-                    + ' where "productCategories"."businessId" = '
-                    + req.body.businessId
-                    + ' and "productCategories"."id" in ('
-                    + req.body.categories.join(', ')
-                    + ');';
-
-if (req.body.name === 'weeeeeeeeeee') console.log(query);
-          client.query(query, done);
-        }
-
-      , tags: function(done){
-          if (!checkTags) return done();
-
-          // Don't worry about checking validity of tags anymore
-          return done();
-
-          // I keep getting cryptic errors with this
-          // var query = productTags.select(
-          //   'count("productTags"."id")'
-          // ).where(
-          //   productTags.businessId.equals(
-          //     req.body.businessId
-          //   ).and(
-          //     '"productTags"."id" in ('
-          //     + req.body.tags.join(', ')
-          //     + ')'
-          //   )
-          // ).toQuery();
-
-          var query = 'select count("productTags"."id") as count'
-                    + ' from "productTags"'
-                    + ' where "productTags"."businessId" = '
-                    + req.body.businessId
-                    + ' and "productTags"."tag" in (\''
-                    + req.body.tags.join("', '")
-                    + '\');';
-
-          client.query(query, done);
-        }
-
-      }, function(error, results){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
-          return res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
-
-        if (checkTags && results.tags.rows[0].count < req.body.tags.length)
-          return res.json({ error: errors.input.INVALID_TAGS, data: null });
-
+      if (!req.body.categories || req.body.categories.length === 0)
         return stage.updateProduct(client);
+
+      var query = 'select pc.id from products p, "productCategories" pc where p."businessId" = pc."businessId" and p.id = ' + req.params.productId;
+
+      client.query(query, function(error, results){
+        if (error) return done(error);
+
+        var categories = results.rows.map(function(a){ return a.id; });
+
+        for (var i = req.body.categories.length - 1; i >= 0; i--){
+          // Business does not have category
+          if (categories.indexOf(req.body.categories[i]) === -1){
+            res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+            return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
+          }
+        }
+
+        stage.updateProduct(client);
       });
     }
 
@@ -445,7 +394,7 @@ if (req.body.name === 'weeeeeeeeeee') console.log(query);
 
       logger.db.debug(TAGS, query.text);
 
-      client.query(query, function(error, results){
+      client.query(query.text + ' RETURNING "businessId"', query.values, function(error, results){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
         // If they didn't provide categories or tags, stop here
@@ -453,15 +402,14 @@ if (req.body.name === 'weeeeeeeeeee') console.log(query);
           return res.json({ error: null, data: null });
 
         // Move on to next stage
-        stage.removeCategoriesAndTags(client, req.param('productId'), categories, tags);
+        stage.removeCategoriesAndTags(client, req.param('productId'), results.rows[0].businessId, categories, tags);
       });
     }
 
-  , removeCategoriesAndTags: function(client, productId, categories, tags){
+  , removeCategoriesAndTags: function(client, productId, businessId, categories, tags){
       var
         inParallel = {
           categories: function(done){
-            console.log("REMOVING categories")
             var query = productsProductCategories.delete().where(
               productsProductCategories.productId.equals(productId)
             ).toQuery();
@@ -469,9 +417,8 @@ if (req.body.name === 'weeeeeeeeeee') console.log(query);
             client.query(query, done);
           }
         , tags: function(done){
-          console.log("REMOVING tags")
             var query = productTags.delete().where(
-              productsTags.productId.equals(productId)
+              productTags.productId.equals(productId)
             ).toQuery();
 
             client.query(query, done);
@@ -481,14 +428,14 @@ if (req.body.name === 'weeeeeeeeeee') console.log(query);
       , onComplete = function(error, results){
           if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-          stage.updateCategoriesTags(client, productId, categories, tags);
+          stage.updateCategoriesTags(client, productId, businessId, categories, tags);
         }
       ;
 
       utils.parallel(inParallel, onComplete);
     }
 
-  , updateCategoriesTags: function(client, productId, categories, tags){
+  , updateCategoriesTags: function(client, productId, businessId, categories, tags){
       var
         inParallel = {
           categories: function(done){
@@ -507,7 +454,7 @@ if (req.body.name === 'weeeeeeeeeee') console.log(query);
             , getQueryFunction = function(values){
                 return function(complete){
                   var query = productsProductCategories.insert(values).toQuery();
-console.log(query.text);
+
                   client.query(query, complete);
                 };
               }
@@ -538,10 +485,10 @@ console.log(query.text);
               queries = []
 
               // Returns a function that executes a query to be executed in parallel via async
-            , getQueryFunction = function(values){
+            , getTagQueryFunction = function(values){
                 return function(complete){
                   var query = productTags.insert(values).toQuery();
-console.log(query.text);
+
                   client.query(query, complete);
                 };
               }
@@ -552,7 +499,7 @@ console.log(query.text);
               queries.push(
                 getTagQueryFunction({
                   productId: productId
-                , businessId: req.body.businessId
+                , businessId: businessId
                 , tag: tags[i]
                 })
               );

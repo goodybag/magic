@@ -49,7 +49,7 @@ describe('GET /v1/businesses/:id/product-tags', function() {
 describe('GET /v1/product-tags/:id', function() {
 
   it('should respond with a productTag', function(done) {
-    tu.get('/v1/product-tags/1', function(err, payload, res) {
+    tu.get('/v1/product-tags/7', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -57,7 +57,7 @@ describe('GET /v1/product-tags/:id', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.id == 1);
+      assert(payload.data.id == 7);
       done();
     });
   });

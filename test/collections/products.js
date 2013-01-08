@@ -239,13 +239,39 @@ describe('PATCH /v1/products/:id', function() {
   });
 
   it('should update the products name and categories ', function(done) {
-    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [1] }), 'application/json', function(err, payload, res) {
+    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [3] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
 
       payload = JSON.parse(payload);
-      console.log(payload.error);
+      assert(!payload.error);
+
+      done();
+    });
+  });
+
+  it('should fail update the products name and categories because of an invalid categoryId', function(done) {
+    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [9999] }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+      assert(payload.error);
+      assert(payload.error.name === "INVALID_CATEGORY_IDS");
+
+      done();
+    });
+  });
+
+  it('should update the products name and tags ', function(done) {
+    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: ['awesome'] }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
       assert(!payload.error);
 
       done();
@@ -273,7 +299,7 @@ describe('DELETE /v1/products/:id', function() {
 describe('GET /v1/products/:id/categories', function() {
 
   it('should respond with a category listing', function(done) {
-    tu.get('/v1/products/1/categories', function(err, payload, res) {
+    tu.get('/v1/products/5/categories', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
