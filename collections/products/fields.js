@@ -15,6 +15,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -28,6 +29,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -41,6 +43,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -54,6 +57,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
   }
@@ -71,6 +75,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -86,6 +91,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -101,6 +107,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -116,6 +123,7 @@ module.exports = {
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
     , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
   }

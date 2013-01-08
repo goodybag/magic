@@ -12,6 +12,7 @@ var
 
   // Tables
 , products                  = db.tables.products
+, productTags               = db.tables.productTags
 , productCategories         = db.tables.productCategories
 , productsProductCategories = db.tables.productsProductCategories
 ;
@@ -153,8 +154,8 @@ module.exports.create = function(req, res){
     // If they didn't provide categories or tags, move on to the next step
   , ensureCategoriesAndTags: function(client){
       var
-        checkCategories = (req.body.categories || req.body.categories.length > 0)
-      , checkTags       = (req.body.tags || req.body.tags.length > 0)
+        checkCategories = (req.body.categories && req.body.categories.length > 0)
+      , checkTags       = (req.body.tags && req.body.tags.length > 0)
       ;
 
       // Run these guys in parallel and ensure in the end they both work
@@ -162,52 +163,67 @@ module.exports.create = function(req, res){
         categories: function(done){
           if (!checkCategories) return done();
 
-          var query = productCategories.select(
-            'count("productCategories"."id") as "count"'
-          ).where(
-            productCategories.businessId.equals(
-              req.body.businessId
-            ).and(
-              '"productCategories"."id" in ('
-              + req.body.categories.join(', ')
-              + ')'
-            )
-          );
-          console.log(query.text);
-return done();
-          // client.query(query, done);
+          // I keep getting cryptic errors with this
+          // var query = productCategories.select(
+          //   'count("productCategories"."id")'
+          // ).where(
+          //   productCategories.businessId.equals(
+          //     req.body.businessId
+          //   ).and(
+          //     '"productCategories"."id" in ('
+          //     + req.body.categories.join(', ')
+          //     + ')'
+          //   )
+          // ).toQuery();
+
+          var query = 'select count("productCategories"."id") as count'
+                    + ' from "productCategories"'
+                    + ' where "productCategories"."businessId" = '
+                    + req.body.businessId
+                    + ' and "productCategories"."id" in ('
+                    + req.body.categories.join(', ')
+                    + ');';
+
+          client.query(query, done);
         }
 
       , tags: function(done){
           if (!checkTags) return done();
 
-          var query = productTags.select(
-            'count("productTags"."id") as "count"'
-          ).where(
-            productTags.businessId.equals(
-              req.body.businessId
-            ).and(
-              '"productTags"."id" in ('
-              + req.body.tags.join(', ')
-              + ')'
-            )
-          );
+          // I keep getting cryptic errors with this
+          // var query = productTags.select(
+          //   'count("productTags"."id")'
+          // ).where(
+          //   productTags.businessId.equals(
+          //     req.body.businessId
+          //   ).and(
+          //     '"productTags"."id" in ('
+          //     + req.body.tags.join(', ')
+          //     + ')'
+          //   )
+          // ).toQuery();
 
-          // client.query(query.text, done);
+          var query = 'select count("productTags"."id") as count'
+                    + ' from "productTags"'
+                    + ' where "productTags"."businessId" = '
+                    + req.body.businessId
+                    + ' and "productTags"."tag" in (\''
+                    + req.body.tags.join("', '")
+                    + '\');';
+
+          client.query(query, done);
         }
 
       }, function(error, results){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-          console.log("################################");
-          console.log(results);
-          console.log("################################");
-        // if (checkCategories && results.categories.rows[0].count !== req.categories.length)
-        //   return res.json({ error: errors.products.INVALID_CATEGORY_IDS, data: null });
 
-        // if (checkTags && results.tags.rows[0].count !== req.tags.length)
-        //   return res.json({ error: errors.products.INVALID_TAGS, data: null });
+        if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
+          return res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
 
-        // return stage.insertProduct(client);
+        if (checkTags && results.tags.rows[0].count < req.body.tags.length)
+          return res.json({ error: errors.input.INVALID_TAGS, data: null });
+
+        return stage.insertProduct(client);
       });
     }
 
@@ -219,50 +235,73 @@ return done();
       var error = utils.validate(req.body, db.schemas.products);
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      // We don't want to try and insert categories
+      // We don't want to try and insert categories or tags
       var categories = req.body.categories;
       delete req.body.categories;
 
+      var tags = req.body.tags;
+      delete req.body.tags;
       var query = products.insert(req.body).toQuery();
 
       logger.db.debug(TAGS, query.text);
 
-      client.query(query.text+' RETURNING id', query.values, function(error, results){
+      client.query(query.text + ' RETURNING id', query.values, function(error, results){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-        // If they didn't provide categories, stop here
-        if (!categories || categories.length === 0)
+        // If they didn't provide categories or tags, stop here
+        if ((!categories || categories.length === 0) && (!tags || tags.length === 0))
           return res.json({ error: null, data: results.rows[0] });
 
         // Move on to next stage
-        stage.insertProductCategoriesRelations(client, results.rows[0].id, categories);
+        stage.insertProductCategoriesRelations(client, results.rows[0].id, categories, tags);
       });
     }
 
     // Setup the relations between the provided categories
-  , insertProductCategoriesRelations: function(client, productId, categories){
+  , insertProductCategoriesRelations: function(client, productId, categories, tags){
+      categories  = categories  || [];
+      tags        = tags        || [];
+
       var
-        isObj       = !!categories[0].id
+        isObj   = (categories.length > 0) ? !!categories[0].id : false
 
         // Array of functions to execute in parallel
-      , queries     = []
+      , queries = []
 
         // Returns a function that executes a query to be executed in parallel via async
-      , getQueryFunction = function(values){
+      , getCategoryQueryFunction = function(values){
           return function(complete){
             var query = productsProductCategories.insert(values).toQuery();
 
             client.query(query.text, query.values, complete);
           };
         }
+      , getTagQueryFunction = function(values){
+          return function(complete){
+            var query = productTags.insert(values).toQuery();
+
+            client.query(query.text, query.values, complete);
+          };
+        }
       ;
 
-      // Queue up query functions
+      // Queue up category query functions
       for (var i = categories.length - 1; i >= 0; i--){
         queries.push(
-          getQueryFunction({
+          getCategoryQueryFunction({
             productId: productId
           , productCategoryId: isObj ? categories[i].id : categories[i]
+          })
+        );
+      }
+
+      // Queue up tag query functions
+      for (var i = tags.length - 1; i >= 0; i--) {
+        queries.push(
+          getTagQueryFunction({
+            productId: productId
+          , businessId: req.body.businessId
+          , tag: tags[i]
           })
         );
       }

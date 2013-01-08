@@ -70,6 +70,8 @@ describe('GET /v1/products/:id', function() {
       assert(payload.data.id == 1);
       assert(payload.data.businessId == 1);
       assert(payload.data.name == 'Product 1');
+      assert(payload.data.categories.length > 1);
+      assert(payload.data.tags.length > 1);
       done();
     });
   });
@@ -148,6 +150,48 @@ describe('POST /v1/products', function() {
 
       assert(payload.error);
       assert(payload.error.name === "INVALID_CATEGORY_IDS");
+      done();
+    });
+  });
+
+  it('should create a product with tags and respond with the id of the new product', function(done) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: ["food", "apparel"] }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.id);
+      done();
+    });
+  });
+
+  it('should fail to create a product with tags because of invalid tags', function(done) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: ["asdfadsf", "asdfsad"] }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(payload.error);
+      assert(payload.error.name === "INVALID_TAGS");
+      done();
+    });
+  });
+
+  it('should create a product with categories and tags and respond with the id of the new product', function(done) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2], tags: ["food", "apparel"] }), 'application/json', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.id);
       done();
     });
   });
