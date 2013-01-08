@@ -17,19 +17,19 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , name: {
       type: 'text'
     , validators: { len:[1] }
-    , sanitizers: { trim: true }
+    , sanitizers: { trim:[] }
     }
   , description: {
       type: 'text'
     }
   , price: {
       type: 'real'
-    , validators: { isDecimal: true }
+    , validators: { isDecimal:[] }
     }
   , isVerified: {
       type: 'boolean'

@@ -17,12 +17,12 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , tag: {
       type: 'text'

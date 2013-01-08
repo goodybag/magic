@@ -29,9 +29,11 @@ module.exports.list = function(req, res){
   var TAGS = ['list-photos', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of photos', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(photos, req.fields)
       .from(photos.leftJoin(products).on(products.id.equals(photos.id)));
 
@@ -50,15 +52,22 @@ module.exports.list = function(req, res){
     if (filters) {
       query.where(filters);
     }
+    query = utils.paginateQuery(req, query);
 
-    query = query.toQuery();
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
+      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
 
-      logger.db.debug(TAGS, result);
+      // run count query
+      query = photos.select('COUNT(*) as count');
+      if (filters) { query.where(filters); }
+      client.query(query.toQuery(), function(error, countResult) {
+        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-      return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };

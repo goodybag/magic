@@ -24,6 +24,21 @@ describe('GET /v1/product-tags', function() {
     });
   });
 
+  it('should paginate', function(done) {
+    tu.get('/v1/product-tags?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
 });
 
 
@@ -38,7 +53,24 @@ describe('GET /v1/businesses/:id/product-tags', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length >= 2);
+      assert(payload.data.length == 2);
+      assert(payload.data[0].id == 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/product-tags?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -86,7 +118,7 @@ describe('POST /v1/product-tags', function() {
     tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/product-tags', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -120,7 +152,7 @@ describe('PATCH /v1/product-tags/:id', function() {
       utils.patch(baseUrl + '/v1/product-tags/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){

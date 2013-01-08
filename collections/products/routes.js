@@ -31,9 +31,11 @@ module.exports.list = function(req, res){
   var TAGS = ['list-products', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of products', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(products, req.fields)
       .from(products);
 
@@ -41,15 +43,24 @@ module.exports.list = function(req, res){
     if (req.param('businessId')) {
       query.where(products.businessId.equals(req.param('businessId')));
     }
+    query = utils.paginateQuery(req, query);
 
-    query = query.toQuery();
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
+      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
 
-      logger.db.debug(TAGS, result);
+      // run count query
+      query = products.select('COUNT(*) as count');
+      if (req.param('businessId')) {
+        query.where(products.businessId.equals(req.param('businessId')));
+      }
+      client.query(query.toQuery(), function(error, countResult) {
+        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-      return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };
@@ -229,6 +240,20 @@ module.exports.create = function(req, res){
 
         return stage.insertProduct(client);
       });
+    }
+
+    // Checks the provided categories against the categories we got back from the
+    // query in ensureCategories. If we're good, move on to insertProduct,
+    // If we're not good, send an invalid_category_ids error
+  , checkCategories: function(client, categories){
+      for (var i = req.body.categories.length - 1; i >= 0; i--){
+        // Business does not have category
+        if (categories.indexOf(req.body.categories[i]) === -1){
+          res.error(errors.input.INVALID_CATEGORY_IDS);
+          return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
+        }
+      }
+      stage.insertProduct(client);
     }
 
     // Validate and insert the provided product

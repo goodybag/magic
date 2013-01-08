@@ -18,6 +18,22 @@ describe('GET /v1/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/products?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -36,10 +52,11 @@ describe('GET /v1/businesses/:id/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 1);
+      assert(payload.data.length > 0);
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -85,6 +102,21 @@ describe('GET /v1/products/:id', function() {
       done();
     });
   });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/products?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length == 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
 });
 
 describe('POST /v1/products', function() {
@@ -107,7 +139,7 @@ describe('POST /v1/products', function() {
     tu.post('/v1/products', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -119,7 +151,7 @@ describe('POST /v1/products', function() {
   it('should fail to post new product because of invalid field', function (done){
     tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi" }), 'application/json', function(err, payload, res) {
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
       payload = JSON.parse(payload);
       assert(payload.error);
       done();
@@ -142,9 +174,8 @@ describe('POST /v1/products', function() {
 
   it('should fail to create a product with categories because of invalid categories', function(done) {
     tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [9999, 99999] }), 'application/json', function(err, payload, res) {
-
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -219,7 +250,7 @@ describe('PATCH /v1/products/:id', function() {
     tu.patch('/v1/products/1', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -231,7 +262,7 @@ describe('PATCH /v1/products/:id', function() {
   it('should fail to update product because of invalid field', function (done){
     tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi", description: "" }), 'application/json', function(err, payload, res) {
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
       payload = JSON.parse(payload);
       assert(payload.error);
       done();

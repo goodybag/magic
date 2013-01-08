@@ -16,6 +16,26 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);      
+      done();
+    });
+  });
+  it('should filter', function(done) {
+    utils.get(baseUrl + '/v1/businesses?filter=2', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      done();
+    });
+  });
+  it('should paginate', function(done) {
+    utils.get(baseUrl + '/v1/businesses?offset=1&limit=1', function(err, res, payload) {
+      assert(!err);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name.length > 0);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -54,12 +74,20 @@ describe('GET /v1/businesses/:id', function() {
 describe('DEL /v1/businesses/:id', function() {
   it('should delete a single business document', function(done) {
     tu.loginAsAdmin(function(error, user){
-      var id = 3;
-      utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
-        assert(!err);
-        assert(!payload.error);
-        tu.logout(function(){
-          done();
+      // get the current count
+      utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
+        var total = payload.meta.total;
+        var id = 3;
+        utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
+          assert(!err);
+          assert(!payload.error);
+          // compare to updated count
+          utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
+            assert(parseInt(total) - 1 === parseInt(payload.meta.total));
+            tu.logout(function(){
+              done();
+            });
+          });
         });
       });
     });

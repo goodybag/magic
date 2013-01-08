@@ -23,6 +23,23 @@ describe('GET /v1/locations', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/locations?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name == 'Location 2');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -41,10 +58,11 @@ describe('GET /v1/businesses/:id/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 1);
+      assert(payload.data.length > 0);
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -61,6 +79,22 @@ describe('GET /v1/businesses/:id/locations', function() {
     utils.get(baseUrl + '/v1/businesses/abcd/locations', function(error, res, payload) {
       assert(!error);
       assert(payload.error);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/locations?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -122,7 +156,7 @@ describe('POST /v1/locations', function() {
     tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -133,10 +167,10 @@ describe('POST /v1/locations', function() {
   });
 
   it('should return error of validation', function(done){
-    tu.loginAsClient(function(error, user){
+    tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'', country:'' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
         assert(payload.error);
         tu.logout(function(){
           done();
@@ -167,7 +201,7 @@ describe('PATCH /v1/locations/:id', function() {
       utils.patch(baseUrl + '/v1/locations/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -178,10 +212,10 @@ describe('PATCH /v1/locations/:id', function() {
   });
 
   it('should return error of validation', function(done){
-    tu.loginAsClient(function(error, user){
+    tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/locations', { businessId:2, name:'', street1:'', zip:'dagsg', country:'' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
         assert(payload.error);
         tu.logout(function(){
           done();

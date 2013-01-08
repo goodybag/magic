@@ -34,7 +34,7 @@ module.exports.get = function(req, res){
 
     var query = utils.selectAsMap(businesses, req.fields)
       .from(businesses)
-      .where(businesses.id.equals(req.params.id))
+      .where(businesses.id.equals(req.params.id)).and(businesses.isDeleted.equals(false))
       .toQuery();
 
     client.query(query.text, query.values, function(error, result){
@@ -59,7 +59,7 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = businesses.delete().where(
+    var query = businesses.update({ isDeleted:true }).where(
       businesses.id.equals(req.params.id)
     ).toQuery();
 
@@ -82,19 +82,33 @@ module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of businesses', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses)
-      .toQuery();
+      .from(businesses);
 
-    client.query(query.text, function(error, result){
+    // add query filters
+    if (req.param('filter')) {
+      query.where(businesses.name.like('%'+req.param('filter')+'%'))
+    }
+    query.where(businesses.isDeleted.equals(false));
+    utils.paginateQuery(req, query);
+
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
+      logger.db.debug(TAGS, dataResult);
 
-      return res.json({ error: null, data: result.rows });
+      // run count query
+      client.query('SELECT COUNT(*) as count FROM businesses WHERE "isDeleted" = FALSE', function(error, countResult) {
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };
@@ -233,7 +247,8 @@ module.exports.create = function(req, res){
     , 'city'      :    req.body.city
     , 'state'     :    req.body.state
     , 'zip'       :    req.body.zip
-    , 'isEnabled' :    req.body.isEnabled
+    , 'isEnabled' :    ('isEnabled' in req.body) ? req.body.isEnabled : true
+    , 'isDeleted' :    false
     , 'cardCode'  :    req.body.cardCode
     }).toQuery();
 

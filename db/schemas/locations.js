@@ -17,12 +17,12 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt: true }
+    , validators: { isInt:[] }
     }
   , name: {
       type: 'text'
     , validators: { len:[1] }
-    , sanitizers: { trim: true }
+    , sanitizers: { trim:[] }
     }
   , street1: {
       type: 'text'
@@ -35,11 +35,11 @@ define(function(require){
     }
   , state: {
       type: 'text'
-    , validators: { len: 2 }
+    , validators: { len:2 }
     }
   , zip: {
       type: 'int'
-    , validators: { len: 5 }
+    , validators: { len:5 }
     }
   , country: {
       type: 'text'
@@ -52,12 +52,15 @@ define(function(require){
     }
   , lat: {
       type: 'int'
+    , sanitizers: { ifNull:0 }
     }
   , lon: {
       type: 'int'
+    , sanitizers: { ifNull:0 }
     }
   , isEnabled: {
       type: 'boolean'
+    , meta: 'default TRUE'
     , validators: { is:/true|false|1|0/ }
     }
   };

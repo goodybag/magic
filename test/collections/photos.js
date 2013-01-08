@@ -21,6 +21,22 @@ describe('GET /v1/photos', function() {
       assert(!payload.error);
       assert(payload.data.length > 0);
       assert(payload.data[0].id == 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should paginate', function(done) {
+    tu.get('/v1/photos?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -41,6 +57,7 @@ describe('GET /v1/businesses/:id/photos', function() {
       assert(!payload.error);
       assert(payload.data.length == 2);
       assert(payload.data[0].id == 1);
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -55,6 +72,21 @@ describe('GET /v1/businesses/:id/photos', function() {
       done();
     });
   })
+
+  it('should paginate', function(done) {
+    tu.get('/v1/businesses/1/photos?offset=1&limit=1', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length == 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
 
 });
 
@@ -99,7 +131,7 @@ describe('POST /v1/photos', function() {
     tu.loginAsSales(function(error, user){
       utils.post(baseUrl + '/v1/photos', { businessId:'foobar' }, function(err, res, payload) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){
@@ -133,7 +165,7 @@ describe('PATCH /v1/photos/:id', function() {
       utils.patch(baseUrl + '/v1/photos/2', { businessId:'foobar' }, function(err, res, payload) {
 
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 400);
 
         assert(payload.error);
         tu.logout(function(){

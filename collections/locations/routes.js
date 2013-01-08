@@ -29,25 +29,36 @@ module.exports.list = function(req, res){
   var TAGS = ['list-locations', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of locations', {uid: 'more'});
 
+  // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(locations, req.fields)
       .from(locations);
 
-    // filter by businessId, if given as a path param
+    // add query filters
     if (req.param('businessId')) {
       query.where(locations.businessId.equals(req.param('businessId')));
     }
+    query = utils.paginateQuery(req, query);
 
-    query = query.toQuery();
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
+      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
 
-      logger.db.debug(TAGS, result);
+      // run count query
+      query = locations.select('COUNT(*) as count');
+      if (req.param('businessId')) {
+        query.where(locations.businessId.equals(req.param('businessId')));
+      }
+      client.query(query.toQuery(), function(error, countResult) {
+        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
-      return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };
@@ -93,7 +104,7 @@ module.exports.create = function(req, res){
       logger.routes.error(TAGS, error);
       return res.json({ error: error, data: null });
     }
-    
+
     var error = utils.validate(req.body, schemas.locations);
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
