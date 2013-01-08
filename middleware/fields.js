@@ -32,7 +32,7 @@ module.exports = function(fields) {
         }
       }
     }
-    if (noneAllowed) return utils.sendError(res, errors.auth.DATA_PERMISSIONS);
+    if (noneAllowed) return res.error(errors.auth.DATA_PERMISSIONS);
 
     // filter request body based on allowed fields
     var data = {};
@@ -49,7 +49,7 @@ module.exports = function(fields) {
         hasRequireErrors = true;
       }
     }
-    if (hasRequireErrors) return utils.sendError(res, errors.input.VALIDATION_FAILED, requireErrors);
+    if (hasRequireErrors) return res.error(errors.input.VALIDATION_FAILED, requireErrors);
 
     // attach field-data to the request
     req.fields = allowedFields;

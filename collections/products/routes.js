@@ -158,7 +158,7 @@ module.exports.create = function(req, res){
       for (var i = req.body.categories.length - 1; i >= 0; i--){
         // Business does not have category
         if (categories.indexOf(req.body.categories[i]) === -1){
-          res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+          res.error(errors.input.INVALID_CATEGORY_IDS);
           return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
         }
       }
@@ -285,7 +285,7 @@ module.exports.update = function(req, res){
       for (var i = req.body.categories.length - 1; i >= 0; i--){
         // Business does not have category
         if (categories.indexOf(req.body.categories[i]) === -1){
-          res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+          res.error(errors.input.INVALID_CATEGORY_IDS);
           return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
         }
       }
