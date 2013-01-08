@@ -232,7 +232,7 @@ module.exports.create = function(req, res){
         if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
         if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
-          return res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+          return res.error(errors.input.INVALID_CATEGORY_IDS);
 
         // Don't worry about checking tag validity anymore
         // if (checkTags && results.tags.rows[0].count < req.body.tags.length)
@@ -388,7 +388,7 @@ module.exports.update = function(req, res){
         for (var i = req.body.categories.length - 1; i >= 0; i--){
           // Business does not have category
           if (categories.indexOf(req.body.categories[i]) === -1){
-            res.json({ error: errors.input.INVALID_CATEGORY_IDS, data: null });
+            res.error(errors.input.INVALID_CATEGORY_IDS);
             return logger.routes.error(TAGS, errors.input.INVALID_CATEGORY_IDS);
           }
         }

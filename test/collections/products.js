@@ -286,7 +286,7 @@ describe('PATCH /v1/products/:id', function() {
     tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [9999] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
       assert(payload.error);
@@ -330,7 +330,7 @@ describe('DELETE /v1/products/:id', function() {
 describe('GET /v1/products/:id/categories', function() {
 
   it('should respond with a category listing', function(done) {
-    tu.get('/v1/products/5/categories', function(err, payload, res) {
+    tu.get('/v1/products/8/categories', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
