@@ -1,6 +1,7 @@
 var db = require('../../db');
 var products = db.tables.products;
 var productCategories = db.tables.productCategories;
+var productTags = db.tables.productTags;
 
 module.exports = {
   products: {
@@ -14,6 +15,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -27,6 +29,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -40,6 +43,7 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
 
@@ -53,10 +57,11 @@ module.exports = {
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
     , categories    : true
+    , tags          : true
     , $postRequires : ['name']
     }
   }
-  
+
 , product: {
     "default": {
       id           : products.id
@@ -69,6 +74,8 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -83,6 +90,8 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -97,6 +106,8 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
 
@@ -111,6 +122,8 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tag          : productTags.tag
+    , tags         : true
     , categories   : true
     }
   }

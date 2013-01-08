@@ -27,7 +27,7 @@ module.exports = function(fields) {
       // extract required fields
       var grf = fields[group]['$' + req.method.toLowerCase() + 'Requires'];
       if (grf) {
-        for (var j=0, jj=grf.length; j < jj; j++) { 
+        for (var j=0, jj=grf.length; j < jj; j++) {
           requiredFields[grf[j]] = true;
         }
       }
