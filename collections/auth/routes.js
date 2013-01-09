@@ -13,7 +13,7 @@ var
   // Tables
 , users       = db.tables.users
 , groups      = db.tables.groups
-, userGroups  = db.tables.userGroups
+, usersGroups = db.tables.usersGroups
 
 //singly variables
 , clientId      = config.singly.clientId
@@ -90,14 +90,14 @@ module.exports.singlyCallback =  function(req, res){
                 logger.db.debug(TAGS, result);
 
                 // Setup groups
-                query = userGroups.select(
+                query = usersGroups.select(
                   groups.name
                 ).from(
-                  userGroups.join(groups).on(
-                    userGroups.groupId.equals(groups.id)
+                  usersGroups.join(groups).on(
+                    usersGroups.groupId.equals(groups.id)
                   )
                 ).where(
-                  userGroups.userId.equals(user.id)
+                  usersGroups.userId.equals(user.id)
                 ).toQuery();
 
                 client.query(query.text, query.values, function(error, results){
@@ -132,7 +132,7 @@ module.exports.authenticate = function(req, res){
     var query = users.select(
       users.id, users.email, users.password
     ).from(users).where(
-      users.email.equals(req.body.email)
+      users.email.equals(req.body.email || '')
     ).toQuery();
 
 
@@ -162,14 +162,14 @@ module.exports.authenticate = function(req, res){
         logger.db.debug(TAGS, "Getting groups and setting on user");
 
         // Setup groups
-        query = userGroups.select(
+        query = usersGroups.select(
           groups.name
         ).from(
-          userGroups.join(groups).on(
-            userGroups.groupId.equals(groups.id)
+          usersGroups.join(groups).on(
+            usersGroups.groupId.equals(groups.id)
           )
         ).where(
-          userGroups.userId.equals(user.id)
+          usersGroups.userId.equals(user.id)
         ).toQuery();
 
         client.query(query.text, query.values, function(error, results){

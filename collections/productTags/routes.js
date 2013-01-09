@@ -147,7 +147,7 @@ module.exports.update = function(req, res){
 
     // build query
     var query = productTags
-      .update(req.body)
+      .update({ tag:req.body.tag })
       .where(productTags.id.equals(req.param('tagId')))
       .where(productTags.businessId.equals(req.param('businessId')));
 

@@ -29,6 +29,7 @@ app.use(require('./collections/locations/server'));
 app.use(require('./collections/products/server'));
 app.use(require('./collections/productCategories/server'));
 app.use(require('./collections/users/server'));
+app.use(require('./collections/groups/server'));
 app.use(require('./collections/photos/server'));
 app.use(require('./collections/productTags/server'));
 
