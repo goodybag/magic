@@ -14,6 +14,7 @@ module.exports = {
   , 'productsProductCategories'
   , 'photos'
   , 'productTags'
+  , 'productsProductTags'
   ]
 , fixtureFile: 'test'
 };

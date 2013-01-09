@@ -22,31 +22,31 @@ server.get(
 , routes.list
 );
 
-// ProductTags.list
+// ProductTags.get
 server.get(
-  '/v1/products/:productId/tags'
+  '/v1/product-tags/:tagId'
 , middleware.fields(fields)
-, routes.list
+, routes.get
+);
+
+// ProductTags.get
+server.get(
+  '/v1/businesses/:businessId/product-tags/:tagId'
+, middleware.fields(fields)
+, routes.get
 );
 
 // ProductTags.create
 server.post(
-  '/v1/product-tags'
+  '/v1/businesses/:businessId/product-tags'
 , middleware.validate(schema)
 , middleware.fields(fields)
 , routes.create
 );
 
-// ProductTags.get
-server.get(
-  '/v1/product-tags/:productTagId'
-, middleware.fields(fields)
-, routes.get
-);
-
 // ProductTags.update
 server.patch(
-  '/v1/product-tags/:productTagId'
+  '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.validate(schema)
 , middleware.fields(fields)
 , routes.update
@@ -54,7 +54,7 @@ server.patch(
 
 // ProductTags.update
 server.post(
-  '/v1/product-tags/:productTagId'
+  '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.validate(schema)
 , middleware.fields(fields)
 , routes.update
@@ -62,7 +62,7 @@ server.post(
 
 // ProductTags.delete
 server.del(
-  '/v1/product-tags/:productTagId'
+  '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
 , routes.del

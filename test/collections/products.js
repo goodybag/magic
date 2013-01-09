@@ -186,7 +186,7 @@ describe('POST /v1/products', function() {
   });
 
   it('should create a product with tags and respond with the id of the new product', function(done) {
-    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: ["food", "apparel"] }), 'application/json', function(err, payload, res) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: [1, 2] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -199,23 +199,22 @@ describe('POST /v1/products', function() {
     });
   });
 
-  // Don't worry about tag validity for now
-  // it('should fail to create a product with tags because of invalid tags', function(done) {
-  //   tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: ["asdfadsf", "asdfsad"] }), 'application/json', function(err, payload, res) {
+  it('should fail to create a product with tags because of invalid tags', function(done) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: [999,999] }), 'application/json', function(err, payload, res) {
 
-  //     assert(!err);
-  //     assert(res.statusCode == 200);
+      assert(!err);
+      assert(res.statusCode == 400);
 
-  //     payload = JSON.parse(payload);
+      payload = JSON.parse(payload);
 
-  //     assert(payload.error);
-  //     assert(payload.error.name === "INVALID_TAGS");
-  //     done();
-  //   });
-  // });
+      assert(payload.error);
+      assert(payload.error.name === "INVALID_TAGS");
+      done();
+    });
+  });
 
   it('should create a product with categories and tags and respond with the id of the new product', function(done) {
-    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2], tags: ["food", "apparel"] }), 'application/json', function(err, payload, res) {
+    tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2], tags: [1, 2] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -297,7 +296,7 @@ describe('PATCH /v1/products/:id', function() {
   });
 
   it('should update the products name and tags ', function(done) {
-    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: ['awesome'] }), 'application/json', function(err, payload, res) {
+    tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [3] }), 'application/json', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);

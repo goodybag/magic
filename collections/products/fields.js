@@ -74,6 +74,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tagId        : productTags.id
     , tag          : productTags.tag
     , tags         : true
     , categories   : true
@@ -90,6 +91,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tagId        : productTags.id
     , tag          : productTags.tag
     , tags         : true
     , categories   : true
@@ -106,6 +108,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tagId        : productTags.id
     , tag          : productTags.tag
     , tags         : true
     , categories   : true
@@ -122,6 +125,7 @@ module.exports = {
     , isEnabled    : products.isEnabled
     , categoryId   : productCategories.id
     , categoryName : productCategories.name
+    , tagId        : productTags.id
     , tag          : productTags.tag
     , tags         : true
     , categories   : true
