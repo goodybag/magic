@@ -45,13 +45,13 @@ SELECT setval('groups_id_seq', (SELECT MAX(id) from "groups")); -- advance the s
 -- USER GROUPS
 
 BEGIN;
-INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('1', '1', '1');
-INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('2', '2', '2');
-INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
-INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
-INSERT INTO "userGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('1', '1', '1');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('2', '2', '2');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
 COMMIT;
-SELECT setval('"userGroups_id_seq"', (SELECT MAX(id) from "userGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
+SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 
 -- PRODUCTS
 

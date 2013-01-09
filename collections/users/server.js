@@ -25,15 +25,23 @@ server.get(
 // Users.create
 server.post(
   '/v1/users'
-// , middleware.fields(fields) :TODO:
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.create
 );
 
-// Users.create
+// Users.update
+server.patch(
+  '/v1/users/:id'
+, middleware.fields(fields)
+, middleware.validate(schema)
+, routes.update
+);
+
+// Users.update
 server.post(
   '/v1/users/:id'
-// , middleware.fields(fields) :TODO:
+, middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );

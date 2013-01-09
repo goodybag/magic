@@ -32,8 +32,8 @@ describe('GET /v1/users/:id', function() {
   });
 
   it('should return null if the id is not in the database', function(done){
-    var id = 5;
-    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+    var id = 500;
+    utils.get(baseUrl + '/v1/users/' + id, function(error, res, payload){
       assert(!error);
       assert(payload.data === null);
       done();
@@ -42,7 +42,7 @@ describe('GET /v1/users/:id', function() {
 
   it('should fail if the id is not in correct type', function(done){
     var id = "abcd";
-    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+    utils.get(baseUrl + '/v1/users/' + id, function(error, res, payload){
       assert(!error);
       assert(payload.error.severity === "ERROR");
       done();
@@ -55,6 +55,7 @@ describe('POST /v1/users', function() {
     var user = {
       email: "testmctesterson@test.com"
     , password: "testetsetset"
+    , groups:[1, 2]
     };
     tu.post('/v1/users', user, function(error, results) {
       assert(!error);
@@ -73,7 +74,45 @@ describe('POST /v1/users', function() {
 
     utils.post(baseUrl + '/v1/users', user, function(error, res, payload){
       assert(!error);
-      assert(payload.error != null);
+      assert(res.statusCode === 400)
+      assert(payload.error.name == 'EMAIL_REGISTERED');
+      done();
+    })
+  });
+});
+
+describe('PATCH /v1/users/:id', function() {
+  it('should update a user', function(done) {
+    var user = {
+      email: "new@email.com"
+    , password: "whatever"
+    , groups:[2, 3]
+    };
+    tu.patch('/v1/users/6', user, function(error, results) {
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+
+      tu.get('/v1/users/6', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.email === 'new@email.com');
+        assert(results.data.groups[0] === 2 && results.data.groups[1] === 3);
+        done();
+      });
+    });
+  });
+
+  it('should not update user if email is taken', function(done){
+    var user = {
+      email: "admin@goodybag.com"
+    };
+
+    utils.post(baseUrl + '/v1/users', user, function(error, res, payload){
+      assert(!error);
+      assert(res.statusCode === 400);
+      assert(payload.error.name === 'EMAIL_REGISTERED');
       done();
     })
   });

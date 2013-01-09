@@ -8,7 +8,7 @@ module.exports = {
   , 'locations'
   , 'users'
   , 'groups'
-  , 'userGroups'
+  , 'usersGroups'
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'

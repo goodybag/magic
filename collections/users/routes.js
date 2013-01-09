@@ -12,7 +12,7 @@ var
   // Tables
 , users       = db.tables.users
 , groups      = db.tables.groups
-, userGroups  = db.tables.userGroups
+, usersGroups = db.tables.usersGroups
 ;
 
 // Setup loggers
@@ -32,14 +32,30 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(users, req.fields)
-      .from(users)
-      .where(users.id.equals(req.params.id))
-      .toQuery();
+    // build query
+    // :TODO: nuke this fields kludge
+    var fields = [];
+    for (var field in req.fields) {
+      if (field === 'groups') {
+        fields.push('array_agg("usersGroups"."groupId") as groups');
+      } else {
+        fields.push('users.' + field + ' AS ' + field);
+      }
+    }
+    var query = [
+      'SELECT', fields.join(', '), 'FROM users',
+      'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
+      'WHERE users.id = $1',
+      'GROUP BY users.id'
+    ].join(' ');
+    /*utils.selectAsMap(users, req.fields)
+      .from(users
+        .join(usersGroups)
+          .on(usersGroups.userId.equals(users.id)))
+      .where(users.id.equals(req.params.id));*/
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query, [req.param('id')], function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: result.rows[0] || null});
@@ -60,10 +76,9 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(users, req.fields)
-      .from(users)
-      .toQuery();
+      .from(users);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -85,39 +100,46 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var user = {
-      email:    req.body.email
-    , password: req.body.password
-    };
+    // start transaction
+    var tx = new Transaction(client);
+    tx.begin(function() {
 
-    var userEmail = users.select(users.id).from(users).where(users.email.equals(req.body.email)).toQuery();
+      // build query
+      var user = {
+        email:    req.body.email
+      , password: utils.encryptPassword(req.body.password)
+      , groups:   req.body.groups
+      };
+      var query = 'INSERT INTO users (email, password) SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
+      client.query(query, [user.email, user.password], function(error, result) {
+        if(error) return res.json({error:error, data: result}), tx.abort(), logger.routes.error(TAGS, error);
 
-    client.query(userEmail.text, userEmail.values, function(error,result){
+        // did the insert occur?
+        if (result.rowCount === 0) {
+          // email must have already existed
+          tx.abort();
+          return res.error(errors.registration.EMAIL_REGISTERED);
+        }
+        var newUser = result.rows[0];
 
-      if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
+        // add groups
+        async.series((user.groups || []).map(function(groupId) {
+          return function(done) {
+            var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
+            client.query(query, [newUser.id, groupId], done);
+          }
+        }), function(err, results) {
+          // did any insert fail?
+          if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
+            // the target group must not have existed
+            tx.abort();
+            return res.error(errors.input.INVALID_GROUPS);
+          }
 
-    if(result.rows.length == 0){
-
-    utils.encryptPassword(user.password, function(error, password){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-      user.password = password;
-
-      var query = users.insert(user).toQuery();
-
-      client.query(query.text + "RETURNING id", query.values, function(error, result){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
-        return res.json({ error: null, data: result.rows[0] });
+          tx.commit();
+          return res.json({ error: null, data: newUser });
+        });
       });
-    });
-    }
-    else
-      {
-        return res.json({error: errors.registration.EMAIL_REGISTERED});
-      }
     });
   });
 };
@@ -149,8 +171,7 @@ module.exports.del = function(req, res){
 };
 
 /**
- * Update user - there's no data modification here, so no need to validate
- * since we've already validated in the middleware
+ * Update user
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
@@ -159,41 +180,64 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    // Don't let them update the id
-    delete req.body.id;
+    // start transaction
+    var tx = new Transaction(client);
+    tx.begin(function() {
 
-    // Only let them update certain fields
-    // :TODO: remove? -- should have been replaced in middleware
-    /*
-    var data;
-    if (req.fields){
-      var fieldsAvailable = 0;
-      data = {};
-      for (var key in req.body){
-        if (req.fieldFieldNames.indexOf(key) > -1){
-          data[key] = req.body[key];
-          fieldsAvailable++;
+      var user = {
+        email    : req.body.email,
+        password : (req.body.password) ? utils.encryptPassword(req.body.password) : undefined,
+        groups   : req.body.groups
+      };
+
+      // build update query
+      var query = [
+        'UPDATE users SET',
+        '  email    =', (user.email)    ? '$2' : 'email', 
+        ', password =', (user.password) ? '$3' : 'password',
+        'WHERE users.id = $1 AND $2 NOT IN (SELECT email FROM users WHERE id != $1)' // this makes sure the user doesn't take an email in use
+      ].join(' ');
+      logger.db.debug(TAGS, query);
+
+      // run update query
+      client.query(query, [req.param('id'), user.email, user.password], function(error, result){
+        if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+        logger.db.debug(TAGS, result);
+
+        // did the update occur?
+        if (result.rowCount === 0) {
+          // email must have already existed
+          tx.abort();
+          return res.error(errors.registration.EMAIL_REGISTERED);
         }
-      }
 
-      // Trying to update things they're not allowed to
-      if (fieldsAvailable === 0)
-        return res.json({ error: errors.auth.NOT_ALLOWED, data: null }), logger.routes.error(TAGS, errors.auth.NOT_ALLOWED);
-    }
-    */
+        // delete all group relations
+        var query = usersGroups.delete()
+          .where(usersGroups.userId.equals(req.param('id')));
+        client.query(query.toQuery(), function(error, result) {
+          if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
 
-    var query = users.update(data || req.body).where(
-      users.id.equals(req.params.id)
-    ).toQuery();
+          // add new group relations
+          async.series((user.groups || []).map(function(groupId) {
+            return function(done) {
+              var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
+              client.query(query, [req.param('id'), groupId], done);
+            }
+          }), function(err, results) {
+            // did any insert fail?
+            if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
+              // the target group must not have existed
+              tx.abort();
+              return res.error(errors.input.INVALID_GROUPS);
+            }
 
-    logger.db.debug(TAGS, query.text);
+            // done
+            tx.commit();
+            return res.json({ error: null, data: null });
+          });
 
-    client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
-      return res.json({ error: null, data: null });
+        });
+      });
     });
   });
 };

@@ -139,7 +139,7 @@ exports.schemas = {
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , groups:                    require('./schemas/groups')
-, userGroups:                require('./schemas/userGroups')
+, usersGroups:               require('./schemas/usersGroups')
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')
