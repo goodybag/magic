@@ -11,7 +11,8 @@ var
 , logger  = {}
 
   // Tables
-, productTags  = db.tables.productTags
+, productTags = db.tables.productTags
+, productsProductTags = db.tables.productsProductTags
 , products = db.tables.products
 ;
 
@@ -21,7 +22,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
- * List productTags
+ * List tags
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
@@ -34,15 +35,12 @@ module.exports.list = function(req, res){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = productTags.select('DISTINCT tag')
+    var query = utils.selectAsMap(productTags, req.fields)
       .from(productTags);
 
     // filters
     if (req.param('businessId')) {
       query.where(productTags.businessId.equals(req.param('businessId')));
-    }
-    if (req.param('productId')) {
-      query.where(productTags.productId.equals(req.param('productId')));
     }
     query = utils.paginateQuery(req, query);
 
@@ -52,26 +50,12 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, dataResult);
 
-      // collect count filters
-      var filters = [];
-      if (req.param('businessId')) {
-        filters.push('"businessId" = \'' + parseInt(req.param('businessId'), 10) + '\'');
-      }
-      if (req.param('productId')) {
-        filters.push('"productId" = \'' + parseInt(req.param('productId'), 10) + '\'');
-      }
-      filters = (filters.length > 0) ? ('WHERE ' + filters.join(' AND ')) : '';
-
-      // build count query
-      var query = [
-        'WITH agg AS (',
-          'SELECT DISTINCT(tag) FROM "productTags"', (filters), 'GROUP BY tag',
-        ')',
-        'SELECT COUNT(*) as count FROM agg;'
-      ].join(' ')
-
       // run count query
-      client.query(query, function(error, countResult) {
+      query = productTags.select('COUNT(*) as count');
+      if (req.param('businessId')) {
+        query.where(productTags.businessId.equals(req.param('businessId')));
+      }
+      client.query(query.toQuery(), function(error, countResult) {
         if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
@@ -81,7 +65,73 @@ module.exports.list = function(req, res){
 };
 
 /**
- * Update productTag
+ * Get tag
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.get = function(req, res){
+  var TAGS = ['get-productTag', req.uuid];
+  logger.routes.debug(TAGS, 'fetching productTag', {uid: 'more'});
+
+  // retrieve client
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // build data query
+    var query = utils.selectAsMap(productTags, req.fields)
+      .from(productTags)
+      .where(productTags.id.equals(req.param('tagId')));
+
+    // run data query
+    client.query(query.toQuery(), function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rows.length <= 0) return res.json({ error: null, data: null});
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
+
+/**
+ * Insert tag
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.create = function(req, res){
+  var TAGS = ['create-productTag', req.uuid];
+
+  // retrieve pg client
+  db.getClient(function(error, client){
+    if (error){
+      logger.routes.error(TAGS, error);
+      return res.json({ error: error, data: null });
+    }
+
+    // validate
+    var data = req.body;
+    data.businessId = req.param('businessId');
+    var error = utils.validate(data, db.schemas.productTags);
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // build query
+    //var query = productTags.insert(req.body).toQuery();
+    //logger.db.debug(TAGS, query.text);
+    var query = 'INSERT INTO "productTags" ("businessId", tag) SELECT $1, $2 WHERE NOT EXISTS (SELECT id from "productTags" WHERE "businessId" = $1 AND tag = $2) RETURNING id';
+
+    // run query
+    client.query(query, [data.businessId, data.tag], function(error, result){
+      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
+
+/**
+ * Update tag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
@@ -98,18 +148,11 @@ module.exports.update = function(req, res){
     // build query
     var query = productTags
       .update(req.body)
-      .where(productTags.tag.equals(req.param('tag')));
-
-    // add filters
-    if (req.param('businessId')) {
-      query.where(productTags.businessId.equals(req.param('businessId')));
-    }
-    if (req.param('productId')) {
-      query.where(productTags.productId.equals(req.param('productId')));
-    }
+      .where(productTags.id.equals(req.param('tagId')))
+      .where(productTags.businessId.equals(req.param('businessId')));
 
     // run query
-    client.query(query.toQuery(), query.values, function(error, result){
+    client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -120,7 +163,7 @@ module.exports.update = function(req, res){
 };
 
 /**
- * Delete productTag
+ * Delete tag
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
@@ -137,15 +180,8 @@ module.exports.del = function(req, res){
     // build query
     var query = productTags
       .delete()
-      .where(productTags.tag.equals(req.param('tag')))
-
-    // add filters
-    if (req.param('businessId')) {
-      query.where(productTags.businessId.equals(req.param('businessId')));
-    }
-    if (req.param('productId')) {
-      query.where(productTags.productId.equals(req.param('productId')));
-    }
+      .where(productTags.id.equals(req.param('tagId')))
+      .where(productTags.businessId.equals(req.param('businessId')));
 
     // run query
     client.query(query.toQuery(), function(error, result){

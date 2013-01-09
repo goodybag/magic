@@ -1,5 +1,5 @@
 /**
- * Product Tags Schema
+ * Products <-> Product Tags Relation Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,23 +9,24 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var productTags = {
+  var productsProductTags = {
     id: {
       type: 'serial'
     , meta: 'primary key'
     }
-  , businessId: {
+  , productTagId: {
       type: 'int'
-    , meta: 'references businesses(id) on delete cascade'
+    , meta: 'references "productTags"(id) on delete cascade'
     , validators: { isInt:[] }
     }
-  , tag: {
-      type: 'text'
-    , validators: { len:[1] }
+  , productId: {
+      type: 'int'
+    , meta: 'references products(id) on delete cascade'
+    , validators: { isInt:[] }
     }
   , createdAt: {
       type: 'timestamp'
     }
   };
-  return productTags;
+  return productsProductTags;
 });

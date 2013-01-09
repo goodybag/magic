@@ -91,12 +91,22 @@ INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('
 COMMIT;
 SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used
 
--- PRODUCT TAGS
+-- TAGS
 
 BEGIN;
-INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('1', '1', '1', 'food');
-INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('2', '1', '1', 'apparel');
-INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('3', '2', '2', 'food');
-INSERT INTO "productTags" (id, "businessId", "productId", tag) VALUES ('4', '3', '3', 'food');
+INSERT INTO "productTags" (id, "businessId", tag) VALUES ('1', '1', 'food');
+INSERT INTO "productTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
+INSERT INTO "productTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
+INSERT INTO "productTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
 COMMIT;
 SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used
+
+-- PRODUCTS TAGS
+
+BEGIN;
+INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('1', '1', '1');
+INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('2', '2', '1');
+INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('3', '3', '2');
+INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('4', '4', '3');
+COMMIT;
+SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used

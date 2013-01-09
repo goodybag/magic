@@ -1,21 +1,24 @@
 var db = require('../../db');
 var productTags = db.tables.productTags;
-var products = db.tables.products;
 
 module.exports = {
   "default": {
-    tag : productTags.tag
+    id  : productTags.id
+  , tag : productTags.tag
   }
 
 , client: {
-    tag : productTags.tag
+    id  : productTags.id
+  , tag : productTags.tag
   }
 
 , sales: {
-    tag : productTags.tag
+    id  : productTags.id
+  , tag : productTags.tag
   }
 
 , admin: {
-    tag : productTags.tag
+    id  : productTags.id
+  , tag : productTags.tag
   }
 };
