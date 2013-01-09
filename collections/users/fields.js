@@ -4,10 +4,11 @@ var usersGroups = db.tables.usersGroups;
 
 module.exports = {
   "default": {
-    id : users.id
+    id       : users.id
   , email    : users.email
   , password : users.password
   , groups   : true
+  , $postRequires : ['email', 'password']
   }
 , client: {
     id       : users.id

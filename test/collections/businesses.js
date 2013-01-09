@@ -4,14 +4,13 @@ var
 , utils   = require('./../../lib/utils')
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
-
-, baseUrl = config.baseUrl
 ;
 
 describe('GET /v1/businesses', function() {
   it('should respond with a business listing', function(done) {
-    utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
+    tu.get('/v1/businesses', function(err, results, res) {
       assert(!err);
+      var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
@@ -21,8 +20,9 @@ describe('GET /v1/businesses', function() {
     });
   });
   it('should filter', function(done) {
-    utils.get(baseUrl + '/v1/businesses?filter=2', function(err, res, payload) {
+    tu.get('/v1/businesses?filter=2', function(err, results, res) {
       assert(!err);
+      var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name.length > 0);
@@ -30,8 +30,9 @@ describe('GET /v1/businesses', function() {
     });
   });
   it('should paginate', function(done) {
-    utils.get(baseUrl + '/v1/businesses?offset=1&limit=1', function(err, res, payload) {
+    tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
       assert(!err);
+      var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name.length > 0);
@@ -44,28 +45,27 @@ describe('GET /v1/businesses', function() {
 describe('GET /v1/businesses/:id', function() {
   it('should respond with a single business document', function(done) {
     var id = 1;
-    utils.get(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
+    tu.get('/v1/businesses/' + id, function(err, results, res) {
       assert(!err);
+      var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.id === id);
       done();
     });
   });
 
-  it('should fail if the id is not in the database', function(done){
-    var id = 5;
-    utils.get(baseUrl + '/v1/business' + id, function(error, res, payload){
+  it('should return 404 if the id is not in the database', function(done){
+    tu.get('/v1/businesses/5', function(error, results, res){
       assert(!error);
-      assert(payload.data === undefined);
+      assert(res.statusCode == 404);
       done();
     });
   });
 
-  it('should fail if the id is not in correct type', function(done){
-    var id = "abcd";
-    utils.get(baseUrl + '/v1/businesses/' + id, function(error, res, payload){
+  it('should return 404 if the id is not in correct type', function(done){
+    tu.get('/v1/businesses/asdf', function(error, results, res){
       assert(!error);
-      assert(payload.error.severity === "ERROR");
+      assert(res.statusCode == 404);
       done();
     });
   });
@@ -75,15 +75,14 @@ describe('DEL /v1/businesses/:id', function() {
   it('should delete a single business document', function(done) {
     tu.loginAsAdmin(function(error, user){
       // get the current count
-      utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
-        var total = payload.meta.total;
-        var id = 3;
-        utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
+      tu.get('/v1/businesses', function(err, results, res) {
+        var total = JSON.parse(results).meta.total;
+        tu.del('/v1/businesses/3', function(err, results, res) {
           assert(!err);
-          assert(!payload.error);
+          assert(res.statusCode == 200)
           // compare to updated count
-          utils.get(baseUrl + '/v1/businesses', function(err, res, payload) {
-            assert(parseInt(total) - 1 === parseInt(payload.meta.total));
+          tu.get('/v1/businesses', function(err, results, res) {
+            assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
             tu.logout(function(){
               done();
             });
@@ -94,11 +93,9 @@ describe('DEL /v1/businesses/:id', function() {
   });
 
   it('should fail to delete a single business document because not logged in', function(done) {
-    var id = 3;
-    utils.del(baseUrl + '/v1/businesses/' + id, function(err, res, payload) {
+    tu.del('/v1/businesses/3', function(err, results, res) {
       assert(!err);
-      assert(payload.error);
-      assert(payload.error.name === "NOT_AUTHENTICATED");
+      assert(res.statusCode == 401);
       tu.logout(function(){
         done();
       });
@@ -120,8 +117,9 @@ describe('POST /v1/businesses', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/businesses', business, function(error, request, results){
+      tu.post('/v1/businesses', business, function(error, results, res){
         assert(!error);
+        results = JSON.parse(results);
         assert(!results.error);
         assert(results.data.id);
         tu.logout(function(){
@@ -143,8 +141,9 @@ describe('POST /v1/businesses', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/businesses', business, function(error, request, results){
+      tu.post('/v1/businesses', business, function(error, results, res){
         assert(!error);
+        results = JSON.parse(results);
         assert(results.error);
         tu.logout(function(){
           done();
@@ -162,9 +161,9 @@ describe('POST /v1/businesses/:id', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, results){
+      tu.post('/v1/businesses/' + 1, business, function(error, results){
         assert(!error);
-        assert(!results.error);
+        assert(!JSON.parse(results).error);
         tu.logout(function(){
           done();
         });
@@ -178,9 +177,9 @@ describe('POST /v1/businesses/:id', function(){
     , url: 123
     };
     tu.loginAsSales(function(error, user){
-      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+      tu.post('/v1/businesses/' + 1, business, function(error, results){
         assert(!error);
-        assert(results.error);
+        assert(JSON.parse(results).error);
         tu.logout(function(){
           done();
         });
@@ -194,9 +193,9 @@ describe('POST /v1/businesses/:id', function(){
       , url: "http://www.google.com"
     };
     tu.loginAsClient(function(error, user){
-      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+      tu.post('/v1/businesses/' + 1, business, function(error, results){
         assert(!error);
-        assert(results.error);
+        assert(JSON.parse(results).error);
         tu.logout(function(){
           done();
         });
@@ -213,9 +212,9 @@ describe('PATCH /v1/businesses/:id', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(!results.error);
+        assert(res.statusCode == 200);
         tu.logout(function(){
           done();
         });
@@ -229,9 +228,9 @@ describe('PATCH /v1/businesses/:id', function(){
     , url: 123
     };
     tu.loginAsSales(function(error, user){
-      utils.patch(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(results.error);
+        assert(res.statusCode == 400);
         tu.logout(function(){
           done();
         });
@@ -245,9 +244,9 @@ describe('PATCH /v1/businesses/:id', function(){
       , url: "http://www.google.com"
     };
     tu.loginAsClient(function(error, user){
-      utils.post(baseUrl + '/v1/businesses/' + 1, business, function(error, request, results){
+     tu.post('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(results.error);
+        assert(res.statusCode == 403);
         tu.logout(function(){
           done();
         });

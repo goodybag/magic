@@ -72,7 +72,6 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
   var checkResults = function(continueCb) {
     return function(err, results) {
       if (err) {
-        logger.log(['upsert'], 'Failed during "'+stage+'" stage: ', err);
         // an error, abort
         if (savePointed) { tx.release('upsert'); }
         tx.abort(function() { originalCb(err); });

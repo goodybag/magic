@@ -39,7 +39,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.param('businessId')) {
-      query.where(locations.businessId.equals(req.param('businessId')));
+      query.where(locations.businessId.equals(+req.param('businessId') || 0));
     }
     query = utils.paginateQuery(req, query);
 
@@ -52,7 +52,7 @@ module.exports.list = function(req, res){
       // run count query
       query = locations.select('COUNT(*) as count');
       if (req.param('businessId')) {
-        query.where(locations.businessId.equals(req.param('businessId')));
+        query.where(locations.businessId.equals(+req.param('businessId') || 0));
       }
       client.query(query.toQuery(), function(error, countResult) {
         if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
@@ -77,16 +77,19 @@ module.exports.get = function(req, res){
 
     var query = utils.selectAsMap(locations, req.fields)
       .from(locations)
-      .where(locations.id.equals(req.param('locationId')))
+      .where(locations.id.equals(+req.param('locationId') || 0))
       .toQuery();
 
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] || null });
+      if (result.rowCount === 0) {
+        return res.status(404).end();
+      }      
+
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

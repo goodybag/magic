@@ -132,7 +132,7 @@ module.exports.authenticate = function(req, res){
     var query = users.select(
       users.id, users.email, users.password
     ).from(users).where(
-      users.email.equals(req.body.email)
+      users.email.equals(req.body.email || '')
     ).toQuery();
 
 

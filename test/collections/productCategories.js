@@ -94,8 +94,9 @@ describe('PATCH /v1/productCategories/:id', function() {
         id: 99999999999
       , isFeatured: false
       };
-      utils.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, response, results) {
+      tu.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, results, res) {
         assert(!error);
+        results = JSON.parse(results);
         assert(results.error);
         tu.logout(function(){
           done();
@@ -129,10 +130,9 @@ describe('DEL /v1/productCategories/:id', function() {
     tu.loginAsConsumer(function(error, user){
       var id = 6; // Dumb user not used for anything
 
-      utils.del(baseUrl + '/v1/productCategories/' + id, function(error, request, results) {
+      tu.del('/v1/productCategories/' + id, function(error, results, res) {
         assert(!error);
-        assert(results.error);
-        assert(results.error.name === "NOT_ALLOWED");
+        assert(res.statusCode == 403);
 
         // Logout
         utils.get(baseUrl + '/v1/logout', function(error){
