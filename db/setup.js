@@ -11,14 +11,14 @@
 
 var
   fs       = require('fs')
-, pg       = require('pg')
-, when     = require('when')
-, pipeline = require('when/pipeline')
-, config   = require('./config')
+  , pg       = require('pg')
+  , when     = require('when')
+  , pipeline = require('when/pipeline')
+  , config   = require('./config')
 
-, client   = null
-, verbose  = false
-;
+  , client   = null
+  , verbose  = false
+  ;
 
 function loadFile(log, file) {
   return function() {
@@ -85,6 +85,16 @@ function loadFixture(name) {
   }
 }
 
+function loadOddity(name) {
+  return function() {
+    if (!name) {return;}
+    return pipeline([
+      loadFile('Loading oddity', __dirname+'/oddity/'+name+'.sql'),
+      query()
+    ]);
+  }
+}
+
 module.exports = function(options, callback){
   if (typeof options === 'function') {
     callback = options;
@@ -94,7 +104,7 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-
+  options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -106,6 +116,7 @@ module.exports = function(options, callback){
     // run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
       .then(loadFixture(options.fixtureFile))
+      .then(loadOddity(options.oddityFile))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;

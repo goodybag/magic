@@ -15,6 +15,9 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
+  , 'oddity'
+  , 'oddityMeta'
   ]
 , fixtureFile: 'test'
+, oddityFile: 'oddityTest'
 };
