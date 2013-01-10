@@ -14,6 +14,25 @@ describe('GET /v1/users', function() {
       done();
     });
   });
+  it('should filter', function(done) {
+    tu.get('/v1/users?filter=admin', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      done();
+    });
+  });
+  it('should paginate', function(done) {
+    tu.get('/v1/users?offset=1&limit=1', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/users/:id', function() {

@@ -79,15 +79,27 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
+    // build data query
     var query = utils.selectAsMap(users, req.fields)
       .from(users);
 
-    client.query(query.toQuery(), function(error, result){
+    // add query filters
+    if (req.param('filter')) {
+      query.where(users.email.like('%'+req.param('filter')+'%'))
+    }
+    utils.paginateQuery(req, query);
+
+    // run data query
+    client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
 
-      logger.db.debug(TAGS, result);
+      // run count query
+      client.query('SELECT COUNT(*) as count FROM users', function(error, countResult) {
+        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-      return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
+      });
     });
   });
 };

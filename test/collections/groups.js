@@ -14,6 +14,16 @@ describe('GET /v1/groups', function() {
       done();
     });
   });
+  it('should paginate', function(done) {
+    tu.get('/v1/groups?offset=1&limit=1', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/groups/:id', function() {
