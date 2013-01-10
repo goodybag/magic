@@ -18,5 +18,6 @@ module.exports = {
   , 'oddity'
   , 'oddityMeta'
   ]
-, fixtureFile: ['test', "oddityTest"]
+, fixtureFile: 'test'
+, oddityFile: 'oddityTest'
 };
