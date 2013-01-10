@@ -66,6 +66,7 @@ function query(log, sql) {
   }
 }
 
+
 function loadSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists "' + name + '_id_seq" cascade'),
@@ -103,12 +104,11 @@ module.exports = function(options, callback){
     if (error) return callback(error);
     client = pgClient;
 
-    // run loadschema on all files
+//    run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
-      .then(loadFixture(options.fixtureFile))
+      .then(options.fixtureFile, loadFixture)
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;
-
   });
 };

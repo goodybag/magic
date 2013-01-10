@@ -15,6 +15,8 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
+  , 'oddity'
+  , 'oddityMeta'
   ]
-, fixtureFile: 'test'
+, fixtureFile: ['test', "oddityTest"]
 };
