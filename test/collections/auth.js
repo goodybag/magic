@@ -6,6 +6,7 @@ var
 , tu = require('../../lib/test-utils')
 , baseUrl = config.baseUrl
 , callbackUrl = config.singly.callbackUrl
+, test = require('../test')
 ;
 
 describe('POST /v1/session', function() {
