@@ -34,15 +34,18 @@ module.exports.get = function(req, res){
 
     var query = utils.selectAsMap(businesses, req.fields)
       .from(businesses)
-      .where(businesses.id.equals(req.params.id)).and(businesses.isDeleted.equals(false))
+      .where(businesses.id.equals(+req.params.id || 0)).and(businesses.isDeleted.equals(false))
       .toQuery();
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] || null});
+      if (result.rowCount === 0) {
+        return res.status(404).end();
+      }
+
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

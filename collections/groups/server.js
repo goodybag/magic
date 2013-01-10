@@ -1,54 +1,54 @@
 /**
- * Users server
+ * Groups server
  */
 
 var server     = require('express')();
 var middleware = require('../../middleware');
 var routes     = require('./routes');
-var schema     = require('../../db').schemas.users;
+var schema     = require('../../db').schemas.groups;
 var fields     = require('./fields');
 
-// Users.list
+// Groups.list
 server.get(
-  '/v1/users'
+  '/v1/groups'
 , middleware.fields(fields)
 , routes.list
 );
 
-// Users.get
+// Groups.get
 server.get(
-  '/v1/users/:id'
+  '/v1/groups/:id'
 , middleware.fields(fields)
 , routes.get
 );
 
-// Users.create
+// Groups.create
 server.post(
-  '/v1/users'
+  '/v1/groups'
 , middleware.fields(fields)
 , middleware.validate(schema)
 , routes.create
 );
 
-// Users.update
+// Groups.update
 server.patch(
-  '/v1/users/:id'
+  '/v1/groups/:id'
 , middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );
 
-// Users.update
+// Groups.update
 server.post(
-  '/v1/users/:id'
+  '/v1/groups/:id'
 , middleware.fields(fields)
 , middleware.validate(schema)
 , routes.update
 );
 
-// Users.delete
+// Groups.delete
 server.del(
-  '/v1/users/:id'
+  '/v1/groups/:id'
 , middleware.auth.allow('admin')
 , routes.del
 );

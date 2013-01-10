@@ -1,5 +1,5 @@
 /**
- * User Groups Schema
+ * Users <-> Groups Relation Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var userGroups = {
+  var usersGroups = {
     id: {
       type: 'serial'
     , meta: 'primary key'
@@ -23,5 +23,5 @@ define(function(require){
     , validators: { isInt:[] }
     }
   };
-  return userGroups;
+  return usersGroups;
 });

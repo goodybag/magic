@@ -72,7 +72,6 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
   var checkResults = function(continueCb) {
     return function(err, results) {
       if (err) {
-        logger.log(['upsert'], 'Failed during "'+stage+'" stage: ', err);
         // an error, abort
         if (savePointed) { tx.release('upsert'); }
         tx.abort(function() { originalCb(err); });
@@ -139,7 +138,7 @@ exports.schemas = {
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , groups:                    require('./schemas/groups')
-, userGroups:                require('./schemas/userGroups')
+, usersGroups:               require('./schemas/usersGroups')
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')

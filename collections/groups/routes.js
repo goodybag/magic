@@ -1,5 +1,5 @@
 /**
- * Users
+ * Groups
  */
 
 var
@@ -21,13 +21,13 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
- * Get user
+ * Get group
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.get = function(req, res){
-  var TAGS = ['get-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching user ' + req.params.id, {uid: 'more'});
+  var TAGS = ['get-groups', req.uuid];
+  logger.routes.debug(TAGS, 'fetching groups ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -36,23 +36,18 @@ module.exports.get = function(req, res){
     // :TODO: nuke this fields kludge
     var fields = [];
     for (var field in req.fields) {
-      if (field === 'groups') {
-        fields.push('array_agg("usersGroups"."groupId") as groups');
+      if (field === 'users') {
+        fields.push('array_agg("usersGroups"."userId") as users');
       } else {
-        fields.push('users.' + field + ' AS ' + field);
+        fields.push('groups.' + field + ' AS ' + field);
       }
     }
     var query = [
-      'SELECT', fields.join(', '), 'FROM users',
-      'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-      'WHERE users.id = $1',
-      'GROUP BY users.id'
+      'SELECT', fields.join(', '), 'FROM groups',
+      'LEFT JOIN "usersGroups" ON "usersGroups"."groupId" = groups.id',
+      'WHERE groups.id = $1',
+      'GROUP BY groups.id'
     ].join(' ');
-    /*utils.selectAsMap(users, req.fields)
-      .from(users
-        .join(usersGroups)
-          .on(usersGroups.userId.equals(users.id)))
-      .where(users.id.equals(req.params.id));*/
 
     client.query(query, [(+req.param('id')) || 0], function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -68,19 +63,19 @@ module.exports.get = function(req, res){
 };
 
 /**
- * List users
+ * List groups
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id, {uid: 'more'});
+  var TAGS = ['list-groups', req.uuid];
+  logger.routes.debug(TAGS, 'fetching groups', {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(users, req.fields)
-      .from(users);
+    var query = utils.selectAsMap(groups, req.fields)
+      .from(groups);
 
     client.query(query.toQuery(), function(error, result){
       if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -93,13 +88,13 @@ module.exports.list = function(req, res){
 };
 
 /**
- * Create users
+ * Create groups
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.create = function(req, res){
-  var TAGS = ['create-users', req.uuid];
-  logger.routes.debug(TAGS, 'creating user ' + req.params.id, {uid: 'more'});
+  var TAGS = ['create-groups', req.uuid];
+  logger.routes.debug(TAGS, 'creating group', {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
@@ -109,39 +104,31 @@ module.exports.create = function(req, res){
     tx.begin(function() {
 
       // build query
-      var user = {
-        email:    req.body.email
-      , password: utils.encryptPassword(req.body.password)
-      , groups:   req.body.groups
+      var group = {
+        name:    req.body.name
+      , users:   req.body.users
       };
-      var query = 'INSERT INTO users (email, password) SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
-      client.query(query, [user.email, user.password], function(error, result) {
+      var query = 'INSERT INTO groups (name) VALUES ($1) RETURNING id';
+      client.query(query, [group.name], function(error, result) {
         if(error) return res.json({error:error, data: result}), tx.abort(), logger.routes.error(TAGS, error);
+        var newGroup = result.rows[0];
 
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          tx.abort();
-          return res.error(errors.registration.EMAIL_REGISTERED);
-        }
-        var newUser = result.rows[0];
-
-        // add groups
-        async.series((user.groups || []).map(function(groupId) {
+        // add users
+        async.series((group.users || []).map(function(userId) {
           return function(done) {
-            var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-            client.query(query, [newUser.id, groupId], done);
+            var query = 'INSERT INTO "usersGroups" ("groupId", "userId") SELECT $1, $2 FROM users WHERE users.id = $2';
+            client.query(query, [newGroup.id, userId], done);
           }
         }), function(err, results) {
           // did any insert fail?
           if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
-            // the target group must not have existed
+            // the target user must not have existed
             tx.abort();
-            return res.error(errors.input.INVALID_GROUPS);
+            return res.error(errors.input.INVALID_USERS);
           }
 
           tx.commit();
-          return res.json({ error: null, data: newUser });
+          return res.json({ error: null, data: newGroup });
         });
       });
     });
@@ -149,19 +136,19 @@ module.exports.create = function(req, res){
 };
 
 /**
- * Delete user
+ * Delete group
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.del = function(req, res){
-  var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id, {uid: 'more'});
+  var TAGS = ['del-group', req.uuid];
+  logger.routes.debug(TAGS, 'deleting group ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
-    var query = users.delete().where(
-      users.id.equals(req.params.id)
+    var query = groups.delete().where(
+      groups.id.equals(+req.param('id') || 0)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
@@ -175,12 +162,12 @@ module.exports.del = function(req, res){
 };
 
 /**
- * Update user
+ * Update group
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
 module.exports.update = function(req, res){
-  var TAGS = ['update-user', req.uuid];
+  var TAGS = ['update-group', req.uuid];
   db.getClient(function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
@@ -188,60 +175,49 @@ module.exports.update = function(req, res){
     var tx = new Transaction(client);
     tx.begin(function() {
 
-      var user = {
-        email    : req.body.email,
-        password : (req.body.password) ? utils.encryptPassword(req.body.password) : undefined,
-        groups   : req.body.groups
+      var group = {
+        name    : req.body.name,
+        users   : req.body.users
       };
 
       // build update query
       var query = [
-        'UPDATE users SET',
-        '  email    =', (user.email)    ? '$2' : 'email', 
-        ', password =', (user.password) ? '$3' : 'password',
-        'WHERE users.id = $1 AND $2 NOT IN (SELECT email FROM users WHERE id != $1)' // this makes sure the user doesn't take an email in use
+        'UPDATE groups SET',
+        '  name =', (group.name) ? '$2' : 'name', 
+        'WHERE groups.id = $1'
       ].join(' ');
       logger.db.debug(TAGS, query);
 
       // run update query
-      client.query(query, [+req.param('id') || 0].concat(user.email || []).concat(user.password || []), function(error, result){
+      client.query(query, [+req.param('id') || 0].concat(group.name || []), function(error, result){
         if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
         // did the update occur?
         if (result.rowCount === 0) {
           tx.abort();
-          // figure out what the problem was
-          client.query('SELECT id FROM users WHERE id=$1', [+req.param('id') || 0], function(error, results) {
-            if (results.rowCount == 0) {
-              // id didnt exist
-              return res.status(404).end();
-            } else {
-              // email must have already existed
-              return res.error(errors.registration.EMAIL_REGISTERED);
-            }
-          });
-          return;
+          // id didnt exist
+          return res.status(404).end();
         }
 
-        // delete all group relations
+        // delete all user relations
         var query = usersGroups.delete()
-          .where(usersGroups.userId.equals(req.param('id')));
+          .where(usersGroups.groupId.equals(req.param('id')));
         client.query(query.toQuery(), function(error, result) {
           if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
 
-          // add new group relations
-          async.series((user.groups || []).map(function(groupId) {
+          // add new user relations
+          async.series((group.users || []).map(function(userId) {
             return function(done) {
-              var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [req.param('id'), groupId], done);
+              var query = 'INSERT INTO "usersGroups" ("groupId", "userId") SELECT $1, $2 FROM users WHERE users.id = $2';
+              client.query(query, [req.param('id'), userId], done);
             }
           }), function(err, results) {
             // did any insert fail?
             if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
-              // the target group must not have existed
+              // the target user must not have existed
               tx.abort();
-              return res.error(errors.input.INVALID_GROUPS);
+              return res.error(errors.input.INVALID_USERS);
             }
 
             // done
