@@ -9,5 +9,5 @@ COMMIT;
 SELECT setval('oddity_id_seq', (SELECT MAX(id) from "oddity")); -- advance the sequence past the IDs just used
 
 BEGIN;
-INSERT INTO "oddityBusinesses" ("oddityId", "toReview", "changeColumns") SELECT oddity.id, 'true', 'true' FROM oddity;
+INSERT INTO "oddityMeta" ("oddityId", "toReview", "changeColumns") SELECT oddity.id, 'true', 'true' FROM oddity;
 COMMIT;
