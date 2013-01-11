@@ -24,6 +24,13 @@ module.exports = {
   , groups   : true
   , $postRequires : ['email', 'password']
   }
+, owner: {
+    id       : users.id
+  , email    : users.email
+  , password : users.password
+  , groups   : true
+  , $postRequires : ['email', 'password']
+  }
 , admin: {
     id       : users.id
   , email    : users.email

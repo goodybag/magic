@@ -118,43 +118,75 @@ describe('PATCH /v1/users/:id', function() {
     , password: "whatever"
     , groups:[2, 3]
     };
-    tu.patch('/v1/users/6', user, function(error, results) {
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-
-      tu.get('/v1/users/6', function(error, results) {
+    tu.login({ email: 'dumb@goodybag.com', password: 'password' }, function(error){
+      tu.patch('/v1/users/6', user, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.email === 'new@email.com');
-        assert(results.data.groups[0] === 2 && results.data.groups[1] === 3);
-        done();
+
+        tu.get('/v1/users/6', function(error, results) {
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.email === 'new@email.com');
+          assert(results.data.groups[0] === 2 && results.data.groups[1] === 3);
+          tu.logout(function() {
+            done();
+          });
+        });
       });
     });
   });
 
+  it('should not update a user if permissions are absent', function(done) {
+    var user = {
+      email: "asdf@email.com"
+    , password: "fdsa"
+    , groups:[1]
+    };
+    tu.loginAsClient(function() {
+      tu.patch('/v1/users/6', user, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode == 403);
+        results = JSON.parse(results);
+        assert(results.error);
+        assert(results.error.name === "NOT_ALLOWED");
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
+  });
+    
   it('should not update user if email is taken', function(done){
     var user = {
       email: "sales@goodybag.com"
     };
-    tu.patch('/v1/users/6', user, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name === 'EMAIL_REGISTERED');
-      done();
-    })
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/users/6', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 400);
+        results = JSON.parse(results);
+        assert(results.error.name === 'EMAIL_REGISTERED');
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
   });
 
   it('should respond 404 if the id is not in the database', function(done){
     var user = {
       email: "sales@goodybag.com"
     };
-    tu.patch('/v1/users/500', user, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode == 404);
-      done();
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/users/500', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 404);
+        tu.logout(function() {
+          done();
+        });
+      });
     });
   });
 
@@ -163,12 +195,16 @@ describe('PATCH /v1/users/:id', function() {
       email: "foobar"
     , groups: [40000]
     };
-    tu.patch('/v1/users/6', user, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name === 'INVALID_GROUPS');
-      done();
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/users/6', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 400);
+        results = JSON.parse(results);
+        assert(results.error.name === 'INVALID_GROUPS');
+        tu.logout(function() {
+          done();
+        });
+      });
     });
   });
 });
