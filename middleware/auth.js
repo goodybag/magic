@@ -25,10 +25,9 @@ var
    * @param  {Array}   groups Array of groups that are allowed to see the resource
    * @return {Boolean}        Whether or not the user is allowed in
    */
-, isUserAllowed = function(user, groups){
-    var alloweds = 0;
-    for (var i = groups.length - 1; i >= 0; i--)
-      if (user.groups.indexOf(groups[i]) > -1) return true;
+, isUserAllowed = function(userGroups, routeGroups){
+    for (var i = routeGroups.length - 1; i >= 0; i--)
+      if (userGroups.indexOf(routeGroups[i]) > -1) return true;
     return false;
   }
 ;
@@ -48,7 +47,8 @@ auth.allow = function(groups){
     if (!req.session || !req.session.user)
       return logger.error(TAGS, errors.auth.NOT_AUTHENTICATED), res.error(errors.auth.NOT_AUTHENTICATED);
 
-    if (!req.session.user.groups || req.session.user.groups.length === 0 || !isUserAllowed(req.session.user, groups))
+    var userGroups = [].concat(req.session.user.groups).concat(req.permittedGroups);
+    if (!userGroups.length === 0 || !isUserAllowed(userGroups, groups))
       return logger.error(TAGS, errors.auth.NOT_ALLOWED), res.error(errors.auth.NOT_ALLOWED);
     next();
   };
