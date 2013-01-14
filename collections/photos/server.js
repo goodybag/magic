@@ -11,21 +11,21 @@ var fields = require('./fields');
 // Photos.list
 server.get(
   '/v1/photos'
-, middleware.fields(fields)
+, middleware.fields(fields.get)
 , routes.list
 );
 
 // Photos.list
 server.get(
   '/v1/businesses/:businessId/photos'
-, middleware.fields(fields)
+, middleware.fields(fields.get)
 , routes.list
 );
 
 // Photos.list
 server.get(
   '/v1/products/:productId/photos'
-, middleware.fields(fields)
+, middleware.fields(fields.get)
 , routes.list
 );
 
@@ -33,14 +33,14 @@ server.get(
 server.post(
   '/v1/photos'
 , middleware.validate(schema)
-, middleware.fields(fields)
+, middleware.fields(fields.modify)
 , routes.create
 );
 
 // Photos.get
 server.get(
   '/v1/photos/:photoId'
-, middleware.fields(fields)
+, middleware.fields(fields.modify)
 , routes.get
 );
 
@@ -48,7 +48,7 @@ server.get(
 server.patch(
   '/v1/photos/:photoId'
 , middleware.validate(schema)
-, middleware.fields(fields)
+, middleware.fields(fields.modify)
 , routes.update
 );
 
@@ -56,7 +56,7 @@ server.patch(
 server.post(
   '/v1/photos/:photoId'
 , middleware.validate(schema)
-, middleware.fields(fields)
+, middleware.fields(fields.modify)
 , routes.update
 );
 

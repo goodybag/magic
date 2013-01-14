@@ -63,8 +63,8 @@ exports.getClient = function(callback){
   // callback(null, client);
 };
 
-exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb) {
-  var tx = new Transaction(client);
+exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb, tx) {
+  var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
   var stage = ''; // for logging
 
@@ -79,7 +79,11 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
         if (results[1].rowCount === 1) {
           // success, we're done
           if (savePointed) { tx.release('upsert'); }
-          tx.commit(originalCb);
+          if (shouldCommitOnFinish) {
+            tx.commit(originalCb);
+          } else {
+            originalCb();
+          }
         } else {
           // carry on
           continueCb && continueCb();
@@ -93,7 +97,12 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
     function(cb) {
       // init transaction
       stage = 'begin';
-      tx.begin(cb);
+      if (!tx) {
+        tx = new Transaction(client);
+        tx.begin(cb);
+      } else {
+        cb();
+      }
     },
     function(cb) {
       // run update
@@ -147,6 +156,7 @@ exports.schemas = {
 , productsProductTags:       require('./schemas/productsProductTags')
 , oddity:                    require('./schemas/oddity')
 , oddityMeta:                require('./schemas/oddityMeta')
+
 };
 
 function buildTable(name, schema) {

@@ -11,21 +11,21 @@ var fields = require('./fields');
 // Products.list
 server.get(
   '/v1/products'
-, middleware.fields(fields.products)
+, middleware.fields(fields.read.products)
 , routes.list
 );
 
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
-, middleware.fields(fields.products)
+, middleware.fields(fields.read.products)
 , routes.list
 );
 
 // Products.create
 server.post(
   '/v1/products'
-, middleware.fields(fields.products)
+, middleware.fields(fields.mutate.product)
 , middleware.validate(schema)
 , routes.create
 );
@@ -33,14 +33,14 @@ server.post(
 // Products.get
 server.get(
   '/v1/products/:productId'
-, middleware.fields(fields.product)
+, middleware.fields(fields.read.product)
 , routes.get
 );
 
 // Products.update
 server.patch(
   '/v1/products/:productId'
-, middleware.fields(fields.product)
+, middleware.fields(fields.mutate.product)
 , middleware.validate(schema)
 , routes.update
 );
@@ -48,7 +48,7 @@ server.patch(
 // Products.update
 server.post(
   '/v1/products/:productId'
-, middleware.fields(fields.product)
+, middleware.fields(fields.mutate.product)
 , middleware.validate(schema)
 , routes.update
 );
@@ -56,20 +56,21 @@ server.post(
 // Products.delete
 server.del(
   '/v1/products/:productId'
+, middleware.auth.allow('admin', 'sales')
 , routes.del
 );
 
 // Products.listCategories
 server.get(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.productCategory)
+, middleware.fields(fields.read.productCategory)
 , routes.listCategories
 );
 
 // Products.addCategory
 server.post(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.productCategory)
+, middleware.fields(fields.mutate.productCategory)
 , routes.addCategory
 );
 
@@ -77,6 +78,12 @@ server.post(
 server.del(
   '/v1/products/:productId/categories/:categoryId'
 , routes.delCategory
+);
+
+// Products.updateFeelings
+server.post(
+  '/v1/products/:productId/feelings'
+, routes.updateFeelings
 );
 
 module.exports = server;

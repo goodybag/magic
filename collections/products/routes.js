@@ -34,7 +34,7 @@ module.exports.list = function(req, res){
 
   // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(products, req.fields)
@@ -48,7 +48,7 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
-      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
@@ -58,7 +58,7 @@ module.exports.list = function(req, res){
         query.where(products.businessId.equals(req.param('businessId')));
       }
       client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
@@ -76,7 +76,7 @@ module.exports.get = function(req, res){
   logger.routes.debug(TAGS, 'fetching product', {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(products, req.fields)
       // :DEBUG: node-sql cant support this yet
@@ -100,7 +100,7 @@ module.exports.get = function(req, res){
       .toQuery();
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
       if (result.rows.length <= 0) return res.json({ error: null, data: null});
 
@@ -162,7 +162,7 @@ module.exports.create = function(req, res){
     clientReceived: function(error, client){
       if (error){
         logger.routes.error(TAGS, error);
-        return res.json({ error: error, data: null });
+        return res.error(errors.internal.DB_FAILURE, error);
       }
 
       stage.ensureCategoriesAndTags(client);
@@ -207,7 +207,7 @@ module.exports.create = function(req, res){
         }
 
       }, function(error, results){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
           return res.error(errors.input.INVALID_CATEGORY_IDS);
@@ -223,10 +223,13 @@ module.exports.create = function(req, res){
   , insertProduct: function(client){
       // defaults
       if (!req.body.isEnabled) req.body.isEnabled = true;
+      req.body.likes = 0;
+      req.body.wants = 0;
+      req.body.tries = 0;
 
       // validate
       var error = utils.validate(req.body, db.schemas.products);
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
       // We don't want to try and insert categories or tags
       var categories = req.body.categories;
@@ -241,7 +244,7 @@ module.exports.create = function(req, res){
 
       // run query
       client.query(query.text + ' RETURNING id', query.values, function(error, results){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         // If they didn't provide categories or tags, stop here
         if ((!categories || categories.length === 0) && (!tags || tags.length === 0))
@@ -303,8 +306,8 @@ module.exports.create = function(req, res){
 
       // That's it!
       utils.parallel(queries, function(error, results){
-        if (error) logger.routes.error(TAGS, error);
-        return res.json({ error: error, data: { id: productId } });
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        return res.json({ error: null, data: { id: productId } });
       });
     }
   };
@@ -326,7 +329,7 @@ module.exports.update = function(req, res){
     clientReceived: function(error, client){
       if (error){
         logger.routes.error(TAGS, error);
-        return res.json({ error: error, data: null });
+        return res.error(errors.internal.DB_FAILURE, error);
       }
 
       stage.ensureCategoriesAndTags(client);
@@ -369,7 +372,7 @@ module.exports.update = function(req, res){
         }
 
       }, function(error, results){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
           return res.error(errors.input.INVALID_CATEGORY_IDS);
@@ -385,10 +388,13 @@ module.exports.update = function(req, res){
   , updateProduct: function(client){
       // defaults
       if (!req.body.isEnabled) req.body.isEnabled = true;
+      delete req.body.likes;
+      delete req.body.wants;
+      delete req.body.tries;
 
       // validate
       var error = utils.validate(req.body, db.schemas.products);
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
       // We don't want to try and insert categories
       var categories = req.body.categories;
@@ -407,7 +413,7 @@ module.exports.update = function(req, res){
 
       // run query
       client.query(query.text + ' RETURNING "businessId"', query.values, function(error, results){
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         // If they didn't provide categories or tags, stop here
         if (!categories && !tags)
@@ -438,7 +444,7 @@ module.exports.update = function(req, res){
         }
 
       , onComplete = function(error, results){
-          if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           stage.updateCategoriesTags(client, productId, businessId, categories, tags);
         }
@@ -520,7 +526,7 @@ module.exports.update = function(req, res){
         }
 
       , onComplete = function(error, results){
-          if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           return res.json({ error: null, data: null });
         }
@@ -546,7 +552,7 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+      return res.error(errors.internal.DB_FAILURE, error);
     }
 
     var query = products
@@ -557,7 +563,7 @@ module.exports.del = function(req, res){
     logger.db.debug(TAGS, query.text);
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -576,7 +582,7 @@ module.exports.listCategories = function(req, res) {
   logger.routes.debug(TAGS, 'fetching list of product\'s categories', {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
     var query = utils.selectAsMap(productsProductCategories, req.fields)
@@ -589,7 +595,7 @@ module.exports.listCategories = function(req, res) {
 
     // run query
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -608,7 +614,7 @@ module.exports.addCategory = function(req, res) {
   var TAGS = ['create-product-productcategory-relation', req.uuid];
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
     // :TODO: make sure product categorys businessId is the same as products
@@ -616,7 +622,7 @@ module.exports.addCategory = function(req, res) {
     // validate
     var data = { productId:req.param('productId'), productCategoryId:req.body.id };
     var error = utils.validate(data, db.schemas.productsProductCategories);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // build query
     var query = {
@@ -629,8 +635,7 @@ module.exports.addCategory = function(req, res) {
 
     // run query
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: null });
@@ -647,14 +652,14 @@ module.exports.delCategory = function(req, res) {
   var TAGS = ['delete-product-productcategory-relation', req.uuid];
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
 
     // validate
     var data = { productId:req.param('productId'), productCategoryId:req.param('categoryId') };
     var error = utils.validate(data, db.schemas.productsProductCategories);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.inputs.VALIDATION_FAILED), logger.routes.error(TAGS, error);
 
     // build query
     var query = productsProductCategories
@@ -667,13 +672,98 @@ module.exports.delCategory = function(req, res) {
 
     // run query
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: null });
     });
   });
-
 };
 
+/**
+ * Add/remove user feelings relations (productLikes, productWants, productTries) to the product
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.updateFeelings = function(req, res) {
+  var TAGS = ['update-product-userfeelings', req.uuid];
+
+  db.getClient(function(error, client){
+    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+
+    // :TODO: make sure user is authenticated
+
+    // validate
+    var input = {
+      productId : req.param('productId'),
+      userId    : req.session.user.id,
+      isLiked   : req.body.isLiked,
+      isWanted  : req.body.isWanted,
+      isTried   : req.body.isTried
+    };
+    var error = utils.validate(input, db.schemas.productsUsersFeelings);
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
+    // start the transaction
+    var tx = new Transaction(client);
+    tx.begin();
+
+    // lock the product row and get the current feelings
+    var query = [
+      'SELECT products.id AS "productId", "productLikes".id as "isLiked", "productWants".id as "isWanted", "productTries".id as "isTried"',
+      'FROM products',
+      'LEFT JOIN "productLikes" ON "productLikes"."productId" = $1 AND "productLikes"."userId" = $2',
+      'LEFT JOIN "productWants" ON "productWants"."productId" = $1 AND "productWants"."userId" = $2',
+      'LEFT JOIN "productTries" ON "productTries"."productId" = $1 AND "productTries"."userId" = $2',
+      'WHERE products.id = $1 FOR UPDATE OF products'
+    ].join(' ');
+    tx.query(query, [+req.param('productId'), +req.session.user.id], function(error, result) {
+      if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
+
+      // fallback inputs to current feelings
+      var currentFeelings = result.rows[0];
+      if (typeof input.isLiked == 'undefined') { input.isLiked = !!currentFeelings.isLiked; }
+      if (typeof input.isWanted == 'undefined') { input.isWanted = !!currentFeelings.isWanted; }
+      if (typeof input.isTried == 'undefined') { input.isTried = !!currentFeelings.isTried; }
+
+      // build product changes
+      var productChanges = [];
+      if (input.isLiked  != !!currentFeelings.isLiked)  { productChanges.push('likes = likes '+(input.isLiked ? '+' : '-')+' 1'); }
+      if (input.isWanted != !!currentFeelings.isWanted) { productChanges.push('wants = wants '+(input.isWanted ? '+' : '-')+' 1'); }
+      if (input.isTried  != !!currentFeelings.isTried)  { productChanges.push('tries = tries '+(input.isTried ? '+' : '-')+' 1'); }
+      productChanges = productChanges.join(', ');
+
+      // update the product count
+      tx.query('UPDATE products SET '+productChanges+' WHERE products.id=$1', [+req.param('productId')], function(error, result) {
+        if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+
+        var feelingsQueryFn = function(table, add) {
+          return function(cb) {
+            if (add) {
+              tx.query('INSERT INTO "'+table+'" ("productId", "userId") VALUES ($1, $2)', [+req.param('productId'), +req.session.user.id], cb);
+            } else {
+              tx.query('DELETE FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2', [+req.param('productId'), +req.session.user.id], cb);
+            }
+          };
+        };
+
+        // create/delete feelings
+        var queries = [];
+        if (input.isLiked  != !!currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', input.isLiked)); }
+        if (input.isWanted != !!currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', input.isWanted)); }
+        if (input.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', input.isTried)); }
+        async.series(queries, function(err, results) {
+            if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+            logger.db.debug(TAGS, result);
+
+            // end transaction
+            tx.commit();
+
+            return res.json({ error: null, data: null });
+        });
+      });
+    });
+  });
+};

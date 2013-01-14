@@ -30,7 +30,7 @@ module.exports.get = function(req, res){
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
     // :TODO: nuke this fields kludge
@@ -55,7 +55,7 @@ module.exports.get = function(req, res){
       .where(users.id.equals(req.params.id));*/
 
     client.query(query, [(+req.param('id')) || 0], function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
@@ -77,7 +77,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(users, req.fields)
@@ -91,12 +91,12 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
       // run count query
       client.query('SELECT COUNT(*) as count FROM users', function(error, countResult) {
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
@@ -114,7 +114,7 @@ module.exports.create = function(req, res){
   logger.routes.debug(TAGS, 'creating user ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction
     var tx = new Transaction(client);
@@ -128,7 +128,7 @@ module.exports.create = function(req, res){
       };
       var query = 'INSERT INTO users (email, password) SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
       client.query(query, [user.email, user.password], function(error, result) {
-        if(error) return res.json({error:error, data: result}), tx.abort(), logger.routes.error(TAGS, error);
+        if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
         // did the insert occur?
         if (result.rowCount === 0) {
@@ -170,14 +170,14 @@ module.exports.del = function(req, res){
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = users.delete().where(
       users.id.equals(req.params.id)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -194,7 +194,7 @@ module.exports.del = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-user', req.uuid];
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction
     var tx = new Transaction(client);
@@ -217,7 +217,7 @@ module.exports.update = function(req, res){
 
       // run update query
       client.query(query, [+req.param('id') || 0].concat(user.email || []).concat(user.password || []), function(error, result){
-        if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
         // did the update occur?
@@ -240,7 +240,7 @@ module.exports.update = function(req, res){
         var query = usersGroups.delete()
           .where(usersGroups.userId.equals(req.param('id')));
         client.query(query.toQuery(), function(error, result) {
-          if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
           // add new group relations
           async.series((user.groups || []).map(function(groupId) {
