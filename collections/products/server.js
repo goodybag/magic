@@ -79,4 +79,10 @@ server.del(
 , routes.delCategory
 );
 
+// Products.updateFeelings
+server.post(
+  '/v1/products/:productId/feelings'
+, routes.updateFeelings
+);
+
 module.exports = server;

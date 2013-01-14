@@ -15,6 +15,9 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
+  , 'productLikes'
+  , 'productWants'
+  , 'productTrieds'
   , 'oddity'
   , 'oddityMeta'
   ]

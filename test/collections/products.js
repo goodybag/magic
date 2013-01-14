@@ -400,7 +400,7 @@ describe('POST /v1/products/:id/categories', function() {
     tu.post('/v1/products/1/categories', JSON.stringify({ id:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 
@@ -419,6 +419,79 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
       assert(!err);
       assert(res.statusCode == 200);
       done();
+    });
+  });
+
+});
+
+describe('POST /v1/products/:id/feelings', function() {
+
+  it('should add to the product feelings totals', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/products/1/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/products/1', function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+          assert(payload.data.likes == 1);
+          assert(payload.data.wants == 1);
+          assert(payload.data.trieds == 1);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  it('should remove from the product feelings totals', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/products/1/feelings', { isWanted:false }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+        
+        tu.get('/v1/products/1', function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+          assert(payload.data.likes == 1);
+          assert(payload.data.wants == 0);
+          assert(payload.data.trieds == 1);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  it('should maintain the tally by user', function(done) {
+    tu.loginAsSales(function() {
+      tu.post('/v1/products/1/feelings', { isLiked:false, isWanted:true, isTried:true }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/products/1', function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+          assert(payload.data.likes == 1);
+          assert(payload.data.wants == 1);
+          assert(payload.data.trieds == 2);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
     });
   });
 

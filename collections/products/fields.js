@@ -2,6 +2,9 @@ var db = require('../../db');
 var products = db.tables.products;
 var productCategories = db.tables.productCategories;
 var productTags = db.tables.productTags;
+var productLikes = db.tables.productLikes;
+var productWants = db.tables.productWants;
+var productTries = db.tables.productTries;
 
 module.exports = {
   products: {
@@ -11,6 +14,9 @@ module.exports = {
     , name          : products.name
     , description   : products.description
     , price         : products.price
+    , likes         : products.likes
+    , wants         : products.wants
+    , trieds        : products.trieds
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -25,6 +31,9 @@ module.exports = {
     , name          : products.name
     , description   : products.description
     , price         : products.price
+    , likes         : products.likes
+    , wants         : products.wants
+    , trieds        : products.trieds
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -39,6 +48,9 @@ module.exports = {
     , name          : products.name
     , description   : products.description
     , price         : products.price
+    , likes         : products.likes
+    , wants         : products.wants
+    , trieds        : products.trieds
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -53,6 +65,9 @@ module.exports = {
     , name          : products.name
     , description   : products.description
     , price         : products.price
+    , likes         : products.likes
+    , wants         : products.wants
+    , trieds        : products.trieds
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -69,6 +84,9 @@ module.exports = {
     , name         : products.name
     , description  : products.description
     , price        : products.price
+    , likes        : products.likes
+    , wants        : products.wants
+    , trieds       : products.trieds
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -86,6 +104,9 @@ module.exports = {
     , name         : products.name
     , description  : products.description
     , price        : products.price
+    , likes        : products.likes
+    , wants        : products.wants
+    , trieds       : products.trieds
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -103,6 +124,9 @@ module.exports = {
     , name         : products.name
     , description  : products.description
     , price        : products.price
+    , likes        : products.likes
+    , wants        : products.wants
+    , trieds       : products.trieds
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -120,6 +144,9 @@ module.exports = {
     , name         : products.name
     , description  : products.description
     , price        : products.price
+    , likes        : products.likes
+    , wants        : products.wants
+    , trieds       : products.trieds
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -153,4 +180,4 @@ module.exports = {
     , name : productCategories.name
     }
   }
-};
+}; 

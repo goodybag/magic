@@ -56,10 +56,10 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- PRODUCTS
 
 BEGIN;
-INSERT INTO "products" VALUES ('1', '1', 'Product 1', 'A product', 55.55, true, false, true);
-INSERT INTO "products" VALUES ('2', '2', 'Product 2', 'A product', 55.55, true, false, true);
-INSERT INTO "products" VALUES ('3', '3', 'Product 3', 'A product', 55.55, true, false, true);
-INSERT INTO "products" VALUES ('4', '1', 'Product 4', 'A product', 55.55, true, false, true);
+INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, trieds, "isVerified", "isEnabled") VALUES ('1', '1', 'Product 1', 'A product', 55.55, 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, trieds, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 55.55, 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, trieds, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 55.55, 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, trieds, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 55.55, 0, 0, 0, true, true);
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 

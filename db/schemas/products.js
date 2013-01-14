@@ -31,6 +31,15 @@ define(function(require){
       type: 'real'
     , validators: { isDecimal:[] }
     }
+  , likes: {
+      type: 'int'
+    }
+  , wants: {
+      type: 'int'
+    }
+  , trieds: {
+      type: 'int'
+    }
   , isVerified: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
