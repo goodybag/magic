@@ -42,6 +42,10 @@ define(function(require){
   , lon: {
       type: 'int'
     }
+  , isProductDefault: {
+      type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
+    }
   , isEnabled: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }

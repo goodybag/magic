@@ -5,6 +5,7 @@ var productTags = db.tables.productTags;
 var productLikes = db.tables.productLikes;
 var productWants = db.tables.productWants;
 var productTries = db.tables.productTries;
+var photos = db.tables.photos;
 
 module.exports = {
   read: {
@@ -15,6 +16,8 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
+      , photoId       : photos.id
+      , photoUrl      : photos.url
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -31,6 +34,8 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
+      , photoId       : photos.id
+      , photoUrl      : photos.url
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -47,6 +52,8 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
+      , photoId       : photos.id
+      , photoUrl      : photos.url
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -63,6 +70,8 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
+      , photoId       : photos.id
+      , photoUrl      : photos.url
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -81,9 +90,11 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , likes         : products.likes
-      , wants         : products.wants
-      , tries         : products.tries
+      , photoId      : photos.id
+      , photoUrl     : photos.url
+      , likes        : products.likes
+      , wants        : products.wants
+      , tries        : products.tries
       , isVerified   : products.isVerified
       , isArchived   : products.isArchived
       , isEnabled    : products.isEnabled
@@ -101,9 +112,11 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , likes         : products.likes
-      , wants         : products.wants
-      , tries         : products.tries
+      , photoId      : photos.id
+      , photoUrl     : photos.url
+      , likes        : products.likes
+      , wants        : products.wants
+      , tries        : products.tries
       , isVerified   : products.isVerified
       , isArchived   : products.isArchived
       , isEnabled    : products.isEnabled
@@ -121,9 +134,11 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , likes         : products.likes
-      , wants         : products.wants
-      , tries         : products.tries
+      , photoId      : photos.id
+      , photoUrl     : photos.url
+      , likes        : products.likes
+      , wants        : products.wants
+      , tries        : products.tries
       , isVerified   : products.isVerified
       , isArchived   : products.isArchived
       , isEnabled    : products.isEnabled
@@ -141,9 +156,11 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , likes         : products.likes
-      , wants         : products.wants
-      , tries         : products.tries
+      , photoId      : photos.id
+      , photoUrl     : photos.url
+      , likes        : products.likes
+      , wants        : products.wants
+      , tries        : products.tries
       , isVerified   : products.isVerified
       , isArchived   : products.isArchived
       , isEnabled    : products.isEnabled
