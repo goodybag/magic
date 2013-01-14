@@ -15,7 +15,7 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
-  // oddity and oddityMeta database should be hidden after inserting into database
+  // oddity and oddityMeta schemas should be hidden after inserting into database
   //, 'oddity'
   //, 'oddityMeta'
   ]
