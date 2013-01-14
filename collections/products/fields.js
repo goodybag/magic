@@ -16,7 +16,7 @@ module.exports = {
     , price         : products.price
     , likes         : products.likes
     , wants         : products.wants
-    , trieds        : products.trieds
+    , tries         : products.tries
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -33,7 +33,7 @@ module.exports = {
     , price         : products.price
     , likes         : products.likes
     , wants         : products.wants
-    , trieds        : products.trieds
+    , tries         : products.tries
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -50,7 +50,7 @@ module.exports = {
     , price         : products.price
     , likes         : products.likes
     , wants         : products.wants
-    , trieds        : products.trieds
+    , tries         : products.tries
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -67,7 +67,7 @@ module.exports = {
     , price         : products.price
     , likes         : products.likes
     , wants         : products.wants
-    , trieds        : products.trieds
+    , tries         : products.tries
     , isVerified    : products.isVerified
     , isArchived    : products.isArchived
     , isEnabled     : products.isEnabled
@@ -86,7 +86,7 @@ module.exports = {
     , price        : products.price
     , likes        : products.likes
     , wants        : products.wants
-    , trieds       : products.trieds
+    , tries        : products.tries
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -106,7 +106,7 @@ module.exports = {
     , price        : products.price
     , likes        : products.likes
     , wants        : products.wants
-    , trieds       : products.trieds
+    , tries        : products.tries
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -126,7 +126,7 @@ module.exports = {
     , price        : products.price
     , likes        : products.likes
     , wants        : products.wants
-    , trieds       : products.trieds
+    , tries        : products.tries
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled
@@ -146,7 +146,7 @@ module.exports = {
     , price        : products.price
     , likes        : products.likes
     , wants        : products.wants
-    , trieds       : products.trieds
+    , tries        : products.tries
     , isVerified   : products.isVerified
     , isArchived   : products.isArchived
     , isEnabled    : products.isEnabled

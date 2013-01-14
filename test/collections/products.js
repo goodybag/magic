@@ -439,7 +439,7 @@ describe('POST /v1/products/:id/feelings', function() {
           payload = JSON.parse(payload);
           assert(payload.data.likes == 1);
           assert(payload.data.wants == 1);
-          assert(payload.data.trieds == 1);
+          assert(payload.data.tries == 1);
 
           tu.logout(function() {
             done();
@@ -462,7 +462,7 @@ describe('POST /v1/products/:id/feelings', function() {
           payload = JSON.parse(payload);
           assert(payload.data.likes == 1);
           assert(payload.data.wants == 0);
-          assert(payload.data.trieds == 1);
+          assert(payload.data.tries == 1);
 
           tu.logout(function() {
             done();
@@ -485,7 +485,7 @@ describe('POST /v1/products/:id/feelings', function() {
           payload = JSON.parse(payload);
           assert(payload.data.likes == 1);
           assert(payload.data.wants == 1);
-          assert(payload.data.trieds == 2);
+          assert(payload.data.tries == 2);
 
           tu.logout(function() {
             done();

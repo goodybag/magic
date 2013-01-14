@@ -156,7 +156,7 @@ exports.schemas = {
 , productsProductTags:       require('./schemas/productsProductTags')
 , productLikes:              require('./schemas/productLikes')
 , productWants:              require('./schemas/productWants')
-, productTrieds:             require('./schemas/productTrieds')
+, productTries:              require('./schemas/productTries')
 };
 
 function buildTable(name, schema) {

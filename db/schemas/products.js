@@ -37,7 +37,7 @@ define(function(require){
   , wants: {
       type: 'int'
     }
-  , trieds: {
+  , tries: {
       type: 'int'
     }
   , isVerified: {

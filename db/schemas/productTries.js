@@ -1,5 +1,5 @@
 /**
- * Product Trieds Schema
+ * Product Tries Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var productTrieds = {
+  var productTries = {
     id: {
       type: 'serial'
     , meta: 'primary key'
@@ -28,5 +28,5 @@ define(function(require){
       type: 'timestamp'
     }
   };
-  return productTrieds;
+  return productTries;
 });

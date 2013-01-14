@@ -225,7 +225,7 @@ module.exports.create = function(req, res){
       if (!req.body.isEnabled) req.body.isEnabled = true;
       req.body.likes = 0;
       req.body.wants = 0;
-      req.body.trieds = 0;
+      req.body.tries = 0;
 
       // validate
       var error = utils.validate(req.body, db.schemas.products);
@@ -390,7 +390,7 @@ module.exports.update = function(req, res){
       if (!req.body.isEnabled) req.body.isEnabled = true;
       delete req.body.likes;
       delete req.body.wants;
-      delete req.body.trieds;
+      delete req.body.tries;
 
       // validate
       var error = utils.validate(req.body, db.schemas.products);
@@ -712,11 +712,11 @@ module.exports.updateFeelings = function(req, res) {
 
     // lock the product row and get the current feelings
     var query = [
-      'SELECT products.id AS "productId", "productLikes".id as "isLiked", "productWants".id as "isWanted", "productTrieds".id as "isTried"',
+      'SELECT products.id AS "productId", "productLikes".id as "isLiked", "productWants".id as "isWanted", "productTries".id as "isTried"',
       'FROM products',
       'LEFT JOIN "productLikes" ON "productLikes"."productId" = $1 AND "productLikes"."userId" = $2',
       'LEFT JOIN "productWants" ON "productWants"."productId" = $1 AND "productWants"."userId" = $2',
-      'LEFT JOIN "productTrieds" ON "productTrieds"."productId" = $1 AND "productTrieds"."userId" = $2',
+      'LEFT JOIN "productTries" ON "productTries"."productId" = $1 AND "productTries"."userId" = $2',
       'WHERE products.id = $1 FOR UPDATE OF products'
     ].join(' ');
     tx.query(query, [+req.param('productId'), +req.session.user.id], function(error, result) {
@@ -733,7 +733,7 @@ module.exports.updateFeelings = function(req, res) {
       var productChanges = [];
       if (input.isLiked  != !!currentFeelings.isLiked)  { productChanges.push('likes = likes '+(input.isLiked ? '+' : '-')+' 1'); }
       if (input.isWanted != !!currentFeelings.isWanted) { productChanges.push('wants = wants '+(input.isWanted ? '+' : '-')+' 1'); }
-      if (input.isTried  != !!currentFeelings.isTried)  { productChanges.push('trieds = trieds '+(input.isTried ? '+' : '-')+' 1'); }
+      if (input.isTried  != !!currentFeelings.isTried)  { productChanges.push('tries = tries '+(input.isTried ? '+' : '-')+' 1'); }
       productChanges = productChanges.join(', ');
 
       // update the product count
@@ -754,7 +754,7 @@ module.exports.updateFeelings = function(req, res) {
         var queries = [];
         if (input.isLiked  != !!currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', input.isLiked)); }
         if (input.isWanted != !!currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', input.isWanted)); }
-        if (input.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTrieds', input.isTried)); }
+        if (input.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', input.isTried)); }
         async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
             logger.db.debug(TAGS, result);

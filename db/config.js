@@ -17,7 +17,7 @@ module.exports = {
   , 'productsProductTags'
   , 'productLikes'
   , 'productWants'
-  , 'productTrieds'
+  , 'productTries'
   , 'oddity'
   , 'oddityMeta'
   ]
