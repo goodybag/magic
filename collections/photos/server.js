@@ -33,14 +33,14 @@ server.get(
 server.post(
   '/v1/photos'
 , middleware.validate(schema)
-, middleware.fields(fields.modify)
+, middleware.fields(fields.create)
 , routes.create
 );
 
 // Photos.get
 server.get(
   '/v1/photos/:photoId'
-, middleware.fields(fields.modify)
+, middleware.fields(fields.get)
 , routes.get
 );
 
