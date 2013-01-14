@@ -56,10 +56,10 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- PRODUCTS
 
 BEGIN;
-INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, tries, "isVerified", "isEnabled") VALUES ('1', '1', 'Product 1', 'A product', 55.55, 0, 0, 0, true, true);
-INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, tries, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 55.55, 0, 0, 0, true, true);
-INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, tries, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 55.55, 0, 0, 0, true, true);
-INSERT INTO "products" (id, "businessId", name, description, price, likes, wants, tries, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 55.55, 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('1', '1', 'Product 1', 'A product', 55.55, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 55.55, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 55.55, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 55.55, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 
@@ -85,9 +85,9 @@ SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "produc
 -- PHOTOS
 
 BEGIN;
-INSERT INTO "photos" (id, "businessId", "productId", url, "isProductDefault", "isEnabled") VALUES ('1', '1', '1', 'http://placekitten.com/200/300', true, true);
-INSERT INTO "photos" (id, "businessId", "productId", url, "isProductDefault", "isEnabled") VALUES ('2', '1', null, 'http://placekitten.com/200/300', false, true);
-INSERT INTO "photos" (id, "businessId", "productId", url, "isProductDefault", "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true, true);
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('1', '1', '1', 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('2', '1', null, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
 COMMIT;
 SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used
 

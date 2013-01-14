@@ -16,8 +16,7 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
-      , photoId       : photos.id
-      , photoUrl      : photos.url
+      , photoUrl      : products.photoUrl
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -34,8 +33,7 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
-      , photoId       : photos.id
-      , photoUrl      : photos.url
+      , photoUrl      : products.photoUrl
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -52,8 +50,7 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
-      , photoId       : photos.id
-      , photoUrl      : photos.url
+      , photoUrl      : products.photoUrl
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -70,8 +67,7 @@ module.exports = {
       , name          : products.name
       , description   : products.description
       , price         : products.price
-      , photoId       : photos.id
-      , photoUrl      : photos.url
+      , photoUrl      : products.photoUrl
       , likes         : products.likes
       , wants         : products.wants
       , tries         : products.tries
@@ -90,8 +86,7 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , photoId      : photos.id
-      , photoUrl     : photos.url
+      , photoUrl     : products.photoUrl
       , likes        : products.likes
       , wants        : products.wants
       , tries        : products.tries
@@ -112,8 +107,7 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , photoId      : photos.id
-      , photoUrl     : photos.url
+      , photoUrl     : products.photoUrl
       , likes        : products.likes
       , wants        : products.wants
       , tries        : products.tries
@@ -134,8 +128,7 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , photoId      : photos.id
-      , photoUrl     : photos.url
+      , photoUrl     : products.photoUrl
       , likes        : products.likes
       , wants        : products.wants
       , tries        : products.tries
@@ -156,8 +149,7 @@ module.exports = {
       , name         : products.name
       , description  : products.description
       , price        : products.price
-      , photoId      : photos.id
-      , photoUrl     : photos.url
+      , photoUrl     : products.photoUrl
       , likes        : products.likes
       , wants        : products.wants
       , tries        : products.tries

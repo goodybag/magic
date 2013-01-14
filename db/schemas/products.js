@@ -31,6 +31,10 @@ define(function(require){
       type: 'real'
     , validators: { isDecimal:[] }
     }
+  , photoUrl: {
+      type: 'text'
+    , validators: { isUrl:[] }
+    }
   , likes: {
       type: 'int'
     }

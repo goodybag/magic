@@ -14,7 +14,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     }
@@ -29,7 +28,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     }
@@ -44,7 +42,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     }
@@ -59,7 +56,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     }
@@ -102,7 +98,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     , $postRequires : ['url']
@@ -117,7 +112,6 @@ module.exports = {
     , notes            : photos.notes
     , lat              : photos.lat
     , lon              : photos.lon
-    , isProductDefault : photos.isProductDefault
     , isEnabled        : photos.isEnabled
     , createdAt        : photos.createdAt
     , $postRequires : ['url']

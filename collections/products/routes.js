@@ -38,10 +38,7 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = utils.selectAsMap(products, req.fields)
-      .from(' products '
-      + 'LEFT JOIN photos '
-        + 'ON photos."productId" = products.id AND photos."isProductDefault" = true'
-      );
+      .from(products);
 
     // filter by businessId, if given as a path param
     if (req.param('businessId')) {
@@ -98,8 +95,6 @@ module.exports.get = function(req, res){
         + 'ON ppt."productId" = products.id '
       + 'LEFT JOIN "productTags" '
         + 'ON "productTags".id = ppt."productTagId" '
-      + 'LEFT JOIN photos '
-        + 'ON photos."productId" = products.id AND photos."isProductDefault" = true'
       )
       .where(products.id.equals(req.param('productId')))
       .toQuery();
