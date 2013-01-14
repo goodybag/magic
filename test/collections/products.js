@@ -400,7 +400,7 @@ describe('POST /v1/products/:id/categories', function() {
     tu.post('/v1/products/1/categories', JSON.stringify({ id:'foobar' }), 'application/json', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
+      assert(res.statusCode == 400);
 
       payload = JSON.parse(payload);
 

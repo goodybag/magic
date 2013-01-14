@@ -32,7 +32,7 @@ module.exports.list = function(req, res){
 
   // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(productTags, req.fields)
@@ -46,7 +46,7 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
@@ -56,7 +56,7 @@ module.exports.list = function(req, res){
         query.where(productTags.businessId.equals(req.param('businessId')));
       }
       client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
@@ -75,7 +75,7 @@ module.exports.get = function(req, res){
 
   // retrieve client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(productTags, req.fields)
@@ -84,7 +84,7 @@ module.exports.get = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       if (result.rows.length <= 0) return res.json({ error: null, data: null});
@@ -105,14 +105,14 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+      return res.error(errors.internal.DB_FAILURE, error);
     }
 
     // validate
     var data = req.body;
     data.businessId = req.param('businessId');
     var error = utils.validate(data, db.schemas.productTags);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // build query
     //var query = productTags.insert(req.body).toQuery();
@@ -121,7 +121,7 @@ module.exports.create = function(req, res){
 
     // run query
     client.query(query, [data.businessId, data.tag], function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -142,7 +142,7 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+      return res.error(errors.internal.DB_FAILURE, error);
     }
 
     // build query
@@ -153,7 +153,7 @@ module.exports.update = function(req, res){
 
     // run query
     client.query(query.toQuery(), function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -174,7 +174,7 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+      return res.error(errors.internal.DB_FAILURE, error);
     }
 
     // build query
@@ -185,7 +185,7 @@ module.exports.del = function(req, res){
 
     // run query
     client.query(query.toQuery(), function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
