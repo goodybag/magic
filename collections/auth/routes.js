@@ -49,7 +49,7 @@ module.exports.singlyCallback =  function(req, res){
     // if callback doesn't return code then return SINGLY CALLBACK error
     if(!code){
       logger.routes.error(TAGS, errors.auth.SINGLY_CALLBACK);
-      return res.json({error: errors.auth.SINGLY_CALLBACK });
+      return res.error(errors.auth.SINGLY_CALLBACK);
     }
     else {
 
@@ -66,7 +66,7 @@ module.exports.singlyCallback =  function(req, res){
 
           client.query(singlyIdQuery.text, singlyIdQuery.values, function(error,result){
             var query = {};
-            if(error) return res.json({error:error, data: result}), logger.routes.error(TAGS, error);
+            if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
             // if singlyId is in the users table then update singlyAccessToken column, else create new user
             if(result.rows.length === 0){
@@ -85,7 +85,7 @@ module.exports.singlyCallback =  function(req, res){
               logger.db.debug(TAGS, query.text);
 
               client.query(query.text + 'RETURNING id', query.values, function(error, result){
-                if (error) return res.json({error: error, data: null}), logger.routes.error(TAGS, error);
+                if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
                 logger.db.debug(TAGS, result);
 
@@ -101,7 +101,7 @@ module.exports.singlyCallback =  function(req, res){
                 ).toQuery();
 
                 client.query(query.text, query.values, function(error, results){
-                  if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+                  if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
                   user.groups = results.rows.map(function(group){ return group.name; });
 
@@ -126,7 +126,7 @@ module.exports.authenticate = function(req, res){
   logger.routes.debug(TAGS, 'attempting to authenticate', {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // First check for user existence
     var query = users.select(
@@ -137,12 +137,12 @@ module.exports.authenticate = function(req, res){
 
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
       if (result.rows.length === 0)
-        return res.json({ error: errors.auth.INVALID_EMAIL, data: null }), logger.routes.error(TAGS, error);
+        return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
 
       var user = result.rows[0];
 
@@ -150,11 +150,8 @@ module.exports.authenticate = function(req, res){
 
       // Compare passwords
       utils.comparePasswords(req.body.password, user.password, function(error, success){
-        if (error)
-          return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
         if (!success)
-          return res.json({ error: errors.auth.INVALID_PASSWORD, data: null }), logger.routes.error(TAGS, error);
+          return res.error(errors.auth.INVALID_PASSWORD), logger.routes.error(TAGS, error);
 
         // Remove password
         delete user.password;
@@ -173,7 +170,7 @@ module.exports.authenticate = function(req, res){
         ).toQuery();
 
         client.query(query.text, query.values, function(error, results){
-          if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           user.groups = results.rows.map(function(group){ return group.name; });
 

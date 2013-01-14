@@ -30,7 +30,7 @@ module.exports.get = function(req, res){
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = utils.selectAsMap(businesses, req.fields)
       .from(businesses)
@@ -38,7 +38,7 @@ module.exports.get = function(req, res){
       .toQuery();
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) {
@@ -60,14 +60,14 @@ module.exports.del = function(req, res){
   logger.routes.debug(TAGS, 'deleting business ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = businesses.update({ isDeleted:true }).where(
       businesses.id.equals(req.params.id)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -87,7 +87,7 @@ module.exports.list = function(req, res){
 
   // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(businesses, req.fields)
@@ -102,13 +102,13 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
       // run count query
       client.query('SELECT COUNT(*) as count FROM businesses WHERE "isDeleted" = FALSE', function(error, countResult) {
-        if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
@@ -130,7 +130,7 @@ module.exports.listWithLocations = function(req, res){
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
-      return res.json({ error: error, data: null });
+      return res.error(errors.internal.DB_FAILURE, error);
     }
 
     var bFields = [
@@ -174,7 +174,7 @@ module.exports.listWithLocations = function(req, res){
     client.query(query.text, function(error, results){
       if (error){
         logger.routes.error(TAGS, error);
-        return res.json({ error: error, data: null });
+        return res.error(errors.internal.DB_FAILURE, error);
       }
 
       var
@@ -234,13 +234,13 @@ module.exports.create = function(req, res){
   var TAGS = ['create-business', req.uuid];
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     if (!req.body.cardCode) req.body.cardCode = "000000";
     if (!req.body.isEnabled) req.body.isEnabled = true;
 
     var error = utils.validate(req.body, schemas.businesses);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     var query = businesses.insert({
       'name'      :    req.body.name
@@ -258,7 +258,7 @@ module.exports.create = function(req, res){
     logger.db.debug(TAGS, query.text);
 
     client.query(query.text + " RETURNING id", query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -276,7 +276,7 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-business', req.uuid];
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = businesses.update(req.body).where(
       businesses.id.equals(req.params.id)
@@ -285,7 +285,7 @@ module.exports.update = function(req, res){
     logger.db.debug(TAGS, query.text);
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 

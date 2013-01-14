@@ -29,7 +29,7 @@ module.exports.get = function(req, res){
 
   // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(
@@ -43,7 +43,7 @@ module.exports.get = function(req, res){
 
     // run data query
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -63,7 +63,7 @@ module.exports.list = function(req, res){
 
   // retrieve pg client
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = utils.selectAsMap(
@@ -81,7 +81,7 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
@@ -91,7 +91,7 @@ module.exports.list = function(req, res){
         query.where(productCategories.businessId.equals(req.param('businessId')));
       }
       client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
@@ -109,7 +109,7 @@ module.exports.create = function(req, res){
   logger.routes.debug(TAGS, 'creating user', {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var category = {
       businessId: req.body.businessId || req.params.businessId
@@ -119,12 +119,12 @@ module.exports.create = function(req, res){
     };
 
     var error = utils.validate(category, db.schemas.productCategories);
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     var query = productCategories.insert(category).toQuery();
 
     client.query(query.text + "RETURNING id", query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -143,14 +143,14 @@ module.exports.del = function(req, res){
   logger.routes.debug(TAGS, 'deleting product-category ' + req.params.id, {uid: 'more'});
 
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = productCategories.delete().where(
       productCategories.id.equals(req.params.id)
     ).toQuery();
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
@@ -168,7 +168,7 @@ module.exports.del = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-productCategory', req.uuid];
   db.getClient(function(error, client){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // Don't let them update the id
     delete req.body.id;
@@ -187,7 +187,7 @@ module.exports.update = function(req, res){
 
       // Trying to update things they're not allowed to
       if (fieldsAvailable === 0)
-        return res.json({ error: errors.auth.NOT_ALLOWED, data: null }), logger.routes.error(TAGS, errors.auth.NOT_ALLOWED);
+        return res.error(errors.auth.NOT_ALLOWED), logger.routes.error(TAGS, errors.auth.NOT_ALLOWED);
     }
 
     var query = productCategories.update(data || req.body).where(
@@ -197,7 +197,7 @@ module.exports.update = function(req, res){
     logger.db.debug(TAGS, query.text);
 
     client.query(query.text, query.values, function(error, result){
-      if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
