@@ -15,10 +15,13 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
-  // oddity and oddityMeta schemas should be hidden after inserting into database
-  //, 'oddity'
-  //, 'oddityMeta'
+  , 'productLikes'
+  , 'productWants'
+  , 'productTries'
+    //oddity and oddityMeta should be commented after inserting to database
+  , 'oddity'
+  , 'oddityMeta'
   ]
 , fixtureFile: 'test'
-//, oddityFile: 'postgresOddity'
+, oddityFile: 'postgresOddity'
 };

@@ -154,6 +154,9 @@ exports.schemas = {
 , photos:                    require('./schemas/photos')
 , productTags:               require('./schemas/productTags')
 , productsProductTags:       require('./schemas/productsProductTags')
+, productLikes:              require('./schemas/productLikes')
+, productWants:              require('./schemas/productWants')
+, productTries:              require('./schemas/productTries')
 , oddity:                    require('./schemas/oddity')
 , oddityMeta:                require('./schemas/oddityMeta')
 
