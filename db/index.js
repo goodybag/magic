@@ -145,6 +145,8 @@ exports.schemas = {
 , photos:                    require('./schemas/photos')
 , productTags:               require('./schemas/productTags')
 , productsProductTags:       require('./schemas/productsProductTags')
+, oddity:                    require('./schemas/oddity')
+, oddityMeta:                require('./schemas/oddityMeta')
 };
 
 function buildTable(name, schema) {

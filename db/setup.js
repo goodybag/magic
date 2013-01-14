@@ -104,7 +104,7 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-  options.oddityFile     = options.oddityFile     || config.oddityFile;
+  //options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -116,7 +116,8 @@ module.exports = function(options, callback){
     // run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
       .then(loadFixture(options.fixtureFile))
-      .then(loadOddity(options.oddityFile))
+      // loadOddity is commented when oddity table is loaded, this table is only loaded one time
+      //.then(loadOddity(options.oddityFile))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;

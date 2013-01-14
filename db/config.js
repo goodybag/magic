@@ -15,9 +15,10 @@ module.exports = {
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
-  , 'oddity'
-  , 'oddityMeta'
+  // oddity and oddityMeta database should be hidden after inserting into database
+  //, 'oddity'
+  //, 'oddityMeta'
   ]
 , fixtureFile: 'test'
-, oddityFile: 'oddityTest'
+//, oddityFile: 'postgresOddity'
 };
