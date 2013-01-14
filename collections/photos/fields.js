@@ -60,7 +60,7 @@ module.exports = {
     , createdAt        : photos.createdAt
     }
   },
-  modify: {
+  create: {
     "default": {
       id               : photos.id
     , businessId       : photos.businessId
@@ -116,6 +116,58 @@ module.exports = {
     , createdAt        : photos.createdAt
     , $postRequires : ['url']
     }
+  },
+  modify: {
+    "default": {
+      id               : photos.id
+    , businessId       : photos.businessId
+    , productId        : photos.productId
+    , consumerId       : photos.consumerId
+    , notes            : photos.notes
+    , lat              : photos.lat
+    , lon              : photos.lon
+    , isEnabled        : photos.isEnabled
+    , createdAt        : photos.createdAt
+    , $postRequires : ['url']
+    }
 
+  , client: {
+      id               : photos.id
+    , businessId       : photos.businessId
+    , productId        : photos.productId
+    , consumerId       : photos.consumerId
+    , notes            : photos.notes
+    , lat              : photos.lat
+    , lon              : photos.lon
+    , isEnabled        : photos.isEnabled
+    , createdAt        : photos.createdAt
+    , $postRequires : ['url']
+    }
+
+  , sales: {
+      id               : photos.id
+    , businessId       : photos.businessId
+    , productId        : photos.productId
+    , consumerId       : photos.consumerId
+    , notes            : photos.notes
+    , lat              : photos.lat
+    , lon              : photos.lon
+    , isEnabled        : photos.isEnabled
+    , createdAt        : photos.createdAt
+    , $postRequires : ['url']
+    }
+
+  , admin: {
+      id               : photos.id
+    , businessId       : photos.businessId
+    , productId        : photos.productId
+    , consumerId       : photos.consumerId
+    , notes            : photos.notes
+    , lat              : photos.lat
+    , lon              : photos.lon
+    , isEnabled        : photos.isEnabled
+    , createdAt        : photos.createdAt
+    , $postRequires : ['url']
+    }
   }
 };
