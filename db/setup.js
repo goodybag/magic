@@ -70,29 +70,19 @@ function loadSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists "' + name + '_id_seq" cascade'),
     query( 'Dropping ' + name,              'drop table if exists "' + name + '" cascade'),
-    buildSql('Creating ' + name,              name),
+    buildSql('Creating ' + name, name),
     query() // will run what getSql returns
   ]);
 }
 
-function loadFixture(name) {
+function loadSqlFile(name, path, message) {
   return function() {
     if (!name) { return; }
     return pipeline([
-      loadFile('Loading fixture', __dirname+'/fixtures/'+name+'.sql'),
+      loadFile(message, path+name+'.sql'),
       query()
     ]);
-  }
-}
-
-function loadOddity(name) {
-  return function() {
-    if (!name) {return;}
-    return pipeline([
-      loadFile('Loading oddity', __dirname+'/oddity/'+name+'.sql'),
-      query()
-    ]);
-  }
+  };
 }
 
 module.exports = function(options, callback){
@@ -114,9 +104,10 @@ module.exports = function(options, callback){
     client = pgClient;
 
     // run loadschema on all files
-    when.map(options.schemaFiles, loadSchema)
-      .then(loadFixture(options.fixtureFile))
-      .then(loadOddity(options.oddityFile))
+    when(loadSqlFile('presetup_idempotent', __dirname+'/', 'Loading idempotent presetup')())
+      .then(function() { return when.map(options.schemaFiles, loadSchema); })
+      .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
+      .then(loadSqlFile(options.oddityFile, __dirname+'/oddity/', 'Loading oddity'))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;
