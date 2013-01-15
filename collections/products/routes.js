@@ -36,11 +36,26 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    // filters
+    var queryFrom = products;
+    if (!isNaN(+req.param('lat')) && !isNaN(+req.param('lon'))) {
+      var lat = +req.param('lat'),
+        lon = +req.param('lon'),
+        range = (+req.param('range') || 1000);
+      queryFrom = [
+        'products',
+          'INNER JOIN businesses ON businesses.id = products."businessId"',
+          'INNER JOIN locations ON',
+            'locations."businessId" = businesses.id',
+            'AND earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth(locations.lat, locations.lon)'
+      ].join(' ');
+    }
+
     // build data query
     var query = utils.selectAsMap(products, req.fields)
-      .from(products);
+      .from(queryFrom);
 
-    // filter by businessId, if given as a path param
+    // more filters
     if (req.param('businessId')) {
       query.where(products.businessId.equals(req.param('businessId')));
     }

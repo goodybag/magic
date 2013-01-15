@@ -259,7 +259,7 @@ describe('PATCH /v1/locations/:id', function() {
 describe('DELETE /v1/locations/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.del('/v1/locations/2', function(err, results, res) {
+      tu.del('/v1/locations/5', function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
         tu.logout(function(){
