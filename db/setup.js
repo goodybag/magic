@@ -116,6 +116,7 @@ module.exports = function(options, callback){
     // run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
       .then(loadFixture(options.fixtureFile))
+      // loadOddity is commented when oddity table is loaded, this table is only loaded one time
       .then(loadOddity(options.oddityFile))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
