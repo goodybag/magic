@@ -41,7 +41,7 @@ module.exports.list = function(req, res){
     if (req.param('businessId')) {
       query.where(locations.businessId.equals(+req.param('businessId') || 0));
     }
-    if (+req.param('lat') && +req.param('lon')) {
+    if (!isNaN(+req.param('lat')) && !isNaN(+req.param('lon'))) {
       var lat = +req.param('lat'),
         lon = +req.param('lon'),
         range = (+req.param('range') || 1000);
