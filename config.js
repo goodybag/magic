@@ -47,6 +47,7 @@ var config = {
       port: 3000
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
+  , baseUrl: 'http://localhost'
   }
 
 , test: {
@@ -70,6 +71,7 @@ var config = {
   , http: {
       port: process.env['PORT'] || 5000
     }
+  , baseUrl: 'http://merlin.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
   , repl: {
       enabled: false

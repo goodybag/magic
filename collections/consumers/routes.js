@@ -3,9 +3,12 @@
  */
 
 var
+  singly  = require('singly')
+
   db      = require('../../db')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, config  = require('../../config')
 
 , logger  = {}
 
@@ -20,7 +23,6 @@ var
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
-
 /**
  * Get consumer
  * @param  {Object} req HTTP Request Object
@@ -28,7 +30,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -68,7 +70,7 @@ module.exports.get = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -108,7 +110,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -117,13 +119,19 @@ module.exports.create = function(req, res){
     var tx = new Transaction(client);
     tx.begin(function() {
 
-      // build query
-      var user = {
-        email:    req.body.email
-      , password: utils.encryptPassword(req.body.password)
-      };
+      // build user query
+      var user = {}, fields;
+      if (req.body.email){
+        fields = ['email', 'password'];
+        user.email = req.body.email;
+        user.password = utils.encryptPassword(req.body.password);
+      }else{
+        fields = ['"singlyId"', '"singlyAccessToken"'];
+        user.singlyId = req.body.singlyId;
+        user.singlyAccessToken = req.body.singlyAccessToken;
+      }
 
-      var query = 'INSERT INTO users (email, password) SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
+      var query = 'INSERT INTO users (' + fields.join(', ') + ') SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
 
       client.query(query, [user.email, user.password], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
@@ -176,7 +184,7 @@ module.exports.create = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

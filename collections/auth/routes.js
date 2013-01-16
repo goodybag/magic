@@ -33,11 +33,85 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  * @param res
  */
 
-module.exports.singlyRedirect = function (req, res){
-  //get service
-  var service = req.param('service');
-  var url = apiBaseUrl+'/oauth/authorize?client_id='+clientId+'&service='+service+'&redirect_uri='+callbackUrl;
-  return res.json({error: null, data: url});
+/**
+ * Get oauth authorization url
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.oauth = function(req, res){
+  var TAGS = ['consumers-oauth', req.uuid];
+
+  var validServices = [
+    'facebook'
+  ];
+
+  logger.routes.debug(TAGS, 'determining service');
+  if (!req.param('service'))
+    return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
+
+  logger.routes.debug(TAGS, 'determining service');
+  if (!req.param('service'))
+    return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
+
+  logger.routes.debug(TAGS, 'determining if service is valid');
+  if (validServices.indexOf(req.param('service')) === -1)
+    return res.error(errors.auth.INVALID_SERVICE), logger.routes.error(TAGS, errors.auth.INVALID_SERVICE);
+
+  logger.routes.debug(TAGS, 'Sending back redirect url');
+
+  return res.json({
+    error: null
+  , data: {
+      url: config.singly.apiBaseUrl
+        + "/oauth/authenticate?client_id="
+        + config.singly.clientId
+        + "&redirect_uri="
+        + encodeURIComponent(req.param('redirect_uri'))
+        + "&profile=all"
+        + "&account=false"
+        + "&service="
+        + req.param('service')
+    }
+  });
+};
+
+module.exports.oauthCallback = function(req, res){
+  var TAGS = ['oauth-callback', req.uuid];
+
+  if (!req.param('code'))
+    return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
+
+  // Get the user accessToken/Id
+  // If the user exists
+    // Update their accessToken
+    // Update session
+    // Send session
+  // If the user doesn't exist
+    // Figure out what group their authenticating to
+    // (?group=consumer)
+    // POST to that kind of account creation
+    // Update session with returned user
+    // Send session
+
+  var stage = {
+    start: function(code){
+      // db.getClient(stage, function(error, client){
+      //   if (error) return dbError(error);
+
+      // });
+
+      singly.getAccessToken(code, function(error, response, token){
+
+      });
+    }
+
+  , dbError: function(error){
+      res.error(errors.internal.DB_FAILURE, error);
+      logger.routes.error(TAGS, error);
+    }
+  };
+
+  stage.start(req.param('code'));
 };
 
 module.exports.singlyCallback =  function(req, res){
@@ -74,40 +148,39 @@ module.exports.singlyCallback =  function(req, res){
                 'singlyAccessToken': token.access_token
                 , 'singlyId': profiles.body.id
               }).toQuery();
+            } else {
+              query = users.update({
+                'singlyAccessToken': token.access_token
+              }).where(users.singlyId.equals(profiles.body.id)).toQuery();
             }
-            else{
-               query = users.update({
-                  'singlyAccessToken': token.access_token
-                }).where(users.singlyId.equals(profiles.body.id)).toQuery();
-              }
 
-              var user = result.rows[0];
-              logger.db.debug(TAGS, query.text);
+            var user = result.rows[0];
+            logger.db.debug(TAGS, query.text);
 
-              client.query(query.text + 'RETURNING id', query.values, function(error, result){
+            client.query(query.text + 'RETURNING id', query.values, function(error, result){
+              if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+              logger.db.debug(TAGS, result);
+
+              // Setup groups
+              query = usersGroups.select(
+                groups.name
+              ).from(
+                usersGroups.join(groups).on(
+                  usersGroups.groupId.equals(groups.id)
+                )
+              ).where(
+                usersGroups.userId.equals(user.id)
+              ).toQuery();
+
+              client.query(query.text, query.values, function(error, results){
                 if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-                logger.db.debug(TAGS, result);
+                user.groups = results.rows.map(function(group){ return group.name; });
 
-                // Setup groups
-                query = usersGroups.select(
-                  groups.name
-                ).from(
-                  usersGroups.join(groups).on(
-                    usersGroups.groupId.equals(groups.id)
-                  )
-                ).where(
-                  usersGroups.userId.equals(user.id)
-                ).toQuery();
-
-                client.query(query.text, query.values, function(error, results){
-                  if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-                  user.groups = results.rows.map(function(group){ return group.name; });
-
-                  // Save user in session
-                  req.session.user = user;
-                  return res.json({ error: null, data: user });
+                // Save user in session
+                req.session.user = user;
+                return res.json({ error: null, data: user });
               });
             });
           });

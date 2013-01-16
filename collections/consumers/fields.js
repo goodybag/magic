@@ -12,6 +12,9 @@ module.exports = {
   , lastName    : consumers.lastName
   , screenName  : consumers.screenName
   , tapinId     : consumers.tapinId
-  , $postRequires : ['email', 'password']
+  , $postRequires : function(req, res){
+      if (req.body.email) return ['email', 'password'];
+      return ['singlyAccessToken', 'singlyId'];
+    }
   }
 };
