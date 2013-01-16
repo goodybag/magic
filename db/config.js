@@ -4,6 +4,7 @@ module.exports = {
 , postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
     'sessions'
+  , 'charities'
   , 'businesses'
   , 'locations'
   , 'users'

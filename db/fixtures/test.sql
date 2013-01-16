@@ -1,10 +1,19 @@
 
+-- CHARITIES
+
+BEGIN;
+INSERT INTO "charities" (id, name, "desc", "logoUrl", "totalReceived") VALUES ('1', 'Charity 1', 'a charity', 'http://placekitten.com/500/500', 1000);
+INSERT INTO "charities" (id, name, "desc", "logoUrl", "totalReceived") VALUES ('2', 'Charity 2', 'a charity', 'http://placekitten.com/500/500', 1000);
+INSERT INTO "charities" (id, name, "desc", "logoUrl", "totalReceived") VALUES ('3', 'Charity 3', 'a charity', 'http://placekitten.com/500/500', 1000);
+COMMIT;
+SELECT setval('charities_id_seq', (SELECT MAX(id) from "charities")); -- advance the sequence past the IDs just used
+
 -- BUSINESSES
 
 BEGIN;
-INSERT INTO "businesses" (id, name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('1', 'Business 1', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
-INSERT INTO "businesses" (id, name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('2', 'Business 2', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
-INSERT INTO "businesses" (id, name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('3', 'Business 3', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('1', 1, 'Business 1', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('2', 1, 'Business 2', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('3', 2, 'Business 3', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 COMMIT;
 SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advance the sequence past the IDs just used
 

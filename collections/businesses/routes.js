@@ -244,6 +244,7 @@ module.exports.create = function(req, res){
 
     var query = businesses.insert({
       'name'      :    req.body.name
+    , 'charityId' :    req.body.charityId
     , 'url'       :    req.body.url
     , 'street1'   :    req.body.street1
     , 'street2'   :    req.body.street2

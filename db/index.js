@@ -143,6 +143,7 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
 
 exports.schemas = {
   sessions:                  require('./schemas/sessions')
+, charities:                 require('./schemas/charities')
 , businesses:                require('./schemas/businesses')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')

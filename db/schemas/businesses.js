@@ -14,6 +14,11 @@ define(function(require){
       type: 'serial'
     , meta: 'primary key'
     }
+  , charityId: {
+      type: 'int'
+    , meta: 'references charities(id)'
+    , validators: { isInt:[] }
+    }
   , name: {
       type: 'text'
     , validators: { len:[1] }
