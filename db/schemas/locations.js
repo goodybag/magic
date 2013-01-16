@@ -52,10 +52,12 @@ define(function(require){
     }
   , lat: {
       type: 'double precision'
+    , validators: { isFloat:[] }
     , sanitizers: { ifNull:0 }
     }
   , lon: {
       type: 'double precision'
+    , validators: { isFloat:[] }
     , sanitizers: { ifNull:0 }
     }
   , isEnabled: {

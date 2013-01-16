@@ -44,10 +44,9 @@ module.exports.list = function(req, res){
         range = (+req.param('range') || 1000);
       queryFrom = [
         'products',
-          'INNER JOIN businesses ON businesses.id = products."businessId"',
-          'INNER JOIN locations ON',
-            'locations."businessId" = businesses.id',
-            'AND earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth(locations.lat, locations.lon)'
+          'INNER JOIN "productLocations"',
+            'ON "productLocations"."productId" = products.id',
+            'AND earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth("productLocations".lat, "productLocations".lon)'
       ].join(' ');
     }
 
@@ -319,9 +318,24 @@ module.exports.create = function(req, res){
         );
       }
 
-      // That's it!
+      // Next stage
       utils.parallel(queries, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        stage.insertProductLocations(client, productId);
+      });
+    }
+
+    // create productLocations for all locations related to the product's business
+  , insertProductLocations: function(client, productId) {
+
+      var query = [
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon)',
+        'SELECT $1, locations.id, $2, locations.lat, locations.lon FROM locations WHERE locations."businessId" = $2'
+      ].join(' ');
+
+      client.query(query, [productId, req.body.businessId], function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
         return res.json({ error: null, data: { id: productId } });
       });
     }

@@ -83,6 +83,20 @@ INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId")
 COMMIT;
 SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "productsProductCategories")); -- advance the sequence past the IDs just used
 
+-- PRODUCT LOCATIONS
+
+BEGIN;
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('1', '1', '1', '1', 10, 10);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('2', '1', '1', '4', 0, 0);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('3', '1', '1', '5', 0, 0);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('4', '2', '2', '2', 10.001, 10.001);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('5', '3', '3', '3', 0, 0);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('6', '4', '1', '1', 10, 10);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('7', '4', '1', '4', 0, 0);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('8', '4', '1', '5', 0, 0);
+COMMIT;
+SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
+
 -- PHOTOS
 
 BEGIN;

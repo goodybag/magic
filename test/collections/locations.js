@@ -172,7 +172,7 @@ describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf' }, function(err, results, res) {
+      tu.post('/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf', lat:5, lon:-5 }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -217,7 +217,7 @@ describe('PATCH /v1/locations/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2' }, function(err, results, res) {
+      tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
         tu.logout(function(){
@@ -229,7 +229,7 @@ describe('PATCH /v1/locations/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { businessId:'foobar' }, function(err, results, res) {
+      tu.patch('/v1/locations/2', { lat:'foobar' }, function(err, results, res) {
 
         assert(!err);
         assert(res.statusCode == 400);

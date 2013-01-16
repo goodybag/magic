@@ -108,25 +108,34 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-location', req.uuid];
 
+  // retrieve db client
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
+    // validate input
     var error = utils.validate(req.body, schemas.locations);
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    // build create query
     var query = locations.insert(req.body).toQuery();
 
     logger.db.debug(TAGS, query.text);
 
+    // run create query
     client.query(query.text+' RETURNING id', query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
+      var newLocation = result.rows[0];
 
-      return res.json({ error: null, data: result.rows[0] });
+      // create productLocations for all products related to the business
+      var query = [
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon)',
+        'SELECT products.id, $1, $2, $3, $4 FROM products WHERE products."businessId" = $2'
+      ].join(' ');
+      client.query(query, [newLocation.id, req.body.businessId, req.body.lat, req.body.lon], function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          return res.json({ error: null, data: newLocation });        
+      });
     });
   });
 };
@@ -139,25 +148,37 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-location', req.uuid];
 
+  // retrieve db client
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
+    // build update query
     var query = locations
       .update(req.body)
-      .where(locations.id.equals(req.param('locationId')))
+      .where(locations.id.equals(+req.param('locationId')))
       .toQuery();
 
     logger.db.debug(TAGS, query.text);
 
+    // run update query
     client.query(query.text, query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      // build productLocations update query
+      var updates = [];
+      if (typeof req.body.lat != 'undefined') { updates.push('lat='+parseFloat(req.body.lat)); }
+      if (typeof req.body.lon != 'undefined') { updates.push('lon='+parseFloat(req.body.lon)); }
+      if (!updates.length) {
+        return res.json({ error: null, data: null });
+      }
+
+      // update related productLocations
+      client.query('UPDATE "productLocations" SET '+updates.join(', ')+' WHERE "locationId"=$1', [req.param('locationId')], function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        return res.json({ error: null, data: null });
+      });
     });
   });
 };

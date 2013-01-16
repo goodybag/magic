@@ -48,9 +48,6 @@ describe('GET /v1/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 3);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[1].name == 'Product 2');
-      assert(payload.data[2].name == 'Product 4');
       assert(payload.meta.total > 1);
       done();
     });
@@ -66,8 +63,6 @@ describe('GET /v1/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 2);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[1].name == 'Product 4');
       assert(payload.meta.total > 1);
       done();
     });
@@ -174,7 +169,7 @@ describe('POST /v1/products', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ price:'foobar' }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -296,7 +291,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ price:'foobar' }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -322,7 +317,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should update the products name and categories ', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [3] }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [1] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -351,7 +346,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should update the products name and tags ', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [3] }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [1] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
