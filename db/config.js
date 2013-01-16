@@ -13,6 +13,7 @@ module.exports = {
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'
+  , 'productLocations'
   , 'photos'
   , 'productTags'
   , 'productsProductTags'

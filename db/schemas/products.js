@@ -29,7 +29,7 @@ define(function(require){
     }
   , price: {
       type: 'real'
-    , validators: { isDecimal:[] }
+    , validators: { isFloat:[] }
     }
   , photoUrl: {
       type: 'text'

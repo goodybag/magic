@@ -8,7 +8,7 @@ var productTries = db.tables.productTries;
 var photos = db.tables.photos;
 
 module.exports = {
-  read: {
+  access: {
     products: {
       "default": {
         id            : products.id
@@ -187,24 +187,13 @@ module.exports = {
       }
     }
   },
-  mutate: {
+  create: {
     product: {
       "default": {
       }
 
-    , owner: {
-        name         : products.name
-      , description  : products.description
-      , price        : products.price
-      , isEnabled    : products.isEnabled
-      , tags         : true
-      , categories   : true
-      , $postRequires : ['name']
-      }
-
     , sales: {
-        id           : products.id
-      , businessId   : products.businessId
+        businessId   : products.businessId
       , name         : products.name
       , description  : products.description
       , price        : products.price
@@ -221,8 +210,7 @@ module.exports = {
       }
 
     , admin: {
-        id           : products.id
-      , businessId   : products.businessId
+        businessId   : products.businessId
       , name         : products.name
       , description  : products.description
       , price        : products.price
@@ -254,6 +242,59 @@ module.exports = {
     , admin: {
         id   : productCategories.id
       , name : productCategories.name
+      }
+    }
+  },
+  mutate: {
+    // :NOTE: BUSINESS ID CAN NOT MUTATE!
+    //        productLocations table would fall out of sync
+    product: {
+      "default": {
+      }
+
+    , owner: {
+        name         : products.name
+      , description  : products.description
+      , price        : products.price
+      , isEnabled    : products.isEnabled
+      , tags         : true
+      , categories   : true
+      , $postRequires : ['name']
+      }
+
+    , sales: {
+        name         : products.name
+      , description  : products.description
+      , price        : products.price
+      , isVerified   : products.isVerified
+      , isArchived   : products.isArchived
+      , isEnabled    : products.isEnabled
+      , categoryId   : productCategories.id
+      , categoryName : productCategories.name
+      , tagId        : productTags.id
+      , tag          : productTags.tag
+      , tags         : true
+      , categories   : true
+      , $postRequires : ['name']
+      }
+
+    , admin: {
+        name         : products.name
+      , description  : products.description
+      , price        : products.price
+      , likes        : products.likes
+      , wants        : products.wants
+      , tries        : products.tries
+      , isVerified   : products.isVerified
+      , isArchived   : products.isArchived
+      , isEnabled    : products.isEnabled
+      , categoryId   : productCategories.id
+      , categoryName : productCategories.name
+      , tagId        : productTags.id
+      , tag          : productTags.tag
+      , tags         : true
+      , categories   : true
+      , $postRequires : ['name']
       }
     }
   }

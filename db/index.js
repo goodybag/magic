@@ -152,6 +152,7 @@ exports.schemas = {
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')
+, productLocations:          require('./schemas/productLocations')
 , photos:                    require('./schemas/photos')
 , productTags:               require('./schemas/productTags')
 , productsProductTags:       require('./schemas/productsProductTags')

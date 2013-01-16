@@ -11,21 +11,21 @@ var fields = require('./fields');
 // Products.list
 server.get(
   '/v1/products'
-, middleware.fields(fields.read.products)
+, middleware.fields(fields.access.products)
 , routes.list
 );
 
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
-, middleware.fields(fields.read.products)
+, middleware.fields(fields.access.products)
 , routes.list
 );
 
 // Products.create
 server.post(
   '/v1/products'
-, middleware.fields(fields.mutate.product)
+, middleware.fields(fields.create.product)
 , middleware.validate(schema)
 , routes.create
 );
@@ -33,7 +33,7 @@ server.post(
 // Products.get
 server.get(
   '/v1/products/:productId'
-, middleware.fields(fields.read.product)
+, middleware.fields(fields.access.product)
 , routes.get
 );
 
@@ -63,14 +63,14 @@ server.del(
 // Products.listCategories
 server.get(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.read.productCategory)
+, middleware.fields(fields.access.productCategory)
 , routes.listCategories
 );
 
 // Products.addCategory
 server.post(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.mutate.productCategory)
+, middleware.fields(fields.create.productCategory)
 , routes.addCategory
 );
 
