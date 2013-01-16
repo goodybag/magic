@@ -94,7 +94,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.param('filter')) {
-      query.where(charities.name.like('%'+req.param('filter')+'%'));
+      query.where('charities.name ILIKE \'%'+req.param('filter')+'%\'');
     }
     utils.paginateQuery(req, query);
 
