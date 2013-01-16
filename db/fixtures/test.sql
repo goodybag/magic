@@ -86,14 +86,14 @@ SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "produc
 -- PRODUCT LOCATIONS
 
 BEGIN;
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('1', '1', '1', '1', 10, 10);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('2', '1', '1', '4', 0, 0);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('3', '1', '1', '5', 0, 0);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('4', '2', '2', '2', 10.001, 10.001);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('5', '3', '3', '3', 0, 0);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('6', '4', '1', '1', 10, 10);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('7', '4', '1', '4', 0, 0);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon) VALUES ('8', '4', '1', '5', 0, 0);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('5', '3', '3', '3', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0));
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
 

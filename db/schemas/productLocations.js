@@ -37,6 +37,9 @@ define(function(require){
       type: 'double precision'
     , sanitizers: { ifNull:0 }
     }
+  , position: {
+      type: 'earth'
+    }
   , createdAt: {
       type: 'timestamp'
     }

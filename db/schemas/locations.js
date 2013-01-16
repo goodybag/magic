@@ -60,6 +60,9 @@ define(function(require){
     , validators: { isFloat:[] }
     , sanitizers: { ifNull:0 }
     }
+  , position: {
+      type: 'earth'
+    }
   , isEnabled: {
       type: 'boolean'
     , meta: 'default TRUE'

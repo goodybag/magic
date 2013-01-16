@@ -555,3 +555,78 @@ describe('POST /v1/products/:id/feelings', function() {
   });
 
 });
+
+
+describe('location list filtering', function() {
+  it('should maintain freshness as locations are added, changed, and removed', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5, lon:5 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5.001, lon:5.001 }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          var idToDelete = JSON.parse(payload).data.id;
+
+          tu.post('/v1/locations', { businessId:3, name:'asdf',  lat:15.002, lon:15.002 }, function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            var idToUpdate = JSON.parse(payload).data.id;
+
+            tu.del('/v1/locations/'+idToDelete, function(err, payload, res) {
+              assert(!err);
+              assert(res.statusCode == 200);
+
+              tu.patch('/v1/locations/'+idToUpdate, { lat:5.002, lon:5.002 }, function(err, payload, res) {
+                assert(!err);
+                assert(res.statusCode == 200);
+
+                tu.get('/v1/products?lat=5&lon=5&range=10000', function(err, payload, res) {
+                  assert(!err);
+                  assert(res.statusCode == 200);
+
+                  payload = JSON.parse(payload);
+                  assert(payload.data.filter(function(item) { return item.businessId != 1 && item.businessId != 3; }).length === 0); // should only have results from business 1 or 3
+
+                  tu.logout(function() {
+                    done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  // :TODO: pending updates to routes
+  it('should provide distinct products'/*, function(done) {
+    tu.loginAsAdmin(function() {
+
+      // add a location that would result in duplicate results
+      tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5.001, lon:5.001 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/products?lat=5&lon=5&range=10000', function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+          var usedIds = {};
+          payload.data.forEach(function(item) {
+            assert(!usedIds[item.id]);
+            usedIds[item.id] = true;
+          });
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  }*/);
+});
