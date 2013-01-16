@@ -10,7 +10,7 @@ var
 
 , logger  = {}
 
-, TextNode = require('../../node_modules/sql/lib/node/text')
+, TextNode = require('sql/lib/node/text')
 
   // Tables
 , locations  = db.tables.locations
