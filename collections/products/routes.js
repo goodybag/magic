@@ -743,7 +743,7 @@ module.exports.updateFeelings = function(req, res) {
         var feelingsQueryFn = function(table, add) {
           return function(cb) {
             if (add) {
-              tx.query('INSERT INTO "'+table+'" ("productId", "userId") VALUES ($1, $2)', [+req.param('productId'), +req.session.user.id], cb);
+              tx.query('INSERT INTO "'+table+'" ("productId", "userId") SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2)', [+req.param('productId'), +req.session.user.id], cb);
             } else {
               tx.query('DELETE FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2', [+req.param('productId'), +req.session.user.id], cb);
             }

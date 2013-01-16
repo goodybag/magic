@@ -1,5 +1,6 @@
 module.exports = {
-  businesses  : require('./businesses')
+  charities   : require('./charities')
+, businesses  : require('./businesses')
 , locations   : require('./locations')
 , products    : require('./products')
 , productTags : require('./productTags')

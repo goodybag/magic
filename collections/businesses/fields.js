@@ -46,6 +46,7 @@ module.exports = {
 , business: {
     "default": {
       id        : businesses.id
+    , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
     , logoUrl   : businesses.logoUrl
@@ -63,6 +64,7 @@ module.exports = {
 
   , client: {
       id        : businesses.id
+    , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
     , logoUrl   : businesses.logoUrl
@@ -78,6 +80,7 @@ module.exports = {
 
   , sales: {
       id        : businesses.id
+    , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
     , logoUrl   : businesses.logoUrl
@@ -95,6 +98,7 @@ module.exports = {
 
   , admin: {
       id        : businesses.id
+    , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
     , logoUrl   : businesses.logoUrl
