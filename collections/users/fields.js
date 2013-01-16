@@ -22,13 +22,11 @@ module.exports = {
   , owner: {
       id       : users.id
     , email    : users.email
-    , password : users.password
     , groups   : true
     }
   , admin: {
       id       : users.id
     , email    : users.email
-    , password : users.password
     , groups   : true
     }
   },
