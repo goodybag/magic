@@ -29,6 +29,15 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+  it('should filter', function(done) {
+    tu.get('/v1/businesses?filter=bus', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      done();
+    });
+  });
   it('should paginate', function(done) {
     tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
       assert(!err);
