@@ -12,7 +12,7 @@ var perms      = require('./permissions');
 // Users.list
 server.get(
   '/v1/users'
-, middleware.fields(fields)
+, middleware.fields(fields.access)
 , routes.list
 );
 
@@ -20,7 +20,7 @@ server.get(
 server.get(
   '/v1/users/:id'
 , middleware.permissions(perms.owner)
-, middleware.fields(fields)
+, middleware.fields(fields.access)
 , routes.get
 );
 
@@ -28,7 +28,7 @@ server.get(
 server.post(
   '/v1/users'
 , middleware.permissions(perms.owner)
-, middleware.fields(fields)
+, middleware.fields(fields.create)
 , middleware.validate(schema)
 , routes.create
 );
@@ -38,7 +38,7 @@ server.patch(
   '/v1/users/:id'
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.fields(fields)
+, middleware.fields(fields.mutate)
 , middleware.validate(schema)
 , routes.update
 );
@@ -48,7 +48,7 @@ server.post(
   '/v1/users/:id'
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.fields(fields)
+, middleware.fields(fields.mutate)
 , middleware.validate(schema)
 , routes.update
 );
