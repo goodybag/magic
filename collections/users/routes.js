@@ -85,7 +85,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.param('filter')) {
-      query.where(users.email.like('%'+req.param('filter')+'%'))
+      query.where('users.email ILIKE \'%'+req.param('filter')+'%\'');
     }
     utils.paginateQuery(req, query);
 
