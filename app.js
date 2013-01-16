@@ -24,6 +24,7 @@ var app = require('./lib/server').createAppServer();
 
 // import resources
 app.use(require('./collections/auth/server'));
+app.use(require('./collections/charities/server'));
 app.use(require('./collections/businesses/server'));
 app.use(require('./collections/locations/server'));
 app.use(require('./collections/products/server'));
