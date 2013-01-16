@@ -7,6 +7,7 @@ module.exports = {
   , 'businesses'
   , 'locations'
   , 'users'
+  , 'consumers'
   , 'groups'
   , 'usersGroups'
   , 'products'
