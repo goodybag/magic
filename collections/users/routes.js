@@ -236,6 +236,12 @@ module.exports.update = function(req, res){
           return;
         }
 
+        // are we done?
+        if (typeof req.body.groups == 'undefined') {
+          tx.commit();
+          return res.json({ error: null, data: null });
+        }
+
         // delete all group relations
         var query = usersGroups.delete()
           .where(usersGroups.userId.equals(req.param('id')));
