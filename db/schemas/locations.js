@@ -51,11 +51,11 @@ define(function(require){
       type: 'text'
     }
   , lat: {
-      type: 'int'
+      type: 'double precision'
     , sanitizers: { ifNull:0 }
     }
   , lon: {
-      type: 'int'
+      type: 'double precision'
     , sanitizers: { ifNull:0 }
     }
   , isEnabled: {

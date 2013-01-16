@@ -41,6 +41,12 @@ module.exports.list = function(req, res){
     if (req.param('businessId')) {
       query.where(locations.businessId.equals(+req.param('businessId') || 0));
     }
+    if (!isNaN(+req.param('lat')) && !isNaN(+req.param('lon'))) {
+      var lat = +req.param('lat'),
+        lon = +req.param('lon'),
+        range = (+req.param('range') || 1000);
+      query.where('earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth(lat, lon)');
+    }
     query = utils.paginateQuery(req, query);
 
     // run data query
