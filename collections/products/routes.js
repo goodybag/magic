@@ -94,7 +94,7 @@ module.exports.get = function(req, res){
       + 'LEFT JOIN "productsProductTags" ppt '
         + 'ON ppt."productId" = products.id '
       + 'LEFT JOIN "productTags" '
-        + 'ON "productTags".id = ppt."productTagId"'
+        + 'ON "productTags".id = ppt."productTagId" '
       )
       .where(products.id.equals(req.param('productId')))
       .toQuery();
@@ -307,6 +307,7 @@ module.exports.create = function(req, res){
       // That's it!
       utils.parallel(queries, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
         return res.json({ error: null, data: { id: productId } });
       });
     }
