@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var oddity = {
+  var oddityLive = {
     id: {
       type: 'serial'
     , meta: 'primary key'
@@ -42,5 +42,5 @@ define(function(require){
       type: 'timestamp'
     }
   };
-  return oddity;
+  return oddityLive;
 });

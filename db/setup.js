@@ -85,15 +85,6 @@ function loadFixture(name) {
   }
 }
 
-function loadOddity(name) {
-  return function() {
-    if (!name) {return;}
-    return pipeline([
-      loadFile('Loading oddity', __dirname+'/oddity/'+name+'.sql'),
-      query()
-    ]);
-  }
-}
 
 module.exports = function(options, callback){
   if (typeof options === 'function') {
@@ -104,7 +95,6 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-  options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -116,7 +106,6 @@ module.exports = function(options, callback){
     // run loadschema on all files
     when.map(options.schemaFiles, loadSchema)
       .then(loadFixture(options.fixtureFile))
-      .then(loadOddity(options.oddityFile))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;

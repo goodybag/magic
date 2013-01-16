@@ -19,9 +19,8 @@ module.exports = {
   , 'productLikes'
   , 'productWants'
   , 'productTries'
-  , 'oddity'
+  , 'oddityLive'
   , 'oddityMeta'
   ]
 , fixtureFile: 'test'
-, oddityFile: 'oddityTest'
 };
