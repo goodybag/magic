@@ -19,9 +19,10 @@ module.exports = {
   , 'productLikes'
   , 'productWants'
   , 'productTries'
+    //oddity and oddityMeta should be commented after inserting to database
   , 'oddity'
   , 'oddityMeta'
   ]
 , fixtureFile: 'test'
-, oddityFile: 'oddityTest'
+, oddityFile: 'postgresOddity'
 };

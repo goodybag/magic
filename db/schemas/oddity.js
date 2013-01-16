@@ -11,35 +11,95 @@ if (typeof module === 'object' && typeof define !== 'function') {
 define(function(require){
   var oddity = {
     id: {
-      type: 'serial'
+      type: 'int'
     , meta: 'primary key'
     }
-    , name: {
+    , biz_name: {
       type: 'text'
     }
-    , url: {
+    , cat_primary: {
       type: 'text'
     }
-    , street1: {
+    , cat_sub: {
       type: 'text'
     }
-    , street2: {
+    , cat_sub2: {
       type: 'text'
     }
-    , city: {
+    , cat_sub3: {
       type: 'text'
     }
-    , state: {
+    , web_url: {
       type: 'text'
     }
-    , zip: {
-      type: 'int'
+    , e_address: {
+      type: 'text'
     }
-    , createdAt: {
-      type: 'timestamp'
+    , e_city: {
+      type: 'text'
     }
-    , updatedAt: {
-      type: 'timestamp'
+    , e_state: {
+      type: 'text'
+    }
+    , e_postal: {
+      type: 'text'
+    }
+    , e_country: {
+      type: 'text'
+    }
+    , loc_county: {
+      type: 'text'
+    }
+    , loc_area_code: {
+      type: 'text'
+    }
+    , loc_FIPS: {
+      type: 'text'
+    }
+    , loc_MSA: {
+      type: 'text'
+    }
+    , loc_PMSA: {
+      type: 'text'
+    }
+    , loc_TZ: {
+      type: 'text'
+    }
+    , loc_DST: {
+      type: 'text'
+    }
+    , loc_LAT_centroid: {
+      type: 'text'
+    }
+    , loc_LAT_poly: {
+      type: 'text'
+    }
+    , loc_LONG_centroid: {
+      type: 'text'
+    }
+    , loc_LONG_poly: {
+      type: 'text'
+    }
+    , biz_popularity: {
+      type: 'text'
+    }
+    , biz_atmosphere: {
+      type: 'text'
+    }
+    , biz_hour: {
+      type: 'text'
+    }
+    , biz_price: {
+      type: 'text'
+    }
+    , flag_outdoorseating: {
+      type: 'text'
+    }
+    , biz_phone: {
+      type: 'text'
+    }
+    , biz_info: {
+      type: 'text'
     }
   };
   return oddity;
