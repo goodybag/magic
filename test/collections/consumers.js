@@ -179,6 +179,58 @@ describe('PATCH /v1/consumers/:id', function() {
       });
     });
   });
+
+  // Skip this for now
+  // it('should update a consumers email and password when they registered with facebook', function(done) {
+  //   this.timeout(30000);
+  //   tu.createTestOauthUser(function(error, results){
+  //     if (error) console.log(error);
+  //     assert(!error);
+
+  //     // Post to our oauth
+  //     var user = {
+  //       group: 'consumer'
+  //     , singlyId: results.account
+  //     , singlyAccessToken: results.access_token
+  //     };
+
+  //     var update = {
+  //       email: "testsstsststst@test.com"
+  //     , password: "password"
+  //     };
+
+  //     tu.post('/v1/oauth', user, function(error, results){
+  //       if (error) console.log(error);
+  //       assert(!error);
+
+  //       results = JSON.parse(results);
+  //       if (results.error) console.log(results.error);
+  //       assert(!results.error);
+  //       assert(results.data.id > 0);
+
+  //       var userId = results.data.id;
+
+  //       tu.patch('/v1/consumers/' + userId , user, function(error, results, res) {
+  //         if (error) console.log(error);
+  //         assert(!error);
+  //         results = JSON.parse(results);
+  //         if (results.error) console.log(results.error);
+  //         assert(!results.error);
+
+  //         tu.logout(function(){
+  //           tu.login(update, function(error, results){
+  //             if (error) console.log(error);
+  //             assert(!error);
+  //             assert(results.id === userId);
+  //             tu.logout(function(){
+  //               done();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 });
 
 describe('DEL /v1/consumers/:id', function() {

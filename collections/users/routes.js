@@ -209,7 +209,7 @@ module.exports.update = function(req, res){
       // build update query
       var query = [
         'UPDATE users SET',
-        '  email    =', (user.email)    ? '$2' : 'email', 
+        '  email    =', (user.email)    ? '$2' : 'email',
         ', password =', (user.password) ? '$3' : 'password',
         'WHERE users.id = $1 AND $2 NOT IN (SELECT email FROM users WHERE id != $1)' // this makes sure the user doesn't take an email in use
       ].join(' ');

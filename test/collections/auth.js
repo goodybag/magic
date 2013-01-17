@@ -126,45 +126,25 @@ describe('POST /v1/oauth', function(){
   this.timeout(25000);
 
   it('should respond with a new user id', function(done){
-    // Get new facebook app access token
-    utils.get(config.facebook.accessTokenUrl, { json: false }, function(error, response, results){
+    tu.createTestOauthUser(function(error, results){
       if (error) console.log(error);
       assert(!error);
 
-      assert(results.indexOf('access_token') > -1);
-
-      var fbAppToken = results.split('=')[1];
-
-      // Make new facebook test user
-      utils.get(config.facebook.testUserUrl(fbAppToken), function(error, response, results){
+      // Post to our oauth
+      var user = {
+        group: 'consumer'
+      , singlyId: results.account
+      , singlyAccessToken: results.access_token
+      }
+      tu.post('/v1/oauth', user, function(error, results){
         assert(!error);
 
-        assert(results.access_token);
-
-        // Apply to singly
-        utils.get(config.singly.applyFacebookTokenUrl(results.access_token), function(error, response, results){
-          assert(!error);
-
-          assert(results.access_token);
-          assert(results.account);
-
-          // Post to our oauth
-          var user = {
-            group: 'consumer'
-          , singlyId: results.account
-          , singlyAccessToken: results.access_token
-          }
-          tu.post('/v1/oauth', user, function(error, results){
-            assert(!error);
-
-            results = JSON.parse(results);
-            if (results.error) console.log(results.error);
-            assert(!results.error);
-            assert(results.data.id > 0);
-            tu.logout(function(){
-              done();
-            });
-          });
+        results = JSON.parse(results);
+        if (results.error) console.log(results.error);
+        assert(!results.error);
+        assert(results.data.id > 0);
+        tu.logout(function(){
+          done();
         });
       });
     });
