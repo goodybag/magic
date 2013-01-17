@@ -29,12 +29,12 @@ server.del(
 
 server.post(
   '/v1/oauth'
-  , routes.oauthCallback
+  , routes.oauthAuthenticate
 );
 
 server.get(
   '/v1/oauth'
-  , routes.oauth
+  , routes.getOauthUrl
 );
 
 module.exports = server;

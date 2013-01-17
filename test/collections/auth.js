@@ -57,30 +57,41 @@ describe('POST /v1/session', function() {
   });
 });
 
-describe('GET v1/oauth', function(){
-  it('should return callback url', function(done){
-    tu.get(baseUrl+'/v1/oauth?service=facebook', function(error, results){
+describe('GET /v1/oauth', function() {
+  var service1 = "facebook", callbackUri = config.baseUrl + ":" + config.http.port;
+  it('should respond with the correct singly url for authenticating via ' + service1, function(done) {
+    tu.get('/v1/oauth?service=' + service1 + '&redirect_uri=' + callbackUri, function(error, results) {
       assert(!error);
-      assert(!results.error);
       results = JSON.parse(results);
-      assert(results.data.toString().indexOf("service=facebook") !== -1)
+      assert(!results.error);
+
+      var url = config.singly.apiBaseUrl
+        + "/oauth/authenticate?client_id="
+        + config.singly.clientId
+        + "&redirect_uri="
+        + encodeURIComponent(callbackUri)
+        + "&profile=all"
+        + "&account=false"
+        + "&service="
+        + service1
+      ;
+
+      assert(results.data.url === url);
+      done();
+    });
+  });
+
+  var service2 = "github";
+  it('should respond with an invalid service error', function(done) {
+    tu.get('/v1/oauth?service=' + service2 + '&redirect_uri=' + callbackUri, function(error, results) {
+      assert(!error);
+      results = JSON.parse(results);
+      assert(results.error);
+      assert(results.error.name === "INVALID_SERVICE");
       done();
     });
   });
 });
-
-describe('GET v1/callback', function(){
-  it('should returns error when no code', function(done){
-    var url = callbackUrl + "?error=ohaidosautrahir90347";
-    tu.get(url, function(error, results){
-      assert(!error);
-      results = JSON.parse(results);
-      assert(results.error.name === "SINGLY_CALLBACK");
-      done();
-    })
-  });
-
-})
 
 
 

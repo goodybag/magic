@@ -38,7 +38,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.oauth = function(req, res){
+module.exports.getOauthUrl = function(req, res){
   var TAGS = ['consumers-oauth', req.uuid];
 
   var validServices = [
@@ -75,11 +75,19 @@ module.exports.oauth = function(req, res){
   });
 };
 
-module.exports.oauthCallback = function(req, res){
+module.exports.oauthAuthenticate = function(req, res){
   var TAGS = ['oauth-callback', req.uuid];
+
+  var supportedGroups = [
+    'consumer'
+  ];
 
   if (!req.param('code'))
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
+
+  if (supportedGroups.indexOf(req.param('group')) === -1)
+    return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
+    
 
   // Get the user accessToken/Id
   // If the user exists
@@ -87,22 +95,81 @@ module.exports.oauthCallback = function(req, res){
     // Update session
     // Send session
   // If the user doesn't exist
-    // Figure out what group their authenticating to
+    // Figure out what group they're authenticating to
     // (?group=consumer)
     // POST to that kind of account creation
     // Update session with returned user
     // Send session
 
   var stage = {
-    start: function(code){
-      // db.getClient(stage, function(error, client){
-      //   if (error) return dbError(error);
+    start: function(){
+      stage.getAccessTokenAndId(req.param('code'))
+    }
 
-      // });
-
+  , getAccessTokenAndId: function(code){
       singly.getAccessToken(code, function(error, response, token){
+        if (error) return stage.singlyError(error);
 
+        var data = { access_token: token.access_token };
+        singly.get('/profiles', data, function(error, result){
+          if (error) return stage.singlyError(error);
+
+          stage.createOrUpdateUser(result.body.id, token.access_token);
+        });
       });
+    }
+
+  , createOrUpdateUser: function(id, accessToken){
+      db.getClient(function(client){
+        var query = users.update({
+          singlyAccessToken: accessToken
+        }).where(
+          users.singlyId.equals(id)
+        );
+
+        client.query(query + " returning id", function(error, result){
+          if (error) return stage.dbError(error);
+
+          if (result.rowCount === 0) return stage.createUser(id, accessToken);
+
+          return stage.setSessionAndSend({
+            id: result.rows[0].id
+          , singlyId: id
+          , singlyAccessToken: accessToken
+          });
+        });
+      });
+    }
+
+  , createUser: function(singlyId, accessToken){
+      var user = {
+        singlyId:     singlyId
+      , accessToken:  accessToken
+      };
+
+      // Figure out which group creation thingy to send this to
+      if (req.param('group') === "consumer"){
+        utils.post(config.baseUrl + '/v1/consumers', user, function(error, response, result){
+          // Really shouldn't happen
+          // TODO: send an actual error
+          if (error) return singlyError(error);
+
+          // No need to log - already logged from the post
+          if (result.error) return res.error(result.error);
+
+          return stage.setSessionAndSend(result.data);
+        });
+      }
+    }
+
+  , setSessionAndSend: function(user){
+      req.session.user = user;
+      res.json({ error: null, data: user });
+    }
+
+  , singlyError: function(error){
+      res.error(error);
+      logger.routes.error(TAGS, error);
     }
 
   , dbError: function(error){
@@ -111,7 +178,7 @@ module.exports.oauthCallback = function(req, res){
     }
   };
 
-  stage.start(req.param('code'));
+  stage.start();
 };
 
 module.exports.singlyCallback =  function(req, res){
