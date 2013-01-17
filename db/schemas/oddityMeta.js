@@ -20,6 +20,9 @@ define(function(require){
     , businessId: {
       type: 'int'
     }
+    , userId: {
+      type: 'int'
+    }
     , locationId: {
       type: 'int'
     }
