@@ -154,7 +154,6 @@ describe('PATCH /v1/businesses/:businessId/product-tags/:tagId', function() {
 
         assert(!err);
         payload = JSON.parse(payload);
-        console.log(payload.error);
         assert(res.statusCode == 400);
 
         assert(payload.error);

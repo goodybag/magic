@@ -102,6 +102,25 @@ describe('POST /v1/consumers', function() {
       done();
     })
   });
+
+  it('should fail because of an invalid tapinID', function(done){
+    var consumer = {
+      email:      "consumer1234@goodybag.com"
+    , password:   "password"
+    , firstName:  "Test"
+    , lastName:   "McTesterson"
+    , screenName: "testies"
+    , tapinId:    "12345-ZZZ"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode === 400);
+      results = JSON.parse(results);
+      assert(results.error.name == 'VALIDATION_FAILED');
+      done();
+    })
+  });
 });
 
 describe('PATCH /v1/consumers/:id', function() {

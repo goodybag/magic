@@ -16,18 +16,27 @@ define(function(require){
     }
   , userId: {
       type: 'int'
+    , validators: { isInt:[] }
     }
   , firstName: {
       type: 'text'
+    , validators: { len:[1] }
+    , sanitizers: { trim:[] }
     }
   , lastName: {
       type: 'text'
+    , validators: { len:[1] }
+    , sanitizers: { trim:[] }
     }
   , screenName: {
       type: 'text'
+    , validators: { len:[1] }
+    , sanitizers: { trim:[] }
     }
   , tapinId: {
       type: 'text'
+    , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
+    , sanitizers: { trim:[] }
     }
   };
   return consumers;
