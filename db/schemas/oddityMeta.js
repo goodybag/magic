@@ -23,6 +23,9 @@ define(function(require){
     , locationId: {
       type: 'int'
     }
+    , userId: {
+      type: 'int'
+    }
     , toReview: {
       type: 'boolean'
     }
