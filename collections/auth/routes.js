@@ -82,10 +82,10 @@ module.exports.oauthAuthenticate = function(req, res){
     'consumer'
   ];
 
-  if (!req.param('code'))
+  if (!req.body.code)
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
-  if (supportedGroups.indexOf(req.param('group')) === -1)
+  if (supportedGroups.indexOf(req.body.group) === -1)
     return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
     
 
@@ -103,7 +103,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
   var stage = {
     start: function(){
-      stage.getAccessTokenAndId(req.param('code'))
+      stage.getAccessTokenAndId(req.body.code)
     }
 
   , getAccessTokenAndId: function(code){
@@ -120,18 +120,20 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createOrUpdateUser: function(id, accessToken){
-      db.getClient(function(client){
+      db.getClient(function(error, client){
+        if (error) return stage.dbError(error);
+
         var query = users.update({
           singlyAccessToken: accessToken
         }).where(
           users.singlyId.equals(id)
-        );
-
-        client.query(query + " returning id", function(error, result){
+        ).toQuery();
+console.log(query.values);
+        client.query(query.text + " RETURNING id", query.values, function(error, result){
           if (error) return stage.dbError(error);
 
+console.log("laksjdfkla");
           if (result.rowCount === 0) return stage.createUser(id, accessToken);
-
           return stage.setSessionAndSend({
             id: result.rows[0].id
           , singlyId: id
@@ -148,11 +150,11 @@ module.exports.oauthAuthenticate = function(req, res){
       };
 
       // Figure out which group creation thingy to send this to
-      if (req.param('group') === "consumer"){
+      if (req.body.group === "consumer"){
         utils.post(config.baseUrl + '/v1/consumers', user, function(error, response, result){
           // Really shouldn't happen
           // TODO: send an actual error
-          if (error) return singlyError(error);
+          if (error) return stage.singlyError(error);
 
           // No need to log - already logged from the post
           if (result.error) return res.error(result.error);
