@@ -115,15 +115,6 @@ function loadIndexSchema() {
   ]);
 }
 
-function loadSqlFile(name, path, message) {
-  return function() {
-    if (!name) { return; }
-    return pipeline([
-      loadFile(message, path+name+'.sql'),
-      query()
-    ]);
-  };
-}
 
 module.exports = function(options, callback){
   if (typeof options === 'function') {
@@ -134,7 +125,6 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-  options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -144,11 +134,11 @@ module.exports = function(options, callback){
     client = pgClient;
 
     // run loadschema on all files
+
     when(loadSqlFile('presetup_idempotent', __dirname+'/', 'Loading idempotent presetup')())
       .then(function() { return when.map(options.schemaFiles, loadTableSchema); })
       .then(loadIndexSchema)
       .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
-      .then(loadSqlFile(options.oddityFile, __dirname+'/oddity/', 'Loading oddity'))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;
