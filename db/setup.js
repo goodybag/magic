@@ -134,7 +134,6 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-  options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -148,7 +147,6 @@ module.exports = function(options, callback){
       .then(function() { return when.map(options.schemaFiles, loadTableSchema); })
       .then(loadIndexSchema)
       .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
-      .then(loadSqlFile(options.oddityFile, __dirname+'/oddity/', 'Loading oddity'))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;

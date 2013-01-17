@@ -9,15 +9,18 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var oddityBusinesses = {
+  var oddityMeta = {
     id: {
       type: 'serial'
     , meta: 'primary key'
     }
-    , oddityId: {
+    , oddityLiveId: {
       type: 'int'
     }
     , businessId: {
+      type: 'int'
+    }
+    , userId: {
       type: 'int'
     }
     , locationId: {
@@ -42,5 +45,5 @@ define(function(require){
       type: 'text'
     }
   };
-  return oddityBusinesses;
+  return oddityMeta;
 });
