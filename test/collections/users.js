@@ -207,6 +207,28 @@ describe('PATCH /v1/users/:id', function() {
       });
     });
   });
+
+  it('should not destroy groups if no group value is provided', function(done){
+    var user = {
+      email: "foo@bar.com"
+    };
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/users/6', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 200);
+
+        tu.get('/v1/users/6', function(error, results, res){
+          assert(!error);
+          assert(res.statusCode === 200);
+          assert(JSON.parse(results).data.groups.length !== 0);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
 });
 
 describe('DEL /v1/users/:id', function() {

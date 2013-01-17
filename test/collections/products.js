@@ -38,6 +38,36 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should filter by lat/lon', function(done) {
+    tu.get('/v1/products?lat=10&lon=10', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 3);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should filter by lat/lon/range', function(done) {
+    tu.get('/v1/products?lat=10&lon=10&range=100', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 2);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
 });
 
 
@@ -139,7 +169,7 @@ describe('POST /v1/products', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ price:'foobar' }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -261,7 +291,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ businessId:'foobar' }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ price:'foobar' }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -287,7 +317,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should update the products name and categories ', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [3] }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [1] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -316,7 +346,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should update the products name and tags ', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [3] }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [1] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -524,4 +554,79 @@ describe('POST /v1/products/:id/feelings', function() {
     });
   });
 
+});
+
+
+describe('location list filtering', function() {
+  it('should maintain freshness as locations are added, changed, and removed', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5, lon:5 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5.001, lon:5.001 }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          var idToDelete = JSON.parse(payload).data.id;
+
+          tu.post('/v1/locations', { businessId:3, name:'asdf',  lat:15.002, lon:15.002 }, function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            var idToUpdate = JSON.parse(payload).data.id;
+
+            tu.del('/v1/locations/'+idToDelete, function(err, payload, res) {
+              assert(!err);
+              assert(res.statusCode == 200);
+
+              tu.patch('/v1/locations/'+idToUpdate, { lat:5.002, lon:5.002 }, function(err, payload, res) {
+                assert(!err);
+                assert(res.statusCode == 200);
+
+                tu.get('/v1/products?lat=5&lon=5&range=10000', function(err, payload, res) {
+                  assert(!err);
+                  assert(res.statusCode == 200);
+
+                  payload = JSON.parse(payload);
+                  assert(payload.data.filter(function(item) { return item.businessId != 1 && item.businessId != 3; }).length === 0); // should only have results from business 1 or 3
+
+                  tu.logout(function() {
+                    done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  // :TODO: pending updates to routes
+  it('should provide distinct products'/*, function(done) {
+    tu.loginAsAdmin(function() {
+
+      // add a location that would result in duplicate results
+      tu.post('/v1/locations', { businessId:1, name:'asdf', lat:5.001, lon:5.001 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/products?lat=5&lon=5&range=10000', function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+          var usedIds = {};
+          payload.data.forEach(function(item) {
+            assert(!usedIds[item.id]);
+            usedIds[item.id] = true;
+          });
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  }*/);
 });

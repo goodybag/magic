@@ -11,14 +11,14 @@ var fields = require('./fields');
 // Locations.list
 server.get(
   '/v1/locations'
-, middleware.fields(fields)
+, middleware.fields(fields.access)
 , routes.list
 );
 
 // Locations.list
 server.get(
   '/v1/businesses/:businessId/locations'
-, middleware.fields(fields)
+, middleware.fields(fields.access)
 , routes.list
 );
 
@@ -26,7 +26,7 @@ server.get(
 server.post(
   '/v1/locations'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.fields(fields.create)
 , middleware.validate(schema)
 , routes.create
 );
@@ -34,7 +34,7 @@ server.post(
 // Locations.get
 server.get(
   '/v1/locations/:locationId'
-, middleware.fields(fields)
+, middleware.fields(fields.access)
 , routes.get
 );
 
@@ -42,7 +42,7 @@ server.get(
 server.patch(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.fields(fields.mutate)
 , middleware.validate(schema)
 , routes.update
 );
@@ -51,7 +51,7 @@ server.patch(
 server.post(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.fields(fields.mutate)
 , middleware.validate(schema)
 , routes.update
 );

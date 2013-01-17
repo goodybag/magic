@@ -10,6 +10,8 @@ var
 
 , logger  = {}
 
+, TextNode = require('sql/lib/node/text')
+
   // Tables
 , products                  = db.tables.products
 , productTags               = db.tables.productTags
@@ -36,11 +38,34 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    // location filter
+    var queryFrom = products;
+    var includeDistance = false;
+    var lat = +req.param('lat'),
+      lon = +req.param('lon'),
+      range = (+req.param('range') || 1000);
+    if (!isNaN(+req.param('lat')) && !isNaN(+req.param('lon'))) {
+      queryFrom = [
+        'products',
+          'INNER JOIN "productLocations"',
+            'ON "productLocations"."productId" = products.id',
+            'AND earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth("productLocations".lat, "productLocations".lon)'
+      ].join(' ');
+      includeDistance = true;
+    }
+
     // build data query
     var query = utils.selectAsMap(products, req.fields)
-      .from(products);
+      .from(queryFrom);
 
-    // filter by businessId, if given as a path param
+    // add distance if a location query
+    if (includeDistance) {
+      // nodes[0] = the select node
+      query.nodes[0].add('earth_distance(ll_to_earth('+lat+','+lon+'), position) AS distance');
+      query.order(new TextNode('distance ASC'));
+    }
+
+    // more filters
     if (req.param('businessId')) {
       query.where(products.businessId.equals(req.param('businessId')));
     }
@@ -304,8 +329,22 @@ module.exports.create = function(req, res){
         );
       }
 
-      // That's it!
+      // Next stage
       utils.parallel(queries, function(error, results){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        stage.insertProductLocations(client, productId);
+      });
+    }
+
+    // create productLocations for all locations related to the product's business
+  , insertProductLocations: function(client, productId) {
+
+      var query = [
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
+        'SELECT $1, locations.id, $2, locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon) FROM locations WHERE locations."businessId" = $2'
+      ].join(' ');
+
+      client.query(query, [productId, req.body.businessId], function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: { id: productId } });
