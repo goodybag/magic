@@ -45,15 +45,14 @@ module.exports.getOauthUrl = function(req, res){
     'facebook'
   ];
 
-  logger.routes.debug(TAGS, 'determining service');
-  if (!req.param('service'))
-    return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
-
-  logger.routes.debug(TAGS, 'determining service');
-  if (!req.param('service'))
-    return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
+  logger.routes.debug(TAGS, 'validing redirect_uri');
+  if (!req.param('redirect_uri'))
+    return res.error(errors.auth.INVALID_URI), logger.routes.error(TAGS, errors.auth.INVALID_URI);
 
   logger.routes.debug(TAGS, 'determining if service is valid');
+  if (!req.param('service'))
+    return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
+
   if (validServices.indexOf(req.param('service')) === -1)
     return res.error(errors.auth.INVALID_SERVICE), logger.routes.error(TAGS, errors.auth.INVALID_SERVICE);
 
