@@ -52,6 +52,7 @@ module.exports = function(fields) {
         hasRequireErrors = true;
       }
     }
+
     if (hasRequireErrors) return res.error(errors.input.VALIDATION_FAILED, requireErrors);
 
     // attach field-data to the request

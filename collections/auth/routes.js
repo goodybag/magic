@@ -82,12 +82,12 @@ module.exports.oauthAuthenticate = function(req, res){
     'consumer'
   ];
 
-  if (!req.body.code)
+  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
   if (supportedGroups.indexOf(req.body.group) === -1)
     return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
-    
+
 
   // Get the user accessToken/Id
   // If the user exists
@@ -103,7 +103,11 @@ module.exports.oauthAuthenticate = function(req, res){
 
   var stage = {
     start: function(){
-      stage.getAccessTokenAndId(req.body.code)
+      if (req.body.code)
+        return stage.getAccessTokenAndId(req.body.code);
+
+      if (req.body.singlyAccessToken && req.body.singlyId)
+        return stage.createOrUpdateUser(req.body.singlyId, req.body.singlyAccessToken);
     }
 
   , getAccessTokenAndId: function(code){
@@ -128,11 +132,10 @@ module.exports.oauthAuthenticate = function(req, res){
         }).where(
           users.singlyId.equals(id)
         ).toQuery();
-console.log(query.values);
+
         client.query(query.text + " RETURNING id", query.values, function(error, result){
           if (error) return stage.dbError(error);
 
-console.log("laksjdfkla");
           if (result.rowCount === 0) return stage.createUser(id, accessToken);
           return stage.setSessionAndSend({
             id: result.rows[0].id
@@ -145,13 +148,16 @@ console.log("laksjdfkla");
 
   , createUser: function(singlyId, accessToken){
       var user = {
-        singlyId:     singlyId
-      , accessToken:  accessToken
+        singlyId:           singlyId
+      , singlyAccessToken:  accessToken
       };
+
+      var url = config.baseUrl;
+      if (url.indexOf(':') === -1) url += ":" + config.http.port;
 
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        utils.post(config.baseUrl + '/v1/consumers', user, function(error, response, result){
+        utils.post(url + '/v1/consumers', user, function(error, response, result){
           // Really shouldn't happen
           // TODO: send an actual error
           if (error) return stage.singlyError(error);

@@ -39,6 +39,16 @@ var config = {
     , clientSecret: "73fa4013446e9985e9217455479d3c3c"
     , callbackUrl: "http://localhost:3000/v1/callback"
     , apiBaseUrl: "https://api.singly.com"
+
+      // Should probably make the url a template and make a util
+      // function that performs this logic
+    , applyFacebookTokenUrl: function(token){
+        return "https://api.singly.com/auth/facebook/apply"
+        + "?client_id="     + config.defaults.singly.clientId
+        + "&client_secret=" + config.defaults.singly.clientSecret
+        + "&token="         + token
+        ;
+      }
     }
   }
 
@@ -59,6 +69,65 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
+
+  , facebook: {
+      id:     "159340790837933"
+    , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
+
+    , openGraphUrl: "https://graph.facebook.com/"
+
+    , firstNames: [
+        'Cyndi'
+      , 'Bob'
+      , 'Tom'
+      , 'Brett'
+      , 'Justin'
+      , 'John'
+      , 'Alice'
+      , 'Mary'
+      , 'Guy'
+      , 'Chance'
+      , 'Stefanie'
+      , 'Brittany'
+      , 'Rachel'
+      , 'William'
+      , 'Robert'
+      , 'Lalit'
+      ]
+
+    , lastNames: [
+        'Fleming'
+      , 'Winslow'
+      , 'Swicegood'
+      , 'Fawcett'
+      , 'Kapoor'
+      , 'Panchal'
+      , 'Patel'
+      , 'Santha'
+      , 'Johnson'
+      , 'Hoover'
+      , 'Vermillion'
+      , 'Awesome'
+      , 'McGee'
+      , 'McDonald'
+      , 'McMaster'
+      , 'McHammer'
+      ]
+
+      // Should probably make the url a template and make a util
+      // function that performs this logic
+    , testUserUrl: function(token){
+        return "https://graph.facebook.com/"
+        + config.test.facebook.id
+        + "/accounts/test-users?installed=true"
+        + "&name="
+        + config.test.facebook.firstNames[parseInt(Math.random() * config.test.facebook.firstNames.length)]
+        + "%20"
+        + config.test.facebook.lastNames[parseInt(Math.random() * config.test.facebook.lastNames.length)]
+        + "&locale=en_US&permissions=read_stream&method=post&access_token="
+        + token;
+      }
+    }
   }
 
 , staging: {
@@ -82,6 +151,13 @@ var config = {
 
   }
 };
+
+config.test.facebook.accessTokenUrl = ''
++ 'https://graph.facebook.com/oauth/access_token?'
++ 'client_id='      + config.test.facebook.id
++ '&client_secret=' + config.test.facebook.secret
++ '&grant_type='    + 'client_credentials'
+;
 
 
 var GB_ENV = process.env['GB_ENV'] = process.env['GB_ENV'] || 'dev';

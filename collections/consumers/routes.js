@@ -38,7 +38,9 @@ module.exports.get = function(req, res){
     var fields = [];
     for (var field in req.fields){
       fields.push(
-        (("id,email,password".indexOf(field) > -1) ? '"users"' : '"consumers"')
+        (("id,email,password,singlyId,singlyAccessToken".indexOf(field) > -1)
+          ? '"users"'
+          : '"consumers"')
       + '."'
       + field + '" AS "'
       + field + '"'
@@ -120,34 +122,46 @@ module.exports.create = function(req, res){
     tx.begin(function() {
 
       // build user query
-      var user = {}, fields;
+      var user = {}, fields, query;
       if (req.body.email){
         fields = ['email', 'password'];
         user.email = req.body.email;
         user.password = utils.encryptPassword(req.body.password);
       }else{
-        fields = ['"singlyId"', '"singlyAccessToken"'];
+        fields = ['singlyId', 'singlyAccessToken'];
         user.singlyId = req.body.singlyId;
         user.singlyAccessToken = req.body.singlyAccessToken;
       }
 
-      var query = 'INSERT INTO users (' + fields.join(', ') + ') SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
+      var query = 'INSERT INTO users ("'
+                + fields.join('", "')
+                + '") SELECT $1, $2 '
+                + 'WHERE $1 NOT IN '
+                + '(SELECT "' + fields[0] + '" FROM users '
+                  + 'WHERE "' + fields[0] + '" != \'\') '
+                + 'RETURNING id';
 
-      client.query(query, [user.email, user.password], function(error, result) {
-        if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+      // Extract the relevant values
+      fields = fields.map(function(f){ return user[f]; });
+
+      client.query(query, fields, function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
         // did the insert occur?
         if (result.rowCount === 0) {
           // email must have already existed
           tx.abort();
-          return res.error(errors.registration.EMAIL_REGISTERED);
+          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
+
+          // Access token already existed - for now, send back generic error
+          // Because they should have used POST /oauth to create/auth
+          return res.error(errors.internal.DB_FAILURE);
         }
 
         var newUser = result.rows[0];
 
         // add group
         var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, id FROM groups WHERE groups.name = $2';
-
         client.query(query, [newUser.id, 'consumer'], function(err, results){
           if (err) return tx.abort(), res.error(errors.input.INVALID_GROUPS);
           if (results.rowCount === 0) return tx.abort(), res.error(errors.input.INVALID_GROUPS);

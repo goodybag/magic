@@ -5,13 +5,15 @@ var consumers = db.tables.consumers;
 
 module.exports = {
   "default": {
-    id          : users.id
-  , email       : users.email
-  , password    : users.password
-  , firstName   : consumers.firstName
-  , lastName    : consumers.lastName
-  , screenName  : consumers.screenName
-  , tapinId     : consumers.tapinId
+    id                : users.id
+  , email             : users.email
+  , password          : users.password
+  , singlyId          : users.singlyId
+  , singlyAccessToken : users.singlyAccessToken
+  , firstName         : consumers.firstName
+  , lastName          : consumers.lastName
+  , screenName        : consumers.screenName
+  , tapinId           : consumers.tapinId
   , $postRequires : function(req, res){
       if (req.body.email) return ['email', 'password'];
       return ['singlyAccessToken', 'singlyId'];

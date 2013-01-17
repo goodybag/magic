@@ -1,12 +1,12 @@
 var
-  assert  = require('better-assert')
-, sinon   = require('sinon')
-, utils   = require('./../../lib/utils')
-, config  = require('./../../config')
-, tu = require('../../lib/test-utils')
-, baseUrl = config.baseUrl
+  assert      = require('better-assert')
+, sinon       = require('sinon')
+, utils       = require('./../../lib/utils')
+, config      = require('./../../config')
+, tu          = require('../../lib/test-utils')
+, baseUrl     = config.baseUrl
 , callbackUrl = config.singly.callbackUrl
-, test = require('../test')
+, test        = require('../test')
 ;
 
 describe('POST /v1/session', function() {
@@ -93,5 +93,56 @@ describe('GET /v1/oauth', function() {
   });
 });
 
+// Get new facebook app access token
+// Make new facebook test user
+// Get access token
+// Apply to singly
+// Get singlyid and access token
+// Post to oauth
+describe('POST /v1/oauth', function(){
+  // FB test API's can VERY be slow
+  this.timeout(25000);
 
+  it('should respond with a new user id', function(done){
+    // Get new facebook app access token
+    utils.get(config.facebook.accessTokenUrl, { json: false }, function(error, response, results){
+      if (error) console.log(error);
+      assert(!error);
 
+      assert(results.indexOf('access_token') > -1);
+
+      var fbAppToken = results.split('=')[1];
+
+      // Make new facebook test user
+      utils.get(config.facebook.testUserUrl(fbAppToken), function(error, response, results){
+        assert(!error);
+
+        assert(results.access_token);
+
+        // Apply to singly
+        utils.get(config.singly.applyFacebookTokenUrl(results.access_token), function(error, response, results){
+          assert(!error);
+
+          assert(results.access_token);
+          assert(results.account);
+
+          // Post to our oauth
+          var user = {
+            group: 'consumer'
+          , singlyId: results.account
+          , singlyAccessToken: results.access_token
+          }
+          tu.post('/v1/oauth', user, function(error, results){
+            assert(!error);
+
+            results = JSON.parse(results);
+            if (results.error) console.log(results.error);
+            assert(!results.error);
+            assert(results.data.id > 0);
+            done();
+          });
+        });
+      });
+    });
+  });
+});
