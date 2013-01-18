@@ -123,7 +123,7 @@ describe('GET /v1/oauth', function() {
 // Post to oauth
 describe('POST /v1/oauth', function(){
   // FB test API's can VERY be slow
-  this.timeout(25000);
+  this.timeout(35000);
 
   it('should respond with a new user id', function(done){
     tu.createTestOauthUser(function(error, results){
