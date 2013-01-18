@@ -85,7 +85,7 @@ module.exports.oauthAuthenticate = function(req, res){
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
   if (supportedGroups.indexOf(req.body.group) === -1)
-    return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
+    return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
 
 
   // Get the user accessToken/Id
@@ -166,7 +166,11 @@ module.exports.oauthAuthenticate = function(req, res){
 
           return stage.setSessionAndSend(result.data);
         });
+      }else{
+        res.error(errors.auth.INVALID_GROUP);
+        return logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
       }
+
     }
 
   , setSessionAndSend: function(user){

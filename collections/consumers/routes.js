@@ -203,31 +203,17 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var tx = new Transaction(client);
+    var query = consumers.delete().where(
+      consumers.userId.equals(req.params.id)
+    ).toQuery();
 
-    tx.begin(function(){
-      var query = consumers.delete().where(
-        consumers.userId.equals(req.params.id)
-      ).toQuery();
+    client.query(query.text, query.values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) return res.status(404).end();
 
-      client.query(query.text, query.values, function(error, result){
-        if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        if (result.rowCount === 0) return tx.abort(), res.status(404).end();
+      logger.db.debug(TAGS, result);
 
-        logger.db.debug(TAGS, result);
-
-        query = users.delete().where(
-          users.id.equals(req.params.id)
-        ).toQuery();
-
-        client.query(query.text, query.values, function(error, result){
-          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-          tx.commit();
-
-          return res.json({ error: null, data: null });
-        });
-      });
+      return res.json({ error: null, data: null });
     });
   });
 };

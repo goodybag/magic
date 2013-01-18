@@ -16,6 +16,7 @@ define(function(require){
     }
   , userId: {
       type: 'int'
+    , meta: 'references users on delete cascade'
     , validators: { isInt:[] }
     }
   , firstName: {

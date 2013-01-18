@@ -149,4 +149,20 @@ describe('POST /v1/oauth', function(){
       });
     });
   });
+
+  it('should fail to authenticate user because of an invalid group type', function(done){
+    var user = {
+      group: 'jibber-jabbers'
+    , singlyId: "12lk3j"
+    , singlyAccessToken: "laksjdf"
+    };
+    tu.post('/v1/oauth', user, function(error, results){
+      assert(!error);
+
+      results = JSON.parse(results);
+      assert(results.error);
+      assert(results.error.name === "INVALID_GROUP");
+      done();
+    });
+  });
 });
