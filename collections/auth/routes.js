@@ -113,44 +113,63 @@ module.exports.oauthAuthenticate = function(req, res){
       singly.getAccessToken(code, function(error, response, token){
         if (error) return stage.singlyError(error);
 
-        var data = { access_token: token.access_token };
-        singly.get('/profiles', data, function(error, result){
-          if (error) return stage.singlyError(error);
-
-          stage.createOrUpdateUser(result.body.id, token.access_token);
-        });
+        stage.getSinglyId(token.access_token);
       });
     }
 
-  , createOrUpdateUser: function(id, accessToken){
+  , getSinglyId: function(accessToken){
+      var data = { access_token: accessToken };
+      singly.get('/profiles', data, function(error, result){
+        if (error) return stage.singlyError(error);
+
+        var user = {
+          singlyId: result.body.id
+        , singlyAccessToken: token.access_token
+        };
+
+        // Get facebook data
+        if (result.body.facebook) return stage.getFacebookData(accessToken, user);
+
+        stage.createOrUpdateUser(user);
+      });
+    }
+
+  , getFacebookData: function(accessToken, user){
+      singly.get('/profiles/facebook', data, function(error, result){
+        if (error) return stage.singlyError(error);
+
+        // Auto fill what we can
+        user.firstName = result.body.data.first_name;
+        user.lastName = result.body.data.last_name;
+
+        stage.createOrUpdateUser(user);
+      });
+    }
+
+  , createOrUpdateUser: function(user){
       db.getClient(function(error, client){
         if (error) return stage.dbError(error);
 
         var query = users.update({
-          singlyAccessToken: accessToken
+          singlyAccessToken: user.singlyAccessToken
         }).where(
-          users.singlyId.equals(id)
+          users.singlyId.equals(user.singlyId)
         ).toQuery();
 
         client.query(query.text + " RETURNING id", query.values, function(error, result){
           if (error) return stage.dbError(error);
 
-          if (result.rowCount === 0) return stage.createUser(id, accessToken);
+          if (result.rowCount === 0) return stage.createUser(user);
           return stage.setSessionAndSend({
             id: result.rows[0].id
-          , singlyId: id
-          , singlyAccessToken: accessToken
+          , singlyId: user.singlyId
+          , singlyAccessToken: user.singlyAccessToken
           });
         });
       });
     }
 
-  , createUser: function(singlyId, accessToken){
-      var user = {
-        singlyId:           singlyId
-      , singlyAccessToken:  accessToken
-      };
-
+  , createUser: function(user){
       var url = config.baseUrl;
       if (url.indexOf(':') === -1) url += ":" + config.http.port;
 
