@@ -159,6 +159,9 @@ exports.schemas = {
 , productLikes:              require('./schemas/productLikes')
 , productWants:              require('./schemas/productWants')
 , productTries:              require('./schemas/productTries')
+, oddityLive:                require('./schemas/oddityLive')
+, oddityMeta:                require('./schemas/oddityMeta')
+
 };
 
 function buildTable(name, schema) {

@@ -9,19 +9,26 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var oddityBusinesses = {
+  var oddityMeta = {
     id: {
       type: 'serial'
     , meta: 'primary key'
     }
-    , oddityId: {
+    , oddityLiveId: {
       type: 'int'
+    , meta: 'references "oddityLive"(id)'
     }
     , businessId: {
       type: 'int'
+    , meta: 'references businesses(id)'
+    }
+    , userId: {
+      type: 'int'
+    , meta: 'references users(id)'
     }
     , locationId: {
       type: 'int'
+    , meta: 'references locations(id)'
     }
     , toReview: {
       type: 'boolean'
@@ -42,5 +49,5 @@ define(function(require){
       type: 'text'
     }
   };
-  return oddityBusinesses;
+  return oddityMeta;
 });
