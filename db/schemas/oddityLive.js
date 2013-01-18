@@ -12,7 +12,7 @@ define(function(require){
   var oddityLive = {
     id: {
       type: 'int'
-      , meta: 'primary key'
+    , meta: 'primary key'
     }
     , biz_name: {
       type: 'text'

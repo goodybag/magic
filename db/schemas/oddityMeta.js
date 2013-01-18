@@ -16,7 +16,7 @@ define(function(require){
     }
     , oddityLiveId: {
       type: 'int'
-    , meta: 'references oddityLive(id)'
+    , meta: 'references "oddityLive"(id)'
     }
     , businessId: {
       type: 'int'
