@@ -81,7 +81,7 @@ define(function(require){
       type: 'text'
     }
     , biz_popularity: {
-      type: 'text'
+      type: 'int'
     }
     , biz_atmosphere: {
       type: 'text'
