@@ -67,7 +67,7 @@ describe('GET /v1/consumers/:id', function() {
 describe('POST /v1/consumers', function() {
   it('should create a consumer and respond with the user id', function(done) {
     var consumer = {
-      email:      "testmctesterson2@test.com"
+      email:      "testmctesterson99@test.com"
     , password:   "password"
     , firstName:  "Test"
     , lastName:   "McTesterson"
