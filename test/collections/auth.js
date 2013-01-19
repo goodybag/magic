@@ -7,6 +7,7 @@ var
 , baseUrl     = config.baseUrl
 , callbackUrl = config.singly.callbackUrl
 , test        = require('../test')
+, fbUsers     = require('../fb-test-users.js')
 ;
 
 describe('POST /v1/session', function() {
@@ -115,37 +116,24 @@ describe('GET /v1/oauth', function() {
   });
 });
 
-// Get new facebook app access token
-// Make new facebook test user
-// Get access token
-// Apply to singly
-// Get singlyid and access token
-// Post to oauth
 describe('POST /v1/oauth', function(){
-  // FB test API's can VERY be slow
-  this.timeout(35000);
-
   it('should respond with a new user id', function(done){
-    tu.createTestOauthUser(function(error, results){
-      if (error) console.log(error);
+    // Post to our oauth
+    var user = {
+      group: 'consumer'
+    , singlyId: fbUsers[0].account
+    , singlyAccessToken: fbUsers[0].access_token
+    };
+
+    tu.post('/v1/oauth', user, function(error, results){
       assert(!error);
 
-      // Post to our oauth
-      var user = {
-        group: 'consumer'
-      , singlyId: results.account
-      , singlyAccessToken: results.access_token
-      }
-      tu.post('/v1/oauth', user, function(error, results){
-        assert(!error);
-
-        results = JSON.parse(results);
-        if (results.error) console.log(results.error);
-        assert(!results.error);
-        assert(results.data.id > 0);
-        tu.logout(function(){
-          done();
-        });
+      results = JSON.parse(results);
+      if (results.error) console.log(results.error);
+      assert(!results.error);
+      assert(results.data.id > 0);
+      tu.logout(function(){
+        done();
       });
     });
   });

@@ -82,7 +82,7 @@ module.exports.oauthAuthenticate = function(req, res){
   ];
 
   if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
-    return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
+    
 
   if (supportedGroups.indexOf(req.body.group) === -1)
     return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
@@ -106,7 +106,15 @@ module.exports.oauthAuthenticate = function(req, res){
         return stage.getAccessTokenAndId(req.body.code);
 
       if (req.body.singlyAccessToken && req.body.singlyId)
-        return stage.createOrUpdateUser(req.body.singlyId, req.body.singlyAccessToken);
+        return stage.createOrUpdateUser({
+          singlyId: req.body.singlyId
+        , singlyAccessToken: req.body.singlyAccessToken
+        });
+
+      if (req.body.singlyAccessToken)
+        return stage.getSinglyId(req.body.singlyAccessToken);
+
+      return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
     }
 
   , getAccessTokenAndId: function(code){

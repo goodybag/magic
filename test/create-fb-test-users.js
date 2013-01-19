@@ -1,9 +1,11 @@
+process.env['GB_ENV'] = 'test';
+
 var
   fs = require('fs')
 
 , utils = require('../lib/test-utils')
 , config = {
-    usersToCreate: 100
+    usersToCreate: 10
   , destination: './fb-test-users.js'
   }
 
@@ -18,7 +20,7 @@ var
 
       if (users.push(results) < config.usersToCreate) return createUsers();
 
-      return writeUsers(call)
+      return writeUsers()
     });
   }
 
