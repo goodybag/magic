@@ -38,8 +38,18 @@ INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'a
 INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
+
+-- CONSUMERS
+
+BEGIN;
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
+COMMIT;
+SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
 -- GROUPS
 
@@ -60,6 +70,8 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('2', '2', '2');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('3', '3', '3');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('6', '7', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('7', '8', '5');
 COMMIT;
 SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 

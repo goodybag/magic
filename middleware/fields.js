@@ -29,6 +29,7 @@ module.exports = function(fields) {
       // extract required fields
       var grf = fields[group]['$' + req.method.toLowerCase() + 'Requires'];
       if (grf) {
+        if (typeof grf === "function") grf = grf(req, res);
         for (var j=0, jj=grf.length; j < jj; j++) {
           requiredFields[grf[j]] = true;
         }
@@ -51,6 +52,7 @@ module.exports = function(fields) {
         hasRequireErrors = true;
       }
     }
+
     if (hasRequireErrors) return res.error(errors.input.VALIDATION_FAILED, requireErrors);
 
     // attach field-data to the request

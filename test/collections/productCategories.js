@@ -10,8 +10,9 @@ var
 
 describe('GET /v1/productCategories', function() {
   it('should respond with a productCategory listing', function(done) {
-    utils.get(baseUrl + '/v1/productCategories', function(error, response, results) {
+    tu.get('/v1/productCategories', function(error, results) {
       assert(!error);
+      results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.length > 0);
       // Check to make sure the correct fields exist
@@ -25,8 +26,9 @@ describe('GET /v1/productCategories', function() {
     });
   });
   it('should paginate', function(done) {
-    utils.get(baseUrl + '/v1/productCategories?offset=1&limit=1', function(error, response, results) {
+    tu.get('/v1/productCategories?offset=1&limit=1', function(error, results) {
       assert(!error);
+      results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.length === 1);
       assert(results.data[0].name);
@@ -39,8 +41,9 @@ describe('GET /v1/productCategories', function() {
 describe('GET /v1/productCategories/:id', function() {
   var id = 1;
   it('should respond with a productCategory of id ' + id, function(done) {
-    utils.get(baseUrl + '/v1/productCategories/' + id, function(error, response, results) {
+    tu.get('/v1/productCategories/' + id, function(error, results) {
       assert(!error);
+      results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.id === id);
       done();
@@ -57,8 +60,9 @@ describe('POST /v1/productCategories', function() {
       , isFeatured: false
       , name: "Some Other Category"
       };
-      utils.post(baseUrl + '/v1/productCategories', category, function(error, response, results) {
+      tu.post('/v1/productCategories', category, function(error, results) {
         assert(!error);
+        results = JSON.parse(results);
         assert(!results.error);
         assert(results.data.id >= 0);
         tu.logout(function(){
@@ -76,8 +80,9 @@ describe('PATCH /v1/productCategories/:id', function() {
         id: 1
       , isFeatured: false
       };
-      utils.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, response, results) {
+      tu.patch('/v1/productCategories/' + category.id, category, function(error, results) {
         assert(!error);
+        results = JSON.parse(results);
         assert(!results.error);
         tu.logout(function(){
           done();
@@ -94,7 +99,7 @@ describe('PATCH /v1/productCategories/:id', function() {
         id: 99999999999
       , isFeatured: false
       };
-      tu.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, results, res) {
+      tu.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);
@@ -111,16 +116,15 @@ describe('DEL /v1/productCategories/:id', function() {
     tu.loginAsSales(function(error, user){
       var id = 4; // Dumb category not used for anything
 
-      utils.del(baseUrl + '/v1/productCategories/' + id, function(error, request, results) {
+      tu.del('/v1/productCategories/' + id, function(error, results) {
         assert(!error);
+        results = JSON.parse(results);
+
         assert(!results.error);
 
         // Logout
-        utils.get(baseUrl + '/v1/logout', function(error){
-          assert(!error);
-          tu.logout(function(){
-            done();
-          });
+        tu.logout(function(){
+          done();
         });
       });
     });
@@ -135,8 +139,7 @@ describe('DEL /v1/productCategories/:id', function() {
         assert(res.statusCode == 403);
 
         // Logout
-        utils.get(baseUrl + '/v1/logout', function(error){
-          assert(!error);
+        tu.logout(function(){
           done();
         });
       });
