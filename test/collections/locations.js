@@ -42,6 +42,39 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should filter by lat/lon', function(done) {
+    tu.get('/v1/locations?lat=10&lon=10', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 2);
+      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should filter by lat/lon/range', function(done) {
+    tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.data[0].name == 'Location 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
 });
 
 
@@ -139,7 +172,7 @@ describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf' }, function(err, results, res) {
+      tu.post('/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf', lat:5, lon:-5 }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -184,7 +217,7 @@ describe('PATCH /v1/locations/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2' }, function(err, results, res) {
+      tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
         tu.logout(function(){
@@ -196,7 +229,7 @@ describe('PATCH /v1/locations/:id', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { businessId:'foobar' }, function(err, results, res) {
+      tu.patch('/v1/locations/2', { lat:'foobar' }, function(err, results, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -226,7 +259,7 @@ describe('PATCH /v1/locations/:id', function() {
 describe('DELETE /v1/locations/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.del('/v1/locations/2', function(err, results, res) {
+      tu.del('/v1/locations/5', function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
         tu.logout(function(){

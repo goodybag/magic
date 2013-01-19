@@ -4,6 +4,7 @@ var config = {
 , postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
     'sessions'
+  , 'charities'
   , 'businesses'
   , 'locations'
   , 'users'
@@ -13,13 +14,14 @@ var config = {
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'
+  , 'productLocations'
   , 'photos'
   , 'productTags'
   , 'productsProductTags'
   , 'productLikes'
   , 'productWants'
   , 'productTries'
-  , 'oddity'
+  , 'oddityLive'
   , 'oddityMeta'
   ]
 , fixtureFile: 'test'

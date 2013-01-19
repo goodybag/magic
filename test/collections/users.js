@@ -70,12 +70,57 @@ describe('POST /v1/users', function() {
     , password: "testetsetset"
     , groups:[1, 2]
     };
+
+    tu.loginAsAdmin(function() {    
+      tu.post('/v1/users', user, function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id >= 0);
+
+        tu.get('/v1/users/'+results.data.id, function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode == 200);
+
+          results = JSON.parse(results);
+          assert(results.data.groups[0] === 1);
+          assert(results.data.groups[1] === 2);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  it('should not allow non-admins to set their own groups', function(done) {
+    var user = {
+      email: "testmctesterson2@test.com"
+    , password: "testetsetset"
+    , groups:[1, 2]
+    };
+
+
     tu.post('/v1/users', user, function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.id >= 0);
-      done();
+
+      tu.loginAsAdmin(function() {    
+        tu.get('/v1/users/'+results.data.id, function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode == 200);
+
+          results = JSON.parse(results);
+          assert(!results.data.groups[0]);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
     });
   });
 
@@ -101,13 +146,17 @@ describe('POST /v1/users', function() {
     , groups:[10000]
     };
 
-    tu.post('/v1/users', user, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name == 'INVALID_GROUPS');
-      done();
-    })
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/users', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 400);
+        results = JSON.parse(results);
+        assert(results.error.name == 'INVALID_GROUPS');
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
   });
 });
 
@@ -203,6 +252,28 @@ describe('PATCH /v1/users/:id', function() {
         assert(results.error.name === 'INVALID_GROUPS');
         tu.logout(function() {
           done();
+        });
+      });
+    });
+  });
+
+  it('should not destroy groups if no group value is provided', function(done){
+    var user = {
+      email: "foo@bar.com"
+    };
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/users/6', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 200);
+
+        tu.get('/v1/users/6', function(error, results, res){
+          assert(!error);
+          assert(res.statusCode === 200);
+          assert(JSON.parse(results).data.groups.length !== 0);
+
+          tu.logout(function() {
+            done();
+          });
         });
       });
     });

@@ -36,12 +36,12 @@ function loadFile(log, file) {
   }
 }
 
-function buildSql(log, name) {
+function buildCreateTableSql(log, name) {
   return function() {
     if (verbose) { console.log(log); }
     var sql = [];
     var schema = require(__dirname + '/schemas/' + name);
-    // assemble the CREATE command from the schema structure
+    // assemble the CREATE TABLE command from the schema structure
     for (var field in schema) {
       var parts = ['"'+field+'"', schema[field].type];
       if (schema[field].meta) {
@@ -50,8 +50,39 @@ function buildSql(log, name) {
       sql.push(parts.join(' '));
     }
     return 'CREATE TABLE "'+name+'" ( '+sql.join(', ')+' );';
-  }
+  };
 }
+
+function buildDropIndexSql(log, schemaFile) {
+  return function() {
+    if (verbose) { console.log(log); }
+    var sql = [];
+    var schema = require(__dirname + '/schemas/' + schemaFile);
+    // assemble the DROP INDEX command from the schema structure
+    for (var name in schema) {
+      sql.push('DROP INDEX IF EXISTS '+name+';');
+    }
+    return sql.join(' ');
+  };
+};
+
+function buildCreateIndexSql(log, schemaFile) {
+  return function() {
+    if (verbose) { console.log(log); }
+    var sql = [];
+    var schema = require(__dirname + '/schemas/' + schemaFile);
+    // assemble the CREATE INDEX command from the schema structure
+    for (var name in schema) {
+      var index = schema[name];
+      sql.push([
+        'CREATE INDEX', name, 'ON', index.table,
+          (index.using) ? 'USING '+index.using : '',
+          index.columns
+      ].join(' '));
+    }
+    return sql.join('; ');
+  };
+};
 
 function query(log, sql) {
   return function(paramSql) {
@@ -66,33 +97,32 @@ function query(log, sql) {
   }
 }
 
-function loadSchema(name) {
+function loadTableSchema(name) {
   return pipeline([
     query( 'Dropping Sequence for ' + name, 'drop sequence if exists "' + name + '_id_seq" cascade'),
     query( 'Dropping ' + name,              'drop table if exists "' + name + '" cascade'),
-    buildSql('Creating ' + name,              name),
+    buildCreateTableSql('Creating ' + name, name),
     query() // will run what getSql returns
   ]);
 }
 
-function loadFixture(name) {
+function loadIndexSchema() {
+  return pipeline([
+    buildDropIndexSql('Dropping old indices', 'indices'),
+    query(),
+    buildCreateIndexSql('Creating new indices', 'indices'),
+    query()
+  ]);
+}
+
+function loadSqlFile(name, path, message) {
   return function() {
     if (!name) { return; }
     return pipeline([
-      loadFile('Loading fixture', __dirname+'/fixtures/'+name+'.sql'),
+      loadFile(message, path+name+'.sql'),
       query()
     ]);
-  }
-}
-
-function loadOddity(name) {
-  return function() {
-    if (!name) {return;}
-    return pipeline([
-      loadFile('Loading oddity', __dirname+'/oddity/'+name+'.sql'),
-      query()
-    ]);
-  }
+  };
 }
 
 module.exports = function(options, callback){
@@ -104,7 +134,6 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
-  options.oddityFile     = options.oddityFile     || config.oddityFile;
   verbose = options.verbose;
 
   // connect to postgres
@@ -114,9 +143,10 @@ module.exports = function(options, callback){
     client = pgClient;
 
     // run loadschema on all files
-    when.map(options.schemaFiles, loadSchema)
-      .then(loadFixture(options.fixtureFile))
-      .then(loadOddity(options.oddityFile))
+    when(loadSqlFile('presetup_idempotent', __dirname+'/', 'Loading idempotent presetup')())
+      .then(function() { return when.map(options.schemaFiles, loadTableSchema); })
+      .then(loadIndexSchema)
+      .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
       .then(function() { callback(null); }, callback)
       .always(function() { client.end(); })
     ;

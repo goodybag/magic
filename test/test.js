@@ -11,6 +11,7 @@ require('./utils');
 // create server
 var app = require('../lib/server').createAppServer();
 app.use(require('../collections/auth/server'));
+app.use(require('../collections/charities/server'));
 app.use(require('../collections/businesses/server'));
 app.use(require('../collections/locations/server'));
 app.use(require('../collections/products/server'));
@@ -32,6 +33,7 @@ before(function(done) {
   });
 });
 
+require('./collections/charities');
 require('./collections/businesses');
 require('./collections/locations');
 require('./collections/users');

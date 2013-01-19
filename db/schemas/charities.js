@@ -1,5 +1,5 @@
 /**
- * Oddity Schema
+ * Charities Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,38 +9,30 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var oddity = {
+  var charities = {
     id: {
       type: 'serial'
     , meta: 'primary key'
     }
-    , name: {
+  , name: {
+      type: 'text'
+    , validators: { len:[1] }
+    , sanitizers: { trim:[] }
+    }
+  , desc: {
       type: 'text'
     }
-    , url: {
+  , logoUrl: {
       type: 'text'
+    , validators: { isUrl:[] }
     }
-    , street1: {
-      type: 'text'
-    }
-    , street2: {
-      type: 'text'
-    }
-    , city: {
-      type: 'text'
-    }
-    , state: {
-      type: 'text'
-    }
-    , zip: {
-      type: 'int'
-    }
-    , createdAt: {
+  , joinedDate: {
       type: 'timestamp'
     }
-    , updatedAt: {
-      type: 'timestamp'
+  , totalReceived: {
+      type: 'real'
+    , validators: { isFloat:[] }
     }
   };
-  return oddity;
+  return charities;
 });

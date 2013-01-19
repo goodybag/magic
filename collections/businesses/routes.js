@@ -95,7 +95,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.param('filter')) {
-      query.where(businesses.name.like('%'+req.param('filter')+'%'))
+      query.where('businesses.name ILIKE \'%'+req.param('filter')+'%\'');
     }
     query.where(businesses.isDeleted.equals(false));
     utils.paginateQuery(req, query);
@@ -244,6 +244,7 @@ module.exports.create = function(req, res){
 
     var query = businesses.insert({
       'name'      :    req.body.name
+    , 'charityId' :    req.body.charityId
     , 'url'       :    req.body.url
     , 'street1'   :    req.body.street1
     , 'street2'   :    req.body.street2

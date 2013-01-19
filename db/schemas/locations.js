@@ -51,12 +51,17 @@ define(function(require){
       type: 'text'
     }
   , lat: {
-      type: 'int'
+      type: 'double precision'
+    , validators: { isFloat:[] }
     , sanitizers: { ifNull:0 }
     }
   , lon: {
-      type: 'int'
+      type: 'double precision'
+    , validators: { isFloat:[] }
     , sanitizers: { ifNull:0 }
+    }
+  , position: {
+      type: 'earth'
     }
   , isEnabled: {
       type: 'boolean'

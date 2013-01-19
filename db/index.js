@@ -143,6 +143,7 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
 
 exports.schemas = {
   sessions:                  require('./schemas/sessions')
+, charities:                 require('./schemas/charities')
 , businesses:                require('./schemas/businesses')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
@@ -152,12 +153,16 @@ exports.schemas = {
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')
+, productLocations:          require('./schemas/productLocations')
 , photos:                    require('./schemas/photos')
 , productTags:               require('./schemas/productTags')
 , productsProductTags:       require('./schemas/productsProductTags')
 , productLikes:              require('./schemas/productLikes')
 , productWants:              require('./schemas/productWants')
 , productTries:              require('./schemas/productTries')
+, oddityLive:                require('./schemas/oddityLive')
+, oddityMeta:                require('./schemas/oddityMeta')
+
 };
 
 function buildTable(name, schema) {

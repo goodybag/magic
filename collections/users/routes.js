@@ -85,7 +85,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.param('filter')) {
-      query.where(users.email.like('%'+req.param('filter')+'%'))
+      query.where('users.email ILIKE \'%'+req.param('filter')+'%\'');
     }
     utils.paginateQuery(req, query);
 
@@ -234,6 +234,12 @@ module.exports.update = function(req, res){
             }
           });
           return;
+        }
+
+        // are we done?
+        if (typeof req.body.groups == 'undefined') {
+          tx.commit();
+          return res.json({ error: null, data: null });
         }
 
         // delete all group relations
