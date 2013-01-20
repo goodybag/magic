@@ -1,5 +1,5 @@
 var appConfig = require('../config');
-module.exports = {
+var config = {
   mongoConnStr:     "mongodb://localhost/goodybag"
 , postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
@@ -8,6 +8,7 @@ module.exports = {
   , 'businesses'
   , 'locations'
   , 'users'
+  , 'consumers'
   , 'groups'
   , 'usersGroups'
   , 'products'
@@ -24,4 +25,7 @@ module.exports = {
   , 'oddityMeta'
   ]
 , fixtureFile: 'test'
+, oddityFile: 'oddityTest'
 };
+
+module.exports = config;

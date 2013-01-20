@@ -27,14 +27,14 @@ server.del(
 , routes.logout
 );
 
-server.get(
-  '/v1/callback'
-  , routes.singlyCallback
+server.post(
+  '/v1/oauth'
+  , routes.oauthAuthenticate
 );
 
 server.get(
   '/v1/oauth'
-  , routes.singlyRedirect
+  , routes.getOauthUrl
 );
 
 module.exports = server;
