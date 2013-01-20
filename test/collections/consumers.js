@@ -273,4 +273,16 @@ describe('DEL /v1/consumers/:id', function() {
       });
     });
   });
+
+  it('should perform a flash login and delete the user', function(done) {
+    tu.loginAsTablet(function(error, user){
+      tu.tapinAuthRequest('DELETE', '/v1/consumers/9', '123456-YYY', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 200);
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
+  });
 });
