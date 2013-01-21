@@ -13,7 +13,7 @@ module.exports = {
   , firstName         : consumers.firstName
   , lastName          : consumers.lastName
   , screenName        : consumers.screenName
-  , tapinId           : consumers.tapinId
+  , cardId            : consumers.cardId
   , $postRequires : function(req, res){
       if (req.body.email) return ['email', 'password'];
       return ['singlyAccessToken', 'singlyId'];

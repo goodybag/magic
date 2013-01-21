@@ -72,7 +72,7 @@ describe('POST /v1/consumers', function() {
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "123456-ZZZ"
+    , cardId:     "123456-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results) {
@@ -91,7 +91,7 @@ describe('POST /v1/consumers', function() {
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "123456-ZZZ"
+    , cardId:     "123456-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
@@ -103,14 +103,14 @@ describe('POST /v1/consumers', function() {
     })
   });
 
-  it('should fail because of an invalid tapinID', function(done){
+  it('should fail because of an invalid cardId', function(done){
     var consumer = {
       email:      "consumer1234@goodybag.com"
     , password:   "password"
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "12345-ZZZ"
+    , cardId:     "12345-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
@@ -279,8 +279,15 @@ describe('DEL /v1/consumers/:id', function() {
       tu.tapinAuthRequest('DELETE', '/v1/consumers/9', '123456-YYY', function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
-        tu.logout(function() {
-          done();
+
+        tu.get('/v1/consumers/9', function(error, result, res){
+          assert(!error);
+          assert(res.statusCode === 200);
+          assert(result.data === undefined)
+
+          tu.logout(function() {
+            done();
+          });
         });
       });
     });

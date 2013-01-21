@@ -47,9 +47,9 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 -- CONSUMERS
 
 BEGIN;
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('3', '9', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('3', '9', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 

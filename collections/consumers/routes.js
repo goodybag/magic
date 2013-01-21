@@ -1,5 +1,5 @@
 /**
- * Users
+ * Consumers
  */
 
 var
@@ -171,7 +171,7 @@ module.exports.create = function(req, res){
             userId:     newUser.id
           , firstName:  req.body.firstName
           , lastName:   req.body.lastName
-          , tapinId:    req.body.tapinId
+          , cardId:     req.body.cardId
           , screenName: req.body.screenName
           }).toQuery();
 
@@ -206,7 +206,7 @@ module.exports.del = function(req, res){
     var query = consumers.delete().where(
       consumers.userId.equals(req.params.id)
     ).toQuery();
-
+console.log(query.text, query.values);
     client.query(query.text, query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.status(404).end();
