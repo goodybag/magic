@@ -10,6 +10,7 @@ var config = {
   , 'users'
   , 'consumers'
   , 'managers'
+  , 'cashiers'
   , 'groups'
   , 'usersGroups'
   , 'products'

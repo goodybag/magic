@@ -1,5 +1,5 @@
 /**
- * Consumers Schema
+ * Cashiers Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
