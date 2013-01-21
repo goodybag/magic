@@ -31,7 +31,7 @@ module.exports = function(req, res, next){
         db.getClient(function(error, client_){
           if (error) return stage.dbError(error);
 
-          
+
           client = client_;
           stage.lookUpUser();
         });
