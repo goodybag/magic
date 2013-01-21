@@ -19,6 +19,7 @@ app.use(require('../collections/productCategories/server'));
 app.use(require('../collections/users/server'));
 app.use(require('../collections/consumers/server'));
 app.use(require('../collections/groups/server'));
+app.use(require('../collections/loyaltyStats/server'));
 app.use(require('../collections/photos/server'));
 app.use(require('../collections/productTags/server'));
 
@@ -39,6 +40,7 @@ require('./collections/locations');
 require('./collections/users');
 require('./collections/consumers');
 require('./collections/groups');
+require('./collections/loyaltyStats');
 require('./collections/auth');
 require('./collections/products');
 require('./collections/productCategories');

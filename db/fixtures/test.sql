@@ -40,6 +40,8 @@ INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 
 INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
@@ -48,8 +50,17 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 BEGIN;
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
+
+-- USER LOYALTY STATS
+
+BEGIN;
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('1', '3', 5, 23, 40, now());
+COMMIT;
+SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
 -- GROUPS
 

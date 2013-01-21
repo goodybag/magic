@@ -11,6 +11,7 @@ var config = {
   , 'consumers'
   , 'groups'
   , 'usersGroups'
+  , 'userLoyaltyStats'
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'
