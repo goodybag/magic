@@ -148,6 +148,7 @@ exports.schemas = {
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , consumers:                 require('./schemas/consumers')
+, managers:                  require('./schemas/managers')
 , groups:                    require('./schemas/groups')
 , usersGroups:               require('./schemas/usersGroups')
 , products:                  require('./schemas/products')

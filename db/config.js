@@ -9,6 +9,7 @@ var config = {
   , 'locations'
   , 'users'
   , 'consumers'
+  , 'managers'
   , 'groups'
   , 'usersGroups'
   , 'products'
