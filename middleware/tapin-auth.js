@@ -6,6 +6,8 @@ var
 
 , users       = db.tables.users
 , consumers   = db.tables.consumers
+, managers    = db.tables.managers
+, cashiers    = db.tables.cashiers
 , groups      = db.tables.groups
 , usersGroups = db.tables.usersGroups
 ;
@@ -23,6 +25,10 @@ module.exports = function(req, res, next){
     // We're going to override this function - keep track of what it was
   , currentEnd = res.end
 
+  , cardId = req.header('tapin-auth')
+
+  , tx
+
     // Fulfilled in start
   , client
 
@@ -31,14 +37,20 @@ module.exports = function(req, res, next){
         db.getClient(function(error, client_){
           if (error) return stage.dbError(error);
 
-
           client = client_;
-          stage.lookUpUser();
+          tx = new Transaction(client);
+
+          tx.being(function(){
+            stage.lookUpUser();
+          });
         });
       }
 
       // Look up the user based on cardId and set them to session
     , lookUpUser: function(){
+        // Joins on consumers, managers, cashiers because
+        // those are the groups we support for tapin-auths
+        // The cardId could belong to any one of those extension tables
         var query = users.select(
           users.id
         , users.email
@@ -48,13 +60,21 @@ module.exports = function(req, res, next){
         ).from(
           users.join(consumers).on(
             consumers.userId.equals(users.id)
+          ).join(managers).on(
+            managers.userId.equals(users.id)
+          ).join(cashiers).on(
+            cashiers.userId.equals(users.id)
           ).join(usersGroups).on(
             usersGroups.userId.equals(users.id)
           ).join(groups).on(
             groups.id.equals(usersGroups.groupId)
           )
         ).where(
-          consumers.cardId.equals(req.header('tapin-auth'))
+          consumers.cardId.equals(cardId).or(
+            managers.cardId.equals(cardId).or(
+              cashiers.cardId.equals(cardId)
+            )
+          )
         ).toQuery();
 
         client.query(query, function(error, result){
@@ -62,23 +82,27 @@ module.exports = function(req, res, next){
 
           if (result.rows.length === 0) return stage.createNewConsumer();
 
-          return stage.parseResults(result.rows);
+          var user = rows[0];
+
+          // Put the groups in an array on the user
+          user.groups = [];
+          for (var i = rows.length - 1; i >= 0; i--){
+            if (rows[i].name) user.groups.push(rows[i].name);
+          }
+
+          // Delete reference to the initial group name
+          delete user.name;
+
+          return stage.insertTapin(user);
         });
       }
 
-    , parseResults: function(rows){
-        var user = rows[0];
+    , insertTapin: function(user){
 
-        // Put the groups in an array on the user
-        user.groups = [];
-        for (var i = rows.length - 1; i >= 0; i--){
-          if (rows[i].name) user.groups.push(rows[i].name);
-        }
+      }
 
-        // Delete reference to the initial group name
-        delete user.name;
+    , determineIfVisit: function(user, tapin){
 
-        stage.loadUserIntoSession(user);
       }
 
     , loadUserIntoSession: function(user){
