@@ -37,6 +37,10 @@ define(function(require){
       type: 'int'
     , validators: { isInt:[] }
     }
+  , eliteVisitsRequired: {
+      type: 'int'
+    , validators: { isInt:[] }
+    }
   };
   return businessLoyaltySettings;
 });

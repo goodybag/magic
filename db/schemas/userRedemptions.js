@@ -39,7 +39,7 @@ define(function(require){
     // , meta: 'references tapinStations'
     , validators: { isInt:[] }
     }
-  , lastVisit: {
+  , dateTime: {
       type: 'timestamp'
     }
   };

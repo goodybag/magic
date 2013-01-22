@@ -35,6 +35,7 @@ app.use(require('./collections/groups/server'));
 app.use(require('./collections/loyaltyStats/server'));
 app.use(require('./collections/photos/server'));
 app.use(require('./collections/productTags/server'));
+app.use(require('./collections/redemptions/server'));
 
 /**
  * REPL

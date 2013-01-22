@@ -10,11 +10,8 @@ var
 
 , logger  = {}
 
-, TextNode = require('sql/lib/node/text')
-
   // Tables
 , userLoyaltyStats = db.tables.userLoyaltyStats
-, consumers        = db.tables.consumers
 , schemas          = db.schemas
 ;
 

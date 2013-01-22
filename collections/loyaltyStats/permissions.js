@@ -42,7 +42,7 @@ exports.owner = function(req, cb) {
           }
         } else {
           // no consumerID was given, but the authed user is a consumer
-          req.body.consumerId = consumer.id;
+          req.body.consumerId = consumer.id; // :TODO: refactor this
           cb('owner');
         }
       } else {

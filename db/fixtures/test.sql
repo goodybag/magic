@@ -17,6 +17,15 @@ INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", str
 COMMIT;
 SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advance the sequence past the IDs just used
 
+-- BUSINESS LOYALTY SETTINGS
+
+BEGIN;
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 10);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 6);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30);
+COMMIT;
+SELECT setval('businessLoyaltySettings_id_seq', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
+
 -- LOCATIONS
 
 BEGIN;

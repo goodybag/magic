@@ -19,6 +19,11 @@ define(function(require){
     , meta: 'references consumers on delete cascade'
     , validators: { isInt:[] }
     }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses'
+    , validators: { isInt:[] }
+    }
   , numPunches: {
       type: 'int'
     , validators: { isInt:[] }
