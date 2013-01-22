@@ -28,7 +28,6 @@ var config = {
   , 'oddityMeta'
   ]
 , fixtureFile: 'test'
-, oddityFile: 'oddityTest'
 };
 
 module.exports = config;

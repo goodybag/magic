@@ -82,6 +82,7 @@ define(function(require){
     }
     , biz_popularity: {
       type: 'int'
+
     }
     , biz_atmosphere: {
       type: 'text'
