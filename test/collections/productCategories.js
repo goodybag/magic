@@ -59,6 +59,7 @@ describe('POST /v1/productCategories', function() {
       , order: 2
       , isFeatured: false
       , name: "Some Other Category"
+      , description: "An amazing description of the category"
       };
       tu.post('/v1/productCategories', category, function(error, results) {
         assert(!error);
@@ -79,6 +80,7 @@ describe('PATCH /v1/productCategories/:id', function() {
       var category = {
         id: 1
       , isFeatured: false
+      , description: 'Just a category'
       };
       tu.patch('/v1/productCategories/' + category.id, category, function(error, results) {
         assert(!error);

@@ -112,10 +112,11 @@ module.exports.create = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var category = {
-      businessId: req.body.businessId || req.params.businessId
-    , order     : req.body.order      || 0
-    , isFeatured: req.body.isFeatured || false
-    , name:       req.body.name
+      businessId:  req.body.businessId || req.params.businessId
+    , order:       req.body.order      || 0
+    , isFeatured:  req.body.isFeatured || false
+    , name:        req.body.name
+    , description: req.body.description || ''
     };
 
     var error = utils.validate(category, db.schemas.productCategories);

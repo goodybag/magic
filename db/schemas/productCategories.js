@@ -32,6 +32,10 @@ define(function(require){
     , validators: { len:[1] }
     , sanitizers: { trim:[] }
     }
+  , description: {
+      type: 'text'
+    , sanitizers: { trim:[] }
+    }
   };
   return productCategories;
 });
