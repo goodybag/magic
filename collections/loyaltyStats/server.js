@@ -20,6 +20,7 @@ server.get(
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
+, middleware.validate(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunces:{isInt:[]}})
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields.mutate)

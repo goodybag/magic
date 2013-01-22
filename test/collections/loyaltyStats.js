@@ -16,25 +16,9 @@ describe('GET /v1/loyaltyStats', function() {
 
         payload = JSON.parse(payload);
         assert(!payload.error);
-        assert(payload.data.numPunches === 5);
-        assert(payload.data.totalPunches === 23);
-        assert(payload.data.visitCount === 40);
-        tu.logout(done);
-      });
-    });
-  });
-
-  it('should respond with zeroed stats if consumer has none set', function(done) {
-    tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
-      tu.get('/v1/loyaltyStats', function(err, payload, res) {
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-        assert(!payload.error);
-        assert(payload.data.numPunches === 0);
-        assert(payload.data.totalPunches === 0);
-        assert(payload.data.visitCount === 0);
+        assert(payload.data[0].numPunches === 5);
+        assert(payload.data[0].totalPunches === 23);
+        assert(payload.data[0].visitCount === 40);
         tu.logout(done);
       });
     });
@@ -55,7 +39,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should update the consumer stats', function(done) {
     tu.login({ email:'consumer2@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5 }, function(err, payload, res) {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, businessId:1 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -65,9 +49,8 @@ describe('POST /v1/loyaltyStats', function() {
 
           payload = JSON.parse(payload);
           assert(!payload.error);
-          assert(payload.data.numPunches === 10);
-          assert(payload.data.totalPunches === 28);
-          assert(payload.data.visitCount === 40);
+          assert(payload.data[0].numPunches === 10);
+          assert(payload.data[0].totalPunches === 28);
           tu.logout(done);
         });
       });
@@ -76,7 +59,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should create the consumer stats if DNE', function(done) {
     tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5 }, function(err, payload, res) {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, businessId:1 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -86,9 +69,9 @@ describe('POST /v1/loyaltyStats', function() {
 
           payload = JSON.parse(payload);
           assert(!payload.error);
-          assert(payload.data.numPunches === 5);
-          assert(payload.data.totalPunches === 5);
-          assert(payload.data.visitCount === 0);
+          assert(payload.data[0].numPunches === 5);
+          assert(payload.data[0].totalPunches === 5);
+          assert(payload.data[0].visitCount === 0);
           tu.logout(done);
         });
       });

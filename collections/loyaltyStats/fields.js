@@ -8,6 +8,7 @@ module.exports = {
 
   , owner: {
       consumerId   : userLoyaltyStats.consumerId
+    , businessId   : userLoyaltyStats.businessId
     , numPunches   : userLoyaltyStats.numPunches
     , totalPunches : userLoyaltyStats.totalPunches
     , visitCount   : userLoyaltyStats.visitCount
@@ -16,6 +17,7 @@ module.exports = {
 
   , sales: {
       consumerId   : userLoyaltyStats.consumerId
+    , businessId   : userLoyaltyStats.businessId
     , numPunches   : userLoyaltyStats.numPunches
     , totalPunches : userLoyaltyStats.totalPunches
     , visitCount   : userLoyaltyStats.visitCount
@@ -24,6 +26,7 @@ module.exports = {
 
   , admin: {
       consumerId   : userLoyaltyStats.consumerId
+    , businessId   : userLoyaltyStats.businessId
     , numPunches   : userLoyaltyStats.numPunches
     , totalPunches : userLoyaltyStats.totalPunches
     , visitCount   : userLoyaltyStats.visitCount
@@ -37,16 +40,22 @@ module.exports = {
   , owner: {
       deltaPunches : true
     , consumerId   : true
+    , businessId   : true
+    , $postRequires : ['deltaPunches', 'businessId']
     }
 
   , sales: {
       deltaPunches : true
     , consumerId   : true
+    , businessId   : true
+    , $postRequires : ['deltaPunches', 'businessId']
     }
 
   , admin: {
       deltaPunches : true
     , consumerId   : true
+    , businessId   : true
+    , $postRequires : ['deltaPunches', 'businessId']
     }
   }
 };

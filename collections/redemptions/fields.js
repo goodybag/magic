@@ -28,9 +28,10 @@ module.exports = {
   create:{
     "default": {}
 
-  , cashier: {
+  , locationEmployee: {
       consumerId     : userRedemptions.consumerId
     , tapinStationId : userRedemptions.tapinStationId
+    , deltaPunches   : true
     , email          : true
     , $postRequires : ['consumerId', 'tapinStationId']
     }

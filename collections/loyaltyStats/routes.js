@@ -30,37 +30,39 @@ module.exports.get = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats', {uid: 'more'});
 
-  // 404 if not a consumer
-  if (!req.body.consumerId) {
-    return res.status(404).end();
-  }
-
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // get stats
-    var query = utils.selectAsMap(userLoyaltyStats, req.fields)
-      .from(userLoyaltyStats)
-      .where(userLoyaltyStats.consumerId.equals(req.body.consumerId));
+    // ensure we have a consumer id
+    var consumerId = req.body.consumerId;
+    var getConsumerId = function(cb) { cb(); };
+    if (!consumerId) {
+      // no consumerId given, look it up off the authed user
+      var query = 'SELECT id FROM consumers WHERE "userId" = $1';
+      getConsumerId = function(cb) { client.query(query, [req.session.user.id], cb); };
+    }
 
-    client.query(query.toQuery(), function(error, result){
+    getConsumerId(function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
-      var stats = result.rows[0];
-
-      if (result.rowCount === 0 || !stats) {
-        // generate a blank record
-        stats = {};
-        for (var key in req.fields) {
-          if (key == 'userId')
-            stats[key] = req.session.user.id;
-          else
-            stats[key] = 0;
+      if (!consumerId) {
+        if (result.rowCount === 0) {
+          return res.status(404).end();
         }
+        consumerId = result.rows[0].id;
       }
 
-      return res.json({ error: null, data: stats });
+      // get stats
+      var query = utils.selectAsMap(userLoyaltyStats, req.fields)
+        .from(userLoyaltyStats)
+        .where(userLoyaltyStats.consumerId.equals(consumerId));
+
+      client.query(query.toQuery(), function(error, result){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        logger.db.debug(TAGS, result);
+
+        return res.json({ error: null, data: result.rows });
+      });
     });
   });
 };
@@ -76,36 +78,50 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-    // validate
-    var deltaPunches = +req.body.deltaPunches;
-    if (isNaN(deltaPunches) || typeof deltaPunches == 'undefined') {
-      var error = { deltaPunches:{ field:'deltaPunches', message:'Must be a valid integer.', validator:'isInt' }};
-      return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
-    }
-    var consumerId = +req.body.consumerId;
-    if (isNaN(consumerId) || typeof consumerId == 'undefined') {
-      var error = { consumerId:{ field:'consumerId', message:'Must be a valid integer.', validator:'isInt' }};
-      return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+    var deltaPunches = req.body.deltaPunches;
+    var consumerId = req.body.consumerId;
+    var businessId = req.body.businessId;
+
+    // ensure we have a consumer id
+    var getConsumerId = function(cb) { cb(); };
+    if (!consumerId) {
+      // no consumerId given, look it up off the authed user
+      var query = 'SELECT id FROM consumers WHERE "userId" = $1';
+      getConsumerId = function(cb) { client.query(query, [req.session.user.id], cb); };
     }
 
-    // run stats upsert
-    db.upsert(client,
-      'UPDATE "userLoyaltyStats" SET ' + [
-        '"numPunches"   = "numPunches"+$2',
-        '"totalPunches" = "totalPunches"+$2'
-      ].join(', ') + ' WHERE "consumerId"=$1',
-      [consumerId, deltaPunches],
-      'INSERT INTO "userLoyaltyStats" '+
-        '("consumerId", "numPunches", "totalPunches", "visitCount", "lastVisit") ' +
-        'SELECT $1, $2, $2, 0, now() WHERE NOT EXISTS '+
-          '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1)',
-      [consumerId, deltaPunches],
-      function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        logger.db.debug(TAGS, result);
+    getConsumerId(function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        return res.json({ error: null, data: null });
+      if (!consumerId) {
+        if (result.rowCount === 0) {
+          return res.status(404).end();
+        }
+        consumerId = result.rows[0].id;
       }
-    );
+
+      // run stats upsert
+      db.upsert(client,
+        ['UPDATE "userLoyaltyStats"',
+          'SET',
+            '"numPunches"   = "numPunches"   + $3,',
+            '"totalPunches" = "totalPunches" + $3',
+          'WHERE "consumerId"=$1 AND "businessId"=$2'
+        ].join(' '),
+        [consumerId, businessId, deltaPunches],
+        ['INSERT INTO "userLoyaltyStats"',
+          '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit")',
+          'SELECT $1, $2, $3, $3, 0, now() WHERE NOT EXISTS',
+            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2)'
+        ].join(' '),
+        [consumerId, businessId, deltaPunches],
+        function(error, result) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          logger.db.debug(TAGS, result);
+
+          return res.json({ error: null, data: null });
+        }
+      );
+    });
   });
 };
