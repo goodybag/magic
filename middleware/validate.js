@@ -7,7 +7,17 @@ var
 , utils  = require('../lib/utils')
 , errors = require('../lib/errors')
 , sanitize = require('validator').sanitize
-, createValidator = function(schema){
+, _ = require('underscore')
+, createValidator = function(schema, schemaAdds){
+    schema = (schema) ? _.clone(schema) : {};
+    // schemaAdds uses a simplified structure of:
+    //  { key:{ validator1:[], validator2:[] }}
+    if (schemaAdds && typeof schemaAdds == 'object') {
+      for (var k in schemaAdds) {
+        schema[k] = { validators:schemaAdds[k] };
+      }
+    }
+
     return function(req, res, next){
       // extract out relevant data
       var data = {};
