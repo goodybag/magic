@@ -51,6 +51,12 @@ INSERT INTO "users" (id, email, password) VALUES ('7', 'tferguson@gmail.com', 'a
 INSERT INTO "users" (id, email, password) VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11112', 'manager_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11122', 'cashier_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
@@ -64,12 +70,23 @@ INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "t
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
--- USER LOYALTY STATS
+-- MANAGERS
 
 BEGIN;
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('1', '3', 5, 23, 40, now());
+INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11110', '1', '1', '123456-XXX');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11111', '1', '1', '123456-XXZ');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11112', '1', '1', '123456-XXY');
 COMMIT;
-SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
+SELECT setval('managers_id_seq', (SELECT MAX(id) from "managers")); -- advance the sequence past the IDs just used
+
+-- CASHIERS
+
+BEGIN;
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11120', '1', '1', '123456-XYX');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11121', '1', '1', '123456-XYZ');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11122', '1', '1', '123456-XYY');
+COMMIT;
+SELECT setval('cashiers_id_seq', (SELECT MAX(id) from "cashiers")); -- advance the sequence past the IDs just used
 
 -- GROUPS
 
@@ -79,6 +96,9 @@ INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
 INSERT INTO "groups" (id, name) VALUES ('3', 'tablet');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
+INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
+INSERT INTO "groups" (id, name) VALUES ('11110', 'manager');
+INSERT INTO "groups" (id, name) VALUES ('11111', 'cashier');
 COMMIT;
 SELECT setval('groups_id_seq', (SELECT MAX(id) from "groups")); -- advance the sequence past the IDs just used
 
@@ -92,8 +112,21 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('4', '4', '4');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('5', '5', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('6', '7', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('7', '8', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11110', '11110', '11110');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11111', '11111', '11110');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11112', '11112', '11110');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11120', '11120', '11111');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11121', '11121', '11111');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11122', '11122', '11111');
 COMMIT;
 SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- advance the sequence past the IDs just usedSELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
+
+-- USER LOYALTY STATS
+
+BEGIN;
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('1', '3', 5, 23, 40, now());
+COMMIT;
+SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
 -- PRODUCTS
 
