@@ -11,6 +11,7 @@ var config = {
   , 'consumers'
   , 'managers'
   , 'cashiers'
+  , 'tapinStations'
   , 'groups'
   , 'usersGroups'
   , 'products'

@@ -150,6 +150,7 @@ exports.schemas = {
 , consumers:                 require('./schemas/consumers')
 , managers:                  require('./schemas/managers')
 , cashiers:                  require('./schemas/cashiers')
+, tapinStations:             require('./schemas/tapinStations')
 , groups:                    require('./schemas/groups')
 , usersGroups:               require('./schemas/usersGroups')
 , products:                  require('./schemas/products')
