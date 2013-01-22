@@ -145,6 +145,7 @@ exports.schemas = {
   sessions:                  require('./schemas/sessions')
 , charities:                 require('./schemas/charities')
 , businesses:                require('./schemas/businesses')
+, businessTags:              require('./schemas/businessTags')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , consumers:                 require('./schemas/consumers')

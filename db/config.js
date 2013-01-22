@@ -6,6 +6,7 @@ var config = {
     'sessions'
   , 'charities'
   , 'businesses'
+  , 'businessTags'
   , 'locations'
   , 'users'
   , 'consumers'

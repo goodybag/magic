@@ -49,6 +49,7 @@ module.exports = {
     , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
+    , tags      : true
     , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
@@ -67,6 +68,7 @@ module.exports = {
     , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
+    , tags      : true
     , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
@@ -83,6 +85,7 @@ module.exports = {
     , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
+    , tags      : true
     , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
@@ -101,6 +104,7 @@ module.exports = {
     , charityId : businesses.charityId
     , name      : businesses.name
     , url       : businesses.url
+    , tags      : true
     , logoUrl   : businesses.logoUrl
     , street1   : businesses.street1
     , street2   : businesses.street2
