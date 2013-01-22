@@ -124,6 +124,7 @@ describe('POST /v1/businesses', function(){
     , city: "Austin"
     , state: "TX"
     , zip: 78756
+    , tags: ['foo', 'bar']
     };
 
     tu.loginAsSales(function(error, user){
@@ -163,57 +164,6 @@ describe('POST /v1/businesses', function(){
   });
 });
 
-describe('POST /v1/businesses/:id', function(){
-  it('should update a business\'s name and url', function(done){
-    var business = {
-      name: "Poophead McGees"
-    , url: "http://pmcgee.com"
-    };
-
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/businesses/' + 1, business, function(error, results){
-        assert(!error);
-        assert(!JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
-      });
-    });
-  });
-
-  it('should fail to update a business because of an invalid field', function(done){
-    var business = {
-      name: "Poophead McGees"
-    , url: 123
-    };
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/businesses/' + 1, business, function(error, results){
-        assert(!error);
-        assert(JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
-      });
-    });
-  });
-
-  it('should fail because user not allow to update information', function(done){
-    var business = {
-      name: "Poophead McGees"
-      , url: "http://www.google.com"
-    };
-    tu.loginAsClient(function(error, user){
-      tu.post('/v1/businesses/' + 1, business, function(error, results){
-        assert(!error);
-        assert(JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
-      });
-    });
-  });
-});
-
 describe('PATCH /v1/businesses/:id', function(){
   it('should update a business\'s name and url', function(done){
     var business = {
@@ -227,6 +177,27 @@ describe('PATCH /v1/businesses/:id', function(){
         assert(res.statusCode == 200);
         tu.logout(function(){
           done();
+        });
+      });
+    });
+  });
+
+  it('should update a business\'s tags', function(done){
+    var business = {
+      tags:['foo','bar','baz']
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.patch('/v1/businesses/1', business, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        tu.get('/v1/businesses/1', function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.tags[0] == 'foo');
+          assert(results.data.tags[1] == 'bar');
+          assert(results.data.tags[2] == 'baz');
+          tu.logout(done);
         });
       });
     });
@@ -254,7 +225,7 @@ describe('PATCH /v1/businesses/:id', function(){
       , url: "http://www.google.com"
     };
     tu.loginAsClient(function(error, user){
-     tu.post('/v1/businesses/' + 1, business, function(error, results, res){
+     tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 403);
         tu.logout(function(){

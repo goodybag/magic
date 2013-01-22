@@ -35,6 +35,9 @@ define(function(require){
   , cardCode: {
       type: 'text'
     }
+  , menuDescription: {
+      type: 'text'
+    }
   , street1: {
       type: 'text'
     }

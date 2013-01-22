@@ -45,72 +45,80 @@ module.exports = {
   }
 , business: {
     "default": {
-      id        : businesses.id
-    , charityId : businesses.charityId
-    , name      : businesses.name
-    , url       : businesses.url
-    , logoUrl   : businesses.logoUrl
-    , street1   : businesses.street1
-    , street2   : businesses.street2
-    , city      : businesses.city
-    , state     : businesses.state
-    , zip       : businesses.zip
-    , isGB      : businesses.isGB
-    , isVerified: businesses.isVerified
-    , isEnabled : businesses.isEnabled
-    , cardCode  : businesses.cardCode
+      id              : businesses.id
+    , charityId       : businesses.charityId
+    , name            : businesses.name
+    , url             : businesses.url
+    , tags            : true
+    , logoUrl         : businesses.logoUrl
+    , menuDescription : businesses.menuDescription
+    , street1         : businesses.street1
+    , street2         : businesses.street2
+    , city            : businesses.city
+    , state           : businesses.state
+    , zip             : businesses.zip
+    , isGB            : businesses.isGB
+    , isVerified      : businesses.isVerified
+    , isEnabled       : businesses.isEnabled
+    , cardCode        : businesses.cardCode
     , $postRequires : ['name']
     }
 
   , client: {
-      id        : businesses.id
-    , charityId : businesses.charityId
-    , name      : businesses.name
-    , url       : businesses.url
-    , logoUrl   : businesses.logoUrl
-    , street1   : businesses.street1
-    , street2   : businesses.street2
-    , city      : businesses.city
-    , state     : businesses.state
-    , zip       : businesses.zip
-    , isGB      : businesses.isGB
-    , isVerified: businesses.isVerified
+      id              : businesses.id
+    , charityId       : businesses.charityId
+    , name            : businesses.name
+    , url             : businesses.url
+    , tags            : true
+    , logoUrl         : businesses.logoUrl
+    , menuDescription : businesses.menuDescription
+    , street1         : businesses.street1
+    , street2         : businesses.street2
+    , city            : businesses.city
+    , state           : businesses.state
+    , zip             : businesses.zip
+    , isGB            : businesses.isGB
+    , isVerified      : businesses.isVerified
     , $postRequires : ['name']
     }
 
   , sales: {
-      id        : businesses.id
-    , charityId : businesses.charityId
-    , name      : businesses.name
-    , url       : businesses.url
-    , logoUrl   : businesses.logoUrl
-    , street1   : businesses.street1
-    , street2   : businesses.street2
-    , city      : businesses.city
-    , state     : businesses.state
-    , zip       : businesses.zip
-    , isGB      : businesses.isGB
-    , isVerified: businesses.isVerified
-    , isEnabled : businesses.isEnabled
-    , cardCode  : businesses.cardCode
+      id              : businesses.id
+    , charityId       : businesses.charityId
+    , name            : businesses.name
+    , url             : businesses.url
+    , tags            : true
+    , logoUrl         : businesses.logoUrl
+    , menuDescription : businesses.menuDescription
+    , street1         : businesses.street1
+    , street2         : businesses.street2
+    , city            : businesses.city
+    , state           : businesses.state
+    , zip             : businesses.zip
+    , isGB            : businesses.isGB
+    , isVerified      : businesses.isVerified
+    , isEnabled       : businesses.isEnabled
+    , cardCode        : businesses.cardCode
     , $postRequires : ['name']
     }
 
   , admin: {
-      id        : businesses.id
-    , charityId : businesses.charityId
-    , name      : businesses.name
-    , url       : businesses.url
-    , logoUrl   : businesses.logoUrl
-    , street1   : businesses.street1
-    , street2   : businesses.street2
-    , city      : businesses.city
-    , state     : businesses.state
-    , zip       : businesses.zip
-    , isGB      : businesses.isGB
-    , isVerified: businesses.isVerified
-    , isEnabled : businesses.isEnabled
-    , cardCode  : businesses.cardCode
+      id              : businesses.id
+    , charityId       : businesses.charityId
+    , name            : businesses.name
+    , url             : businesses.url
+    , tags            : true
+    , logoUrl         : businesses.logoUrl
+    , menuDescription : businesses.menuDescription
+    , street1         : businesses.street1
+    , street2         : businesses.street2
+    , city            : businesses.city
+    , state           : businesses.state
+    , zip             : businesses.zip
+    , isGB            : businesses.isGB
+    , isVerified      : businesses.isVerified
+    , isEnabled       : businesses.isEnabled
+    , cardCode        : businesses.cardCode
     , $postRequires : ['name']
     }
   }

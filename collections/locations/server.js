@@ -11,7 +11,7 @@ var fields = require('./fields');
 // Locations.list
 server.get(
   '/v1/locations'
-, middleware.fields(fields.access)
+, middleware.fields(fields.accessOne)
 , routes.list
 );
 

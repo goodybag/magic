@@ -32,12 +32,23 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses)
-      .where(businesses.id.equals(+req.params.id || 0)).and(businesses.isDeleted.equals(false))
-      .toQuery();
+    // :TODO: nuke this fields kludge
+    var fields = [];
+    for (var field in req.fields) {
+      if (field === 'tags') {
+        fields.push('array_agg("businessTags"."tag") as tags');
+      } else {
+        fields.push('businesses."' + field + '" AS ' + field);
+      }
+    }
+    var query = [
+      'SELECT', fields.join(', '), ' FROM businesses',
+        'LEFT JOIN "businessTags" ON "businessTags"."businessId" = businesses.id',
+        'WHERE businesses.id = $1 AND businesses."isDeleted" = false',
+        'GROUP BY businesses.id'
+    ].join(' ');
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query, [+req.params.id || 0], function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
@@ -238,6 +249,7 @@ module.exports.create = function(req, res){
 
     if (!req.body.cardCode) req.body.cardCode = "000000";
     if (!req.body.isEnabled) req.body.isEnabled = true;
+    var tags = req.body.tags; delete req.body.tags;
 
     var error = utils.validate(req.body, schemas.businesses);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
@@ -260,17 +272,24 @@ module.exports.create = function(req, res){
 
     client.query(query.text + " RETURNING id", query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: result.rows[0] });
+      var business = result.rows[0];
+      if (!tags) return res.json({ error: null, data: business });
+
+      var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
+      query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
+      client.query(query, [business.id].concat(tags), function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        return res.json({ error: null, data: business });
+      });
     });
   });
 };
 
 /**
- * Update business - there's no data modification here, so no need to validate
- * since we've already validated in the middleware
+ * Update business
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
@@ -278,6 +297,10 @@ module.exports.update = function(req, res){
   var TAGS = ['update-business', req.uuid];
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var tags = req.body.tags;
+    delete req.body.tags;
+    req.body.id = req.params.id; // make sure there's always something in the update
 
     var query = businesses.update(req.body).where(
       businesses.id.equals(req.params.id)
@@ -287,10 +310,23 @@ module.exports.update = function(req, res){
 
     client.query(query.text, query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      if (typeof tags == 'undefined') return res.json({ error: null, data: null });
+
+      client.query('DELETE FROM "businessTags" WHERE "businessId" = $1', [req.params.id], function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        if (tags.length === 0) return res.json({ error: null, data: null });
+
+        var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
+        query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
+        client.query(query, [req.params.id].concat(tags), function(error, result) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          
+          return res.json({ error: null, data: null });
+        });
+      });
     });
   });
 };

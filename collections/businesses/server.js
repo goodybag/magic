@@ -47,15 +47,6 @@ server.patch(
 , routes.update
 );
 
-// Businesses.update
-server.post(
-  '/v1/businesses/:id'
-, middleware.auth.allow('admin', 'sales')
-, middleware.validate(schema)
-, middleware.fields(fields.business)
-, routes.update
-);
-
 // Businesses.listWithLocations - STUPID METHOD
 server.get(
   '/v1/businessesWithLocations'

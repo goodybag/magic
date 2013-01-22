@@ -7,6 +7,7 @@ var config = {
   , 'charities'
   , 'businesses'
   , 'businessLoyaltySettings'
+  , 'businessTags'
   , 'locations'
   , 'users'
   , 'consumers'

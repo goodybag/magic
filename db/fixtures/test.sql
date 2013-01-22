@@ -26,6 +26,16 @@ INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem",
 COMMIT;
 SELECT setval('"businessLoyaltySettings_id_seq"', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
 
+-- BUSINESS TAGS
+
+BEGIN;
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('1', '1', 'food');
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
+COMMIT;
+SELECT setval('"businessTags_id_seq"', (SELECT MAX(id) from "businessTags")); -- advance the sequence past the IDs just used
+
 -- LOCATIONS
 
 BEGIN;
