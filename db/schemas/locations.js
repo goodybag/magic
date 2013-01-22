@@ -63,6 +63,62 @@ define(function(require){
   , position: {
       type: 'earth'
     }
+  , startSunday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endSunday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startMonday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endMonday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startTuesday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endTuesday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startWednesday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endWednesday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startThursday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endThursday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startFriday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endFriday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , startSaturday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
+  , endSaturday: {
+      type: 'time'
+    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    }
   , isEnabled: {
       type: 'boolean'
     , meta: 'default TRUE'
