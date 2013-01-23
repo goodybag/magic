@@ -1,5 +1,5 @@
 /**
- * Users
+ * Consumers
  */
 
 var
@@ -42,14 +42,14 @@ module.exports.get = function(req, res){
           ? '"users"'
           : '"consumers"')
       + '."'
-      + field + '" AS "'
+      + req.fields[field].name + '" AS "'
       + field + '"'
       );
     }
     var query = [
-      'SELECT', fields.join(', '), 'FROM users',
-      'LEFT JOIN "consumers" ON "consumers"."userId" = users.id',
-      'WHERE users.id = $1'
+      'SELECT', fields.join(', '), 'FROM consumers',
+        'LEFT JOIN users ON consumers."userId" = users.id',
+        'WHERE consumers.id = $1'
     ].join(' ');
 
     client.query(query, [(+req.param('id')) || 0], function(error, result){
@@ -71,8 +71,8 @@ module.exports.get = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
+  var TAGS = ['list-consumers', req.uuid];
+  logger.routes.debug(TAGS, 'fetching consumers ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -96,7 +96,7 @@ module.exports.list = function(req, res){
       logger.db.debug(TAGS, dataResult);
 
       // run count query
-      client.query('SELECT COUNT(*) as count FROM users, consumers where users.id = consumers."userId"', function(error, countResult) {
+      client.query('SELECT COUNT(*) as count FROM users INNER JOIN consumers ON users.id = consumers."userId"', function(error, countResult) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
@@ -117,97 +117,70 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // start transaction
-    var tx = new Transaction(client);
-    tx.begin(function() {
+    // build user query
+    var userFields, userValues;
+    if (req.body.email) {
+      userFields = ['email', 'password'];
+      userValues = [req.body.email, utils.encryptPassword(req.body.password)];
+    } else {
+      userFields = ['singlyId', 'singlyAccessToken'];
+      userValues = [req.body.singlyId, req.body.singlyAccessToken];
+    }
+    userValues = userValues.concat([
+      req.body.firstName, req.body.lastName, req.body.cardId, req.body.screenName
+    ]);
+    var userFieldsStr = userFields.map(function(f) { return '"'+f+'"'; }).join(', ');      
 
-      // build user query
-      var user = {}, fields, query;
-      if (req.body.email){
-        fields = ['email', 'password'];
-        user.email = req.body.email;
-        user.password = utils.encryptPassword(req.body.password);
-      }else{
-        fields = ['singlyId', 'singlyAccessToken'];
-        user.singlyId = req.body.singlyId;
-        user.singlyAccessToken = req.body.singlyAccessToken;
+    var query = [
+      'WITH',
+        '"user" AS',
+          '(INSERT INTO users (', userFieldsStr, ') SELECT $1, $2 FROM users',
+            'WHERE NOT EXISTS (SELECT 1 FROM users WHERE', '"'+userFields[0]+'"', '= $1)',
+            'RETURNING id),',
+        '"userGroup" AS',
+          '(INSERT INTO "usersGroups" ("userId", "groupId")',
+            'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
+        '"consumer" AS',
+          '(INSERT INTO consumers ("userId", "firstName", "lastName", "cardId", "screenName")',
+            'SELECT "user".id, $3, $4, $5, $6 FROM "user" RETURNING id)', // $1=cardId
+      'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
+    ].join(' ');
+    client.query(query, userValues, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      // did the insert occur?
+      if (result.rowCount === 0) {
+        // email must have already existed
+        if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
+
+        // Access token already existed - for now, send back generic error
+        // Because they should have used POST /oauth to create/auth
+        return res.error(errors.internal.DB_FAILURE);
       }
 
-      var query = 'INSERT INTO users ("'
-                + fields.join('", "')
-                + '") SELECT $1, $2 '
-                + 'WHERE $1 NOT IN '
-                + '(SELECT "' + fields[0] + '" FROM users '
-                  + 'WHERE "' + fields[0] + '" != \'\') '
-                + 'RETURNING id';
-
-      // Extract the relevant values
-      fields = fields.map(function(f){ return user[f]; });
-
-      client.query(query, fields, function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          tx.abort();
-          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-          // Access token already existed - for now, send back generic error
-          // Because they should have used POST /oauth to create/auth
-          return res.error(errors.internal.DB_FAILURE);
-        }
-
-        var newUser = result.rows[0];
-
-        // add group
-        var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, id FROM groups WHERE groups.name = $2';
-        client.query(query, [newUser.id, 'consumer'], function(err, results){
-          if (err) return tx.abort(), res.error(errors.input.INVALID_GROUPS);
-          if (results.rowCount === 0) return tx.abort(), res.error(errors.input.INVALID_GROUPS);
-
-          // Add consumer information
-          query = consumers.insert({
-            userId:     newUser.id
-          , firstName:  req.body.firstName
-          , lastName:   req.body.lastName
-          , tapinId:    req.body.tapinId
-          , screenName: req.body.screenName
-          }).toQuery();
-
-          client.query(query, function(error, result){
-            if (error){
-              tx.abort();
-              res.error(errors.internal.DB_FAILURE, error);
-              return logger.routes.error(TAGS, error);
-            }
-
-            tx.commit();
-            return res.json({ error: null, data: newUser });
-          });
-        });
-      });
+      return res.json({ error: null, data: { id:result.rows[0].consumerId } });
     });
   });
 };
 
 /**
- * Delete user
+ * Delete consumer
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.del = function(req, res){
-  var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
+  var TAGS = ['del-consumer', req.uuid];
+  logger.routes.debug(TAGS, 'deleting consumer ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = consumers.delete().where(
-      consumers.userId.equals(req.params.id)
-    ).toQuery();
-
-    client.query(query.text, query.values, function(error, result){
+    var query = [
+      'DELETE FROM users USING consumers',
+        'WHERE users.id = consumers."userId"',
+        'AND consumers.id = $1'
+    ].join(' ');
+    client.query(query, [+req.param('id') || 0], function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.status(404).end();
 
@@ -246,7 +219,7 @@ module.exports.update = function(req, res){
       // Clean up last comma
       query = query.substring(0, query.length - 2);
 
-      query += ' where consumers."userId" = $' + values.push(req.params.id);
+      query += ' where consumers.id = $' + values.push(req.params.id);
 
       logger.db.debug(TAGS, query);
 
