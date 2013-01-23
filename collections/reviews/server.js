@@ -19,4 +19,8 @@ server.get(
   , routes.get
 );
 
+server.put(
+  '/v1/reviews/:id'
+  , routes.hide
+);
 module.exports = server;
