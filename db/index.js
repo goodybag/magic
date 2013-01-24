@@ -63,6 +63,17 @@ exports.getClient = function(callback){
   // callback(null, client);
 };
 
+/**
+ * Uses a transaction to update a record and insert if DNE
+ * @param  {Object} client       PostGres db client
+ * @param  {String} updateQuery  Update query to attempt first
+ * @param  {Array}  updateValues Values to use in the update query
+ * @param  {String} insertQuery  Insert query to attempt if update did not affect any rows
+ * @param  {Array}  insertValues Values to use in the insert query
+ * @param  {Func}   originalCb   Callback on completion
+ * @param  {Object} tx           Optional. PostGres transaction to use (created if not given)
+ * @return undefined
+ */
 exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb, tx) {
   var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
@@ -145,6 +156,8 @@ exports.schemas = {
   sessions:                  require('./schemas/sessions')
 , charities:                 require('./schemas/charities')
 , businesses:                require('./schemas/businesses')
+, businessLoyaltySettings:   require('./schemas/businessLoyaltySettings')
+, businessTags:              require('./schemas/businessTags')
 , locations:                 require('./schemas/locations')
 , users:                     require('./schemas/users')
 , consumers:                 require('./schemas/consumers')
@@ -153,6 +166,8 @@ exports.schemas = {
 , tapinStations:             require('./schemas/tapinStations')
 , groups:                    require('./schemas/groups')
 , usersGroups:               require('./schemas/usersGroups')
+, userLoyaltyStats:          require('./schemas/userLoyaltyStats')
+, userRedemptions:           require('./schemas/userRedemptions')
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')
@@ -165,7 +180,6 @@ exports.schemas = {
 , productTries:              require('./schemas/productTries')
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
-
 };
 
 function buildTable(name, schema) {

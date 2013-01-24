@@ -172,7 +172,28 @@ describe('POST /v1/locations', function() {
 
   it('should respond with the id of a new location', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:2, name:'asdf', street1:'asdf', city:'asdf', state:'AS', zip:'12345', country:'asdf', lat:5, lon:-5 }, function(err, results, res) {
+      var bus = {
+        businessId:2,
+        name:'asdf', 
+        street1:'asdf', 
+        city:'asdf', 
+        state:'AS', 
+        zip:'12345', 
+        country:'asdf', 
+        lat:5, 
+        lon:-5,
+        startMonday:'11:00 am',
+        endMonday:'5:00 pm',
+        startTuesday:'11:00 am',
+        endTuesday:'5:00 pm',
+        startWednesday:'11:00 am',
+        endWednesday:'5:00 pm',
+        startThursday:'11:00 am',
+        endThursday:'5:00 pm',
+        startFriday:'11:00 am',
+        endFriday:'4:30 pm'
+      };
+      tu.post('/v1/locations', bus, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -189,7 +210,7 @@ describe('POST /v1/locations', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:'foobar' }, function(err, results, res) {
+      tu.post('/v1/locations', { businessId:'foobar', name:'barfoo', endWednesday:'5pm' }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 400);
         tu.logout(function(){

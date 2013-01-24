@@ -1,5 +1,5 @@
 /**
- * Product Categories Schema
+ * businessLoyaltySettings Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,33 +9,38 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var productCategories = {
+  var businessLoyaltySettings = {
     id: {
       type: 'serial'
     , meta: 'primary key'
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses(id) on delete cascade'
+    , meta: 'references businesses on delete cascade'
     , validators: { isInt:[] }
     }
-  , order: {
-      type: 'int'
-    , validators: { isInt:[] }
-    }
-  , isFeatured: {
-      type: 'boolean'
-    , validators: { is:/true|false|1|0/ }
-    }
-  , name: {
+  , reward: {
       type: 'text'
     , validators: { len:[1] }
     , sanitizers: { trim:[] }
     }
-  , description: {
+  , requiredItem: {
       type: 'text'
+    , validators: { len:[1] }
     , sanitizers: { trim:[] }
     }
+  , regularPunchesRequired: {
+      type: 'int'
+    , validators: { isInt:[] }
+    }
+  , elitePunchesRequired: {
+      type: 'int'
+    , validators: { isInt:[] }
+    }
+  , eliteVisitsRequired: {
+      type: 'int'
+    , validators: { isInt:[] }
+    }
   };
-  return productCategories;
+  return businessLoyaltySettings;
 });
