@@ -9,7 +9,7 @@ var
 describe('GET /v1/loyaltyStats', function() {
 
   it('should respond with stats', function(done) {
-    tu.login({ email:'consumer2@gmail.com', password:'password' }, function() {
+    tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.get('/v1/loyaltyStats', function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
@@ -38,7 +38,7 @@ describe('GET /v1/loyaltyStats', function() {
 describe('POST /v1/loyaltyStats', function() {
 
   it('should update the consumer stats', function(done) {
-    tu.login({ email:'consumer2@gmail.com', password:'password' }, function() {
+    tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.post('/v1/loyaltyStats', { deltaPunches:5, businessId:1 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
@@ -79,7 +79,7 @@ describe('POST /v1/loyaltyStats', function() {
   });
 
   it('should respond to an invalid payload with errors', function(done) {
-    tu.login({ email:'consumer2@gmail.com', password:'password' }, function() {
+    tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.post('/v1/loyaltyStats', { deltaPunches:'asdf' }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 400);
@@ -89,5 +89,24 @@ describe('POST /v1/loyaltyStats', function() {
     });
   });
 
-  it('should allow business owners to make changes via tapin auth'); // :TODO:
+  it('should allow business owners to make changes via tapin auth', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-consumer4', { deltaPunches:5, businessId:1 }, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 200);
+        tu.logout(function() {
+          tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
+            tu.get('/v1/loyaltyStats', function(error, results, res) {
+              assert(res.statusCode === 200);
+              results = JSON.parse(results);
+              assert(results.data[0].numPunches === 15);
+              assert(results.data[0].totalPunches === 33);
+
+              tu.logout(done);
+            });
+          });
+        });
+      });
+    });
+  });
 });
