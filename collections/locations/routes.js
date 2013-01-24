@@ -78,7 +78,12 @@ module.exports.list = function(req, res){
           '"businessTags"."businessId" = locations."businessId" AND',
           '(', tags.join(' OR '), ')'
       ].join(' ');
-      query.fields.add('array_agg("businessTags".tag) as tags');
+      // query.fields.add('array_agg("businessTags".tag) as tags');
+    }
+
+    // random sort
+    if (req.query.sort == 'random') {
+      query.fields.add('random() as random'); // this is really inefficient
     }
 
     // run data query

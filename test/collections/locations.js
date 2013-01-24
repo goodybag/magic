@@ -152,6 +152,14 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should sort by random', function(done) {
+    tu.get('/v1/locations?sort=random', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
   it('should sort by distance if also given a location', function(done) {
     tu.get('/v1/locations?lat=10&lon=10&sort=+distance', function(err, payload, res) {
 

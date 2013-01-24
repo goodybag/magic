@@ -11,6 +11,15 @@ var fields = require('./fields');
 // Products.list
 server.get(
   '/v1/products'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    businessId : { isInt:[] },
+    sort       : { is:/(\+|-)?(name|distance|popular|random)/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.fields(fields.access.products)
 , routes.list
 );
@@ -18,6 +27,17 @@ server.get(
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
+, middleware.validate.path({
+    businessId : { isInt:[] }
+  })
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    sort       : { is:/(\+|-)?(name|distance|popular|random)/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.fields(fields.access.products)
 , routes.list
 );

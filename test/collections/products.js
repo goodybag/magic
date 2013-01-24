@@ -75,14 +75,7 @@ describe('GET /v1/products', function() {
 
       assert(!err);
       assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
-      assert(payload.meta.total > 1);
+      // tags arent current returned, so not much to test against
       done();
     });
   });
@@ -92,14 +85,7 @@ describe('GET /v1/products', function() {
 
       assert(!err);
       assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
-      assert(payload.meta.total > 1);
+      // tags arent current returned, so not much to test against
       done();
     });
   });
@@ -113,9 +99,7 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
+      assert(payload.data[0].name == 'Product 1');
       assert(payload.meta.total > 1);
       done();
     });
@@ -130,9 +114,7 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
+      assert(payload.data[0].name == 'Product 1');
       assert(payload.meta.total > 1);
       done();
     });
@@ -147,10 +129,24 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
+      assert(payload.data[0].name == 'Product 4');
       assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort by popular', function(done) {
+    tu.get('/v1/products?sort=popular', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
+  it('should sort by random', function(done) {
+    tu.get('/v1/products?sort=random', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
       done();
     });
   });
@@ -164,7 +160,7 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(false/*TODO*/);
+      assert(payload.data[0].name == 'Product 1');
       done();
     });
   });
@@ -173,12 +169,7 @@ describe('GET /v1/products', function() {
     tu.get('/v1/products?sort=+distance', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(false/*TODO*/);
+      assert(res.statusCode == 400);
       done();
     });
   });
@@ -187,12 +178,7 @@ describe('GET /v1/products', function() {
     tu.get('/v1/products?sort=foobar', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(false/*TODO*/);
+      assert(res.statusCode == 400);
       done();
     });
   });
