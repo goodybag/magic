@@ -75,6 +75,20 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should return 200 on invalid query params by using sane defaults', function(done) {
+    tu.get('/v1/locations?limit=-10&offset=-10', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      done();
+    });
+  });
+
 });
 
 
