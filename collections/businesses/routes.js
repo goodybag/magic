@@ -38,7 +38,7 @@ module.exports.get = function(req, res){
       if (field === 'tags') {
         fields.push('array_agg("businessTags"."tag") as tags');
       } else {
-        fields.push('businesses."' + field + '" AS ' + field);
+        fields.push('businesses."' + field + '" AS "' + field + '"');
       }
     }
     var query = [
@@ -323,7 +323,7 @@ module.exports.update = function(req, res){
         query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
         client.query(query, [req.params.id].concat(tags), function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          
+
           return res.json({ error: null, data: null });
         });
       });
