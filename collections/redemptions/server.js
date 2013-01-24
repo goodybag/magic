@@ -19,7 +19,7 @@ server.get(
 // Redemptions.create
 server.post(
   '/v1/redemptions'
-, middleware.validate(schema, { deltaPunches:{ isInt:[] }})
+, middleware.validate.body(schema, { deltaPunches:{ isInt:[] }})
 , middleware.permissions(perms.locationEmployee)
 , middleware.auth.allow('locationEmployee')
 , middleware.fields(fields.create)

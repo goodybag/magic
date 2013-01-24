@@ -34,7 +34,7 @@ server.post(
   '/v1/charities'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.create)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -43,7 +43,7 @@ server.patch(
   '/v1/charities/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.mutate)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -51,7 +51,7 @@ server.patch(
 server.post(
   '/v1/charities/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , middleware.fields(fields.mutate)
 , routes.update
 );

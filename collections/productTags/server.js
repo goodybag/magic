@@ -39,7 +39,7 @@ server.get(
 // ProductTags.create
 server.post(
   '/v1/businesses/:businessId/product-tags'
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , middleware.fields(fields)
 , routes.create
 );
@@ -47,7 +47,7 @@ server.post(
 // ProductTags.update
 server.patch(
   '/v1/businesses/:businessId/product-tags/:tagId'
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , middleware.fields(fields)
 , routes.update
 );
@@ -55,7 +55,7 @@ server.patch(
 // ProductTags.update
 server.post(
   '/v1/businesses/:businessId/product-tags/:tagId'
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , middleware.fields(fields)
 , routes.update
 );

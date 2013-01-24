@@ -76,7 +76,7 @@ describe('GET /v1/locations', function() {
   });
 
   it('should filter by a single tag', function(done) {
-    tu.get('/v1/locations?tag=food', function(err, payload, res) {
+    tu.get('/v1/locations?tag=uniquetag', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -84,15 +84,14 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data.length == 1);
       assert(payload.meta.total > 1);
       done();
     });
   });
 
   it('should filter by mutliple tags', function(done) {
-    tu.get('/v1/locations?tag[]=food&tag[]=fashion', function(err, payload, res) {
+    tu.get('/v1/locations?tag[]=food&tag[]=apparel', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -100,8 +99,7 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data.length == 2);
       assert(payload.meta.total > 1);
       done();
     });
@@ -116,8 +114,8 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
       assert(payload.meta.total > 1);
       done();
     });
@@ -132,8 +130,8 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
       assert(payload.meta.total > 1);
       done();
     });
@@ -148,8 +146,7 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[0].name == 'Location 4');
       assert(payload.meta.total > 1);
       done();
     });
@@ -164,8 +161,8 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
       assert(payload.meta.total > 1);
       done();
     });
@@ -175,14 +172,7 @@ describe('GET /v1/locations', function() {
     tu.get('/v1/locations?sort=+distance', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.meta.total > 1);
+      assert(res.statusCode == 400);
       done();
     });
   });
@@ -191,14 +181,7 @@ describe('GET /v1/locations', function() {
     tu.get('/v1/locations?sort=foobar', function(err, payload, res) {
 
       assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.meta.total > 1);
+      assert(res.statusCode == 400);
       done();
     });
   });
@@ -238,8 +221,7 @@ describe('GET /v1/businesses/:id/locations', function() {
   it('should respond nothing to invalid business id type', function(done) {
     tu.get('/v1/businesses/abcd/locations', function(error, results, res) {
       assert(!error);
-      results = JSON.parse(results);
-      assert(results.data.length === 0);
+      assert(res.statusCode == 400);
       done();
     });
   });
