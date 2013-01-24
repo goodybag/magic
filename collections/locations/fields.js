@@ -193,7 +193,7 @@ module.exports = {
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
     , isEnabled  : locations.isEnabled
-    , $postRequires : ['businessId', 'name']
+    , $postRequires : ['businessId']
     }
 
   , sales: {
@@ -226,7 +226,7 @@ module.exports = {
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
     , isEnabled  : locations.isEnabled
-    , $postRequires : ['businessId', 'name']
+    , $postRequires : ['businessId']
     }
 
   , admin: {
@@ -259,7 +259,7 @@ module.exports = {
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
     , isEnabled  : locations.isEnabled
-    , $postRequires : ['businessId', 'name']
+    , $postRequires : ['businessId']
     }
   },
   mutate:{

@@ -14,9 +14,7 @@ describe('GET /v1/cashiers', function() {
         assert(!results.error);
         assert(results.data.length > 0);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -28,9 +26,7 @@ describe('GET /v1/cashiers', function() {
         assert(!payload.error);
         assert(payload.data.length >= 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -43,9 +39,7 @@ describe('GET /v1/cashiers', function() {
         assert(payload.data.length === 1);
         assert(payload.meta.total > 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -61,9 +55,7 @@ describe('GET /v1/cashiers/:id', function() {
         assert(!results.error);
         assert(results.data.cashierId === 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -74,9 +66,7 @@ describe('GET /v1/cashiers/:id', function() {
         assert(!error);
         assert(res.statusCode == 404);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -87,9 +77,7 @@ describe('GET /v1/cashiers/:id', function() {
         assert(!error);
         assert(res.statusCode == 404);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -114,9 +102,7 @@ describe('POST /v1/cashiers', function() {
         assert(!results.error);
         assert(results.data.id >= 0);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -137,9 +123,7 @@ describe('POST /v1/cashiers', function() {
         results = JSON.parse(results);
         assert(results.error.name == 'EMAIL_REGISTERED');
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -161,9 +145,7 @@ describe('POST /v1/cashiers', function() {
         results = JSON.parse(results);
         assert(results.error.name == 'VALIDATION_FAILED');
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

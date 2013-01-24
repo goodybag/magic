@@ -24,9 +24,7 @@ describe('POST /v1/session', function() {
       assert(!results.error);
       assert(results.data.id);
       assert(utils.isArray(results.data.groups));
-      tu.logout(function(){
-        done();
-      });
+      tu.logout(done);
     });
   });
 
@@ -132,9 +130,7 @@ describe('POST /v1/oauth', function(){
       if (results.error) console.log(results.error);
       assert(!results.error);
       assert(results.data.id > 0);
-      tu.logout(function(){
-        done();
-      });
+      tu.logout(done);
     });
   });
 

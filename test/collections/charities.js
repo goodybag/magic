@@ -83,9 +83,7 @@ describe('DEL /v1/charities/:id', function() {
           // compare to updated count
           tu.get('/v1/charities', function(err, results, res) {
             assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
-            tu.logout(function(){
-              done();
-            });
+            tu.logout(done);
           });
         });
       });
