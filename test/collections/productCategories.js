@@ -66,9 +66,7 @@ describe('POST /v1/productCategories', function() {
         results = JSON.parse(results);
         assert(!results.error);
         assert(results.data.id >= 0);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -86,9 +84,7 @@ describe('PATCH /v1/productCategories/:id', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -105,9 +101,7 @@ describe('PATCH /v1/productCategories/:id', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -125,9 +119,7 @@ describe('DEL /v1/productCategories/:id', function() {
         assert(!results.error);
 
         // Logout
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -141,9 +133,7 @@ describe('DEL /v1/productCategories/:id', function() {
         assert(res.statusCode == 403);
 
         // Logout
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

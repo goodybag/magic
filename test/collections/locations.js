@@ -201,9 +201,7 @@ describe('POST /v1/locations', function() {
         assert(!payload.error);
         assert(payload.data.id);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -213,9 +211,7 @@ describe('POST /v1/locations', function() {
       tu.post('/v1/locations', { businessId:'foobar', name:'barfoo', endWednesday:'5pm' }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 400);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -225,9 +221,7 @@ describe('POST /v1/locations', function() {
       tu.post('/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'', country:'' }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 400);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -241,9 +235,7 @@ describe('PATCH /v1/locations/:id', function() {
       tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -255,21 +247,7 @@ describe('PATCH /v1/locations/:id', function() {
         assert(!err);
         assert(res.statusCode == 400);
 
-        tu.logout(function(){
-          done();
-        });
-      });
-    });
-  });
-
-  it('should return error of validation', function(done){
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:2, name:'', street1:'', zip:'dagsg', country:'' }, function(err, results, res) {
-        assert(!err);
-        assert(res.statusCode == 400);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -283,9 +261,7 @@ describe('DELETE /v1/locations/:id', function() {
       tu.del('/v1/locations/5', function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 200);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

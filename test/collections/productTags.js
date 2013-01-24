@@ -87,9 +87,7 @@ describe('POST /v1/businesses/:businessId/product-tags', function() {
         payload = JSON.parse(payload);
         assert(res.statusCode == 200);
         assert(!payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -105,9 +103,7 @@ describe('POST /v1/businesses/:businessId/product-tags', function() {
           assert(!payload.error);
           tu.get('/v1/businesses/1/product-tags', function(err, payload, res) {
             assert(count === JSON.parse(payload).meta.total);
-            tu.logout(function(){
-              done();
-            });
+            tu.logout(done);
           });
         });
       });
@@ -122,9 +118,7 @@ describe('POST /v1/businesses/:businessId/product-tags', function() {
         assert(res.statusCode == 400);
 
         assert(payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -141,9 +135,7 @@ describe('PATCH /v1/businesses/:businessId/product-tags/:tagId', function() {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(!payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -157,9 +149,7 @@ describe('PATCH /v1/businesses/:businessId/product-tags/:tagId', function() {
         assert(res.statusCode == 400);
 
         assert(payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -176,9 +166,7 @@ describe('DELETE /v1/businesses/:businessId/product-tags/:tagId', function() {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(!payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
