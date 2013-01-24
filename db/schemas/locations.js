@@ -8,6 +8,10 @@ if (typeof module === 'object' && typeof define !== 'function') {
   };
 }
 
+var regs = {
+  time: /^[\d]{1,2}\:[\d]{1,2} ?(am|pm|AM|PM)?$/
+}
+
 define(function(require){
   var locations = {
     id: {
@@ -65,59 +69,59 @@ define(function(require){
     }
   , startSunday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endSunday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startMonday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endMonday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startTuesday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endTuesday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startWednesday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endWednesday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startThursday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endThursday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startFriday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endFriday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , startSaturday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , endSaturday: {
       type: 'time'
-    , validators: { is:/^[\d]{1,2}\:[\d]{1,2} ?(am|pm)$/ }
+    , validators: { is: regs.time }
     }
   , isEnabled: {
       type: 'boolean'
