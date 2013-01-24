@@ -86,9 +86,7 @@ describe('POST /v1/users', function() {
           assert(results.data.groups[0] === 1);
           assert(results.data.groups[1] === 2);
 
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -116,9 +114,7 @@ describe('POST /v1/users', function() {
           results = JSON.parse(results);
           assert(!results.data.groups[0]);
 
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -179,9 +175,7 @@ describe('PATCH /v1/users/:id', function() {
           assert(!results.error);
           assert(results.data.email === 'new@email.com');
           assert(results.data.groups[0] === 2 && results.data.groups[1] === 3);
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -271,9 +265,7 @@ describe('PATCH /v1/users/:id', function() {
           assert(res.statusCode === 200);
           assert(JSON.parse(results).data.groups.length !== 0);
 
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });

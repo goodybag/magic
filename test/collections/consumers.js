@@ -38,11 +38,11 @@ describe('GET /v1/consumers', function() {
 
 describe('GET /v1/consumers/:id', function() {
   it('should respond with a consumer', function(done) {
-    tu.get('/v1/consumers/7', function(error, results) {
+    tu.get('/v1/consumers/1', function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.id === 7);
+      assert(results.data.consumerId === 1);
       done();
     });
   });
@@ -72,7 +72,7 @@ describe('POST /v1/consumers', function() {
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "123456-ZZZ"
+    , cardId:     "123456-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results) {
@@ -91,7 +91,7 @@ describe('POST /v1/consumers', function() {
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "123456-ZZZ"
+    , cardId:     "123456-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
@@ -103,14 +103,14 @@ describe('POST /v1/consumers', function() {
     })
   });
 
-  it('should fail because of an invalid tapinID', function(done){
+  it('should fail because of an invalid cardId', function(done){
     var consumer = {
       email:      "consumer1234@goodybag.com"
     , password:   "password"
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
-    , tapinId:    "12345-ZZZ"
+    , cardId:     "12345-ZZZ"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
@@ -129,19 +129,17 @@ describe('PATCH /v1/consumers/:id', function() {
       firstName: "Terd"
     };
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.patch('/v1/consumers/7', consumer, function(error, results, res) {
+      tu.patch('/v1/consumers/1', consumer, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.get('/v1/consumers/7', function(error, results) {
+        tu.get('/v1/consumers/1', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.firstName === "Terd");
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -152,7 +150,7 @@ describe('PATCH /v1/consumers/:id', function() {
       firstName: "Terd"
     };
     tu.loginAsClient(function() {
-      tu.patch('/v1/consumers/7', consumer, function(error, results, res) {
+      tu.patch('/v1/consumers/1', consumer, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -240,9 +238,7 @@ describe('DEL /v1/consumers/:id', function() {
       tu.del('/v1/consumers/' + id, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
-        tu.logout(function() {
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -255,20 +251,22 @@ describe('DEL /v1/consumers/:id', function() {
         results = JSON.parse(results);
         assert(results.error);
         assert(results.error.name === "NOT_ALLOWED");
-        tu.logout(function() {
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
 
-  it('should fail to delete a user because because user is not a consumer', function(done) {
-    tu.loginAsAdmin(function(error, consumer){
-      tu.del('/v1/consumers/1', function(error, results, res) {
+  it('should perform a flash login and delete the user', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user){
+      tu.tapinAuthRequest('DELETE', '/v1/consumers/8', '123456-YYZ', function(error, results, res) {
         assert(!error);
-        assert(res.statusCode == 404);
-        tu.logout(function() {
-          done();
+        assert(res.statusCode === 200);
+
+        tu.get('/v1/consumers/8', function(error, result, res){
+          assert(!error);
+          assert(res.statusCode === 404);
+
+          tu.logout(done);
         });
       });
     });

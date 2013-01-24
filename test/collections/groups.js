@@ -138,9 +138,7 @@ describe('DEL /v1/groups/:id', function() {
       tu.del('/v1/groups/' + id, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
-        tu.logout(function() {
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -153,9 +151,7 @@ describe('DEL /v1/groups/:id', function() {
         results = JSON.parse(results);
         assert(results.error);
         assert(results.error.name === "NOT_ALLOWED");
-        tu.logout(function() {
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

@@ -119,9 +119,7 @@ describe('POST /v1/photos', function() {
 
         assert(!payload.error);
         assert(payload.data.id);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -134,9 +132,7 @@ describe('POST /v1/photos', function() {
         assert(res.statusCode == 400);
 
         assert(payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
 
     });
@@ -154,9 +150,7 @@ describe('PATCH /v1/photos/:id', function() {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(!payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -170,9 +164,7 @@ describe('PATCH /v1/photos/:id', function() {
         assert(res.statusCode == 400);
 
         assert(payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -188,9 +180,7 @@ describe('DELETE /v1/photos/:id', function() {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(!payload.error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
