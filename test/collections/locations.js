@@ -188,13 +188,13 @@ describe('POST /v1/locations', function() {
     tu.loginAsSales(function(error, user){
       var bus = {
         businessId:2,
-        name:'asdf', 
-        street1:'asdf', 
-        city:'asdf', 
-        state:'AS', 
-        zip:'12345', 
-        country:'asdf', 
-        lat:5, 
+        name:'asdf',
+        street1:'asdf',
+        city:'asdf',
+        state:'AS',
+        zip:'12345',
+        country:'asdf',
+        lat:5,
         lon:-5,
         startMonday:'11:00 am',
         endMonday:'5:00 pm',
@@ -206,6 +206,44 @@ describe('POST /v1/locations', function() {
         endThursday:'5:00 pm',
         startFriday:'11:00 am',
         endFriday:'4:30 pm'
+      };
+      tu.post('/v1/locations', bus, function(err, results, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.id);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond with the id of a new location', function(done) {
+    tu.loginAsSales(function(error, user){
+      var bus = {
+        businessId:2,
+        name:'asdf',
+        street1:'asdf',
+        city:'asdf',
+        state:'AS',
+        zip:'12345',
+        country:'asdf',
+        lat:5,
+        lon:-5,
+        // All day
+        startMonday:'00:00',
+        endMonday:'24:00',
+        // Closed
+        startTuesday:'00:00',
+        endTuesday:'00:00',
+        startWednesday:'11:00 am',
+        endWednesday:'5:00 pm',
+        startThursday:'11:00 AM',
+        endThursday:'5:00 pm',
+        startFriday:'11:00 am',
+        endFriday:'0430'
       };
       tu.post('/v1/locations', bus, function(err, results, res) {
         assert(!err);

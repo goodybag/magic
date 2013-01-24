@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 var regs = {
-  time: /^[\d]{1,2}\:[\d]{1,2} ?(am|pm|AM|PM)?$/
+  time: /^[\d]{1,2}\:?[\d]{1,2} ?(am|pm)?$/i
 }
 
 define(function(require){
