@@ -238,7 +238,6 @@ module.exports.authenticate = function(req, res){
       users.email.equals(req.body.email || '')
     ).toQuery();
 
-
     client.query(query.text, query.values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

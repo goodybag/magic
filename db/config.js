@@ -18,6 +18,8 @@ var config = {
   , 'usersGroups'
   , 'userLoyaltyStats'
   , 'userRedemptions'
+  , 'tapins'
+  , 'visits'
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'
