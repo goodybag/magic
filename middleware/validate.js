@@ -20,9 +20,9 @@ var
 
     return function(req, res, next){
       // extract out relevant data
-      var data = {};
+      var data = {}, deleted = [];
       for (var key in schema) {
-        if (typeof req.body[key] === 'undefined' || req.body[key] === null) continue;
+        if (typeof req.body[key] === 'undefined') continue;
 
         // Ensure we're not convering an object or array
         if (!utils.isArray(req.body[key]) && !utils.isObject(req.body[key])) {
@@ -33,8 +33,14 @@ var
       }
 
       // validate
+      if (req.body.name === "Ballers, Inc. 2") console.log(data);
       var error = utils.validate(data, schema);
       if (error) return res.error(errors.input.VALIDATION_FAILED, error);
+
+      // Convert blank strings back to nulls
+      for (var key in data){
+        if (data[key] === "") data[key] = null;
+      }
 
       // run sanitizers
       for (var key in data) {

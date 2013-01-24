@@ -234,7 +234,18 @@ describe('POST /v1/products', function() {
 
         assert(!payload.error);
         assert(payload.data.id);
-        tu.logout(done);
+
+        tu.get('/v1/products/' + payload.data.id, function(error, payload){
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          assert(!payload.error);
+
+          assert(payload.data.tags.length > 0);
+          tu.logout(done);
+        });
       });
     });
   });
@@ -513,7 +524,7 @@ describe('POST /v1/products/:id/feelings', function() {
       tu.post('/v1/products/1/feelings', { isWanted:false }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
-        
+
         tu.get('/v1/products/1', function(err, payload, res) {
           assert(!err);
           assert(res.statusCode == 200);

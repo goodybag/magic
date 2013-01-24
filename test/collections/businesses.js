@@ -15,7 +15,7 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);      
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -129,6 +129,34 @@ describe('POST /v1/businesses', function(){
       tu.post('/v1/businesses', business, function(error, results, res){
         assert(!error);
         results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should save a business with a null url and return the id', function(done){
+    var business = {
+      name: "Ballers, Inc. 2"
+    , charityId: 2
+    , url: null
+    , cardCode: "123456"
+    , street1: "123 Sesame St"
+    , street2: 'asdf'
+    , city: "Austin"
+    , state: "TX"
+    , zip: 78756
+    , tags: ['foo', 'bar']
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.post('/v1/businesses', business, function(error, results, res){
+        assert(!error);
+        results = JSON.parse(results);
+        console.log(results.error);
         assert(!results.error);
         assert(results.data.id);
         tu.logout(function(){
