@@ -44,6 +44,9 @@ module.exports.list = function(req, res){
       , oddityLive.web_url
       , oddityLive.e_state
       , oddityLive.e_postal
+      , oddityMeta.isHidden
+      , oddityMeta.toReview
+      , oddityMeta.changeColumns
     ).from(oddityLive.join(oddityMeta).on(
       oddityLive.id.equals(oddityMeta.oddityLiveId))
     ).where(oddityMeta.toReview.equals(true))
@@ -80,6 +83,9 @@ module.exports.get = function(req, res){
       , oddityLive.web_url
       , oddityLive.e_state
       , oddityLive.e_postal
+      , oddityMeta.isHidden
+      , oddityMeta.toReview
+      , oddityMeta.changeColumns
     ).from(oddityLive.join(oddityMeta).on(
       oddityLive.id.equals(oddityMeta.oddityLiveId))
     ).where(oddityMeta.toReview.equals(true))
@@ -112,9 +118,10 @@ module.exports.hide = function(req, res){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
   var query = oddityMeta.update({isHidden: true}).where
-  (oddityMeta.oddityLiveId.equals(req.params.id)).toQuery();
+  (oddityMeta.id.equals(req.params.id)).toQuery();
 
     logger.db.debug(TAGS, query.text);
+    client.query(query.text, query.values, function(error, result){
     client.query(query.text, query.values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
