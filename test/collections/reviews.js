@@ -49,3 +49,21 @@ describe('GET /v1/reviews/:id', function() {
     });
   });
 });
+
+describe('PATCH /v1/reviews/:id', function(){
+  it('should update hidden is true', function(done){
+    var review = {
+      isHidden: true
+    }
+    tu.loginAsSales(function(error, user){
+      tu.patch('/v1/reviews/' + 1, review, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+});
