@@ -139,9 +139,7 @@ describe('PATCH /v1/consumers/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.firstName === "Terd");
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
