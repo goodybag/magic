@@ -16,6 +16,7 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     businessId : { isInt:[] },
+    tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name|distance|random)/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
@@ -34,6 +35,7 @@ server.get(
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
     range      : { isInt:[] },
+    tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name|distance|random)/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
