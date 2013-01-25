@@ -18,6 +18,7 @@ server.get(
     businessId : { isInt:[] },
     sort       : { is:/(\+|-)?(name|distance|popular|random)/ },
     offset     : { isInt:[], min:[0] },
+    test       : { is:/(foo|bar)/ },
     limit      : { isInt:[], min:[1] }
   })
 , middleware.fields(fields.access.products)
