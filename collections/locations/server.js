@@ -11,6 +11,15 @@ var fields = require('./fields');
 // Locations.list
 server.get(
   '/v1/locations'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    businessId : { isInt:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.fields(fields.accessOne)
 , routes.list
 );
@@ -18,6 +27,17 @@ server.get(
 // Locations.list
 server.get(
   '/v1/businesses/:businessId/locations'
+, middleware.validate.path({
+    businessId : { isInt:[] }
+  })
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.fields(fields.access)
 , routes.list
 );
@@ -27,7 +47,7 @@ server.post(
   '/v1/locations'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.create)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -43,7 +63,7 @@ server.patch(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.mutate)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -52,7 +72,7 @@ server.post(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.mutate)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 

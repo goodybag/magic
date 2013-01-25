@@ -15,7 +15,7 @@ describe('GET /v1/businesses', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);      
+      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -92,9 +92,7 @@ describe('DEL /v1/businesses/:id', function() {
           // compare to updated count
           tu.get('/v1/businesses', function(err, results, res) {
             assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
-            tu.logout(function(){
-              done();
-            });
+            tu.logout(done);
           });
         });
       });
@@ -118,6 +116,33 @@ describe('POST /v1/businesses', function(){
       name: "Ballers, Inc."
     , charityId: 2
     , url: "http://ballersinc.com"
+    , cardCode: "123456"
+    , street1: "123 Sesame St"
+    , street2: 'asdf'
+    , city: "Austin"
+    , state: "TX"
+    , zip: 78756
+    , tags: ['foo', 'bar']
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.post('/v1/businesses', business, function(error, results, res){
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should save a business with a null url and return the id', function(done){
+    var business = {
+      name: "Ballers, Inc. 2"
+    , charityId: 2
+    , url: null
     , cardCode: "123456"
     , street1: "123 Sesame St"
     , street2: 'asdf'
@@ -175,6 +200,41 @@ describe('PATCH /v1/businesses/:id', function(){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 200);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should update a business\'s url to be blank', function(done){
+    var business = {
+      url: null
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should fail to update a business\'s url to be blank because of a validation error', function(done){
+    var business = {
+      url: ""
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 400);
+        results = JSON.parse(results);
+        assert(results.error);
+        assert(results.error.name === "VALIDATION_FAILED");
         tu.logout(function(){
           done();
         });

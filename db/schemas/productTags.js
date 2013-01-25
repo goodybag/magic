@@ -17,11 +17,11 @@ define(function(require){
   , businessId: {
       type: 'int'
     , meta: 'references businesses(id) on delete cascade'
-    , validators: { isInt:[] }
+    , validators: { isInt:[], notNull:[] }
     }
   , tag: {
       type: 'text'
-    , validators: { len:[1] }
+    , validators: { len:[1], notNull:[] }
     }
   , createdAt: {
       type: 'timestamp'

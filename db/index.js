@@ -168,6 +168,8 @@ exports.schemas = {
 , usersGroups:               require('./schemas/usersGroups')
 , userLoyaltyStats:          require('./schemas/userLoyaltyStats')
 , userRedemptions:           require('./schemas/userRedemptions')
+, tapins:                    require('./schemas/tapins')
+, visits:                    require('./schemas/visits')
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')

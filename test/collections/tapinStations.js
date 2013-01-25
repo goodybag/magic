@@ -14,9 +14,7 @@ describe('GET /v1/tapin-stations', function() {
         assert(!results.error);
         assert(results.data.length > 0);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -28,9 +26,7 @@ describe('GET /v1/tapin-stations', function() {
         assert(!payload.error);
         assert(payload.data.length >= 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -43,9 +39,7 @@ describe('GET /v1/tapin-stations', function() {
         assert(payload.data.length === 1);
         assert(payload.meta.total > 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -60,9 +54,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         assert(!results.error);
         assert(results.data.tapinStationId === 1);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -73,9 +65,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         assert(!error);
         assert(res.statusCode == 404);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -86,9 +76,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         assert(!error);
         assert(res.statusCode == 404);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -112,9 +100,7 @@ describe('POST /v1/tapin-stations', function() {
         assert(!results.error);
         assert(results.data.id >= 0);
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -134,9 +120,7 @@ describe('POST /v1/tapin-stations', function() {
         results = JSON.parse(results);
         assert(results.error.name == 'EMAIL_REGISTERED');
 
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
