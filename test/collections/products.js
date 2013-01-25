@@ -104,6 +104,7 @@ describe('GET /v1/products', function() {
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
         return (p.tags.indexOf('food') === -1);
       }).length === 0); // make sure all rows have the 'food' tag
@@ -117,9 +118,38 @@ describe('GET /v1/products', function() {
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
         return (p.tags.indexOf('food') === -1 && p.tags.indexOf('fashion') === -1);
       }).length === 0); // make sure all rows have the 'food' or 'fashion' tag
+      done();
+    });
+  });
+
+  it('should filter by negated tags', function(done) {
+    tu.get('/v1/products?tag=!food&include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1);
+      }).length === 0); // make sure no rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should filter by multiple negated tags', function(done) {
+    tu.get('/v1/products?tag=!food,!uniquetag&include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('uniquetag') !== -1);
+      }).length === 0); // make sure all rows have neither the 'food' and 'unique' tag
       done();
     });
   });
@@ -165,14 +195,6 @@ describe('GET /v1/products', function() {
       assert(!payload.error);
       assert(payload.data[0].name == 'Product 4');
       assert(payload.meta.total > 1);
-      done();
-    });
-  });
-
-  it('should sort by popular', function(done) {
-    tu.get('/v1/products?sort=popular', function(err, payload, res) {
-      assert(!err);
-      assert(res.statusCode == 200);
       done();
     });
   });
@@ -250,6 +272,68 @@ describe('GET /v1/businesses/:id/products', function() {
       done();
     });
   })
+});
+
+describe('GET /v1/products/food', function() {
+  it('should respond with food items', function(done) {
+    tu.get('/v1/products/food?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/products/food?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+
+  it('should allow the user to sort by popular', function(done) {
+    tu.get('/v1/products/food?sort=-popular', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/products/fashion', function() {
+  it('should respond with fashion items', function(done) {
+    tu.get('/v1/products/fashion?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('apparel') === -1);
+      }).length === 0); // make sure all rows have the 'apparel' tag
+      done();
+    });
+  });
+});
+
+describe('GET /v1/products/other', function() {
+  it('should respond with non-food and non-fashion items', function(done) {
+    tu.get('/v1/products/other?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
+      done();
+    });
+  });
 });
 
 describe('GET /v1/products/:id', function() {

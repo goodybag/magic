@@ -16,7 +16,8 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     businessId : { isInt:[] },
-    sort       : { is:/(\+|-)?(name|distance|popular|random)/ },
+    tag        : { is:/[A-z\!\,]+/ },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
     include    : { is:/tags|categories/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
@@ -35,10 +36,71 @@ server.get(
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
     range      : { isInt:[] },
-    sort       : { is:/(\+|-)?(name|distance|popular|random)/ },
+    tag        : { isAlpha:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
     include    : { is:/tags|categories/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
+  })
+, middleware.fields(fields.access.products)
+, routes.list
+);
+
+// Products.list
+server.get(
+  '/v1/products/food'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['food']
+  })
+, middleware.fields(fields.access.products)
+, routes.list
+);
+
+// Products.list
+server.get(
+  '/v1/products/fashion'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['apparel']
+  })
+, middleware.fields(fields.access.products)
+, routes.list
+);
+
+// Products.list
+server.get(
+  '/v1/products/other'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['!food,!apparel']
   })
 , middleware.fields(fields.access.products)
 , routes.list
