@@ -21,12 +21,12 @@ define(function(require){
     }
   , name: {
       type: 'text'
-    , validators: { len:[1] }
+    , validators: { notNull:[], notEmpty:[] }
     , sanitizers: { trim:[] }
     }
   , url: {
       type: 'text'
-    , validators: { is: /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/ }
+    , validators: { isUrl:[] }
     }
   , logoUrl: {
       type: 'text'

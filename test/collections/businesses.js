@@ -156,7 +156,6 @@ describe('POST /v1/businesses', function(){
       tu.post('/v1/businesses', business, function(error, results, res){
         assert(!error);
         results = JSON.parse(results);
-        console.log(results.error);
         assert(!results.error);
         assert(results.data.id);
         tu.logout(function(){
