@@ -75,8 +75,8 @@ describe('GET /v1/locations', function() {
     });
   });
 
-  it('should return 200 on invalid query params by using sane defaults', function(done) {
-    tu.get('/v1/locations?limit=-10&offset=-10', function(err, payload, res) {
+  it('should filter by a single tag', function(done) {
+    tu.get('/v1/locations?tag=uniquetag', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -84,7 +84,112 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length === 1);
+      assert(payload.data.length == 1);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should filter by mutliple tags', function(done) {
+    tu.get('/v1/locations?tag[]=food&tag[]=apparel', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length == 2);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort ASC if a + prefix is given', function(done) {
+    tu.get('/v1/locations?sort=+name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort ASC if no prefix is given', function(done) {
+    tu.get('/v1/locations?sort=name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort DESC if a - prefix is given', function(done) {
+    tu.get('/v1/locations?sort=-name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Location 4');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort by random', function(done) {
+    tu.get('/v1/locations?sort=random', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
+  it('should sort by distance if also given a location', function(done) {
+    tu.get('/v1/locations?lat=10&lon=10&sort=+distance', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[1].name == 'Location 2');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should return 400 if asked to sort by distance and not given a location', function(done) {
+    tu.get('/v1/locations?sort=+distance', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+
+  it('should return 400 if the sort parameter is not recognized', function(done) {
+    tu.get('/v1/locations?sort=foobar', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 400);
       done();
     });
   });
@@ -124,8 +229,7 @@ describe('GET /v1/businesses/:id/locations', function() {
   it('should respond nothing to invalid business id type', function(done) {
     tu.get('/v1/businesses/abcd/locations', function(error, results, res) {
       assert(!error);
-      results = JSON.parse(results);
-      assert(results.data.length === 0);
+      assert(res.statusCode == 400);
       done();
     });
   });

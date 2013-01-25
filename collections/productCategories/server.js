@@ -9,7 +9,7 @@ var
 , schema      = require('../../db').schemas.productCategories
 , fields      = require('./fields')
 , auth        = middleware.auth
-, validate    = middleware.validate
+, validate    = middleware.validate.body
 ;
 
 // ProductCategories.list

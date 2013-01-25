@@ -31,7 +31,7 @@ server.post(
   '/v1/tapin-stations'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -40,7 +40,7 @@ server.patch(
   '/v1/tapin-stations/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -49,7 +49,7 @@ server.post(
   '/v1/tapin-stations/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
