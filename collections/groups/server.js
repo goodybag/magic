@@ -26,7 +26,7 @@ server.get(
 server.post(
   '/v1/groups'
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -34,7 +34,7 @@ server.post(
 server.patch(
   '/v1/groups/:id'
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -42,7 +42,7 @@ server.patch(
 server.post(
   '/v1/groups/:id'
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 

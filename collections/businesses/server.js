@@ -34,7 +34,7 @@ server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.business)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -43,7 +43,7 @@ server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields.business)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 

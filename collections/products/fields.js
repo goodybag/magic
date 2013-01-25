@@ -13,6 +13,7 @@ module.exports = {
       "default": {
         id            : products.id
       , businessId    : products.businessId
+      , businessName  : products.businessName
       , name          : products.name
       , description   : products.description
       , price         : products.price
@@ -30,6 +31,7 @@ module.exports = {
     , client: {
         id            : products.id
       , businessId    : products.businessId
+      , businessName  : products.businessName
       , name          : products.name
       , description   : products.description
       , price         : products.price
@@ -47,6 +49,7 @@ module.exports = {
     , sales: {
         id            : products.id
       , businessId    : products.businessId
+      , businessName  : products.businessName
       , name          : products.name
       , description   : products.description
       , price         : products.price
@@ -64,6 +67,7 @@ module.exports = {
     , admin: {
         id            : products.id
       , businessId    : products.businessId
+      , businessName  : products.businessName
       , name          : products.name
       , description   : products.description
       , price         : products.price

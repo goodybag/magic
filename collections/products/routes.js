@@ -5,6 +5,7 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
@@ -38,51 +39,81 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // location filter
-    var queryFrom = products;
-    var includeDistance = false;
-    var lat = +req.param('lat'),
-      lon = +req.param('lon'),
-      range = (+req.param('range') || 1000);
-    if (!isNaN(+req.param('lat')) && !isNaN(+req.param('lon'))) {
-      queryFrom = [
-        'products',
-          'INNER JOIN "productLocations"',
-            'ON "productLocations"."productId" = products.id',
-            'AND earth_box(ll_to_earth('+lat+','+lon+'), '+range+') @>ll_to_earth("productLocations".lat, "productLocations".lon)'
-      ].join(' ');
-      includeDistance = true;
+    // if sort=distance, validate that we got lat/lon
+    if (req.query.sort && req.query.sort.indexOf('distance') !== -1) {
+      if (!req.query.lat || !req.query.lon) {
+        return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
+      }
     }
 
     // build data query
-    var query = utils.selectAsMap(products, req.fields)
-      .from(queryFrom);
+    var query = sql.query([
+      'SELECT {fields} FROM products',
+        '{locJoin} {tagJoin}',
+        'INNER JOIN businesses ON businesses.id = products."businessId"',
+        '{where}',
+        'GROUP BY products.id',
+        '{sort} {limit}'
+    ]);
+    query.fields = sql.fields().addMap(req.fields);
+    query.where  = sql.where();
+    query.sort   = sql.sort(req.query.sort || '+name');
+    query.limit  = sql.limit(req.query.limit, req.query.offset);
 
-    // add distance if a location query
-    if (includeDistance) {
-      // nodes[0] = the select node
-      query.nodes[0].add('earth_distance(ll_to_earth('+lat+','+lon+'), position) AS distance');
-      query.order(new TextNode('distance ASC'));
+    // business filtering
+    if (req.param('businessId')) { // use param() as this may come from the path or the query
+      query.where.and('"businessId" = $businessId');
+      query.$('businessId', req.param('businessId'));
     }
 
-    // more filters
-    if (req.param('businessId')) {
-      query.where(products.businessId.equals(req.param('businessId')));
+    // location filtering
+    if (req.query.lat && req.query.lon) {
+      query.locJoin = [
+        'INNER JOIN "productLocations" ON',
+          '"productLocations"."productId" = products.id',
+          'AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)'
+      ].join(' ')
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), position)) AS distance')
+      query.$('lat', req.query.lat);
+      query.$('lon', req.query.lon);
+      query.$('range', req.query.range || 1000);
     }
-    query = utils.paginateQuery(req, query);
+
+    // tag filtering
+    if (req.query.tag) {
+      var tags = [].concat(req.query.tag).map(function(tag, i) {
+        query.$('tag'+i, tag); // side effect - add input param to query
+        return '"productTags".tag = $tag'+i;
+      });
+      query.tagJoin = [
+        'INNER JOIN "productsProductTags" ON',
+          '"productsProductTags"."productId" = products.id',
+        'INNER JOIN "productTags" ON',
+          '"productTags".id = "productsProductTags"."productTagId" AND',
+          '(', tags.join(' OR '), ')'
+      ].join(' ');
+      query.fields.add('array_agg("productTags".tag) as tags'); // :DEBUG: temporary, this should not be returned unless always returned
+    }
+
+    // custom sorts
+    if (req.query.sort == 'random')
+      query.fields.add('random() as random'); // this is really inefficient
+    else if (req.query.sort == 'popular')
+      query.fields.add('random() as popular'); // :TODO:
 
     // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
       // run count query
-      query = products.select('COUNT(*) as count');
+      var query = sql.query('SELECT COUNT(*) AS count FROM products {whereBusiness}');
       if (req.param('businessId')) {
-        query.where(products.businessId.equals(req.param('businessId')));
+        query.whereBusiness = 'WHERE "businessId" = $businessId';
+        query.$('businessId', req.param('businessId'));
       }
-      client.query(query.toQuery(), function(error, countResult) {
+      client.query(query.toString(), query.$values, function(error, countResult) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
