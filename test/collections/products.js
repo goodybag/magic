@@ -38,6 +38,34 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should include tags if requested', function(done) {
+    tu.get('/v1/products?include=tags', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data[0].tags);
+      done();
+    });
+  });
+
+  it('should include categories if requested', function(done) {
+    tu.get('/v1/products?include=categories', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data[0].categories);
+      done();
+    });
+  });
+
+  it('should include tags and categories if requested', function(done) {
+    tu.get('/v1/products?include[]=tags&include[]=categories', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data[0].tags);
+      assert(payload.data[0].categories);
+      done();
+    });
+  });
+
   it('should filter by lat/lon', function(done) {
     tu.get('/v1/products?lat=10&lon=10', function(err, payload, res) {
 
@@ -71,20 +99,57 @@ describe('GET /v1/products', function() {
   });
 
   it('should filter by a single tag', function(done) {
-    tu.get('/v1/products?tag=food', function(err, payload, res) {
+    tu.get('/v1/products?tag=food&include=tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
       done();
     });
   });
 
   it('should filter by multiple tags', function(done) {
-    tu.get('/v1/products?tag[]=food&tag[]=fashion', function(err, payload, res) {
+    tu.get('/v1/products?tag[]=food&tag[]=fashion&include=tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
-      // tags arent current returned, so not much to test against
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1 && p.tags.indexOf('fashion') === -1);
+      }).length === 0); // make sure all rows have the 'food' or 'fashion' tag
+      done();
+    });
+  });
+
+  it('should filter by negated tags', function(done) {
+    tu.get('/v1/products?tag=!food&include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1);
+      }).length === 0); // make sure no rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should filter by multiple negated tags', function(done) {
+    tu.get('/v1/products?tag=!food,!uniquetag&include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('uniquetag') !== -1);
+      }).length === 0); // make sure all rows have neither the 'food' and 'unique' tag
       done();
     });
   });
@@ -130,14 +195,6 @@ describe('GET /v1/products', function() {
       assert(!payload.error);
       assert(payload.data[0].name == 'Product 4');
       assert(payload.meta.total > 1);
-      done();
-    });
-  });
-
-  it('should sort by popular', function(done) {
-    tu.get('/v1/products?sort=popular', function(err, payload, res) {
-      assert(!err);
-      assert(res.statusCode == 200);
       done();
     });
   });
@@ -215,6 +272,22 @@ describe('GET /v1/businesses/:id/products', function() {
       done();
     });
   })
+});
+
+describe('GET /v1/products/food', function() {
+  it('should respond with food items', function(done) {
+    tu.get('/v1/products?tag=food&include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
 });
 
 describe('GET /v1/products/:id', function() {
