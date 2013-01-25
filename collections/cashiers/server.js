@@ -32,7 +32,7 @@ server.post(
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -42,7 +42,7 @@ server.patch(
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -52,7 +52,7 @@ server.post(
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 

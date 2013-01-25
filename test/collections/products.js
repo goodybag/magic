@@ -63,7 +63,122 @@ describe('GET /v1/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 2);
+      assert(payload.data[0].distance <= 100);
+      assert(payload.data[1].distance <= 100);
       assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should filter by a single tag', function(done) {
+    tu.get('/v1/products?tag=food', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      // tags arent current returned, so not much to test against
+      done();
+    });
+  });
+
+  it('should filter by multiple tags', function(done) {
+    tu.get('/v1/products?tag[]=food&tag[]=fashion', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      // tags arent current returned, so not much to test against
+      done();
+    });
+  });
+
+  it('should sort ASC if a + prefix is given', function(done) {
+    tu.get('/v1/products?sort=+name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort ASC if no prefix is given', function(done) {
+    tu.get('/v1/products?sort=name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort DESC if a - prefix is given', function(done) {
+    tu.get('/v1/products?sort=-name', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Product 4');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should sort by popular', function(done) {
+    tu.get('/v1/products?sort=popular', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
+  it('should sort by random', function(done) {
+    tu.get('/v1/products?sort=random', function(err, payload, res) {
+      assert(!err);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
+  it('should sort by distance if also given a location', function(done) {
+    tu.get('/v1/products?lat=10&lon=10&sort=+distance', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data[0].name == 'Product 1');
+      done();
+    });
+  });
+
+  it('should return 400 if asked to sort by distance and not given a location', function(done) {
+    tu.get('/v1/products?sort=+distance', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+
+  it('should return 400 if the sort parameter is not recognized', function(done) {
+    tu.get('/v1/products?sort=foobar', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 400);
       done();
     });
   });

@@ -29,7 +29,7 @@ server.post(
   '/v1/consumers'
 , middleware.permissions(perms.owner)
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.create
 );
 
@@ -39,7 +39,7 @@ server.patch(
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
@@ -49,7 +49,7 @@ server.post(
 , middleware.permissions(perms.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.fields(fields)
-, middleware.validate(schema)
+, middleware.validate.body(schema)
 , routes.update
 );
 
