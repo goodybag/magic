@@ -45,11 +45,14 @@ module.exports.list = function(req, res){
         return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
       }
     }
+    var includes = [].concat(req.query.include);
+    var includeTags = (includes.indexOf('tags') !== -1 && req.fields['tags']);
+    var includeCats = (includes.indexOf('categories') !== -1 && req.fields['categories']);
 
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{locJoin} {tagJoin}',
+        '{locJoin} {tagJoin} {catJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY products.id',
@@ -92,7 +95,30 @@ module.exports.list = function(req, res){
           '"productTags".id = "productsProductTags"."productTagId" AND',
           '(', tags.join(' OR '), ')'
       ].join(' ');
-      query.fields.add('array_agg("productTags".tag) as tags'); // :DEBUG: temporary, this should not be returned unless always returned
+    }
+
+    // tag include
+    if (includeTags) {
+      if (!req.query.tag) {
+        query.tagJoin = [
+          'LEFT JOIN "productsProductTags" ON',
+            '"productsProductTags"."productId" = products.id',
+          'LEFT JOIN "productTags" ON',
+            '"productTags".id = "productsProductTags"."productTagId"',
+        ].join(' ');
+      }
+      query.fields.add('array_agg("productTags".tag) as tags');
+    }
+
+    // category include
+    if (includeCats) {
+      query.catJoin = [
+        'LEFT JOIN "productsProductCategories" ON',
+          '"productsProductCategories"."productId" = products.id',
+        'LEFT JOIN "productCategories" ON',
+          '"productCategories".id = "productsProductCategories"."productCategoryId"',
+      ].join(' ');
+      query.fields.add('array_agg("productCategories".name ORDER BY "productCategories".order ASC) as categories');
     }
 
     // custom sorts
