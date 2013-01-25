@@ -18,6 +18,7 @@ server.get(
     businessId : { isInt:[] },
     tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name|distance|random)/ },
+    include    : { is:/tags|categories/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -37,10 +38,74 @@ server.get(
     range      : { isInt:[] },
     tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name|distance|random)/ },
+    include    : { is:/tags|categories/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
 , middleware.fields(fields.access)
+, routes.list
+);
+
+// Locations.list
+server.get(
+  '/v1/locations/food'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    businessId : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['food']
+  })
+, middleware.fields(fields.accessOne)
+, routes.list
+);
+
+// Locations.list
+server.get(
+  '/v1/locations/fashion'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    businessId : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['apparel']
+  })
+, middleware.fields(fields.accessOne)
+, routes.list
+);
+
+// Locations.list
+server.get(
+  '/v1/locations/other'
+, middleware.validate.query({
+    lat        : { isFloat:[] },
+    lon        : { isFloat:[] },
+    range      : { isInt:[] },
+    businessId : { isInt:[] },
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name|distance|random)/ },
+    include    : { is:/tags|categories/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['!food,!apparel']
+  })
+, middleware.fields(fields.accessOne)
 , routes.list
 );
 

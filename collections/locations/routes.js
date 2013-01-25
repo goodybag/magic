@@ -42,6 +42,8 @@ module.exports.list = function(req, res){
         return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
       }
     }
+    var includes = [].concat(req.query.include);
+    var includeTags = (includes.indexOf('tags') !== -1 && req.fields['tags']);
 
     // build data query
     var query = sql.query(
@@ -69,21 +71,30 @@ module.exports.list = function(req, res){
 
     // tag filtering
     if (req.query.tag) {
-      var tags = [].concat(req.query.tag).map(function(tag, i) {
-        query.$('tag'+i, tag); // side effect - add input param to query
-        return '"businessTags".tag = $tag'+i;
-      });
+      var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
       query.tagJoin = [
         'INNER JOIN "businessTags" ON',
           '"businessTags"."businessId" = locations."businessId" AND',
-          '(', tags.join(' OR '), ')'
+          tagsClause
       ].join(' ');
-      // query.fields.add('array_agg("businessTags".tag) as tags');
+    }
+
+    // tag include
+    if (includeTags) {
+      if (!req.query.tag) {
+        query.tagJoin = [
+        'LEFT JOIN "businessTags" ON',
+          '"businessTags"."businessId" = locations."businessId" AND',
+        ].join(' ');
+      }
+      query.fields.add('array_agg("businessTags".tag) as tags');
     }
 
     // random sort
-    if (req.query.sort == 'random') {
-      query.fields.add('random() as random'); // this is really inefficient
+    if (req.query.sort) {
+      if(req.query.sort.indexOf('random') !== -1) {
+        query.fields.add('random() as random'); // this is really inefficient
+      }
     }
 
     // run data query

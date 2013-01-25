@@ -14,6 +14,7 @@ BEGIN;
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('1', 1, 'Business 1', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('2', 1, 'Business 2', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('3', 2, 'Business 3', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('4', 2, 'Business 4', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 COMMIT;
 SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advance the sequence past the IDs just used
 
@@ -33,6 +34,7 @@ INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('1', '2', 'uniquetag'
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('5', '4', 'apparel');
 COMMIT;
 SELECT setval('"businessTags_id_seq"', (SELECT MAX(id) from "businessTags")); -- advance the sequence past the IDs just used
 
@@ -44,6 +46,7 @@ INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, 
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('3', '3', 'Location 3', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('4', '1', 'Location 4', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('5', '1', 'Location 4', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
+INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('6', '4', 'Location 6', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
 COMMIT;
 SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 
