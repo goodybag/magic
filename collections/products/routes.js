@@ -81,16 +81,13 @@ module.exports.list = function(req, res){
 
     // tag filtering
     if (req.query.tag) {
-      var tags = [].concat(req.query.tag).map(function(tag, i) {
-        query.$('tag'+i, tag); // side effect - add input param to query
-        return '"productTags".tag = $tag'+i;
-      });
+      var tagsClause = sql.filtersMap(query, '"productTags".tag {=} $filter', req.query.tag);
       query.tagJoin = [
         'INNER JOIN "productsProductTags" ON',
           '"productsProductTags"."productId" = products.id',
         'INNER JOIN "productTags" ON',
           '"productTags".id = "productsProductTags"."productTagId" AND',
-          '(', tags.join(' OR '), ')'
+          tagsClause
       ].join(' ');
       query.fields.add('array_agg("productTags".tag) as tags'); // :DEBUG: temporary, this should not be returned unless always returned
     }

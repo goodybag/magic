@@ -75,7 +75,6 @@ describe('GET /v1/products', function() {
 
       assert(!err);
       assert(res.statusCode == 200);
-      // tags arent current returned, so not much to test against
       done();
     });
   });
