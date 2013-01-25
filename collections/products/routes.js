@@ -118,7 +118,7 @@ module.exports.list = function(req, res){
         'LEFT JOIN "productCategories" ON',
           '"productCategories".id = "productsProductCategories"."productCategoryId"',
       ].join(' ');
-      query.fields.add('array_agg("productCategories".name) as categories');
+      query.fields.add('array_agg("productCategories".name ORDER BY "productCategories".order ASC) as categories');
     }
 
     // custom sorts
