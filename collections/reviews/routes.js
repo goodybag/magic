@@ -117,11 +117,12 @@ module.exports.hide = function(req, res){
   db.getClient(function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-  var query = oddityMeta.update({isHidden: true}).where
-  (oddityMeta.id.equals(req.params.id)).toQuery();
+  var business = {
+    isHidden: req.body.isHidden
+  };
+  var query = oddityMeta.update(business).where(oddityMeta.id.equals(req.params.id)).toQuery();
 
     logger.db.debug(TAGS, query.text);
-    client.query(query.text, query.values, function(error, result){
     client.query(query.text, query.values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
