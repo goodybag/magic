@@ -276,7 +276,7 @@ describe('GET /v1/businesses/:id/products', function() {
 
 describe('GET /v1/products/food', function() {
   it('should respond with food items', function(done) {
-    tu.get('/v1/products?tag=food&include=tags', function(err, payload, res) {
+    tu.get('/v1/products/food?include=tags', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -285,6 +285,52 @@ describe('GET /v1/products/food', function() {
       assert(payload.data.filter(function(p) {
         return (p.tags.indexOf('food') === -1);
       }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/products/food?tag=foobarinclude=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+
+  it('should allow the user to sort by popular', function(done) {
+    tu.get('/v1/products/food?sort=-popular', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/products/fashion', function() {
+  it('should respond with fashion items', function(done) {
+    tu.get('/v1/products/fashion?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('apparel') === -1);
+      }).length === 0); // make sure all rows have the 'apparel' tag
+      done();
+    });
+  });
+});
+
+describe('GET /v1/products/other', function() {
+  it('should respond with non-food and non-fashion items', function(done) {
+    tu.get('/v1/products/other?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
       done();
     });
   });

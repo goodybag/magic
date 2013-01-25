@@ -119,10 +119,12 @@ module.exports.list = function(req, res){
     }
 
     // custom sorts
-    if (req.query.sort == 'random')
-      query.fields.add('random() as random'); // this is really inefficient
-    else if (req.query.sort == 'popular')
-      query.fields.add('random() as popular'); // :TODO:
+    if (req.query.sort) {
+      if (req.query.sort.indexOf('random') !== -1)
+        query.fields.add('random() as random'); // this is really inefficient
+      else if (req.query.sort.indexOf('popular') !== -1)
+        query.fields.add('random() as popular'); // :TODO:
+    }
 
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){

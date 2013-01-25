@@ -80,7 +80,7 @@ server.get(
     limit      : { isInt:[], min:[1] }
   })
 , middleware.defaults.query({
-    tag : ['fashion']
+    tag : ['apparel']
   })
 , middleware.fields(fields.access.products)
 , routes.list
@@ -100,7 +100,7 @@ server.get(
     limit      : { isInt:[], min:[1] }
   })
 , middleware.defaults.query({
-    tag : ['!food,!fashion']
+    tag : ['!food,!apparel']
   })
 , middleware.fields(fields.access.products)
 , routes.list
