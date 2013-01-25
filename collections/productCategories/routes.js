@@ -75,7 +75,7 @@ module.exports.list = function(req, res){
 
     // add query filters
     if (req.params.businessId){
-      query.where(productCategories.businessId.equals(req.params.businessId));
+      query.where(productCategories.businessId.equals(req.params.businessId)).order(productCategories.order);
     }
     utils.paginateQuery(req, query);
 
