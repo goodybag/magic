@@ -63,6 +63,9 @@ INSERT INTO "users" (id, email, password) VALUES ('9', 'consumer2@gmail.com', 'a
 INSERT INTO "users" (id, email, password) VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11', 'consumer_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('12', 'consumer_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 
 INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -88,12 +91,15 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 -- CONSUMERS
 
 BEGIN;
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "tapinId") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('7', '9', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2', '123456-YYZ');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('9', '15', 'Consumer', 'Four', 'consumer4', '123456-consumer4');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
@@ -103,7 +109,7 @@ BEGIN;
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11110', '1', '1', '123456-XXX');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11111', '1', '1', '123456-XXZ');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11112', '1', '1', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11113', '1', '1', '123456-XXY');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11113', '1', '1', '123456-manager_redeem1');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11114', '1', '4', '123456-XXY');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11115', '2', '2', '123456-XXY');
 COMMIT;
@@ -136,7 +142,7 @@ SELECT setval('"tapinStations_id_seq"', (SELECT MAX(id) from "tapinStations")); 
 BEGIN;
 INSERT INTO "groups" (id, name) VALUES ('1', 'admin');
 INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
-INSERT INTO "groups" (id, name) VALUES ('3', 'tablet');
+INSERT INTO "groups" (id, name) VALUES ('3', 'tapin-station');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
@@ -159,8 +165,11 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('7', '8', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('8', '9', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('9', '10', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('10', '11', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11', '14', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('12', '15', '5');
 
 -- manager
+
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11110', '11110', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11111', '11111', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11112', '11112', '11110');
@@ -189,6 +198,7 @@ BEGIN;
 INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('1', '3', '1', 5, 23, 40, now());
 INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('2', '5', '1', 10, 10, 10, now());
 INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('3', '6', '1', 4, 4, 20, now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('4', '9', '1', 5, 23, 40, now());
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
