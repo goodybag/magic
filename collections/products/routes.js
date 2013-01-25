@@ -84,16 +84,13 @@ module.exports.list = function(req, res){
 
     // tag filtering
     if (req.query.tag) {
-      var tags = [].concat(req.query.tag).map(function(tag, i) {
-        query.$('tag'+i, tag); // side effect - add input param to query
-        return '"productTags".tag = $tag'+i;
-      });
+      var tagsClause = sql.filtersMap(query, '"productTags".tag {=} $filter', req.query.tag);
       query.tagJoin = [
         'INNER JOIN "productsProductTags" ON',
           '"productsProductTags"."productId" = products.id',
         'INNER JOIN "productTags" ON',
           '"productTags".id = "productsProductTags"."productTagId" AND',
-          '(', tags.join(' OR '), ')'
+          tagsClause
       ].join(' ');
     }
 
@@ -122,10 +119,12 @@ module.exports.list = function(req, res){
     }
 
     // custom sorts
-    if (req.query.sort == 'random')
-      query.fields.add('random() as random'); // this is really inefficient
-    else if (req.query.sort == 'popular')
-      query.fields.add('random() as popular'); // :TODO:
+    if (req.query.sort) {
+      if (req.query.sort.indexOf('random') !== -1)
+        query.fields.add('random() as random'); // this is really inefficient
+      else if (req.query.sort.indexOf('popular') !== -1)
+        query.fields.add('random() as popular'); // :TODO:
+    }
 
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){

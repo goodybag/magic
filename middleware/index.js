@@ -5,4 +5,5 @@ module.exports = {
 , uuid        : require('./uuid')
 , validate    : require('./validate')
 , permissions : require('./permissions')
+, defaults    : require('./defaults')
 }

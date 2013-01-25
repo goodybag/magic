@@ -99,7 +99,7 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 2);
+      assert(payload.data.length == 3);
       assert(payload.meta.total > 1);
       done();
     });
@@ -146,7 +146,7 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data[0].name == 'Location 4');
+      assert(payload.data[0].name == 'Location 6');
       assert(payload.meta.total > 1);
       done();
     });
@@ -246,6 +246,61 @@ describe('GET /v1/businesses/:id/locations', function() {
       assert(payload.data.length === 1);
       assert(payload.data[0].name);
       assert(payload.meta.total > 1);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/locations/food', function() {
+  it('should respond with food items', function(done) {
+    tu.get('/v1/locations/food?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/locations/food?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/locations/fashion', function() {
+  it('should respond with fashion items', function(done) {
+    tu.get('/v1/locations/fashion?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('apparel') === -1);
+      }).length === 0); // make sure all rows have the 'apparel' tag
+      done();
+    });
+  });
+});
+
+describe('GET /v1/locations/other', function() {
+  it('should respond with non-food and non-fashion items', function(done) {
+    tu.get('/v1/locations/other?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
       done();
     });
   });

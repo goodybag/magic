@@ -32,6 +32,7 @@ module.exports = {
     , startSaturday  : locations.startSaturday
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
+    , tags           : true
     }
 
   , client: {
@@ -63,6 +64,7 @@ module.exports = {
     , startSaturday  : locations.startSaturday
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
+    , tags           : true
     }
 
   , sales: {
@@ -94,6 +96,7 @@ module.exports = {
     , startSaturday  : locations.startSaturday
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
+    , tags           : true
     }
 
   , admin: {
@@ -125,6 +128,7 @@ module.exports = {
     , startSaturday  : locations.startSaturday
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
+    , tags           : true
     }
   },
   accessOne:{
@@ -157,6 +161,7 @@ module.exports = {
     , startSaturday  : locations.startSaturday
     , endSaturday    : locations.endSaturday
     , isEnabled      : locations.isEnabled
+    , tags           : true
     }
   },
   create:{
