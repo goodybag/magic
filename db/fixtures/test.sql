@@ -273,3 +273,18 @@ INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('3',
 INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('4', '4', '3');
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used
+
+
+--
+BEGIN;
+INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd');
+INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('2', 'Abilene', '1866 Pine St');
+INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('11', 'Abilene', '18677 Pine St');
+INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('22', 'Abilene', '18677 Guaterloop St');
+COMMIT;
+
+--
+BEGIN;
+INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('1', '11', true, true, false);
+INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('2', '22', true, true, false);
+COMMIT;
