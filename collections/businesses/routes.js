@@ -102,7 +102,8 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses);
+      .from(businesses)
+      .order(businesses.name);
 
     // add query filters
     if (req.param('filter')) {
