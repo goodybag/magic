@@ -102,14 +102,14 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses)
-      .order(businesses.name);
+      .from(businesses);
 
     // add query filters
     if (req.param('filter')) {
       query.where('businesses.name ILIKE \'%'+req.param('filter')+'%\'');
     }
     query.where(businesses.isDeleted.equals(false));
+    query.order(businesses.name);
     utils.paginateQuery(req, query);
 
     // run data query
