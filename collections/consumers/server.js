@@ -19,7 +19,7 @@ server.get(
 // consumers.get
 server.get(
   '/v1/consumers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.fields(fields)
 , routes.get
 );
@@ -27,7 +27,7 @@ server.get(
 // consumers.create
 server.post(
   '/v1/consumers'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.fields(fields)
 , middleware.validate.body(schema)
 , routes.create
@@ -36,7 +36,7 @@ server.post(
 // consumers.update
 server.patch(
   '/v1/consumers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.fields(fields)
 , middleware.validate.body(schema)
@@ -46,7 +46,7 @@ server.patch(
 // consumers.update
 server.post(
   '/v1/consumers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.fields(fields)
 , middleware.validate.body(schema)
@@ -56,7 +56,7 @@ server.post(
 // consumers.delete
 server.del(
   '/v1/consumers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'owner')
 , routes.del
 );

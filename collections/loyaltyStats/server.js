@@ -12,7 +12,7 @@ var perms  = require('./permissions');
 // LoyaltyStats.get
 server.get(
   '/v1/loyaltyStats'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.fields(fields.access)
 , routes.get
 );
@@ -21,7 +21,7 @@ server.get(
 server.post(
   '/v1/loyaltyStats'
 , middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunces:{isInt:[]}})
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields.mutate)
 , routes.update

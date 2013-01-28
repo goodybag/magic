@@ -4,6 +4,6 @@ module.exports = {
 , fields      : require('./fields')
 , uuid        : require('./uuid')
 , validate    : require('./validate')
-, permissions : require('./permissions')
+, applyGroups : require('./apply-groups')
 , defaults    : require('./defaults')
 }

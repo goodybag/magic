@@ -20,7 +20,7 @@ server.get(
 // tapinStations.get
 server.get(
   '/v1/tapin-stations/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
 , routes.get

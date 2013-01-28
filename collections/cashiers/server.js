@@ -20,7 +20,7 @@ server.get(
 // cashiers.get
 server.get(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
 , routes.get
@@ -29,7 +29,7 @@ server.get(
 // cashiers.create
 server.post(
   '/v1/cashiers'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
 , middleware.validate.body(schema)
@@ -39,7 +39,7 @@ server.post(
 // cashiers.update
 server.patch(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
 , middleware.validate.body(schema)
@@ -49,7 +49,7 @@ server.patch(
 // cashiers.update
 server.post(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
 , middleware.validate.body(schema)
@@ -59,7 +59,7 @@ server.post(
 // cashiers.delete
 server.del(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(perms.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , routes.del
 );
