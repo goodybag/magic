@@ -10,9 +10,6 @@ var
 
 , logger  = {}
 
-  // Tables
-, businesses = db.tables.businesses
-, locations  = db.tables.locations
 , schemas    = db.schemas
 ;
 

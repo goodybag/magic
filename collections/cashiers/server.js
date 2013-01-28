@@ -12,6 +12,10 @@ var perms      = require('./permissions');
 // cashiers.list
 server.get(
   '/v1/cashiers'
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.auth.allow('admin', 'sales')
 , middleware.fields(fields)
 , routes.list
