@@ -2,12 +2,12 @@
  * Tapin Stations server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var routes     = require('./routes');
-var schema     = require('../../db').schemas.tapinStations;
-var fields     = require('./fields');
-var perms      = require('./permissions');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var routes      = require('./routes');
+var schema      = require('../../db').schemas.tapinStations;
+var fields      = require('./fields');
+var applyGroups = require('apply-groups');
 
 // tapinStations.list
 server.get(
@@ -20,7 +20,7 @@ server.get(
 // tapinStations.get
 server.get(
   '/v1/tapin-stations/:id'
-, middleware.applyGroups(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.fields(fields)
 , routes.get

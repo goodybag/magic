@@ -2,11 +2,11 @@
  * Businesses server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var schema     = require('../../db').schemas.businesses;
-var fields     = require('./fields');
-var routes     = require('./routes');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var schema      = require('../../db').schemas.businesses;
+var permissions = require('apply-groups');
+var routes      = require('./routes');
 
 // Businesses.list
 server.get(

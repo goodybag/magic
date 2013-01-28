@@ -7,7 +7,7 @@ var middleware = require('../../middleware');
 var schema = require('../../db').schemas.userRedemptions;
 var routes = require('./routes');
 var fields = require('./fields');
-var perms  = require('./permissions');
+var applyGroups = require('apply-groups');
 
 // Redemptions.list
 server.get(
@@ -20,7 +20,7 @@ server.get(
 server.post(
   '/v1/redemptions'
 , middleware.validate.body(schema, { deltaPunches:{ isInt:[] }})
-, middleware.applyGroups(perms.locationEmployee)
+, middleware.applyGroups(applyGroups.locationEmployee)
 , middleware.auth.allow('locationEmployee')
 , middleware.fields(fields.create)
 , routes.create
