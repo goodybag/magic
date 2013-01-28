@@ -11,10 +11,6 @@ var
 
 , logger  = {}
 
-, TextNode = require('sql/lib/node/text')
-
-  // Tables
-, locations  = db.tables.locations
 , schemas    = db.schemas
 ;
 
