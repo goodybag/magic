@@ -123,8 +123,8 @@ module.exports.create = function(req, res){
       query.$('uid', req.body.email);
       query.$('upass', utils.encryptPassword(req.body.password));
     } else {
-      query.uidField = 'singlyId';
-      query.upassField = 'singlyAccessToken';
+      query.uidField = '"singlyId"';
+      query.upassField = '"singlyAccessToken"';
       query.$('uid', req.body.singlyId);
       query.$('upass', req.body.singlyAccessToken);
     }
@@ -162,8 +162,12 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('DELETE FROM cashiers WHERE id = $id');
-    query.$('id', req.params.id);
+    var query = sql.query([
+      'DELETE FROM users USING cashiers',
+        'WHERE users.id = cashiers."userId"',
+        'AND cashiers.id = $id'
+    ]);
+    query.$('id', +req.params.id || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

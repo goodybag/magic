@@ -79,7 +79,7 @@ describe('POST /v1/consumers', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.id >= 0);
+      assert(results.data.consumerId >= 0);
       done();
     });
   });

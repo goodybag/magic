@@ -163,7 +163,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
           if (result.rowCount === 0) return stage.createUser(user);
           return stage.setSessionAndSend({
-            id: result.rows[0].id
+            id: result.rows[0].userId
           , singlyId: user.singlyId
           , singlyAccessToken: user.singlyAccessToken
           });
