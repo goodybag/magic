@@ -97,23 +97,16 @@ module.exports.list = function(req, res){
       }
     }
 
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      var query = sql.query('SELECT COUNT (*) as count FROM locations {whereBusiness}');
-      if (req.param('businessId')) {
-        query.whereBusiness = 'WHERE "businessId" = $businessId';
-        query.$('businessId', req.param('businessId'));
-      }
-      client.query(query.toString(), query.$values, function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };

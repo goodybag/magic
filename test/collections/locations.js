@@ -70,7 +70,6 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.data[0].name == 'Location 1');
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -85,7 +84,6 @@ describe('GET /v1/locations', function() {
 
       assert(!payload.error);
       assert(payload.data.length == 1);
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -100,7 +98,6 @@ describe('GET /v1/locations', function() {
 
       assert(!payload.error);
       assert(payload.data.length == 3);
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -116,7 +113,6 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data[0].name == 'Location 1');
       assert(payload.data[1].name == 'Location 2');
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -132,7 +128,6 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data[0].name == 'Location 1');
       assert(payload.data[1].name == 'Location 2');
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -147,7 +142,6 @@ describe('GET /v1/locations', function() {
 
       assert(!payload.error);
       assert(payload.data[0].name == 'Location 6');
-      assert(payload.meta.total > 1);
       done();
     });
   });
@@ -171,7 +165,6 @@ describe('GET /v1/locations', function() {
       assert(!payload.error);
       assert(payload.data[0].name == 'Location 1');
       assert(payload.data[1].name == 'Location 2');
-      assert(payload.meta.total > 1);
       done();
     });
   });
