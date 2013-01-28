@@ -207,7 +207,7 @@ describe('PATCH /v1/businesses/:id', function(){
     });
   });
 
-  it('should update a business\'s url to be blank', function(done){
+  it('should update a business\'s url to be null', function(done){
     var business = {
       url: null
     };
@@ -223,18 +223,15 @@ describe('PATCH /v1/businesses/:id', function(){
     });
   });
 
-  it('should fail to update a business\'s url to be blank because of a validation error', function(done){
+  it('should update a business\'s url to be blank', function(done){
     var business = {
-      url: ""
+      url: ''
     };
 
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 400);
-        results = JSON.parse(results);
-        assert(results.error);
-        assert(results.error.name === "VALIDATION_FAILED");
+        assert(res.statusCode == 200);
         tu.logout(function(){
           done();
         });

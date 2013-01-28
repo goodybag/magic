@@ -21,7 +21,7 @@ define(function(require){
     }
   , tag: {
       type: 'text'
-    , validators: { len:[1], notNull:[] }
+    , validators: { notEmpty:[], notNull:[] }
     }
   , createdAt: {
       type: 'timestamp'

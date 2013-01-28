@@ -19,6 +19,17 @@ var
     }
 
     return function(req, res, next){
+      // extract out relevant data
+      var data = {};
+      for (var key in schema) {
+        if (typeof req.body[key] === 'undefined') continue;
+        data[key] = req.body[key];
+      }
+
+      // validate
+      var error = utils.validate(data, schema);
+      if (error) { return res.error(errors.input.VALIDATION_FAILED, error); }
+
       // run sanitizers
       for (var key in data) {
         if (schema[key].sanitizers) {
@@ -31,22 +42,10 @@ var
         }
       }
 
-      // extract out relevant data
-      var data = {}, deleted = [];
-      for (var key in schema) {
-        if (typeof req.body[key] === 'undefined' || req.body[key] === null) continue;
-        data[key] = req.body[key];
-      }
-
-      // validate
-      var error = utils.validate(data, schema);
-      if (error) return res.error(errors.input.VALIDATION_FAILED, error);
-
       // Convert blank strings back to nulls
       for (var key in data){
         if (data[key] === "") data[key] = null;
       }
-
 
       next();
     };
