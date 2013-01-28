@@ -99,7 +99,7 @@ module.exports.list = function(req, res){
     var query = sql.query('SELECT {fields} FROM businesses {locationJoin} {where} GROUP BY businesses.id {sort} {limit}');
     query.fields = sql.fields().addSelectMap(req.fields);
     query.where  = sql.where().and('"isDeleted" = false');
-    query.sort   = sql.sort(req.query.sort);
+    query.sort   = sql.sort(req.query.sort || 'name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
     if (includeLocations) {
@@ -197,6 +197,7 @@ module.exports.update = function(req, res){
 
     var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.$('id', req.params.id);
 
     logger.db.debug(TAGS, query.toString());
 

@@ -4,13 +4,12 @@
 
 var
   db         = require('../../db')
+, sql        = require('../../lib/sql')
 , utils      = require('../../lib/utils')
 , errors     = require('../../lib/errors')
 
 , logger  = {}
 
-  // Tables
-, charities = db.tables.charities
 , schemas   = db.schemas
 ;
 
@@ -31,12 +30,11 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(charities, req.fields)
-      .from(charities)
-      .where(charities.id.equals(+req.params.id || 0))
-      .toQuery();
+    var query = sql.query('SELECT {fields} FROM charities WHERE id=$id');
+    query.fields = sql.fields().addSelectMap(req.fields);
+    query.$('id', +req.params.id || 0);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
@@ -61,11 +59,10 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = charities.delete().where(
-      charities.id.equals(req.params.id)
-    ).toQuery();
+    var query = sql.query('DELETE FROM charities WHERE id=$id');
+    query.$('id', +req.params.id || 0);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -88,28 +85,26 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(charities, req.fields)
-      .from(charities);
+    var query = sql.query('SELECT {fields} FROM charities {where} {limit}');
+    query.fields = sql.fields().addSelectMap(req.fields);
+    query.where  = sql.where();
+    query.limit  = sql.limit(req.query.limit, req.query.offset);
 
-    // add query filters
     if (req.param('filter')) {
-      query.where('charities.name ILIKE \'%'+req.param('filter')+'%\'');
+      query.where.and('charities.name ILIKE $nameFilter');
+      query.$('nameFilter', '%'+req.param('filter')+'%');
     }
-    utils.paginateQuery(req, query);
+
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      client.query('SELECT COUNT(*) as count FROM charities', function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };
@@ -126,21 +121,18 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    if (!req.body.cardCode) req.body.cardCode = "000000";
-    if (!req.body.isEnabled) req.body.isEnabled = true;
+    var inputs = req.body;
 
-    var error = utils.validate(req.body, schemas.charities);
+    var error = utils.validate(inputs, schemas.charities);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-    var query = charities.insert({
-      'name'      :    req.body.name
-    , 'desc'      :    req.body.desc
-    , 'logoUrl'   :    req.body.logoUrl
-    }).toQuery();
+    var query = sql.query('INSERT INTO charities ({fields}) VALUES ({values}) RETURNING id');
+    query.fields = sql.fields().addObjectKeys(inputs);
+    query.values = sql.fields().addObjectValues(inputs, query);
 
-    logger.db.debug(TAGS, query.text);
+    logger.db.debug(TAGS, query.toString());
 
-    client.query(query.text + " RETURNING id", query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -161,13 +153,15 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = charities.update(req.body).where(
-      charities.id.equals(req.params.id)
-    ).toQuery();
+    var inputs = req.body;
 
-    logger.db.debug(TAGS, query.text);
+    var query = sql.query('UPDATE charities SET {updates} WHERE id=$id');
+    query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.$('id', +req.params.id || 0)
 
-    client.query(query.text, query.values, function(error, result){
+    logger.db.debug(TAGS, query.toString());
+
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
