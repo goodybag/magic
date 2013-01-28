@@ -68,21 +68,6 @@ describe('POST /v1/groups', function() {
       done();
     });
   });
-
-  it('should fail if included user does not exist', function(done){
-    var group = {
-      name:'foobar'
-    , users:[10000]
-    };
-
-    tu.post('/v1/groups', group, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name == 'INVALID_USERS');
-      done();
-    })
-  });
 });
 
 describe('PATCH /v1/group/:id', function() {
@@ -115,20 +100,7 @@ describe('PATCH /v1/group/:id', function() {
       done();
     });
   });
-
-  it('should fail if included user does not exist', function(done){
-    var group = {
-      name: "foobar"
-    , users: [40000]
-    };
-    tu.patch('/v1/groups/6', group, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name === 'INVALID_USERS');
-      done();
-    });
-  });
+  
 });
 
 describe('DEL /v1/groups/:id', function() {
