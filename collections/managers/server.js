@@ -7,7 +7,7 @@ var middleware  = require('../../middleware');
 var routes      = require('./routes');
 var schema      = require('../../db').schemas.managers;
 var fields      = require('./fields');
-var applyGroups = require('apply-groups');
+var applyGroups = require('./apply-groups');
 
 // managers.list
 server.get(

@@ -32,17 +32,8 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // :TODO: nuke this fields kludge
-    var fields = [];
-    for (var field in req.fields) {
-      if (field === 'tags') {
-        fields.push('array_agg("businessTags"."tag") as tags');
-      } else {
-        fields.push('businesses."' + field + '" AS "' + field + '"');
-      }
-    }
     var query = [
-      'SELECT', fields.join(', '), ' FROM businesses',
+      'SELECT * FROM businesses',
         'LEFT JOIN "businessTags" ON "businessTags"."businessId" = businesses.id',
         'WHERE businesses.id = $1 AND businesses."isDeleted" = false',
         'GROUP BY businesses.id'
@@ -101,8 +92,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(businesses, req.fields)
-      .from(businesses);
+    var query = businesses.select("*").from(businesses);
 
     // add query filters
     if (req.param('filter')) {
@@ -111,7 +101,7 @@ module.exports.list = function(req, res){
     query.where(businesses.isDeleted.equals(false));
     query.order(businesses.name);
     utils.paginateQuery(req, query);
-
+console.log(query.toQuery().text);
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

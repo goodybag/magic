@@ -11,6 +11,7 @@ describe('GET /v1/businesses', function() {
     tu.get('/v1/businesses', function(err, results, res) {
       assert(!err);
       var payload = JSON.parse(results);
+      console.log(payload.error);
       assert(!payload.error);
       assert(payload.data.length > 0);
       assert(payload.data[0].id);

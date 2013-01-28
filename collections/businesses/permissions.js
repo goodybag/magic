@@ -1,9 +1,8 @@
 module.exports = {
   world: {
-    read:   false
-  , create: false
-  , update: false
-  , delete: false
+    read:   []
+  , create: []
+  , update: []
   }
 
 , default: {
@@ -23,13 +22,11 @@ module.exports = {
     read:   true
   , create: true
   , update: true
-  , delete: true
   }
 
 , admin: {
     read:   true
   , create: true
   , update: true
-  , delete: true
   }
 };

@@ -7,7 +7,7 @@ var middleware = require('../../middleware');
 var schema = require('../../db').schemas.userLoyaltyStats;
 var routes = require('./routes');
 var fields = require('./fields');
-var applyGroups = require('apply-groups');
+var applyGroups = require('./apply-groups');
 
 // LoyaltyStats.get
 server.get(
