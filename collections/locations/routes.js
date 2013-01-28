@@ -163,7 +163,8 @@ module.exports.create = function(req, res){
 
     // validate input
     var error = utils.validate(req.body, schemas.locations);
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (req.body && req.body.businessId === null) throw "god dasmnit :::"+req.body.name;
+    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // enumerate values
     var valueNames = [], valueTokens = [], values = [], i=0;

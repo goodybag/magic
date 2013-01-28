@@ -429,7 +429,7 @@ describe('POST /v1/locations', function() {
 
   it('should return error of validation', function(done){
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/locations', { businessId:2, name:'', street1:'', city:'', state:'', zip:'', country:'' }, function(err, results, res) {
+      tu.post('/v1/locations', { businessId:null, name:'a', street1:'', city:'', state:'', zip:'', country:'' }, function(err, results, res) {
         assert(!err);
         assert(res.statusCode == 400);
         tu.logout(done);
