@@ -38,7 +38,7 @@ module.exports.get = function(req, res){
         'WHERE businesses.id = $1 AND businesses."isDeleted" = false',
         'GROUP BY businesses.id'
     ].join(' ');
-
+    
     client.query(query, [+req.params.id || 0], function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
@@ -101,7 +101,7 @@ module.exports.list = function(req, res){
     query.where(businesses.isDeleted.equals(false));
     query.order(businesses.name);
     utils.paginateQuery(req, query);
-console.log(query.toQuery().text);
+
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
