@@ -186,7 +186,6 @@ module.exports.oauthAuthenticate = function(req, res){
           if (result.error) return res.error(result.error);
 
           consumer.groups = ['consumer'];
-          console.log(result.data);
           consumer.id = result.data.userId;
 
           return stage.setSessionAndSend(consumer);
