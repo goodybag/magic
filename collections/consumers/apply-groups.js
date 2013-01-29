@@ -22,7 +22,6 @@ exports.owner = function(req, cb) {
     ).where(
       consumers.userId.equals(req.session.user.id)
     ).toQuery();
-
     client.query(query, function(error, result){
       if (error) return cb(null);
 

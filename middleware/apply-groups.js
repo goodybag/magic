@@ -3,7 +3,8 @@ module.exports = function(permsFn) {
   return function(req, res, next){
     // run the provided permissions function
     permsFn(req, function(groups) {
-      req.permittedGroups = [].concat(groups);
+      if (groups != null)
+        req.permittedGroups = [].concat(groups);
       next();
     });
   };

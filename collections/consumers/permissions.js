@@ -1,6 +1,9 @@
 module.exports = {
   world: {
-    read:   []
+    read:   [
+      'screenName'
+    , 'consumerId'
+    ]
   , create: [
       'email'
     , 'password'
@@ -27,6 +30,7 @@ module.exports = {
     , 'lastName'
     , 'screenName'
     , 'cardId'
+    , 'consumerId'
     ]
   }
 

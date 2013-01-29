@@ -1,6 +1,6 @@
 module.exports = {
   world: {
-    read:   ['id', 'businessId', 'name']
+    read:   ['id', 'businessId', 'name', 'tags']
   , create: []
   , update: []
   }
@@ -31,8 +31,6 @@ module.exports = {
     , 'endFriday'
     , 'startSaturday'
     , 'endSaturday'
-    , 'isEnabled'
-    , 'tags'
     ]
   }
 

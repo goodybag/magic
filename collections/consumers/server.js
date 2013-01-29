@@ -27,7 +27,8 @@ server.get(
 // consumers.create
 server.post(
   '/v1/consumers'
-, middleware.applyGroups(applyGroups.owner)
+  // Make the requester owner so they can read their own fields after creation
+, function(req, res, next){ req.permittedGroups = ['owner']; next(); }
 , middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create

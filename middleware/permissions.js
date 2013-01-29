@@ -87,10 +87,14 @@ module.exports = function(allPerms){
       }
     ;
 
-    // Aggregate permissions
-    if (req.session && req.session.user){
-      var groups = req.session.user.groups.concat('default') || ['default'];
+    var groups = [];
+    if (req.session && req.session.user)
+      groups = groups.concat(req.session.user.groups).concat('default');
+    if (req.permittedGroups)
+      groups = groups.concat(req.permittedGroups);
 
+    // Aggregate permissions
+    if (groups.length > 0){
       // Go through each group on the user obj and merge permissions
       for (var i = groups.length - 1, group, groupPerm, typePerms; i >= 0; i--){
         group = groups[i];

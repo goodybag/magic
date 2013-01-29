@@ -39,13 +39,13 @@ module.exports.list = function(req, res){
       }
     }
     var includes = [].concat(req.query.include);
-    var includeTags = (includes.indexOf('tags') !== -1 && req.fields['tags']);
+    var includeTags = includes.indexOf('tags') !== -1;
 
     // build data query
     var query = sql.query(
       'SELECT {fields} FROM locations {tagJoin} {where} GROUP BY locations.id {sort} {limit}'
     );
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("locations.*");
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -100,7 +100,6 @@ module.exports.list = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
-
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
@@ -120,7 +119,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("locations.*");
     query.$('id', +req.param('locationId') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -129,7 +128,7 @@ module.exports.get = function(req, res){
 
       if (result.rowCount === 0) {
         return res.status(404).end();
-      }      
+      }
 
       return res.json({ error: null, data: result.rows[0] });
     });
@@ -182,7 +181,7 @@ module.exports.create = function(req, res){
       query.$('lon', inputs.lon);
       client.query(query.toString(), query.$values, function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        return res.json({ error: null, data: newLocation });        
+        return res.json({ error: null, data: newLocation });
       });
     });
   });
