@@ -12,7 +12,6 @@ var
 , logger  = {}
 
   // Tables
-, userRedemptions = db.tables.userRedemptions
 , schemas     = db.schemas
 , Transaction = require('pg-transaction')
 ;
