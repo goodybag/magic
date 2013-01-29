@@ -1,6 +1,59 @@
 var
-  utils = require('../lib/utils')
+  fs = require('fs')
+, utils = require('../lib/utils')
+, collections = {}
+, files = fs.readdirSync(__dirname + '/../collections/')
+
+, getExpandedPerms = function(group, type, perms){
+    if (typeof perms === "boolean") return perms;
+
+    // Copy so we don't change the original object
+    perms = perms.slice(0);
+    // Go through each permission to see if we have something to expand
+    for (var i = 0, collection; i < perms.length; i++){
+      if (perms[i].indexOf(':') === -1) continue;
+
+      // The ol' switcheroo
+      collection  = perms[i].substring(perms[i].lastIndexOf(':') + 1);
+      perms[i]    = perms[i].substring(0, perms[i].lastIndexOf(':'));
+
+      // add on the expanded set of permissions
+      perms = perms.concat(
+        getExpandedPerms(group, type, collections[collection][group][type]).map(function(perm){
+          return perms[i] + "." + perm;
+        })
+      );
+    }
+
+    return perms;
+  }
 ;
+
+// Get all of the permissions files
+for (var i = files.length - 1, dir; i >= 0; i--){
+  if (!fs.statSync(dir = __dirname + '/../collections/' + files[i]).isDirectory())
+    continue;
+
+  if (!fs.existsSync(dir + '/permissions.js')) continue;
+
+  collections[files[i]] = require(dir + '/permissions');
+}
+
+// Expand references
+var perms;
+for (var collection in collections){
+  // Each collection
+  for (var group in collections[collection]){
+    // Each type of request
+    for (var requestType in collections[collection][group]){
+      if (!utils.isArray(collections[collection][group][requestType])) continue;
+
+      perms = collections[collection][group][requestType];
+
+      collections[collection][group][requestType] = getExpandedPerms(group, requestType, perms);
+    }
+  }
+}
 
 module.exports = function(allPerms){
   return function(req, res, next){
@@ -16,9 +69,20 @@ module.exports = function(allPerms){
        * @param  {Array}  permissions The set of permissions to filter by
        * @param  {Object} doc         The document to be filtered
        */
-    , filterDoc = function(permissions, doc){
+    , filterDoc = function(permissions, doc, subKeyPrepend){
+        subKeyPrepend = subKeyPrepend || "";
+
         for (var key in doc){
-          if (permissions.indexOf(key) === -1) delete doc[key];
+          if (permissions.indexOf(subKeyPrepend + key) === -1){
+            delete doc[key]
+            continue;
+          }
+
+          if (utils.isArray(doc[key])){
+            for (var i = doc[key].length - 1; i >= 0; i--){
+              filterDoc(permissions, doc[key][i], subKeyPrepend + key + ".");
+            }
+          }
         }
       }
     ;

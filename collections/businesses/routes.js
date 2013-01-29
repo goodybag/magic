@@ -92,7 +92,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var includes = [].concat(req.query.include);
-    var includeLocations = (includes.indexOf('locations') !== -1;
+    var includeLocations = includes.indexOf('locations') !== -1;
 
     var query = sql.query('SELECT {fields} FROM businesses {locationJoin} {where} GROUP BY businesses.id {sort} {limit}');
     query.fields = sql.fields().add("businesses.*");
@@ -101,7 +101,6 @@ module.exports.list = function(req, res){
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
     if (includeLocations) {
-      query.fields = sql.fields().add("locations.*");
       query.locationJoin = 'LEFT JOIN locations ON locations."businessId" = businesses.id';
       query.fields.add('array_to_json(array_agg(row_to_json(locations.*))) as locations');
       // the above actually makes sense when you know what postgres does with its types
@@ -126,6 +125,7 @@ module.exports.list = function(req, res){
       dataResult.rows.forEach(function(r) {
         r.locations = (r.locations) ? JSON.parse(r.locations) : []; // would be nice if we could avoid this
       });
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
      });
   });
