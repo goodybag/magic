@@ -11,12 +11,6 @@ var
 , config  = require('../../config')
 
 , logger  = {}
-
-  // Tables
-, users       = db.tables.users
-, managers    = db.tables.managers
-, groups      = db.tables.groups
-, usersGroups = db.tables.usersGroups
 ;
 
 // Setup loggers

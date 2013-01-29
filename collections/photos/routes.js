@@ -5,14 +5,11 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
-
-  // Tables
-, photos  = db.tables.photos
-, products = db.tables.products
 ;
 
 // Setup loggers
@@ -29,45 +26,33 @@ module.exports.list = function(req, res){
   var TAGS = ['list-photos', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of photos', {uid: 'more'});
 
-  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(photos, req.fields)
-      .from(photos.leftJoin(products).on(products.id.equals(photos.id)));
+    var query = sql.query('SELECT *, COUNT(*) OVER() as "metaTotal" FROM photos {where} {limit}');
+    query.where = sql.where();
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    // filters
-    var filters = null; // :TEMPORARY:
-    ['businessId', 'productId', 'consumerId'].forEach(function(filterName) {
-      if (req.param(filterName)) {
-        var filter = photos[filterName].equals(req.param(filterName));
-        if (!filters) {
-          filters = filter;
-        } else {
-          filters = filters.and(filter);
-        }
-      }
-    });
-    if (filters) {
-      query.where(filters);
+    if (req.param('businessId')) {
+      query.where.and('"businessId" = $businessId');
+      query.$('businessId', req.param('businessId'));
     }
-    query = utils.paginateQuery(req, query);
+    if (req.param('productId')) {
+      query.where.and('"productId" = $productId');
+      query.$('productId', req.param('productId'));
+    }
+    if (req.param('consumerId')) {
+      query.where.and('"consumerId" = $consumerId');
+      query.$('consumerId', req.param('consumerId'));
+    }
 
-    // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      query = photos.select('COUNT(*) as count');
-      if (filters) { query.where(filters); }
-      client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };
@@ -84,12 +69,10 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(photos, req.fields)
-      .from(photos.join(products).on(products.id.equals(photos.id)))
-      .where(photos.id.equals(req.param('photoId')))
-      .toQuery();
+    var query = sql.query('SELECT * FROM photos WHERE id=$id');
+    query.$('id', req.param('photoId'));
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -108,19 +91,20 @@ module.exports.create = function(req, res){
   var TAGS = ['create-photo', req.uuid];
 
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var error = utils.validate(req.body, db.schemas.photos);
+    var inputs = req.body;
+
+    var error = utils.validate(inputs, db.schemas.photos);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-    var query = photos.insert(req.body).toQuery();
+    var query = sql.query('INSERT INTO photos ({fields}) VALUES ({values}) RETURNING id');
+    query.fields = sql.fields().addObjectKeys(inputs);
+    query.values = sql.fields().addObjectValues(inputs, query);
 
-    logger.db.debug(TAGS, query.text);
+    logger.db.debug(TAGS, query.toString());
 
-    client.query(query.text+' RETURNING id', query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -139,19 +123,17 @@ module.exports.update = function(req, res){
   var TAGS = ['update-photo', req.uuid];
 
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = photos
-      .update(req.body)
-      .where(photos.id.equals(req.param('photoId')))
-      .toQuery();
+    var inputs = req.body;
 
-    logger.db.debug(TAGS, query.text);
+    var query = sql.query('UPDATE photos SET {updates} WHERE id=$photoId');
+    query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.$('photoId', req.param('photoId'));
 
-    client.query(query.text, query.values, function(error, result){
+    logger.db.debug(TAGS, query.toString());
+
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -170,19 +152,14 @@ module.exports.del = function(req, res){
   var TAGS = ['delete-photo', req.uuid];
 
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = photos
-      .delete()
-      .where(photos.id.equals(req.param('photoId')))
-      .toQuery();
+    var query = sql.query('DELETE FROM photos WHERE id=$id');
+    query.$('id', req.param('photoId'));
 
-    logger.db.debug(TAGS, query.text);
+    logger.db.debug(TAGS, query.toString());
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
