@@ -35,27 +35,8 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var fields = [], name, as;
-    for (var field in req.fields){
-      if (field === "userId" || field === "cashierId"){
-        as = field;
-        name = "id";
-      }else{
-        as = name = field;
-      }
-
-      fields.push(
-        (("userId,email,password,singlyId,singlyAccessToken".indexOf(field) > -1)
-          ? '"users"'
-          : '"cashiers"')
-      + '."'
-      + name  + '" AS "'
-      + as    + '"'
-      );
-    }
-
     var query = [
-      'SELECT', fields.join(', '), 'FROM users',
+      'SELECT users.*, cashiers.* FROM users',
       'LEFT JOIN "cashiers" ON "cashiers"."userId" = users.id',
       'WHERE cashiers.id = $1'
     ].join(' ');
