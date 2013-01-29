@@ -6,26 +6,26 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var schema = require('../../db').schemas.photos;
 var routes = require('./routes');
-var fields = require('./fields');
+var permissions = require('./permissions');
 
 // Photos.list
 server.get(
   '/v1/photos'
-, middleware.fields(fields.get)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Photos.list
 server.get(
   '/v1/businesses/:businessId/photos'
-, middleware.fields(fields.get)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Photos.list
 server.get(
   '/v1/products/:productId/photos'
-, middleware.fields(fields.get)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -33,14 +33,14 @@ server.get(
 server.post(
   '/v1/photos'
 , middleware.validate.body(schema)
-, middleware.fields(fields.create)
+, middleware.permissions(permissions)
 , routes.create
 );
 
 // Photos.get
 server.get(
   '/v1/photos/:photoId'
-, middleware.fields(fields.get)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -48,7 +48,7 @@ server.get(
 server.patch(
   '/v1/photos/:photoId'
 , middleware.validate.body(schema)
-, middleware.fields(fields.modify)
+, middleware.permissions(permissions)
 , routes.update
 );
 
@@ -56,7 +56,7 @@ server.patch(
 server.post(
   '/v1/photos/:photoId'
 , middleware.validate.body(schema)
-, middleware.fields(fields.modify)
+, middleware.permissions(permissions)
 , routes.update
 );
 
