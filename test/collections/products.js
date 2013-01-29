@@ -216,7 +216,6 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data[0].name == 'Product 1');
       done();
     });
   });

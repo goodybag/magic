@@ -60,8 +60,11 @@ module.exports = function(allPerms){
     }
 
     // Filter body
-    if (req.method === "POST" || req.method === "PATCH")
-      filterDoc(req.method === "POST" ? perms.create : perms.update, req.body);
+    if ((req.method === "POST" || req.method === "PATCH")){
+      var filters = req.method === "POST" ? perms.create : perms.update;
+      if (typeof filters !== "boolean")
+        filterDoc(filters, req.body);
+    }
 
     res.json = function(result){
       // If there's an error or they have access to all, don't filter
