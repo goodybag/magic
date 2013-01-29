@@ -5,15 +5,11 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
-
-  // Tables
-, productTags = db.tables.productTags
-, productsProductTags = db.tables.productsProductTags
-, products = db.tables.products
 ;
 
 // Setup loggers
@@ -30,36 +26,25 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productTags', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of productTags', {uid: 'more'});
 
-  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(productTags, req.fields)
-      .from(productTags);
+    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM "productTags" {where} {limit}');
+    query.where = sql.where();
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    // filters
     if (req.param('businessId')) {
-      query.where(productTags.businessId.equals(req.param('businessId')));
+      query.where.and('"businessId" = $businessId');
+      query.$('businessId', req.param('businessId'));
     }
-    query = utils.paginateQuery(req, query);
 
-    // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      query = productTags.select('COUNT(*) as count');
-      if (req.param('businessId')) {
-        query.where(productTags.businessId.equals(req.param('businessId')));
-      }
-      client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };
@@ -73,21 +58,17 @@ module.exports.get = function(req, res){
   var TAGS = ['get-productTag', req.uuid];
   logger.routes.debug(TAGS, 'fetching productTag', {uid: 'more'});
 
-  // retrieve client
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(productTags, req.fields)
-      .from(productTags)
-      .where(productTags.id.equals(req.param('tagId')));
+    var query = sql.query('SELECT * FROM "productTags" WHERE id=$tagId');
+    query.$('tagId', +req.param('tagId') || 0);
 
-    // run data query
-    client.query(query.toQuery(), function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      if (result.rows.length <= 0) return res.json({ error: null, data: null});
+      if (result.rows.length <= 0) return res.json({ error: null, data: null });
       return res.json({ error: null, data: result.rows[0] });
     });
   });
@@ -101,26 +82,28 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-productTag', req.uuid];
 
-  // retrieve pg client
   db.getClient(function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.error(errors.internal.DB_FAILURE, error);
     }
 
-    // validate
-    var data = req.body;
-    data.businessId = req.param('businessId');
-    var error = utils.validate(data, db.schemas.productTags);
+    var inputs = req.body;
+    inputs.businessId = req.param('businessId');
+
+    var error = utils.validate(inputs, db.schemas.productTags);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-    // build query
-    //var query = productTags.insert(req.body).toQuery();
-    //logger.db.debug(TAGS, query.text);
-    var query = 'INSERT INTO "productTags" ("businessId", tag) SELECT $1, $2 WHERE NOT EXISTS (SELECT id from "productTags" WHERE "businessId" = $1 AND tag = $2) RETURNING id';
+    var query = sql.query([
+      'INSERT INTO "productTags" ("businessId", tag)',
+        'SELECT $businessId, $tag WHERE NOT EXISTS',
+          '(SELECT id from "productTags" WHERE "businessId" = $businessId AND tag = $tag)',
+        'RETURNING id'
+    ]);
+    query.$('businessId', inputs.businessId);
+    query.$('tag', inputs.tag)
 
-    // run query
-    client.query(query, [data.businessId, data.tag], function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -138,21 +121,15 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-productTag', req.uuid];
 
-  // retrieve pg client
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build query
-    var query = productTags
-      .update({ tag:req.body.tag })
-      .where(productTags.id.equals(req.param('tagId')))
-      .where(productTags.businessId.equals(req.param('businessId')));
+    var query = sql.query('UPDATE "productTags" SET tag=$tag WHERE id=$id AND "businessId"=$businessId');
+    query.$('tag', req.body.tag || '');
+    query.$('id', +req.param('tagId') || 0);
+    query.$('businessId', +req.param('businessId') || 0);
 
-    // run query
-    client.query(query.toQuery(), function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -170,21 +147,14 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-productTag', req.uuid];
 
-  // retrieve pg client
   db.getClient(function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build query
-    var query = productTags
-      .delete()
-      .where(productTags.id.equals(req.param('tagId')))
-      .where(productTags.businessId.equals(req.param('businessId')));
+    var query = sql.query('DELETE FROM "productTags" WHERE id=$id AND "businessId"=$businessId');
+    query.$('id', +req.param('tagId') || 0);
+    query.$('businessId', +req.param('businessId') || 0);
 
-    // run query
-    client.query(query.toQuery(), function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
