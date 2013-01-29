@@ -148,7 +148,6 @@ describe('PATCH /v1/photos/:id', function() {
       tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
         assert(!err);
         payload = JSON.parse(payload);
-        console.log(payload.error);
         assert(res.statusCode == 200);
         assert(!payload.error);
         tu.logout(done);
