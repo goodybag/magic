@@ -6,14 +6,14 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
 var schema      = require('../../db').schemas.managers;
-var fields      = require('./fields');
+var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
 // managers.list
 server.get(
   '/v1/managers'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -22,7 +22,7 @@ server.get(
   '/v1/managers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -31,7 +31,7 @@ server.post(
   '/v1/managers'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -41,7 +41,7 @@ server.patch(
   '/v1/managers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -51,7 +51,7 @@ server.post(
   '/v1/managers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
