@@ -4,9 +4,15 @@ var userLoyaltyStats = db.tables.userLoyaltyStats;
 module.exports = {
   access:{
     "default": {
+      consumerId   : userLoyaltyStats.consumerId
+    , businessId   : userLoyaltyStats.businessId
+    , numPunches   : userLoyaltyStats.numPunches
+    , totalPunches : userLoyaltyStats.totalPunches
+    , visitCount   : userLoyaltyStats.visitCount
+    , lastVisit    : userLoyaltyStats.lastVisit
     }
 
-  , owner: {
+  , employee: {
       consumerId   : userLoyaltyStats.consumerId
     , businessId   : userLoyaltyStats.businessId
     , numPunches   : userLoyaltyStats.numPunches
@@ -37,7 +43,7 @@ module.exports = {
     "default": {
     }
 
-  , owner: {
+  , employee: {
       deltaPunches : true
     , consumerId   : true
     , businessId   : true
