@@ -100,7 +100,7 @@ describe('POST /v1/cashiers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.id >= 0);
+        assert(results.data.cashierId >= 0);
 
         tu.logout(done);
       });

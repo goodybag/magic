@@ -129,7 +129,7 @@ describe('POST /v1/oauth', function(){
       results = JSON.parse(results);
       if (results.error) console.log(results.error);
       assert(!results.error);
-      assert(results.data.id > 0);
+      assert(results.data.userId > 0);
       tu.logout(done);
     });
   });

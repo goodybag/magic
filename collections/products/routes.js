@@ -58,7 +58,7 @@ module.exports.list = function(req, res){
         'GROUP BY products.id',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().addMap(req.fields);
+    query.fields = sql.fields().addSelectMap(req.fields);
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);

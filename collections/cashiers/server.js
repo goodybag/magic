@@ -12,6 +12,10 @@ var applyGroups = require('./apply-groups');
 // cashiers.list
 server.get(
   '/v1/cashiers'
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.auth.allow('admin', 'sales')
 , middleware.permissions(perms)
 , routes.list
