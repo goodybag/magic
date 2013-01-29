@@ -6,13 +6,13 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
 var schema      = require('../../db').schemas.consumers;
-var fields      = require('./fields');
+var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
 // consumers.list
 server.get(
   '/v1/consumers'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -20,7 +20,7 @@ server.get(
 server.get(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -28,7 +28,7 @@ server.get(
 server.post(
   '/v1/consumers'
 , middleware.applyGroups(applyGroups.owner)
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -38,7 +38,7 @@ server.patch(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -48,7 +48,7 @@ server.post(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
