@@ -11,12 +11,6 @@ var
 , config  = require('../../config')
 
 , logger  = {}
-
-  // Tables
-, users         = db.tables.users
-, tapinStations = db.tables.tapinStations
-, groups        = db.tables.groups
-, usersGroups   = db.tables.usersGroups
 ;
 
 // Setup loggers
