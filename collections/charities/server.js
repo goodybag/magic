@@ -2,23 +2,23 @@
  * Charities server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var schema     = require('../../db').schemas.charities;
-var fields     = require('./fields');
-var routes     = require('./routes');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var schema      = require('../../db').schemas.charities;
+var permissions = require('./permissions');
+var routes      = require('./routes');
 
 // Charities.list
 server.get(
   '/v1/charities'
-, middleware.fields(fields.access)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Charities.get
 server.get(
   '/v1/charities/:id'
-, middleware.fields(fields.access)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -33,7 +33,7 @@ server.del(
 server.post(
   '/v1/charities'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.create)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -42,7 +42,7 @@ server.post(
 server.patch(
   '/v1/charities/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.mutate)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -52,7 +52,7 @@ server.post(
   '/v1/charities/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.validate.body(schema)
-, middleware.fields(fields.mutate)
+, middleware.permissions(permissions)
 , routes.update
 );
 
