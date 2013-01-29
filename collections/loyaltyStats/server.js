@@ -12,7 +12,7 @@ var perms  = require('./permissions');
 // LoyaltyStats.get
 server.get(
   '/v1/loyaltyStats'
-, middleware.permissions(perms.owner)
+, middleware.permissions(perms.employee)
 , middleware.fields(fields.access)
 , routes.get
 );
@@ -20,9 +20,9 @@ server.get(
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
-, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunces:{isInt:[]}})
-, middleware.permissions(perms.owner)
-, middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
+, middleware.permissions(perms.employee)
+, middleware.auth.allow('admin', 'sales', 'employee')
 , middleware.fields(fields.mutate)
 , routes.update
 );
