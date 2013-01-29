@@ -33,12 +33,12 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = [
-      'SELECT * FROM businesses',
+      'SELECT businesses.*, array_agg("businessTags"."tag") as tags FROM businesses',
         'LEFT JOIN "businessTags" ON "businessTags"."businessId" = businesses.id',
         'WHERE businesses.id = $1 AND businesses."isDeleted" = false',
         'GROUP BY businesses.id'
     ].join(' ');
-    
+
     client.query(query, [+req.params.id || 0], function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
