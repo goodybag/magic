@@ -46,8 +46,8 @@ module.exports.list = function(req, res){
       }
     }
     var includes = [].concat(req.query.include);
-    var includeTags = (includes.indexOf('tags') !== -1 && req.fields['tags']);
-    var includeCats = (includes.indexOf('categories') !== -1 && req.fields['categories']);
+    var includeTags = includes.indexOf('tags') !== -1;
+    var includeCats = includes.indexOf('categories') !== -1;
 
     // build data query
     var query = sql.query([
@@ -58,7 +58,7 @@ module.exports.list = function(req, res){
         'GROUP BY products.id',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().addSelectMap('products.*');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -151,14 +151,7 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(products, req.fields)
-      // :DEBUG: node-sql cant support this yet
-      /*.from(products
-        .join(productsProductCategories)
-          .on(productsProductCategories.productId.equals(products.id))
-        .join(productCategories)
-          .on(productCategories.id.equals(productsProductCategories.productCategoryId))
-        )*/
+    var query = products.select('products.*')
       .from(' products '
       + 'LEFT JOIN "productsProductCategories" ppc '
         + 'ON ppc."productId" = products.id '
@@ -673,7 +666,7 @@ module.exports.listCategories = function(req, res) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
-    var query = utils.selectAsMap(productsProductCategories, req.fields)
+    var query = productsProductCategories.select('"productsProductCategories".*, "productCategories".*')
       .from(productsProductCategories
         .join(productCategories)
           .on(productCategories.id.equals(productsProductCategories.productCategoryId))
@@ -686,7 +679,7 @@ module.exports.listCategories = function(req, res) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
-
+console.log(result.rows);
       return res.json({ error: null, data: result.rows });
     });
   });

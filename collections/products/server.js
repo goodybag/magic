@@ -6,7 +6,7 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
 var schema = require('../../db').schemas.products;
-var fields = require('./fields');
+var permissions = require('./permissions');
 
 // Products.list
 server.get(
@@ -22,7 +22,7 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.fields(fields.access.products)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -42,7 +42,7 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.fields(fields.access.products)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -62,7 +62,7 @@ server.get(
 , middleware.defaults.query({
     tag : ['food']
   })
-, middleware.fields(fields.access.products)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -82,7 +82,7 @@ server.get(
 , middleware.defaults.query({
     tag : ['apparel']
   })
-, middleware.fields(fields.access.products)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -102,14 +102,14 @@ server.get(
 , middleware.defaults.query({
     tag : ['!food,!apparel']
   })
-, middleware.fields(fields.access.products)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Products.create
 server.post(
   '/v1/products'
-, middleware.fields(fields.create.product)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -117,14 +117,14 @@ server.post(
 // Products.get
 server.get(
   '/v1/products/:productId'
-, middleware.fields(fields.access.product)
+, middleware.permissions(permissions)
 , routes.get
 );
 
 // Products.update
 server.patch(
   '/v1/products/:productId'
-, middleware.fields(fields.mutate.product)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -132,7 +132,7 @@ server.patch(
 // Products.update
 server.post(
   '/v1/products/:productId'
-, middleware.fields(fields.mutate.product)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -147,14 +147,14 @@ server.del(
 // Products.listCategories
 server.get(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.access.productCategory)
+, middleware.permissions(permissions)
 , routes.listCategories
 );
 
 // Products.addCategory
 server.post(
   '/v1/products/:productId/categories'
-, middleware.fields(fields.create.productCategory)
+, middleware.permissions(permissions)
 , routes.addCategory
 );
 
