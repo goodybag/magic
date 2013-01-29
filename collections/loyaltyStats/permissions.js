@@ -1,4 +1,13 @@
-var all = ['id', 'consumerId', 'businessId', 'numPunches', 'totalPunches', 'visitCount', 'lastVisit'];
+var all = [
+  'id'
+, 'consumerId'
+, 'businessId'
+, 'numPunches'
+, 'totalPunches'
+, 'deltaPunches'
+, 'visitCount'
+, 'lastVisit'
+];
 
 module.exports = {
   world: {

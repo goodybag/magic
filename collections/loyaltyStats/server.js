@@ -20,10 +20,10 @@ server.get(
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
-, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunces:{isInt:[]}})
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , middleware.permissions(permissions)
+, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , routes.update
 );
 
