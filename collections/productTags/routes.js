@@ -35,7 +35,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(productTags, req.fields)
+    var query = productTags.select('"productTags".*')
       .from(productTags);
 
     // filters
@@ -78,7 +78,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(productTags, req.fields)
+    var query = productTags.select('"productTags".*')
       .from(productTags)
       .where(productTags.id.equals(req.param('tagId')));
 

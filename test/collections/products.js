@@ -564,7 +564,6 @@ describe('PATCH /v1/products/:id', function() {
 
         assert(!err);
         payload = JSON.parse(payload);
-        console.log(payload.error);
         assert(res.statusCode == 200);
 
         assert(!payload.error);
