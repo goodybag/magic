@@ -28,7 +28,7 @@ define(function(require){
       type: 'text'
     }
   , price: {
-      type: 'real'
+      type: 'numeric(10,2)'
     , validators: { isFloat:[] }
     }
   , photoUrl: {
