@@ -12,7 +12,7 @@ var applyGroups = require('./apply-groups');
 // LoyaltyStats.get
 server.get(
   '/v1/loyaltyStats'
-, middleware.applyGroups(applyGroups.owner)
+, middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
 , routes.get
 );
@@ -20,8 +20,8 @@ server.get(
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
-, middleware.applyGroups(applyGroups.owner)
-, middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.applyGroups(applyGroups.employee)
+, middleware.auth.allow('admin', 'sales', 'employee')
 , middleware.permissions(permissions)
 , middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , routes.update

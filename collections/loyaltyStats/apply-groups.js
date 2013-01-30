@@ -2,15 +2,14 @@
  * Loyalty Stats permissions
  */
 
-var 
-  db      = require('../../db')
-, userLoyaltyStats = db.tables.userLoyaltyStats
-, consumers        = db.tables.consumers
+var
+  db  = require('../../db')
+, sql = require('../../lib/sql')
 ;
 
-exports.owner = function(req, cb) {
+exports.employee = function(req, cb) {
   if (!req.session.user) return cb(null);
-  
+
   var consumerId = req.body.consumerId;
   var businessId = req.body.businessId;
   var userId     = req.session.user.id;
@@ -19,19 +18,20 @@ exports.owner = function(req, cb) {
     if (error) cb(null);
 
     // were we given a consumer id in the request body?
-    var query, qv = [userId];
-    if (consumerId) {
-      // make sure it belongs to the authorized user
-      query = 'SELECT id FROM consumers WHERE "userId" = $1 AND id = $2';
-      qv.push(consumerId);
+    var query;
+    if (req.session.user.groups.indexOf('manager') !== -1) {
+      query = sql.query('SELECT id FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
+    } else if (req.session.user.groups.indexOf('cashier') !== -1) {
+      query = sql.query('SELECT id FROM cashiers WHERE "userId" = $userId AND "businessId" = $businessId');
     } else {
-      // make sure the authorized user is a consumer
-      query = 'SELECT id FROM consumers WHERE "userId" = $1';
+      return cb(null);
     }
+    query.$('userId', userId);
+    query.$('businessId', businessId);
 
-    client.query(query, qv, function(error, result) {
+    client.query(query.toString(), query.$values, function(error, result) {
       if (error || result.rowCount === 0) return cb(null);
-      cb('owner')
+      cb('employee');
     });
   });
 };
