@@ -4,15 +4,11 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
-
-  // Tables
-, users       = db.tables.users
-, groups      = db.tables.groups
-, usersGroups = db.tables.usersGroups
 ;
 
 // Setup loggers
@@ -32,29 +28,16 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build query
-    // :TODO: nuke this fields kludge
-    var fields = [];
-    for (var field in req.fields) {
-      if (field === 'groups') {
-        fields.push('array_agg("usersGroups"."groupId") as groups');
-      } else {
-        fields.push('users.' + field + ' AS ' + field);
-      }
-    }
-    var query = [
-      'SELECT', fields.join(', '), 'FROM users',
-      'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-      'WHERE users.id = $1',
-      'GROUP BY users.id'
-    ].join(' ');
-    /*utils.selectAsMap(users, req.fields)
-      .from(users
-        .join(usersGroups)
-          .on(usersGroups.userId.equals(users.id)))
-      .where(users.id.equals(req.params.id));*/
+    var query = sql.query([
+      'SELECT users.*, array_agg("usersGroups"."groupId") AS groups',
+        'FROM users LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
+        'WHERE users.id = $id',
+        'GROUP BY users.id'
+    ]);
+    //query.fields = sql.fields().addSelectMap(req.fields);
+    query.$('id', +req.param('id') || 0);
 
-    client.query(query, [(+req.param('id')) || 0], function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
@@ -79,27 +62,21 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(users, req.fields)
-      .from(users);
+    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
+    query.where = sql.where();
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    // add query filters
     if (req.param('filter')) {
-      query.where('users.email ILIKE \'%'+req.param('filter')+'%\'');
+      query.where.and('users.email ILIKE $emailFilter');
+      query.$('emailFilter', '%'+req.param('filter')+'%');
     }
-    utils.paginateQuery(req, query);
 
-    // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      client.query('SELECT COUNT(*) as count FROM users', function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };
@@ -116,18 +93,17 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // start transaction
     var tx = new Transaction(client);
     tx.begin(function() {
 
-      // build query
-      var user = {
-        email:    req.body.email
-      , password: utils.encryptPassword(req.body.password)
-      , groups:   req.body.groups
-      };
-      var query = 'INSERT INTO users (email, password) SELECT $1, $2 WHERE $1 NOT IN (SELECT email FROM users) RETURNING id';
-      client.query(query, [user.email, user.password], function(error, result) {
+      var query = sql.query([
+        'INSERT INTO users (email, password)',
+          'SELECT $email, $password WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
+          'RETURNING id'
+      ]);
+      query.$('email', req.body.email);
+      query.$('password', utils.encryptPassword(req.body.password));
+      client.query(query.toString(), query.$values, function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
         // did the insert occur?
@@ -139,7 +115,7 @@ module.exports.create = function(req, res){
         var newUser = result.rows[0];
 
         // add groups
-        async.series((user.groups || []).map(function(groupId) {
+        async.series((req.body.groups || []).map(function(groupId) {
           return function(done) {
             var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
             client.query(query, [newUser.id, groupId], done);
@@ -172,11 +148,10 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = users.delete().where(
-      users.id.equals(req.params.id)
-    ).toQuery();
+    var query = sql.query('DELETE FROM users WHERE id=$id');
+    query.$('id', +req.params.id || 0);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

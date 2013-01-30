@@ -49,6 +49,15 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+  it('should include locations on include=locations', function(done) {
+    tu.get('/v1/businesses?include=locations', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data[0].locations.length > 0);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/businesses/:id', function() {

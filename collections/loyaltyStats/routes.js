@@ -5,13 +5,12 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
 
-  // Tables
-, userLoyaltyStats = db.tables.userLoyaltyStats
 , schemas          = db.schemas
 ;
 
@@ -53,11 +52,11 @@ module.exports.get = function(req, res){
       }
 
       // get stats
-      var query = utils.selectAsMap(userLoyaltyStats, req.fields)
-        .from(userLoyaltyStats)
-        .where(userLoyaltyStats.consumerId.equals(consumerId));
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" WHERE "userLoyaltyStats"."consumerId" = $consumerId');
+      query.fields = sql.fields().addSelectMap(req.fields);
+      query.$('consumerId', consumerId);
 
-      client.query(query.toQuery(), function(error, result){
+      client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 

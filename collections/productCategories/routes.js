@@ -4,13 +4,11 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
-
-  // Tables
-, productCategories = db.tables.productCategories
 ;
 
 // Setup loggers
@@ -32,17 +30,11 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(
-      productCategories
-    , req.fields
-    ).from(
-      productCategories
-    ).where(
-      productCategories.id.equals(req.params.id)
-    ).toQuery();
+    var query = sql.query('SELECT * FROM "productCategories" WHERE id=$id');
+    query.$('id', +req.params.id || 0)
 
     // run data query
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -61,40 +53,26 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productCategories', req.uuid];
   logger.routes.debug(TAGS, 'fetching product categories', {uid: 'more'});
 
-  // retrieve pg client
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(
-      productCategories
-    , req.fields
-    ).from(
-      productCategories
-    );
+    var query = sql.query('SELECT *, COUNT(*) OVER() AS "metaTotal" FROM "productCategories" {where} {sort} {limit}');
+    query.where = sql.where();
+    query.sort  = sql.sort('"productCategories".order');
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    // add query filters
     if (req.params.businessId){
-      query.where(productCategories.businessId.equals(req.params.businessId)).order(productCategories.order);
+      query.where.and('"businessId" = $businessId');
+      query.$('businessId', req.params.businessId);
     }
-    utils.paginateQuery(req, query);
 
-    // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      query = productCategories.select('COUNT(*) as count');
-      if (req.param('businessId')) {
-        query.where(productCategories.businessId.equals(req.param('businessId')));
-      }
-      client.query(query.toQuery(), function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };
@@ -111,7 +89,7 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var category = {
+    var inputs = {
       businessId:  req.body.businessId || req.params.businessId
     , order:       req.body.order      || 0
     , isFeatured:  req.body.isFeatured || false
@@ -119,12 +97,14 @@ module.exports.create = function(req, res){
     , description: req.body.description || ''
     };
 
-    var error = utils.validate(category, db.schemas.productCategories);
+    var error = utils.validate(inputs, db.schemas.productCategories);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-    var query = productCategories.insert(category).toQuery();
+    var query = sql.query('INSERT INTO "productCategories" ({fields}) VALUES ({values}) RETURNING id');
+    query.fields = sql.fields().addObjectKeys(inputs);
+    query.values = sql.fields().addObjectValues(inputs, query);
 
-    client.query(query.text + "RETURNING id", query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -146,11 +126,10 @@ module.exports.del = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = productCategories.delete().where(
-      productCategories.id.equals(req.params.id)
-    ).toQuery();
+    var query = sql.query('DELETE FROM "productCategories" WHERE id=$id');
+    query.$('id', +req.params.id || 0);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -171,33 +150,20 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // Don't let them update the id
-    delete req.body.id;
+    var inputs = req.body;
+    delete inputs.id; // Don't let them update the id
 
-    // Only let them update certain fields
-    var data;
-    if (req.fields){
-      var fieldsAvailable = 0;
-      data = {};
-      for (var key in req.body){
-        if (req.fields.hasOwnProperty(key)){
-          data[key] = req.body[key];
-          fieldsAvailable++;
-        }
-      }
-
-      // Trying to update things they're not allowed to
-      if (fieldsAvailable === 0)
-        return res.error(errors.auth.NOT_ALLOWED), logger.routes.error(TAGS, errors.auth.NOT_ALLOWED);
+    if (require('underscore').isEmpty(inputs)) {
+      return res.error(errors.input.VALIDATION_FAILED, 'Request body is empty');
     }
 
-    var query = productCategories.update(data || req.body).where(
-      productCategories.id.equals(req.params.id)
-    ).toQuery();
+    var query = sql.query('UPDATE "productCategories" SET {updates} WHERE id=$prodCatId');
+    query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.$('prodCatId', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.text);
+    logger.db.debug(TAGS, query.toString());
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

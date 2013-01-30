@@ -5,13 +5,13 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 
 , logger  = {}
 
   // Tables
-, userRedemptions = db.tables.userRedemptions
 , schemas     = db.schemas
 , Transaction = require('pg-transaction')
 ;
@@ -32,22 +32,15 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = utils.selectAsMap(userRedemptions, req.fields)
-      .from(userRedemptions);
-    utils.paginateQuery(req, query);
+    var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    // run data query
-    client.query(query.toQuery(), function(error, dataResult){
+    client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
-      // run count query
-      client.query('SELECT COUNT(*) as count FROM "userRedemptions"', function(error, countResult) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
-      });
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
 };

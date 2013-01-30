@@ -8,10 +8,6 @@ var
   , errors  = require('../../lib/errors')
 
   , logger  = {}
-
-// Tables
-  , oddityLive = db.tables.oddityLive
-  , oddityMeta = db.tables.oddityMeta
   ;
 
 // Setup loggers
@@ -29,38 +25,26 @@ module.exports.list = function(req, res){
   var TAGS = ['get-oddity-businesses list', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of oddity businesses', {uid: "more"});
 
-  // retrieve oddity business from oddityMeta join oddity table
   db.getClient(function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    var query = sql.query([
+      'SELECT * FROM "oddityLive"',
+        'INNER JOIN "oddityMeta"',
+          'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
+        'WHERE "oddityMeta"."toReview" = true',
+          'AND "oddityMeta"."changeColumns" = true',
+          'AND "oddityMeta"."isHidden" = false'
+    ]);
 
-    // query of joining oddityMeta and oddity tables to return business' name and address
-    var query = oddityLive.select(
-        oddityMeta.id
-      , oddityMeta.oddityLiveId
-      , oddityLive.biz_name
-      , oddityLive.e_address
-      , oddityLive.e_city
-      , oddityLive.web_url
-      , oddityLive.e_state
-      , oddityLive.e_postal
-      , oddityMeta.isHidden
-      , oddityMeta.toReview
-      , oddityMeta.changeColumns
-    ).from(oddityLive.join(oddityMeta).on(
-      oddityLive.id.equals(oddityMeta.oddityLiveId))
-    ).where(oddityMeta.toReview.equals(true))
-      .and(oddityMeta.changeColumns.equals(true))
-      .and(oddityMeta.isHidden.equals(false)).toQuery();
-
-    client.query(query.text, query.values, function(error, results){
+    client.query(query.toString(), query.$values, function(error, results){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       return res.json({error: null, data: results.rows})
-    })
+    });
+  });
+};
 
-  })
-}
 /**
  * Get 1 business by joining table between oddityLive and oddityMeta, return business name, address
  * city, postal and web url
@@ -74,37 +58,25 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if(error) res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = oddityLive.select(
-      oddityMeta.id
-      , oddityMeta.oddityLiveId
-      , oddityLive.biz_name
-      , oddityLive.e_address
-      , oddityLive.e_city
-      , oddityLive.web_url
-      , oddityLive.e_state
-      , oddityLive.e_postal
-      , oddityMeta.isHidden
-      , oddityMeta.toReview
-      , oddityMeta.changeColumns
-    ).from(oddityLive.join(oddityMeta).on(
-      oddityLive.id.equals(oddityMeta.oddityLiveId))
-    ).where(oddityMeta.toReview.equals(true))
-      .and(oddityMeta.changeColumns.equals(true))
-      .and(oddityMeta.isHidden.equals(false)
-      .and(oddityMeta.id.equals(+req.params.id || 0))).toQuery();
+    var query = sql.query([
+      'SELECT * FROM "oddityLive"',
+        'INNER JOIN "oddityMeta"',
+          'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
+        'WHERE "oddityMeta"."toReview" = true',
+          'AND "oddityMeta"."changeColumns" = true',
+          'AND "oddityMeta"."isHidden" = false',
+          'AND "oddityMeta".id = $id'
+    ]);
+    query.$('id', +req.params.id || 0);
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
+      if (result.rowCount === 0) return res.status(404).end();
       return res.json({error: null, data: result.rows[0]})
-    })
-  })
-  //query to get review by id
-
-}
+    });
+  });
+};
 /**
  * Function to hide one business in oddityMeta table and isHidden is set to false
  * @param req
@@ -117,19 +89,18 @@ module.exports.hide = function(req, res){
   db.getClient(function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-  var business = {
-    isHidden: req.body.isHidden
-  };
-  var query = oddityMeta.update(business).where(oddityMeta.id.equals(req.params.id)).toQuery();
+    var query = sql.query('UPDATE "oddityMeta" SET "isHidden"=$isHidden WHERE id=$id');
+    query.$('isHidden', !!req.body.isHidden);
+    query.$('id', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.text);
-    client.query(query.text, query.values, function(error, result){
+    logger.db.debug(TAGS, query.toString());
+
+    client.query(query.toString(), query.$values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
 
-
       return res.json({error: null, data: null });
-    })
-  })
-}
+    });
+  });
+};

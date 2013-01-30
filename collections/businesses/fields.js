@@ -10,6 +10,7 @@ module.exports = {
     , isGB      : businesses.isGB
     , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
+    , locations : true
     , $postRequires : ['name']
     }
 
@@ -20,6 +21,7 @@ module.exports = {
     , isGB      : businesses.isGB
     , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
+    , locations : true
     , $postRequires : ['name']
     }
 
@@ -30,6 +32,7 @@ module.exports = {
     , isGB      : businesses.isGB
     , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
+    , locations : true
     , $postRequires : ['name']
     }
 
@@ -40,6 +43,7 @@ module.exports = {
     , isGB      : businesses.isGB
     , isVerified: businesses.isVerified
     , isEnabled : businesses.isEnabled
+    , locations : true
     , $postRequires : ['name']
     }
   }

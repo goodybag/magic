@@ -11,10 +11,6 @@ var
 
 , logger  = {}
 
-, TextNode = require('sql/lib/node/text')
-
-  // Tables
-, locations  = db.tables.locations
 , schemas    = db.schemas
 ;
 
@@ -49,7 +45,7 @@ module.exports.list = function(req, res){
     var query = sql.query(
       'SELECT {fields} FROM locations {tagJoin} {where} GROUP BY locations.id {sort} {limit}'
     );
-    query.fields = sql.fields().addMap(req.fields);
+    query.fields = sql.fields().addSelectMap(req.fields);
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -123,13 +119,11 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = utils.selectAsMap(locations, req.fields)
-      .from(locations)
-      .where(locations.id.equals(+req.param('locationId') || 0))
-      .toQuery();
+    var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
+    query.fields = sql.fields().addSelectMap(req.fields);
+    query.$('id', +req.param('locationId') || 0);
 
-
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
@@ -154,40 +148,41 @@ module.exports.create = function(req, res){
   db.getClient(function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
+    var inputs = req.body;
+
     // validate input
-    var error = utils.validate(req.body, schemas.locations);
+    var error = utils.validate(inputs, schemas.locations);
     if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-    // enumerate values
-    var valueNames = [], valueTokens = [], values = [], i=0;
-    for (var name in req.body) {
-      valueNames.push('"'+name+'"');
-      valueTokens.push('$'+(++i));
-      values.push(req.body[name]);
-    }
+    // build query
+    var query = sql.query('INSERT INTO locations ({fields}) VALUES ({values}) RETURNING id');
+    query.fields = sql.fields().addObjectKeys(inputs);
+    query.values = sql.fields().addObjectValues(inputs, query);
 
     // add calculations
-    valueNames.push('"position"');
-    valueTokens.push('(ll_to_earth('+parseFloat(req.body.lat)+','+parseFloat(req.body.lon)+'))');
+    query.fields.add('position');
+    query.values.add('(ll_to_earth('+parseFloat(inputs.lat)+','+parseFloat(inputs.lon)+'))');
 
-    // build create query
-    var query = 'INSERT INTO locations ('+valueNames.join(', ')+') VALUES ('+valueTokens.join(', ')+') RETURNING id;';
-    logger.db.debug(TAGS, query);
+    logger.db.debug(TAGS, query.toString());
 
     // run create query
-    client.query(query, values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
       var newLocation = result.rows[0];
 
       // create productLocations for all products related to the business
-      var query = [
+      var query = sql.query([
         'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
-        'SELECT products.id, $1, $2, $3, $4, ll_to_earth($3, $4) FROM products WHERE products."businessId" = $2'
-      ].join(' ');
-      client.query(query, [newLocation.id, req.body.businessId, req.body.lat, req.body.lon], function(error, result) {
+        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon) FROM products WHERE products."businessId" = $businessId'
+      ]);
+      query.$('locationId', newLocation.id);
+      query.$('businessId', inputs.businessId);
+      query.$('lat', inputs.lat);
+      query.$('lon', inputs.lon);
+      client.query(query.toString(), query.$values, function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          return res.json({ error: null, data: newLocation });        
+        return res.json({ error: null, data: newLocation });        
       });
     });
   });
@@ -205,46 +200,38 @@ module.exports.update = function(req, res){
   db.getClient(function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-    // enumerate values
-    var valueNames = [], valueTokens = [], values = [], i=0;
-    for (var name in req.body) {
-      valueNames.push('"'+name+'"');
-      valueTokens.push('$'+(++i));
-      values.push(req.body[name]);
+    var inputs = req.body;
+
+    var query = sql.query('UPDATE locations SET {updates} WHERE id=$id');
+    query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.$('id', req.param('locationId'));
+
+    var isUpdatingPosition = (typeof inputs.lat != 'undefined' || typeof inputs.lon != 'undefined');
+    var lat = inputs.lat ? parseFloat(inputs.lat) : 'lat';
+    var lon = inputs.lon ? parseFloat(inputs.lon) : 'lon';
+    if (isUpdatingPosition) {
+      query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
     }
 
-    // add position updates
-    var isUpdatingPosition = false, newLat = 'lat', newLon = 'lon';
-    if (typeof req.body.lat != 'undefined') { isUpdatingPosition = true; newLat = parseFloat(req.body.lat); }
-    if (typeof req.body.lon != 'undefined') { isUpdatingPosition = true; newLon = parseFloat(req.body.lon); }
-    if (isUpdatingPosition) { 
-      valueNames.push('"position"');
-      valueTokens.push('(ll_to_earth('+newLat+','+newLon+'))');
-    }
-
-    // build update query
-    var query = 'UPDATE locations SET ('+valueNames.join(', ')+') = ('+valueTokens.join(', ')+') WHERE id='+(+req.param('locationId'))+';';
-    logger.db.debug(TAGS, query);
+    logger.db.debug(TAGS, query.toString());
 
     // run update query
-    client.query(query, values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       // do we need to update the productLocations?
-      if (!isUpdatingPosition) {
+      if (isUpdatingPosition) {
         return res.json({ error: null, data: null });
       }
 
-      // build productLocations update query
-      var updates = [
-        'lat='+newLat,
-        'lon='+newLon,
-        'position=ll_to_earth('+newLat+','+newLon+')'
-      ].join(',')
-
       // update related productLocations
-      client.query('UPDATE "productLocations" SET '+updates+' WHERE "locationId"=$1', [req.param('locationId')], function(error, result) {
+      var query = sql.query('UPDATE "productLocations" SET {updates} WHERE "locationId"=$id');
+      query.updates = sql.fields().addUpdateMap({lat:lat, lon:lon}, query);
+      query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
+      query.$('id', req.param('locationId'));
+
+      client.query(query.toString(), query.$values, function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         return res.json({ error: null, data: null });
@@ -267,14 +254,12 @@ module.exports.del = function(req, res){
       return res.error(errors.internal.DB_FAILURE, error);
     }
 
-    var query = locations
-      .delete()
-      .where(locations.id.equals(req.param('locationId')))
-      .toQuery();
+    var query = sql.query('DELETE FROM locations WHERE id=$id');
+    query.$('id', req.param('locationId'));
 
-    logger.db.debug(TAGS, query.text);
+    logger.db.debug(TAGS, query.toString());
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
