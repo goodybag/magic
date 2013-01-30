@@ -498,7 +498,7 @@ module.exports.update = function(req, res){
         .toQuery();
 
       logger.db.debug(TAGS, query.text);
-
+console.log("updating with", req.body);
       // run query
       client.query(query.text + ' RETURNING "businessId"', query.values, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

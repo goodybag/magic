@@ -258,6 +258,7 @@ module.exports = {
 
     , owner: {
         name         : products.name
+      , photoUrl     : products.photoUrl
       , description  : products.description
       , price        : products.price
       , isEnabled    : products.isEnabled
@@ -268,6 +269,7 @@ module.exports = {
 
     , sales: {
         name         : products.name
+      , photoUrl     : products.photoUrl
       , description  : products.description
       , price        : products.price
       , isVerified   : products.isVerified
@@ -284,6 +286,7 @@ module.exports = {
 
     , admin: {
         name         : products.name
+      , photoUrl     : products.photoUrl
       , description  : products.description
       , price        : products.price
       , likes        : products.likes
@@ -302,4 +305,4 @@ module.exports = {
       }
     }
   }
-}; 
+};
