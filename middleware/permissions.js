@@ -128,8 +128,12 @@ module.exports = function(allPerms){
     }
 
     // Filter body
-    if ((req.method === "POST" || req.method === "PATCH")){
-      var filters = req.method === "POST" ? perms.create : perms.update;
+    if (req.body){
+      var filters;
+
+      if (req.method === "POST") filters = perms.create;
+      if (req.method === "PATCH" || req.method === "PUT") filters = perms.update;
+
       if (typeof filters !== "boolean")
         filterDoc(filters, req.body);
     }
