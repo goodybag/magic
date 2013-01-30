@@ -35,32 +35,14 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var fields = [], name, as;
-    for (var field in req.fields){
-      if (field === "userId" || field === "tapinStationId"){
-        as = field;
-        name = "id";
-      }else{
-        as = name = field;
-      }
-
-      fields.push(
-        (("userId,email,password,singlyId,singlyAccessToken".indexOf(field) > -1)
-          ? '"users"'
-          : '"tapinStations"')
-      + '."'
-      + name  + '" AS "'
-      + as    + '"'
-      );
-    }
-
     var query = [
-      'SELECT', fields.join(', '), 'FROM users',
+      'SELECT users.*, "tapinStations".*, "tapinStations".id as "tapinStationId" FROM users',
       'LEFT JOIN "tapinStations" ON "tapinStations"."userId" = users.id',
       'WHERE "tapinStations".id = $1'
     ].join(' ');
 
     client.query(query, [(+req.param('id')) || 0], function(error, result){
+      if (error) console.log(error);
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
@@ -86,7 +68,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(users, req.fields).from(
+    var query = users.select('users.*, "tapinStations".*').from(
       users.join(tapinStations).on(
         users.id.equals(tapinStations.userId)
       )
@@ -100,6 +82,7 @@ module.exports.list = function(req, res){
 
     // run data query
     client.query(query.toQuery(), function(error, dataResult){
+      if (error) console.log(error);
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
@@ -247,7 +230,6 @@ module.exports.update = function(req, res){
 
       // Include only allowed fields in update
       for (var key in req.body){
-        if (!(key in req.fields)) continue;
         query += ' "' + key + '" = $' + values.push(req.body[key]) + ', '
       }
 

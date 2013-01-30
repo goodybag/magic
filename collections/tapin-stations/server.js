@@ -6,14 +6,14 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
 var schema      = require('../../db').schemas.tapinStations;
-var fields      = require('./fields');
+var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
 // tapinStations.list
 server.get(
   '/v1/tapin-stations'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -22,7 +22,7 @@ server.get(
   '/v1/tapin-stations/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -30,7 +30,7 @@ server.get(
 server.post(
   '/v1/tapin-stations'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -39,7 +39,7 @@ server.post(
 server.patch(
   '/v1/tapin-stations/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -48,7 +48,7 @@ server.patch(
 server.post(
   '/v1/tapin-stations/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
