@@ -10,6 +10,6 @@ module.exports = {
   , isFeatured  : productCategories.isFeatured
   , order       : productCategories.order
   , categories  : true 
-  , $postRequires : ['name', 'businessId']
+  , $postRequires : ['name'/*, 'businessId' :DEBUG: temporary*/]
   }
 };
