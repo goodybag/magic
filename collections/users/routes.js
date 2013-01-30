@@ -33,26 +33,13 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
-    // :TODO: nuke this fields kludge
-    var fields = [];
-    for (var field in req.fields) {
-      if (field === 'groups') {
-        fields.push('array_agg("usersGroups"."groupId") as groups');
-      } else {
-        fields.push('users.' + field + ' AS ' + field);
-      }
-    }
+    var fields = ['array_agg("usersGroups"."groupId") as groups', 'users.*'];
     var query = [
       'SELECT', fields.join(', '), 'FROM users',
       'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
       'WHERE users.id = $1',
       'GROUP BY users.id'
     ].join(' ');
-    /*utils.selectAsMap(users, req.fields)
-      .from(users
-        .join(usersGroups)
-          .on(usersGroups.userId.equals(users.id)))
-      .where(users.id.equals(req.params.id));*/
 
     client.query(query, [(+req.param('id')) || 0], function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -80,8 +67,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(users, req.fields)
-      .from(users);
+    var query = users.select("users.*").from(users);
 
     // add query filters
     if (req.param('filter')) {
