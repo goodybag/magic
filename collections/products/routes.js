@@ -58,7 +58,7 @@ module.exports.list = function(req, res){
         'GROUP BY products.id',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().addSelectMap('products.*');
+    query.fields = sql.fields().add('products.*');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -151,7 +151,15 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = products.select('products.*')
+    var fields = [
+      'products.*'
+    , '"productCategories".id as "categoryId"'
+    , '"productCategories".name as "categoryName"'
+    , '"productTags".id as "tagId"'
+    , '"productTags".tag as "tag"'
+    ];
+
+    var query = products.select(fields.join(', '))
       .from(' products '
       + 'LEFT JOIN "productsProductCategories" ppc '
         + 'ON ppc."productId" = products.id '
@@ -183,7 +191,7 @@ module.exports.get = function(req, res){
       for (var i=0, ii=result.rows.length, p; i < ii; i++) {
         p = result.rows[i];
 
-        if (catsPushed.indexOf(p.categoryId) === -1){
+        if (catsPushed.indexOf(p.categoryId) === -1 && p.categoryId != undefined){
           product.categories.push({
             id:   p.categoryId
           , name: p.categoryName
@@ -193,7 +201,7 @@ module.exports.get = function(req, res){
           catsPushed.push(p.categoryId);
         }
 
-        if (tagsPushed.indexOf(p.tagId) === -1){
+        if (tagsPushed.indexOf(p.tagId) === -1 && p.tagId != undefined){
           product.tags.push({
             id:  p.tagId
           , tag: p.tag
@@ -283,6 +291,7 @@ module.exports.create = function(req, res){
 
         return stage.insertProduct(client);
       });
+
     }
 
     // Validate and insert the provided product
@@ -679,7 +688,7 @@ module.exports.listCategories = function(req, res) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
-console.log(result.rows);
+
       return res.json({ error: null, data: result.rows });
     });
   });
@@ -837,7 +846,7 @@ module.exports.updateFeelings = function(req, res) {
         if (input.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', input.isTried)); }
         async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
-            logger.db.debug(TAGS, result);
+            logger.db.debug(TAGS, results);
 
             // end transaction
             tx.commit();

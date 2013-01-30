@@ -520,7 +520,7 @@ describe('PATCH /v1/products/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/products/1', JSON.stringify({ businessId:2, name:'fdsa' }), 'application/json', function(err, payload, res) {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'fdsa' }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -563,9 +563,10 @@ describe('PATCH /v1/products/:id', function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [1] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
+        payload = JSON.parse(payload);
+        console.log(payload.error);
         assert(res.statusCode == 200);
 
-        payload = JSON.parse(payload);
         assert(!payload.error);
         tu.logout(done);
       });
@@ -577,9 +578,9 @@ describe('PATCH /v1/products/:id', function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [9999] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
+        payload = JSON.parse(payload);
         assert(res.statusCode == 400);
 
-        payload = JSON.parse(payload);
         assert(payload.error);
         assert(payload.error.name === "INVALID_CATEGORY_IDS");
         tu.logout(done);

@@ -24,6 +24,7 @@ module.exports = {
     , 'businessName'
     , 'name'
     , 'description'
+    , 'distance'
     , 'price'
     , 'photoUrl'
     , 'likes'
