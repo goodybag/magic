@@ -64,7 +64,7 @@ module.exports.list = function(req, res){
 
     var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
     query.where = sql.where();
-    query.limit = sql.limit(req.query.limit, req.query.order);
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
     if (req.param('filter')) {
       query.where.and('users.email ILIKE $emailFilter');
