@@ -1,12 +1,16 @@
 var all = [
   'id'
-, 'consumerId'
 , 'businessId'
+, 'consumerId'
+, 'cashierUserId'
+, 'locationId'
+, 'tapinStationId'
+, 'dateTime'
+, 'deltaPunches'
 , 'numPunches'
 , 'totalPunches'
-, 'deltaPunches'
+, 'isElite'
 , 'visitCount'
-, 'lastVisit'
 ];
 
 module.exports = {
@@ -21,16 +25,31 @@ module.exports = {
 , consumer: {
     read:   [
       'id'
-    , 'consumerId'
     , 'businessId'
+    , 'consumerId'
+    , 'locationId'
+    , 'isElite'
     , 'numPunches'
     , 'totalPunches'
-    , 'visitCount'
-    , 'lastVisit'
+    , 'dateTime'
     ]
+  , create: []
+  , update: []
   }
 
-, employee: {
+, locationEmployee: {
+    read:   all
+  , create: all
+  , update: all
+  }
+
+, manager: {
+    read:   all
+  , create: all
+  , update: all
+  }
+
+, cashier: {
     read:   all
   , create: all
   , update: all

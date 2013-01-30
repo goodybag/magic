@@ -6,13 +6,13 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var schema = require('../../db').schemas.userRedemptions;
 var routes = require('./routes');
-var fields = require('./fields');
+var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
 // Redemptions.list
 server.get(
   '/v1/redemptions'
-, middleware.fields(fields.access)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -22,7 +22,7 @@ server.post(
 , middleware.validate.body(schema, { deltaPunches:{ isInt:[] }})
 , middleware.applyGroups(applyGroups.locationEmployee)
 , middleware.auth.allow('locationEmployee')
-, middleware.fields(fields.create)
+, middleware.permissions(permissions)
 , routes.create
 );
 

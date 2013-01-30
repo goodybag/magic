@@ -2,13 +2,13 @@
  * Redemptions permissions
  */
 
-var 
+var
   db      = require('../../db')
 ;
 
 exports.locationEmployee = function(req, cb) {
   if (!req.session.user) return cb(null);
-  
+
   var tapinStationId = +req.body.tapinStationId;
   var cashierUserId  = +req.session.user.id;
   var cashierTable = '"cashiers"';
@@ -26,6 +26,7 @@ exports.locationEmployee = function(req, cb) {
         'WHERE "tapinStations".id = $1'
     ] .join(' ')
       .replace(RegExp('{c}','g'), cashierTable)
+
     client.query(query, [tapinStationId, cashierUserId], function(error, result) {
       if (error) return cb(null);
       if (result.rowCount === 0) { cb(null); }

@@ -33,7 +33,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
-    var query = utils.selectAsMap(userRedemptions, req.fields)
+    var query = userRedemptions.select('"userRedemptions".*')
       .from(userRedemptions);
     utils.paginateQuery(req, query);
 
@@ -45,7 +45,6 @@ module.exports.list = function(req, res){
       // run count query
       client.query('SELECT COUNT(*) as count FROM "userRedemptions"', function(error, countResult) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
         return res.json({ error: null, data: dataResult.rows, meta: { total:countResult.rows[0].count } });
       });
     });
@@ -77,6 +76,7 @@ module.exports.create = function(req, res){
       ] .join(' ')
         .replace(RegExp('{bls}','g'), '"businessLoyaltySettings"')
         .replace(RegExp('{ts}','g'), '"tapinStations"');
+
       client.query(query, [req.body.tapinStationId], function(error, result) {
         if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
         if (result.rowCount === 0) { return res.error(errors.internal.BAD_DATA, 'Business loyalty settings not found'), tx.abort(), logger.routes.error(TAGS, error); }
