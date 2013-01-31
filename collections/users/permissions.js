@@ -17,7 +17,7 @@ module.exports = {
 
 , owner: {
     read:   all
-  , update: ['email, singlyAccessToken', 'password']
+  , update: ['email', 'singlyAccessToken', 'password']
   }
 
 , sales: {
@@ -27,8 +27,8 @@ module.exports = {
   }
 
 , admin: {
-    read:   all
-  , create: all
+    read:   all.concat('password')
+  , create: all.concat('password')
   , update: all.concat('password')
   }
 };
