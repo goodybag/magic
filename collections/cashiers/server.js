@@ -2,12 +2,12 @@
  * cashiers server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var routes     = require('./routes');
-var schema     = require('../../db').schemas.cashiers;
-var fields     = require('./fields');
-var perms      = require('./permissions');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var routes      = require('./routes');
+var schema      = require('../../db').schemas.cashiers;
+var perms       = require('./permissions');
+var applyGroups = require('./apply-groups');
 
 // cashiers.list
 server.get(
@@ -17,25 +17,25 @@ server.get(
     limit      : { isInt:[], min:[1] }
   })
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(perms)
 , routes.list
 );
 
 // cashiers.get
 server.get(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(perms)
 , routes.get
 );
 
 // cashiers.create
 server.post(
   '/v1/cashiers'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(perms)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -43,9 +43,9 @@ server.post(
 // cashiers.update
 server.patch(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(perms)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -53,9 +53,9 @@ server.patch(
 // cashiers.update
 server.post(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.fields(fields)
+, middleware.permissions(perms)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -63,7 +63,7 @@ server.post(
 // cashiers.delete
 server.del(
   '/v1/cashiers/:id'
-, middleware.permissions(perms.owner)
+, middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
 , routes.del
 );

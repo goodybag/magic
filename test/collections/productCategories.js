@@ -15,11 +15,6 @@ describe('GET /v1/productCategories', function() {
       results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.length > 0);
-      // Check to make sure the correct fields exist
-      // It'll be interesting when we get our READ/WRITE
-      // field digestion finished because then we can check
-      // the existence of all of our fields returned based on
-      // logged in user
       assert(results.data[0].name);
       assert(results.meta.total > 1);
       done();

@@ -7,11 +7,6 @@ module.exports = {
 
 , default: {}
 
-, owner: {
-    read:   true
-  , update: ['email', 'password', 'singlyId', 'singlyAccessToken']
-  }
-
 , sales: {
     read:   true
   , create: true

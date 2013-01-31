@@ -1,16 +1,16 @@
+var all = [
+  'id'
+, 'tag'
+];
+
 module.exports = {
   world: {
-    read:   []
+    read:   all
   , create: []
   , update: []
   }
 
 , default: {}
-
-, owner: {
-    read:   true
-  , update: ['email', 'password', 'singlyId', 'singlyAccessToken']
-  }
 
 , sales: {
     read:   true

@@ -1,16 +1,21 @@
+var all = [
+  'id'
+, 'name'
+, 'description'
+, 'businessId'
+, 'isFeatured'
+, 'order'
+, 'categories'
+];
+
 module.exports = {
   world: {
-    read:   []
+    read:   ['id', 'name', 'description', 'businessId']
   , create: []
   , update: []
   }
 
 , default: {}
-
-, owner: {
-    read:   true
-  , update: ['email', 'password', 'singlyId', 'singlyAccessToken']
-  }
 
 , sales: {
     read:   true

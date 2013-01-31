@@ -13,7 +13,6 @@ describe('GET /v1/loyaltyStats', function() {
       tu.get('/v1/loyaltyStats', function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
-
         payload = JSON.parse(payload);
         assert(!payload.error);
         assert(payload.data[0].numPunches === 5);

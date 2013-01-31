@@ -2,11 +2,11 @@
  * Businesses server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var schema     = require('../../db').schemas.businesses;
-var fields     = require('./fields');
-var routes     = require('./routes');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var schema      = require('../../db').schemas.businesses;
+var permissions = require('./permissions');
+var routes      = require('./routes');
 
 // Businesses.list
 server.get(
@@ -17,14 +17,14 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.fields(fields.businesses)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
-, middleware.fields(fields.business)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -39,7 +39,7 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.business)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -48,7 +48,7 @@ server.post(
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.business)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );

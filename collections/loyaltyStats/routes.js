@@ -53,7 +53,7 @@ module.exports.get = function(req, res){
 
       // get stats
       var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" WHERE "userLoyaltyStats"."consumerId" = $consumerId');
-      query.fields = sql.fields().addSelectMap(req.fields);
+      query.fields = sql.fields().add('"userLoyaltyStats".*');
       query.$('consumerId', consumerId);
 
       client.query(query.toString(), query.$values, function(error, result){

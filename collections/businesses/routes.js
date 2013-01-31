@@ -36,11 +36,9 @@ module.exports.get = function(req, res){
         'WHERE businesses.id = $id AND businesses."isDeleted" = false',
         'GROUP BY businesses.id'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("businesses.*");
     query.$('id', +req.params.id || 0);
-
-    if (req.fields.tags)
-      query.fields.add('array_agg("businessTags"."tag") as tags');
+    query.fields.add('array_agg("businessTags"."tag") as tags');
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -94,10 +92,10 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var includes = [].concat(req.query.include);
-    var includeLocations = (includes.indexOf('locations') !== -1 && req.fields['locations']);
+    var includeLocations = includes.indexOf('locations') !== -1;
 
     var query = sql.query('SELECT {fields} FROM businesses {locationJoin} {where} GROUP BY businesses.id {sort} {limit}');
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("businesses.*");
     query.where  = sql.where().and('"isDeleted" = false');
     query.sort   = sql.sort(req.query.sort || 'name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -127,6 +125,7 @@ module.exports.list = function(req, res){
       dataResult.rows.forEach(function(r) {
         r.locations = (r.locations) ? JSON.parse(r.locations) : []; // would be nice if we could avoid this
       });
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
      });
   });

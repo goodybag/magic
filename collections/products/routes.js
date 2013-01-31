@@ -37,8 +37,8 @@ module.exports.list = function(req, res){
       }
     }
     var includes = [].concat(req.query.include);
-    var includeTags = (includes.indexOf('tags') !== -1 && req.fields['tags']);
-    var includeCats = (includes.indexOf('categories') !== -1 && req.fields['categories']);
+    var includeTags = includes.indexOf('tags') !== -1;
+    var includeCats = includes.indexOf('categories') !== -1;
 
     // build data query
     var query = sql.query([
@@ -49,7 +49,7 @@ module.exports.list = function(req, res){
         'GROUP BY products.id',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add('products.*');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -242,6 +242,7 @@ module.exports.create = function(req, res){
 
         return stage.insertProduct(client);
       });
+
     }
 
     // Validate and insert the provided product

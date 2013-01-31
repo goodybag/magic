@@ -2,30 +2,33 @@
  * Groups server
  */
 
-var server     = require('express')();
-var middleware = require('../../middleware');
-var routes     = require('./routes');
-var schema     = require('../../db').schemas.groups;
-var fields     = require('./fields');
+var server      = require('express')();
+var middleware  = require('../../middleware');
+var routes      = require('./routes');
+var schema      = require('../../db').schemas.groups;
+var permissions = require('./permissions');
 
 // Groups.list
 server.get(
   '/v1/groups'
-, middleware.fields(fields)
+, middleware.auth.allow('admin')
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // Groups.get
 server.get(
   '/v1/groups/:id'
-, middleware.fields(fields)
+, middleware.auth.allow('admin')
+, middleware.permissions(permissions)
 , routes.get
 );
 
 // Groups.create
 server.post(
   '/v1/groups'
-, middleware.fields(fields)
+, middleware.auth.allow('admin')
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -33,7 +36,8 @@ server.post(
 // Groups.update
 server.patch(
   '/v1/groups/:id'
-, middleware.fields(fields)
+, middleware.auth.allow('admin')
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -41,7 +45,8 @@ server.patch(
 // Groups.update
 server.post(
   '/v1/groups/:id'
-, middleware.fields(fields)
+, middleware.auth.allow('admin')
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );

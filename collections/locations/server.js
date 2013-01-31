@@ -6,7 +6,7 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var schema = require('../../db').schemas.locations;
 var routes = require('./routes');
-var fields = require('./fields');
+var permissions = require('./permissions');
 
 // Locations.list
 server.get(
@@ -22,7 +22,7 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.fields(fields.accessOne)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -42,7 +42,7 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.fields(fields.access)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -63,7 +63,7 @@ server.get(
 , middleware.defaults.query({
     tag : ['food']
   })
-, middleware.fields(fields.accessOne)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -84,7 +84,7 @@ server.get(
 , middleware.defaults.query({
     tag : ['apparel']
   })
-, middleware.fields(fields.accessOne)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -105,7 +105,7 @@ server.get(
 , middleware.defaults.query({
     tag : ['!food,!apparel']
   })
-, middleware.fields(fields.accessOne)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -113,7 +113,7 @@ server.get(
 server.post(
   '/v1/locations'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.create)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -121,7 +121,7 @@ server.post(
 // Locations.get
 server.get(
   '/v1/locations/:locationId'
-, middleware.fields(fields.access)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -129,7 +129,7 @@ server.get(
 server.patch(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.mutate)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -138,7 +138,7 @@ server.patch(
 server.post(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields.mutate)
+, middleware.permissions(permissions)
 , middleware.validate.body(schema)
 , routes.update
 );

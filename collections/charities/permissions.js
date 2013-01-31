@@ -1,6 +1,6 @@
 module.exports = {
   world: {
-    read:   []
+    read:   ['id', 'name', 'desc', 'logoUrl']
   , create: []
   , update: []
   }
@@ -8,14 +8,13 @@ module.exports = {
 , default: {}
 
 , owner: {
-    read:   true
-  , update: ['email', 'password', 'singlyId', 'singlyAccessToken']
+    read:   ['joinDate', 'totalReceived']
   }
 
 , sales: {
     read:   true
-  , create: true
-  , update: true
+  , create: ['name', 'desc', 'logoUrl']
+  , update: ['name', 'desc', 'logoUrl']
   }
 
 , admin: {
