@@ -59,10 +59,16 @@ module.exports = function(allPerms){
   return function(req, res, next){
     var
       // Everyone starts off with world
-      perms = utils.clone(allPerms.world)
+      perms = {
+        read:   typeof allPerms.world.read   !== "boolean" ? allPerms.world.read.slice(0)   : allPerms.world.read
+      , create: typeof allPerms.world.create !== "boolean" ? allPerms.world.create.slice(0) : allPerms.world.create
+      , update: typeof allPerms.world.update !== "boolean" ? allPerms.world.update.slice(0) : world.update
+      }
 
       // Overriding - saving for later
     , json = res.json
+
+    , filtered = []
 
       /**
        * Filters a document based on permissions
@@ -74,6 +80,7 @@ module.exports = function(allPerms){
 
         for (var key in doc){
           if (permissions.indexOf(subKeyPrepend + key) === -1){
+            filtered.push(key);
             delete doc[key]
             continue;
           }
@@ -156,6 +163,11 @@ module.exports = function(allPerms){
       res.json = json;
     };
 
+    if (filtered.length > 0){
+      var error = utils.clone(errors.auth.INVALID_WRITE_PERMISSIONS);
+      error.fields = filtered;
+      return res.json({ error: error });
+    }
     next();
   };
 };
