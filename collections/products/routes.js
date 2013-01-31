@@ -466,28 +466,30 @@ module.exports.update = function(req, res){
     }
 
   , removeCategoriesAndTags: function(client, productId, businessId, categories, tags){
-      var
-        inParallel = {
-          categories: function(done){
-            var query = sql.query('DELETE FROM "productsProductCategories" WHERE "productId"=$productId');
-            query.$('productId', productId);
-            client.query(query.toString(), query.$values, done);
-          }
-        , tags: function(done){
-            var query = sql.query('DELETE FROM "productsProductTags" WHERE "productId"=$productId');
-            query.$('productId', productId);
-            client.query(query.toString(), query.$values, done);
-          }
-        }
+      var removes = [];
+      if (categories) {
+        removes.push(function(done){
+          var query = sql.query('DELETE FROM "productsProductCategories" WHERE "productId"=$productId');
+          query.$('productId', productId);
+          client.query(query.toString(), query.$values, done);
+        });
+      }
+      if (tags) {
+        removes.push(function(done){
+          var query = sql.query('DELETE FROM "productsProductTags" WHERE "productId"=$productId');
+          query.$('productId', productId);
+          client.query(query.toString(), query.$values, done);
+        });
+      }
 
-      , onComplete = function(error, results){
+      var onComplete = function(error, results){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           stage.updateCategoriesTags(client, productId, businessId, categories, tags);
         }
       ;
 
-      utils.parallel(inParallel, onComplete);
+      utils.parallel(removes, onComplete);
     }
 
   , updateCategoriesTags: function(client, productId, businessId, categories, tags){
