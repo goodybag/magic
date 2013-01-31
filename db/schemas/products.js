@@ -28,8 +28,8 @@ define(function(require){
       type: 'text'
     }
   , price: {
-      type: 'numeric(10,2)'
-    , validators: { isFloat:[] }
+      type: 'int'
+    , validators: { isInt:[] }
     , sanitizers: { ifNull:[0] }
     }
   , photoUrl: {

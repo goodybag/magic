@@ -382,7 +382,7 @@ describe('POST /v1/products', function() {
 
   it('should create a product and respond with the id of the new product', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:12.34 }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:1234 }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -424,7 +424,7 @@ describe('POST /v1/products', function() {
 
   it('should create a product with categories and respond with the id of the new product', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2] }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:9999, categories: [1, 2] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -439,7 +439,7 @@ describe('POST /v1/products', function() {
 
   it('should fail to create a product with categories because of invalid categories', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [9999, 99999] }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:9999, categories: [9999, 99999] }), 'application/json', function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 400);
 
@@ -454,7 +454,7 @@ describe('POST /v1/products', function() {
 
   it('should create a product with tags and respond with the id of the new product', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: [1, 2] }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:9999, tags: [1, 2] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -481,7 +481,7 @@ describe('POST /v1/products', function() {
 
   it('should fail to create a product with tags because of invalid tags', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, tags: [999,999] }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:9999, tags: [999,999] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 400);
@@ -497,7 +497,7 @@ describe('POST /v1/products', function() {
 
   it('should create a product with categories and tags and respond with the id of the new product', function(done) {
     tu.loginAsAdmin(function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:99.99, categories: [1, 2], tags: [1, 2] }), 'application/json', function(err, payload, res) {
+      tu.post('/v1/products', JSON.stringify({ businessId:1, name:'zzzzz', price:9999, categories: [1, 2], tags: [1, 2] }), 'application/json', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
