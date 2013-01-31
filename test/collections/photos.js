@@ -169,6 +169,60 @@ describe('PATCH /v1/photos/:id', function() {
     });
   });
 
+  it('should not allow a non-owning consumer to update', function(done) {
+    tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { notes:'this wont happen' }, function(err, payload, res) {
+        assert(res.statusCode == 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should allow an owning consumer to update', function(done) {
+    tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { notes:'this will happen' }, function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should not allow a non-owning-business manager to update', function(done) {
+    tu.login({ email:'manager_redeem3@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
+        assert(res.statusCode == 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should allow an owning business manager to update', function(done) {
+    tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should not allow a non-owning-business cashier to update', function(done) {
+    tu.login({ email:'cashier_redeem3@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
+        assert(res.statusCode == 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should allow an owning business cashier to update', function(done) {
+    tu.login({ email:'some_cashier@gmail.com', password:'password' }, function() {
+      tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.logout(done);
+      });
+    });
+  });
+
 });
 
 

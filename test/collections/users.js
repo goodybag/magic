@@ -100,7 +100,6 @@ describe('POST /v1/users', function() {
       , groups:[1, 2]
       };
 
-
       tu.post('/v1/users', user, function(error, results) {
         assert(!error);
         results = JSON.parse(results);

@@ -143,6 +143,9 @@ module.exports = function(allPerms){
 
       if (typeof filters !== "boolean")
         filterDoc(filters, req.body);
+
+      if (["POST","PATCH","PUT"].indexOf(req.method) !== -1 && utils.isEmpty(req.body))
+        return res.error(errors.auth.DATA_PERMISSIONS);
     }
 
     res.json = function(result){
