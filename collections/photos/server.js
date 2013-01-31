@@ -7,6 +7,7 @@ var middleware = require('../../middleware');
 var schema = require('../../db').schemas.photos;
 var routes = require('./routes');
 var permissions = require('./permissions');
+var applyGroups = require('./apply-groups');
 
 // Photos.list
 server.get(
@@ -48,6 +49,8 @@ server.get(
 server.patch(
   '/v1/photos/:photoId'
 , middleware.validate.body(schema)
+, middleware.applyGroups(applyGroups.owner)
+, middleware.applyGroups(applyGroups.businessOwner)
 , middleware.permissions(permissions)
 , routes.update
 );
@@ -56,6 +59,8 @@ server.patch(
 server.post(
   '/v1/photos/:photoId'
 , middleware.validate.body(schema)
+, middleware.applyGroups(applyGroups.owner)
+, middleware.applyGroups(applyGroups.businessOwner)
 , middleware.permissions(permissions)
 , routes.update
 );
