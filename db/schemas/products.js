@@ -30,6 +30,7 @@ define(function(require){
   , price: {
       type: 'numeric(10,2)'
     , validators: { isFloat:[] }
+    , sanitizers: { ifNull:[0] }
     }
   , photoUrl: {
       type: 'text'
