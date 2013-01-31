@@ -598,6 +598,25 @@ describe('PATCH /v1/products/:id', function() {
     });
   });
 
+  it('should preserve tags and categories if not included in the PATCH', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/products/1', JSON.stringify({ name:'product 1', tags:[1], categories:[1] }), 'application/json', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.patch('/v1/products/1', JSON.stringify({ name:'product 1' }), 'application/json', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          tu.get('/v1/products/1', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(!payload.error);
+            assert(payload.data.tags[0].id === 1);
+            assert(payload.data.categories[0].id === 1);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
 });
 
 
