@@ -26,7 +26,7 @@ define(function(require){
     }
   , consumerId: {
       type: 'int'
-    // :TODO: , meta: 'references businesses(id) on delete cascade'
+    , meta: 'references consumers(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , url: {

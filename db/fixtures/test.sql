@@ -251,8 +251,8 @@ SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocation
 -- PHOTOS
 
 BEGIN;
-INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('1', '1', '1', 'http://placekitten.com/200/300', true);
-INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('2', '1', null, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled") VALUES ('1', '1', '1', 9, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled") VALUES ('2', '1', null, 4, 'http://placekitten.com/200/300', true);
 INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
 COMMIT;
 SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used

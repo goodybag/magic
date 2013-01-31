@@ -164,9 +164,7 @@ module.exports = function(allPerms){
     };
 
     if (filtered.length > 0){
-      var error = utils.clone(errors.auth.INVALID_WRITE_PERMISSIONS);
-      error.fields = filtered;
-      return res.json({ error: error });
+      return res.error(errors.auth.INVALID_WRITE_PERMISSIONS, filtered);
     }
     next();
   };
