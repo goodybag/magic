@@ -93,20 +93,20 @@ describe('POST /v1/users', function() {
   });
 
   it('should update users groups', function(done) {
-    var user = {
-      email: "testmctesterson2@test.com"
-    , password: "testetsetset"
-    , groups:[1, 2]
-    };
+    tu.loginAsAdmin(function() {
+      var user = {
+        email: "testmctesterson2@test.com"
+      , password: "testetsetset"
+      , groups:[1, 2]
+      };
 
 
-    tu.post('/v1/users', user, function(error, results) {
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      assert(results.data.id >= 0);
+      tu.post('/v1/users', user, function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id >= 0);
 
-      tu.loginAsAdmin(function() {
         tu.get('/v1/users/'+results.data.id, function(error, results, res) {
           assert(!error);
           assert(res.statusCode == 200);
@@ -121,18 +121,20 @@ describe('POST /v1/users', function() {
   });
 
   it('should fail if user email existing', function(done){
-    var user = {
-      email: "sales@goodybag.com"
-    , password: "password"
-    };
+    tu.loginAsAdmin(function() {
+      var user = {
+        email: "sales@goodybag.com"
+      , password: "password"
+      };
 
-    tu.post('/v1/users', user, function(error, results, res){
-      assert(!error);
-      assert(res.statusCode === 400);
-      results = JSON.parse(results);
-      assert(results.error.name == 'EMAIL_REGISTERED');
-      done();
-    })
+      tu.post('/v1/users', user, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode === 400);
+        results = JSON.parse(results);
+        assert(results.error.name == 'EMAIL_REGISTERED');
+        done();
+      });
+    });
   });
 
   it('should fail if included group does not exist', function(done){
@@ -161,7 +163,6 @@ describe('PATCH /v1/users/:id', function() {
     var user = {
       email: "new@email.com"
     , password: "whatever"
-    , groups:[2, 3]
     };
     tu.login({ email: 'dumb@goodybag.com', password: 'password' }, function(error){
       tu.patch('/v1/users/6', user, function(error, results, res) {
@@ -174,9 +175,25 @@ describe('PATCH /v1/users/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.email === 'new@email.com');
-          assert(results.data.groups[0] === 2 && results.data.groups[1] === 3);
           tu.logout(done);
         });
+      });
+    });
+  });
+
+  it('should fail update a user because of invalid write permissions', function(done) {
+    var user = {
+      email: "blehdfasr@goodybag.com"
+    , password: "whatever"
+    , groups:[2, 3]
+    };
+    tu.login({ email: 'consumer@goodybag.com', password: 'password' }, function(error, user){
+      tu.patch('/v1/users/' + user.id, user, function(error, results, res) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(results.error);
+        assert(results.error.name === "INVALID_WRITE_PERMISSIONS");
+        tu.logout(done);
       });
     });
   });
