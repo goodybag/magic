@@ -143,9 +143,6 @@ module.exports = function(allPerms){
 
       if (typeof filters !== "boolean")
         filterDoc(filters, req.body);
-
-      if (["POST","PATCH","PUT"].indexOf(req.method) !== -1 && utils.isEmpty(req.body))
-        return res.error(errors.auth.DATA_PERMISSIONS);
     }
 
     res.json = function(result){
@@ -167,9 +164,7 @@ module.exports = function(allPerms){
     };
 
     if (filtered.length > 0){
-      var error = utils.clone(errors.auth.INVALID_WRITE_PERMISSIONS);
-      error.fields = filtered;
-      return res.json({ error: error });
+      return res.error(errors.auth.INVALID_WRITE_PERMISSIONS, filtered);
     }
     next();
   };
