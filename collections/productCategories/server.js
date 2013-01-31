@@ -7,7 +7,7 @@ var
 , middleware  = require('../../middleware')
 , routes      = require('./routes')
 , schema      = require('../../db').schemas.productCategories
-, fields      = require('./fields')
+, permissions = require('./permissions')
 , auth        = middleware.auth
 , validate    = middleware.validate.body
 ;
@@ -15,7 +15,7 @@ var
 // ProductCategories.list
 server.get(
   '/v1/productCategories'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -23,7 +23,7 @@ server.get(
 server.post(
   '/v1/productCategories'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.create
 );
@@ -31,7 +31,7 @@ server.post(
 // ProductCategories.get
 server.get(
   '/v1/productCategories/:id'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -39,7 +39,7 @@ server.get(
 server.patch(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -48,7 +48,7 @@ server.patch(
 server.put(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -57,7 +57,7 @@ server.put(
 server.post(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -66,14 +66,14 @@ server.post(
 server.del(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.del
 );
 
 // ProductCategories.list
 server.get(
   '/v1/businesses/:businessId/productCategories'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
@@ -81,7 +81,7 @@ server.get(
 server.post(
   '/v1/businesses/:businessId/productCategories'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.create
 );
@@ -89,7 +89,7 @@ server.post(
 // ProductCategories.get
 server.get(
   '/v1/businesses/:businessId/productCategories/:id'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -97,7 +97,7 @@ server.get(
 server.patch(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -106,7 +106,7 @@ server.patch(
 server.put(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -115,7 +115,7 @@ server.put(
 server.post(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , validate(schema)
 , routes.update
 );
@@ -124,7 +124,7 @@ server.post(
 server.del(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.del
 );
 

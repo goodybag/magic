@@ -6,33 +6,33 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
 var schema = require('../../db').schemas.productTags;
-var fields = require('./fields');
+var permissions = require('./permissions');
 
 // ProductTags.list
 server.get(
   '/v1/product-tags'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // ProductTags.list
 server.get(
   '/v1/businesses/:businessId/product-tags'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.list
 );
 
 // ProductTags.get
 server.get(
   '/v1/product-tags/:tagId'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
 // ProductTags.get
 server.get(
   '/v1/businesses/:businessId/product-tags/:tagId'
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.get
 );
 
@@ -40,7 +40,7 @@ server.get(
 server.post(
   '/v1/businesses/:businessId/product-tags'
 , middleware.validate.body(schema)
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.create
 );
 
@@ -48,7 +48,7 @@ server.post(
 server.patch(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.validate.body(schema)
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.update
 );
 
@@ -56,7 +56,7 @@ server.patch(
 server.post(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.validate.body(schema)
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.update
 );
 
@@ -64,7 +64,7 @@ server.post(
 server.del(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.auth.allow('admin', 'sales')
-, middleware.fields(fields)
+, middleware.permissions(permissions)
 , routes.del
 );
 

@@ -34,11 +34,10 @@ module.exports.get = function(req, res){
         'WHERE groups.id = $id',
         'GROUP BY groups.id'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("groups.*");
     query.$('id', +req.param('id') || 0);
 
-    if (req.fields.users)
-      query.fields.add('array_agg("usersGroups"."userId") as users');
+    query.fields.add('array_agg("usersGroups"."userId") as users');
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -66,7 +65,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM groups {limit}');
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("groups.*");
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');

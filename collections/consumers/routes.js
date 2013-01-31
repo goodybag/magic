@@ -34,7 +34,7 @@ module.exports.get = function(req, res){
         'LEFT JOIN "consumers" ON "consumers"."userId" = users.id',
         'WHERE consumers.id = $id'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("users.*, consumers.*");
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -42,6 +42,9 @@ module.exports.get = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
+        result.rows[0].consumerId = result.rows[0].id;
+        delete result.rows[0].id;
+
         return res.json({ error: null, data: result.rows[0] });
       } else {
         return res.status(404).end();
@@ -68,7 +71,7 @@ module.exports.list = function(req, res){
         'INNER JOIN users ON consumers."userId" = users.id',
         '{where} {limit}'
     ]);
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("users.*, consumers.*");
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
@@ -107,7 +110,7 @@ module.exports.create = function(req, res){
         '"user" AS',
           '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
             'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-            'RETURNING id),',
+            'RETURNING *),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',

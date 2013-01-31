@@ -71,7 +71,7 @@ describe('POST /v1/users', function() {
     , groups:[1, 2]
     };
 
-    tu.loginAsAdmin(function() {    
+    tu.loginAsAdmin(function() {
       tu.post('/v1/users', user, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
@@ -92,7 +92,7 @@ describe('POST /v1/users', function() {
     });
   });
 
-  it('should not allow non-admins to set their own groups', function(done) {
+  it('should update users groups', function(done) {
     var user = {
       email: "testmctesterson2@test.com"
     , password: "testetsetset"
@@ -106,13 +106,13 @@ describe('POST /v1/users', function() {
       assert(!results.error);
       assert(results.data.id >= 0);
 
-      tu.loginAsAdmin(function() {    
+      tu.loginAsAdmin(function() {
         tu.get('/v1/users/'+results.data.id, function(error, results, res) {
           assert(!error);
           assert(res.statusCode == 200);
 
           results = JSON.parse(results);
-          assert(!results.data.groups[0]);
+          assert(results.data.groups[0] === 1);
 
           tu.logout(done);
         });
@@ -200,7 +200,7 @@ describe('PATCH /v1/users/:id', function() {
       });
     });
   });
-    
+
   it('should not update user if email is taken', function(done){
     var user = {
       email: "sales@goodybag.com"

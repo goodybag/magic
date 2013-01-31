@@ -1,37 +1,50 @@
-/**
- * Loyalty Stats permissions
- */
+var all = [
+  'id'
+, 'consumerId'
+, 'businessId'
+, 'numPunches'
+, 'totalPunches'
+, 'deltaPunches'
+, 'visitCount'
+, 'lastVisit'
+];
 
-var 
-  db  = require('../../db')
-, sql = require('../../lib/sql')
-;
+module.exports = {
+  world: {
+    read:   []
+  , create: []
+  , update: []
+  }
 
-exports.employee = function(req, cb) {
-  if (!req.session.user) return cb(null);
-  
-  var consumerId = req.body.consumerId;
-  var businessId = req.body.businessId;
-  var userId     = req.session.user.id;
+, default: {}
 
-  db.getClient(function(error, client) {
-    if (error) cb(null);
+, consumer: {
+    read:   [
+      'id'
+    , 'consumerId'
+    , 'businessId'
+    , 'numPunches'
+    , 'totalPunches'
+    , 'visitCount'
+    , 'lastVisit'
+    ]
+  }
 
-    // were we given a consumer id in the request body?
-    var query;
-    if (req.session.user.groups.indexOf('manager') !== -1) {
-      query = sql.query('SELECT id FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
-    } else if (req.session.user.groups.indexOf('cashier') !== -1) {
-      query = sql.query('SELECT id FROM cashiers WHERE "userId" = $userId AND "businessId" = $businessId');
-    } else {
-      return cb(null);
-    }
-    query.$('userId', userId);
-    query.$('businessId', businessId);
+, employee: {
+    read:   all
+  , create: all
+  , update: all
+  }
 
-    client.query(query.toString(), query.$values, function(error, result) {
-      if (error || result.rowCount === 0) return cb(null);
-      cb('employee');
-    });
-  });
+, sales: {
+    read:   all
+  , create: all
+  , update: all
+  }
+
+, admin: {
+    read:   all
+  , create: all
+  , update: all
+  }
 };

@@ -145,10 +145,10 @@ describe('PATCH /v1/photos/:id', function() {
 
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.patch('/v1/photos/2', { businessId:2, name:'Barhouse2' }, function(err, payload, res) {
+      tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
         payload = JSON.parse(payload);
+        assert(res.statusCode == 200);
         assert(!payload.error);
         tu.logout(done);
       });

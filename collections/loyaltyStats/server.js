@@ -6,24 +6,24 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var schema = require('../../db').schemas.userLoyaltyStats;
 var routes = require('./routes');
-var fields = require('./fields');
-var perms  = require('./permissions');
+var permissions = require('./permissions');
+var applyGroups = require('./apply-groups');
 
 // LoyaltyStats.get
 server.get(
   '/v1/loyaltyStats'
-, middleware.permissions(perms.employee)
-, middleware.fields(fields.access)
+, middleware.applyGroups(applyGroups.employee)
+, middleware.permissions(permissions)
 , routes.get
 );
 
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
-, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
-, middleware.permissions(perms.employee)
+, middleware.applyGroups(applyGroups.employee)
 , middleware.auth.allow('admin', 'sales', 'employee')
-, middleware.fields(fields.mutate)
+, middleware.permissions(permissions)
+, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , routes.update
 );
 

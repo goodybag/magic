@@ -78,7 +78,7 @@ module.exports.oauthAuthenticate = function(req, res){
   ];
 
   if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
-    
+
 
   if (supportedGroups.indexOf(req.body.group) === -1)
     return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
@@ -150,34 +150,34 @@ module.exports.oauthAuthenticate = function(req, res){
       });
     }
 
-  , createOrUpdateUser: function(user){
+  , createOrUpdateUser: function(consumer){
       db.getClient(function(error, client){
         if (error) return stage.dbError(error);
 
-        var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id');
-        query.$('token', user.singlyAccessToken);
-        query.$('id', user.singlyId);
+        var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
+        query.$('token', consumer.singlyAccessToken);
+        query.$('id', consumer.singlyId);
 
         client.query(query.toString(), query.$values, function(error, result){
           if (error) return stage.dbError(error);
 
-          if (result.rowCount === 0) return stage.createUser(user);
+          if (result.rowCount === 0) return stage.createUser(consumer);
           return stage.setSessionAndSend({
-            id: result.rows[0].userId
-          , singlyId: user.singlyId
-          , singlyAccessToken: user.singlyAccessToken
+            id: result.rows[0].id
+          , singlyId: consumer.singlyId
+          , singlyAccessToken: consumer.singlyAccessToken
           });
         });
       });
     }
 
-  , createUser: function(user){
+  , createUser: function(consumer){
       var url = config.baseUrl;
       if (url.indexOf(':') === -1) url += ":" + config.http.port;
 
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        utils.post(url + '/v1/consumers', user, function(error, response, result){
+        utils.post(url + '/v1/consumers', consumer, function(error, response, result){
           // Really shouldn't happen
           // TODO: send an actual error
           if (error) return stage.singlyError(error);
@@ -185,7 +185,10 @@ module.exports.oauthAuthenticate = function(req, res){
           // No need to log - already logged from the post
           if (result.error) return res.error(result.error);
 
-          return stage.setSessionAndSend(result.data);
+          consumer.groups = ['consumer'];
+          consumer.id = result.data.userId;
+
+          return stage.setSessionAndSend(consumer);
         });
       }else{
         res.error(errors.auth.INVALID_GROUP);
@@ -196,6 +199,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
   , setSessionAndSend: function(user){
       req.session.user = user;
+      // console.log(user);
       res.json({ error: null, data: user });
     }
 
@@ -269,7 +273,6 @@ module.exports.authenticate = function(req, res){
           req.session.user = user;
 
           // TODO: get user info based on groups
-
           return res.json({ error: null, data: user });
         }); // End setup groups query
       }); // End compare passwords

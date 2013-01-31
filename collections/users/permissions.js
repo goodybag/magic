@@ -1,12 +1,34 @@
-/**
- * User permissions
- */
+var all = [
+  'id'
+, 'email'
+, 'singlyUserId'
+, 'singlyAccessToken'
+, 'groups'
+];
 
-exports.owner = function(req, cb) {
-  var userId = req.param('id');
-  if (req.session.user && userId == req.session.user.id) {
-    cb('owner');
-  } else {
-    cb(null);
+module.exports = {
+  world: {
+    read:   ['id']
+  , create: []
+  , update: []
+  }
+
+, default: {}
+
+, owner: {
+    read:   all
+  , update: ['email, singlyAccessToken', 'password']
+  }
+
+, sales: {
+    read:   all
+  , create: all
+  , update: all
+  }
+
+, admin: {
+    read:   all
+  , create: all
+  , update: all.concat('password')
   }
 };

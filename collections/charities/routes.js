@@ -31,7 +31,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM charities WHERE id=$id');
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("charities.*");
     query.$('id', +req.params.id || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -86,7 +86,7 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM charities {where} {limit}');
-    query.fields = sql.fields().addSelectMap(req.fields);
+    query.fields = sql.fields().add("charities.*");
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 

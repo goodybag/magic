@@ -10,7 +10,6 @@ describe('GET /v1/reviews', function(){
   it('should response with business from oddityLive join oddityMeta', function(done){
     tu.get('/v1/reviews', function(error, results){
       assert(!error);
-      console.log()
       var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.length > 0);

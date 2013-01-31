@@ -156,7 +156,7 @@ describe('PATCH /v1/cashiers/:id', function() {
     var cashier = {
       locationId: 4
     };
-    tu.login({ email: 'some_cashier@gmail.com', password: 'password' }, function(error){
+    tu.loginAsAdmin(function(error){
       tu.patch('/v1/cashiers/1', cashier, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);

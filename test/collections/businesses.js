@@ -4,6 +4,7 @@ var
 , utils   = require('./../../lib/utils')
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
+, perms   = require('../../collections/businesses/permissions')
 ;
 
 describe('GET /v1/businesses', function() {
@@ -85,6 +86,42 @@ describe('GET /v1/businesses/:id', function() {
       assert(!error);
       assert(res.statusCode == 404);
       done();
+    });
+  });
+
+  it('should respond with a single business document with fields ' + perms.world.read.join(', '), function(done) {
+    var id = 1;
+    tu.get('/v1/businesses/' + id, function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.id === id);
+
+      for (var key in payload.data){
+        assert(perms.world.read.indexOf(key) > -1);
+      }
+
+      done();
+    });
+  });
+
+  var permFields = perms.default.read.concat(perms.world.read);
+  it('should respond with a single business document with fields ' + permFields.join(', '), function(done) {
+    tu.loginAsConsumer(function(error){
+      assert(!error);
+      var id = 1;
+      tu.get('/v1/businesses/' + id, function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.id === id);
+
+        for (var key in payload.data){
+          assert(permFields.indexOf(key) > -1);
+        }
+
+        tu.logout(done);
+      });
     });
   });
 });

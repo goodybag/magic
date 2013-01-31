@@ -1,35 +1,42 @@
-/**
- * Owner permissions
- */
+module.exports = {
+  world: {
+    read:   [
+      'screenName'
+    , 'consumerId'
+    ]
+  , create: [
+      'email'
+    , 'password'
+    , 'singlyId'
+    , 'singlyAccessToken'
+    , 'firstName'
+    , 'lastName'
+    , 'screenName'
+    , 'cardId'
+    ]
+  , update: []
+  }
 
-var
-  db      = require('../../db')
+, default: {}
 
-  // Tables
-, consumers   = db.tables.consumers
-;
+, owner: {
+    read:   true
+  , update: [
+      'email'
+    , 'password'
+    , 'singlyId'
+    , 'singlyAccessToken'
+    , 'firstName'
+    , 'lastName'
+    , 'screenName'
+    , 'cardId'
+    , 'consumerId'
+    ]
+  }
 
-exports.owner = function(req, cb) {
-  if (!req.session || !req.session.user) return cb(null);
-
-  var userId = req.param('id');
-
-  db.getClient(function(error, client){
-    if (error) return cb(null);
-
-    var query = consumers.select(
-      consumers.id
-    ).where(
-      consumers.userId.equals(req.session.user.id)
-    ).toQuery();
-
-    client.query(query, function(error, result){
-      if (error) return cb(null);
-
-      if (result.rows.length === 0) return cb(null);
-      if (result.rows[0].id != userId) return cb(null);
-
-      cb('owner');
-    });
-  });
+, admin: {
+    read:   true
+  , create: true
+  , update: true
+  }
 };

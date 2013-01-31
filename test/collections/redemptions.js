@@ -12,9 +12,9 @@ describe('POST /v1/redemptions', function() {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
         assert(!err);
+        payload = JSON.parse(payload);
         assert(res.statusCode == 200);
 
-        payload = JSON.parse(payload);
         assert(!payload.error);
         assert(payload.data.numPunches === 4);
         assert(payload.data.totalPunches === 12);
