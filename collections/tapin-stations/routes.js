@@ -34,7 +34,10 @@ module.exports.get = function(req, res){
         'LEFT JOIN "tapinStations" ON "tapinStations"."userId" = users.id',
         'WHERE "tapinStations".id = $id'
     ]);
-    query.fields = sql.fields().add('users.*, "tapinStations".*');
+    query.fields = sql.fields().add('users.*');
+    query.fields.add('"tapinStations".*');
+    query.fields.add('"tapinStations".id as "tapinStationId"');
+
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -68,7 +71,10 @@ module.exports.list = function(req, res){
         'INNER JOIN users ON "tapinStations"."userId" = users.id',
         '{where} {limit}'
     ]);
-    query.fields = sql.fields().add('users.*, "tapinStations".*');
+    query.fields = sql.fields().add('users.*');
+    query.fields.add('"tapinStations".*');
+    query.fields.add('"tapinStations".id as "tapinStationId"');
+
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
