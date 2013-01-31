@@ -11,6 +11,12 @@ var routes     = require('./routes');
 // Businesses.list
 server.get(
   '/v1/businesses'
+, middleware.validate.query({
+    sort       : { is:/(\+|-)?(name)/ },
+    include    : { is:/locations/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.fields(fields.businesses)
 , routes.list
 );
@@ -45,13 +51,6 @@ server.patch(
 , middleware.fields(fields.business)
 , middleware.validate.body(schema)
 , routes.update
-);
-
-// Businesses.listWithLocations - STUPID METHOD
-server.get(
-  '/v1/businessesWithLocations'
-, middleware.auth.allow('admin', 'sales')
-, routes.listWithLocations
 );
 
 module.exports = server;

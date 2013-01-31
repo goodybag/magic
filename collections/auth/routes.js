@@ -4,16 +4,12 @@
 
 var
   db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 , config = require('../../config')
 
 , logger  = {}
-
-  // Tables
-, users       = db.tables.users
-, groups      = db.tables.groups
-, usersGroups = db.tables.usersGroups
 
 //singly variables
 , clientId      = config.singly.clientId
@@ -158,18 +154,16 @@ module.exports.oauthAuthenticate = function(req, res){
       db.getClient(function(error, client){
         if (error) return stage.dbError(error);
 
-        var query = users.update({
-          singlyAccessToken: user.singlyAccessToken
-        }).where(
-          users.singlyId.equals(user.singlyId)
-        ).toQuery();
+        var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id');
+        query.$('token', user.singlyAccessToken);
+        query.$('id', user.singlyId);
 
-        client.query(query.text + " RETURNING id", query.values, function(error, result){
+        client.query(query.toString(), query.$values, function(error, result){
           if (error) return stage.dbError(error);
 
           if (result.rowCount === 0) return stage.createUser(user);
           return stage.setSessionAndSend({
-            id: result.rows[0].id
+            id: result.rows[0].userId
           , singlyId: user.singlyId
           , singlyAccessToken: user.singlyAccessToken
           });
@@ -232,13 +226,10 @@ module.exports.authenticate = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // First check for user existence
-    var query = users.select(
-      users.id, users.email, users.password
-    ).from(users).where(
-      users.email.equals(req.body.email || '')
-    ).toQuery();
+    var query = sql.query('SELECT id, email, password FROM users WHERE email = $email');
+    query.$('email', req.body.email || '');
 
-    client.query(query.text, query.values, function(error, result){
+    client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);
@@ -261,20 +252,18 @@ module.exports.authenticate = function(req, res){
         logger.db.debug(TAGS, "Getting groups and setting on user");
 
         // Setup groups
-        query = usersGroups.select(
-          groups.name
-        ).from(
-          usersGroups.join(groups).on(
-            usersGroups.groupId.equals(groups.id)
-          )
-        ).where(
-          usersGroups.userId.equals(user.id)
-        ).toQuery();
+        query = sql.query([
+          'SELECT array_agg(groups.name) as groups FROM "usersGroups"',
+            'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
+            'WHERE "usersGroups"."userId" = $id',
+            'GROUP BY "usersGroups"."userId"'
+        ]);
+        query.$('id', user.id);
 
-        client.query(query.text, query.values, function(error, results){
+        client.query(query.toString(), query.$values, function(error, results){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          user.groups = results.rows.map(function(group){ return group.name; });
+          user.groups = results.rows[0] ? results.rows[0].groups : [];
 
           // Save user in session
           req.session.user = user;
