@@ -4,14 +4,14 @@
 
 var Profiler = require('clouseau');
 
-module.exports.profile = function(req, res){
+module.exports.getProfilerData = function(req, res){
   var data = Profiler.getFormattedData();
   res.format({
     'application/json':function() {
       res.json(data);
     },
     'text/html':function() {
-      var netTotalAvg = data.tree.children.reduce(function(acc, node) { return acc + node.totalAverage }, 0);
+      var netTotalAvg = (data.tree.children || []).reduce(function(acc, node) { return acc + node.totalAverage }, 0);
 
       res.end([
         '<h1>Route Totals</h1>',
@@ -45,11 +45,23 @@ module.exports.profile = function(req, res){
               '</tr>'
             ].join('');
           }).join(''),
-        '</table>'
+        '</table>',
+        '<br/><hr/><br/>',
+        '<form action="/v1/debug/profile" method="post">',
+          '<input type="checkbox" name="enabled" value="1"', Profiler.enabled ? 'checked' : '',' /> Profiling Enabled<br/>',
+          '<input type="checkbox" name="catchAll" value="1"', Profiler.catchAll ? 'checked' : '',' /> Profile All Requests<br/>',
+          '<input type="submit" /> <a href="/v1/debug/profile">Refresh</a>',
+        '</form>'
       ].join(''));
     }
   })
 };
+
+module.exports.updateProfilerSettings = function(req, res) {
+  Profiler.enabled = req.body.enabled;
+  Profiler.catchAll = req.body.catchAll;
+  res.redirect('/v1/debug/profile');
+}
 
 function routes(total) {
   return (total.name.charAt(0) == '/');

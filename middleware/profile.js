@@ -4,6 +4,10 @@ var profile = function(name, params) {
   return function(req, res, next) {
     var n = name;
 
+    if (!Profiler.catchAll && !req.param('profile')) {
+      return next();
+    }
+
     if (params && Array.isArray(params)) {
       var p = [];
       params.forEach(function(k) {

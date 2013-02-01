@@ -22,6 +22,7 @@ var
 // :DEBUG: profiler
 var Profiler = require('clouseau');
 Profiler.enabled = true;
+Profiler.catchAll = false;
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
 
