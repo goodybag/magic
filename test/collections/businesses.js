@@ -56,6 +56,8 @@ describe('GET /v1/businesses', function() {
       var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data[0].locations.length > 0);
+      assert(payload.data[0].locations[0].lat != null && payload.data[0].locations[0].lat != undefined);
+      assert(payload.data[0].locations[0].lon != null && payload.data[0].locations[0].lon != undefined);
       done();
     });
   });
