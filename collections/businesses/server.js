@@ -6,6 +6,7 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var schema      = require('../../db').schemas.businesses;
 var permissions = require('./permissions');
+var applyGroups = require('./apply-groups');
 var routes      = require('./routes');
 
 // Businesses.list
@@ -17,15 +18,31 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , routes.list
 );
 
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , routes.get
+);
+
+
+// Businesses.loyalty.get
+server.get(
+  '/v1/businesses/:id/loyalty'
+, routes.getLoyalty
+);
+
+// Businesses.loyalty.patch
+server.patch(
+  '/v1/businesses/:id/loyalty'
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
+, middleware.permissions(permissions.loyalty)
+, routes.updateLoyalty
 );
 
 // Businesses.del
@@ -39,7 +56,7 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -48,7 +65,7 @@ server.post(
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , middleware.validate.body(schema)
 , routes.update
 );

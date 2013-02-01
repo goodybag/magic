@@ -172,7 +172,6 @@ describe('PATCH /v1/photos/:id', function() {
   it('should not allow a non-owning consumer to update', function(done) {
     tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.patch('/v1/photos/2', { notes:'this wont happen' }, function(err, payload, res) {
-        console.log(res.statusCode)
         assert(res.statusCode == 403);
         tu.logout(done);
       });

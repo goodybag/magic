@@ -41,16 +41,34 @@ for (var i = files.length - 1, dir; i >= 0; i--){
 
 // Expand references
 var perms;
-for (var collection in collections){
   // Each collection
-  for (var group in collections[collection]){
-    // Each type of request
-    for (var requestType in collections[collection][group]){
-      if (!utils.isArray(collections[collection][group][requestType])) continue;
+for (var collection in collections){
+  // Dealing with sub-collections
+  if (!('world' in collections[collection])){
+    // Loop through each sub-collection
+    for (var subCollection in collections[collection]){
+      // Each group in the sub-collections
+      for (var group in collections[collection][subCollection]){
+        // Each type of request
+        for (var requestType in collections[collection][subCollection][group]){
+          if (!utils.isArray(collections[collection][subCollection][group][requestType])) continue;
 
-      perms = collections[collection][group][requestType];
+          perms = collections[collection][subCollection][group][requestType];
+          collections[collection][subCollection][group][requestType] = getExpandedPerms(group, requestType, perms);
+        }
+      }
+    }
+  } else {
+    // Each group in the collections
+    for (var group in collections[collection]){
+      // Each type of request
+      for (var requestType in collections[collection][group]){
+        if (!utils.isArray(collections[collection][group][requestType])) continue;
 
-      collections[collection][group][requestType] = getExpandedPerms(group, requestType, perms);
+        perms = collections[collection][group][requestType];
+
+        collections[collection][group][requestType] = getExpandedPerms(group, requestType, perms);
+      }
     }
   }
 }
