@@ -103,6 +103,18 @@ describe('GET /v1/businesses/:id', function() {
 
       done();
     });
+
+  });
+
+  it('should respond with a businesses loyalty settings', function(done) {
+    var id = 1;
+    tu.get('/v1/businesses/' + id + '/loyalty', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.businessId === id);
+      done();
+    });
   });
 
   var permFields = perms.default.read.concat(perms.world.read);
@@ -243,6 +255,18 @@ describe('PATCH /v1/businesses/:id', function(){
     };
 
     tu.loginAsSales(function(error, user){
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        tu.logout(function(){
+          done();
+        });
+      });
+    });
+  });
+
+  it('should login as a businesses manager and update the loyalty settings', function(done){
+    tu.post(function(error, user){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 200);

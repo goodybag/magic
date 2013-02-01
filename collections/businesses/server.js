@@ -6,6 +6,7 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var schema      = require('../../db').schemas.businesses;
 var permissions = require('./permissions');
+var applyGroups = require('./apply-groups');
 var routes      = require('./routes');
 
 // Businesses.list
@@ -26,6 +27,23 @@ server.get(
   '/v1/businesses/:id'
 , middleware.permissions(permissions)
 , routes.get
+);
+
+
+// Businesses.loyalty.get
+server.get(
+  '/v1/businesses/:id/loyalty'
+  // Not required atm since the whole object available to world
+// , middleware.permissions(permissions)
+, routes.getLoyalty
+);
+
+// Businesses.loyalty.patch
+server.patch(
+  '/v1/businesses/:id/loyalty'
+, middleware.auth.allow('admin', 'sales', 'managerOwner')
+, middleware.permissions(permissions)
+, routes.updateLoyalty
 );
 
 // Businesses.del
