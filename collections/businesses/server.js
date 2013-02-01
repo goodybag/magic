@@ -29,7 +29,7 @@ server.get(
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
-, middleware.profile('get business')
+, middleware.profile('/v1/business/:id')
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('get business handler')
