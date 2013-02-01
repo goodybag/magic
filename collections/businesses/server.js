@@ -39,7 +39,8 @@ server.get(
 // Businesses.loyalty.patch
 server.patch(
   '/v1/businesses/:id/loyalty'
-, middleware.auth.allow('admin', 'sales', 'managerOwner')
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.permissions(permissions.loyalty)
 , routes.updateLoyalty
 );

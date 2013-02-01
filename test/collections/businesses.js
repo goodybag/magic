@@ -55,7 +55,6 @@ describe('GET /v1/businesses', function() {
       assert(!err);
       var payload = JSON.parse(results);
       assert(!payload.error);
-      console.log(payload);
       assert(payload.data[0].locations.length > 0);
       done();
     });
@@ -271,7 +270,6 @@ describe('PATCH /v1/businesses/:id', function(){
   it('should login as a businesses manager and update the loyalty settings', function(done){
     tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error, user){
       assert(!error);
-
       var loyalty = {
         requiredItem: 'Coffee'
       , reward: 'Chicken'
@@ -279,9 +277,10 @@ describe('PATCH /v1/businesses/:id', function(){
 
       tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
         assert(!error);
+        results = JSON.parse(results);
+        console.log(results);
         assert(res.statusCode == 200);
 
-        results = JSON.parse(results);
         assert(!results.error);
 
         tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
@@ -309,7 +308,6 @@ describe('PATCH /v1/businesses/:id', function(){
 
       tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
 
         results = JSON.parse(results);
         assert(results.error);

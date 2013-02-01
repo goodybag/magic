@@ -236,10 +236,10 @@ module.exports.getLoyalty = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT {fields} FROM loyaltySettings',
+      'SELECT {fields} FROM "businessLoyaltySettings"',
         'WHERE "businessId" = $id'
     ]);
-    query.fields = sql.fields().add('"loyaltySettings".*');
+    query.fields = sql.fields().add('"businessLoyaltySettings".*');
     query.$('id', +req.params.id || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -267,7 +267,7 @@ module.exports.updateLoyalty = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE "loyaltySettings" SET {updates} WHERE id=$id');
+    var query = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(req.body, query);
     query.$('id', req.params.id);
 

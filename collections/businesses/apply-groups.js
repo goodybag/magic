@@ -7,10 +7,10 @@ var
 , sql = require('../../lib/sql')
 ;
 
-exports.ownerManger = function(req, cb) {
+exports.ownerManager = function(req, cb) {
   if (!req.session.user) return cb(null);
 
-  var businessId = req.param('businessId');
+  var businessId = req.param('id');
   var userId     = req.session.user.id;
 
   db.getClient(function(error, client) {
@@ -28,7 +28,7 @@ exports.ownerManger = function(req, cb) {
 
     client.query(query.toString(), query.$values, function(error, result) {
       if (error || result.rowCount === 0) return cb(null);
-      cb('ownerManger');
+      cb('ownerManager');
     });
   });
 };
