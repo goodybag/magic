@@ -18,14 +18,14 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , routes.list
 );
 
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , routes.get
 );
 
@@ -33,8 +33,6 @@ server.get(
 // Businesses.loyalty.get
 server.get(
   '/v1/businesses/:id/loyalty'
-  // Not required atm since the whole object available to world
-// , middleware.permissions(permissions)
 , routes.getLoyalty
 );
 
@@ -42,7 +40,7 @@ server.get(
 server.patch(
   '/v1/businesses/:id/loyalty'
 , middleware.auth.allow('admin', 'sales', 'managerOwner')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.loyalty)
 , routes.updateLoyalty
 );
 
@@ -57,7 +55,7 @@ server.del(
 server.post(
   '/v1/businesses'
 , middleware.auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -66,7 +64,7 @@ server.post(
 server.patch(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.business)
 , middleware.validate.body(schema)
 , routes.update
 );

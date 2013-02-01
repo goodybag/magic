@@ -222,3 +222,64 @@ module.exports.update = function(req, res){
     });
   });
 };
+
+/**
+ * Get business loyalty settings
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getLoyalty = function(req, res){
+  var TAGS = ['get-business-loyalty', req.uuid];
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty', {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query([
+      'SELECT {fields} FROM loyaltySettings',
+        'WHERE "businessId" = $id'
+    ]);
+    query.fields = sql.fields().add('"loyaltySettings".*');
+    query.$('id', +req.params.id || 0);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0) {
+        return res.status(404).end();
+      }
+
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
+
+/**
+ * Update business loyalty settings
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.updateLoyalty = function(req, res){
+  var TAGS = ['update-business-loyalty', req.uuid];
+  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty', {uid: 'more'});
+
+  db.getClient(function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('UPDATE "loyaltySettings" SET {updates} WHERE id=$id');
+    query.updates = sql.fields().addUpdateMap(req.body, query);
+    query.$('id', req.params.id);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0) {
+        return res.status(404).end();
+      }
+
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
