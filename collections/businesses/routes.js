@@ -227,6 +227,7 @@ module.exports.update = function(req, res){
 
     var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.updates.add('"updatedAt" = now()');
     query.$('id', req.params.id);
 
     logger.db.debug(TAGS, query.toString());
