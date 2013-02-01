@@ -114,6 +114,11 @@ module.exports.list = function(req, res){
       query.$('nameFilter', '%'+req.param('filter')+'%');
     }
 
+    if (req.param('reviewName')) {
+      query.where.and('businesses.name = $reviewName');
+      query.$('reviewName', req.param('reviewName'));
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, dataResult){
