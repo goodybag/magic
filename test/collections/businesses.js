@@ -39,6 +39,24 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+
+  it('should filter by a single tag', function(done) {
+    tu.get('/v1/businesses?tag=uniquetag', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 1);
+      done();
+    });
+  });
+
+  it('should filter by mutliple tags', function(done) {
+    tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 4);
+      done();
+    });
+  });
   it('should paginate', function(done) {
     tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
       assert(!err);
@@ -58,6 +76,66 @@ describe('GET /v1/businesses', function() {
       assert(payload.data[0].locations.length > 0);
       assert(payload.data[0].locations[0].lat != null && payload.data[0].locations[0].lat != undefined);
       assert(payload.data[0].locations[0].lon != null && payload.data[0].locations[0].lon != undefined);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/food', function() {
+  it('should respond with food items', function(done) {
+    tu.get('/v1/businesses/food?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/businesses/food?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/fashion', function() {
+  it('should respond with fashion items', function(done) {
+    tu.get('/v1/businesses/fashion?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('apparel') === -1);
+      }).length === 0); // make sure all rows have the 'apparel' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/businesses/fashion?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/other', function() {
+  it('should respond with non-food and non-fashion items', function(done) {
+    tu.get('/v1/businesses/other?include=tags', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
       done();
     });
   });
