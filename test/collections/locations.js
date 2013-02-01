@@ -259,6 +259,13 @@ describe('GET /v1/locations/food', function() {
     });
   });
 
+  it('should filter lat/lon', function(done) {
+    tu.get('/v1/locations/food?include=tags&lat=37.332409&lon=-122.0305121', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+
   it('should not allow the user to filter by tags', function(done) {
     tu.get('/v1/locations/food?tag=foobar&include=tags', function(err, payload, res) {
       assert(res.statusCode == 400);
