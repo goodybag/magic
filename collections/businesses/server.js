@@ -8,23 +8,31 @@ var schema      = require('../../db').schemas.businesses;
 var permissions = require('./permissions');
 var routes      = require('./routes');
 
+
 // Businesses.list
 server.get(
   '/v1/businesses'
+, middleware.profile('/v1/businesses', ['include','limit'])
+, middleware.profile('validate query')
 , middleware.validate.query({
     sort       : { is:/(\+|-)?(name)/ },
     include    : { is:/locations/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('list businesses handler')
 , routes.list
 );
 
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
+, middleware.profile('get business')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('get business handler')
 , routes.get
 );
 

@@ -19,10 +19,17 @@ var
 , httpServer
 ;
 
+// :DEBUG: profiler
+var Profiler = require('clouseau');
+Profiler.enabled = true;
+Profiler.init({ displayInterval:0, useMicrotime:true });
+
+
 // instantiate HTTP server
 var app = require('./lib/server').createAppServer();
 
 // import resources
+app.use(require('./collections/debug/server'));
 app.use(require('./collections/auth/server'));
 app.use(require('./collections/charities/server'));
 app.use(require('./collections/businesses/server'));
