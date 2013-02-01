@@ -1,6 +1,6 @@
 module.exports = {
   world: {
-    read:   ['id', 'name', 'locations:locations']
+    read:   ['id', 'name', 'locations:locations', 'isGb']
   , create: []
   , update: []
   }

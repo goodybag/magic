@@ -1,22 +1,27 @@
 module.exports = {
   world: {
-    read:   ['id', 'businessId', 'name', 'tags']
+    read:   [
+      'id'
+    , 'businessId'
+    , 'name'
+    , 'tags'
+    , 'lat'
+    , 'lon'
+    , 'street1'
+    , 'street2'
+    , 'city'
+    , 'state'
+    , 'zip'
+    , 'country'
+    ]
   , create: []
   , update: []
   }
 
 , default: {
     read:   [
-      'street1'
-    , 'street2'
-    , 'city'
-    , 'state'
-    , 'zip'
-    , 'country'
-    , 'phone'
+      'phone'
     , 'fax'
-    , 'lat'
-    , 'lon'
     , 'startSunday'
     , 'endSunday'
     , 'startMonday'
