@@ -43,8 +43,8 @@ var
       }
 
       // Convert blank strings back to nulls
-      for (var key in data){
-        if (data[key] === "") data[key] = null;
+      for (var key in req.body){
+        if (req.body[key] === "") req.body[key] = null;
       }
 
       next();
