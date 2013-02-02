@@ -192,6 +192,11 @@ module.exports.update = function(req, res){
     var inputs = req.body;
     var tags = inputs.tags;
     delete inputs.tags;
+
+    // PG should be handling this
+    delete inputs.createdAt;
+    delete inputs.updatedAt;
+
     inputs.id = req.params.id; // make sure there's always something in the update
 
     var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
@@ -199,7 +204,6 @@ module.exports.update = function(req, res){
     query.$('id', req.params.id);
 
     logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
