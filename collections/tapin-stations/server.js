@@ -36,7 +36,7 @@ server.post(
 );
 
 // tapinStations.update
-server.patch(
+server.put(
   '/v1/tapin-stations/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.permissions(permissions)

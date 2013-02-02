@@ -19,7 +19,7 @@ server.get(
   , routes.get
 );
 
-server.patch(
+server.put(
   '/v1/reviews/:id'
   , routes.hide
 );

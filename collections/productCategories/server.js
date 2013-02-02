@@ -36,7 +36,7 @@ server.get(
 );
 
 // ProductCategories.update
-server.patch(
+server.put(
   '/v1/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
@@ -94,7 +94,7 @@ server.get(
 );
 
 // ProductCategories.update
-server.patch(
+server.put(
   '/v1/businesses/:businessId/productCategories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
