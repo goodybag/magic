@@ -93,8 +93,12 @@ module.exports.list = function(req, res){
 
     var includes = [].concat(req.query.include);
     var includeLocations = includes.indexOf('locations') !== -1;
+    var includeTags = includes.indexOf('tags') !== -1;
 
-    var query = sql.query('SELECT {fields} FROM businesses {locationJoin} {where} GROUP BY businesses.id {sort} {limit}');
+    var query = sql.query([
+      'SELECT {fields} FROM businesses {locationJoin} {tagJoin}',
+        '{where} GROUP BY businesses.id {sort} {limit}'
+    ]);
     query.fields = sql.fields().add("businesses.*");
     query.where  = sql.where().and('"isDeleted" = false');
     query.sort   = sql.sort(req.query.sort || 'name');
@@ -109,6 +113,28 @@ module.exports.list = function(req, res){
       // that gives us PostGres' array format, which array_to_json() then converts to JSON for us
     }
 
+    // tag filtering
+    if (req.query.tag) {
+      var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+      query.tagJoin = [
+        'INNER JOIN "businessTags" ON',
+          '"businessTags"."businessId" = businesses.id AND',
+          tagsClause
+      ].join(' ');
+    }
+
+    // tag include
+    if (includeTags) {
+      if (!req.query.tag) {
+        query.tagJoin = [
+          'LEFT JOIN "businessTags" ON',
+            '"businessTags"."businessId" = businesses.id'
+        ].join(' ');
+      }
+      query.fields.add('array_agg("businessTags".tag) as tags');
+    }
+
+    // name filter
     if (req.param('filter')) {
       query.where.and('businesses.name ILIKE $nameFilter');
       query.$('nameFilter', '%'+req.param('filter')+'%');

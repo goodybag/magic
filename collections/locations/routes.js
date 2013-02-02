@@ -79,8 +79,8 @@ module.exports.list = function(req, res){
     if (includeTags) {
       if (!req.query.tag) {
         query.tagJoin = [
-        'LEFT JOIN "businessTags" ON',
-          '"businessTags"."businessId" = locations."businessId" AND',
+          'LEFT JOIN "businessTags" ON',
+            '"businessTags"."businessId" = locations."businessId"'
         ].join(' ');
       }
       query.fields.add('array_agg("businessTags".tag) as tags');
