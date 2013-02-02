@@ -100,7 +100,9 @@ module.exports.list = function(req, res){
         '{where} GROUP BY businesses.id {sort} {limit}'
     ]);
     query.fields = sql.fields().add("businesses.*");
-    query.where  = sql.where().and('"isDeleted" = false');
+    query.where  = sql.where()
+      .and('businesses."isDeleted" = false')
+      .and('businesses."isEnabled" = true');
     query.sort   = sql.sort(req.query.sort || 'name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
