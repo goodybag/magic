@@ -13,10 +13,62 @@ var routes      = require('./routes');
 server.get(
   '/v1/businesses'
 , middleware.validate.query({
+    tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name)/ },
-    include    : { is:/locations/ },
+    include    : { is:/locations|tags/ },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
+  })
+, middleware.permissions(permissions.business)
+, routes.list
+);
+
+// Businesses.list
+server.get(
+  '/v1/businesses/food'
+, middleware.validate.query({
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name)/ },
+    include    : { is:/locations|tags/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['food']
+  })
+, middleware.permissions(permissions.business)
+, routes.list
+);
+
+// Businesses.list
+server.get(
+  '/v1/businesses/fashion'
+, middleware.validate.query({
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name)/ },
+    include    : { is:/locations|tags/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['apparel']
+  })
+, middleware.permissions(permissions.business)
+, routes.list
+);
+
+// Businesses.list
+server.get(
+  '/v1/businesses/other'
+, middleware.validate.query({
+    tag        : { isNull:[] },
+    sort       : { is:/(\+|-)?(name)/ },
+    include    : { is:/locations|tags/ },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.defaults.query({
+    tag : ['!food,!apparel']
   })
 , middleware.permissions(permissions.business)
 , routes.list
