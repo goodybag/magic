@@ -56,7 +56,7 @@ module.exports.list = function(req, res){
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
-      query.where.and('"businessId" = $businessId');
+      query.where.and('products."businessId" = $businessId');
       query.$('businessId', req.param('businessId'));
     }
 
@@ -118,7 +118,6 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
