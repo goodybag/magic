@@ -280,7 +280,6 @@ describe('PATCH /v1/businesses/:id', function(){
       tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
         assert(!error);
         results = JSON.parse(results);
-        console.log(results);
         assert(res.statusCode == 200);
 
         assert(!results.error);

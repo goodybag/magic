@@ -34,7 +34,7 @@ server.post(
 );
 
 // Users.update
-server.patch(
+server.put(
   '/v1/users/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')

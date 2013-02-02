@@ -37,7 +37,7 @@ server.get(
 );
 
 // Businesses.loyalty.patch
-server.patch(
+server.put(
   '/v1/businesses/:id/loyalty'
 , middleware.applyGroups(applyGroups.ownerManager)
 , middleware.auth.allow('admin', 'sales', 'ownerManager')
@@ -62,7 +62,7 @@ server.post(
 );
 
 // Businesses.update
-server.patch(
+server.put(
   '/v1/businesses/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.permissions(permissions.business)

@@ -126,7 +126,7 @@ server.get(
 );
 
 // Locations.update
-server.patch(
+server.put(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
