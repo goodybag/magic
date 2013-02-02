@@ -261,6 +261,26 @@ describe('GET /v1/businesses/:id/products', function() {
     });
   });
 
+  it('should respond with a product listing', function(done) {
+    tu.get('/v1/businesses/1/products?include[]=tags&include[]=categories', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.data[0].id == 1);
+      assert(payload.data[0].businessId == 1);
+      assert(payload.data[0].name == 'Product 1');
+      assert(payload.data[0].tags.length > 0);
+      assert(payload.data[0].categories.length > 0);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
   it('should return empty with invalid businesses id', function(done){
     tu.get('/v1/businesses/100/products', function(err, payload) {
 
