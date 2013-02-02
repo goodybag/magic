@@ -34,7 +34,7 @@ server.post(
 );
 
 // Groups.update
-server.patch(
+server.put(
   '/v1/groups/:id'
 , middleware.auth.allow('admin')
 , middleware.permissions(permissions)

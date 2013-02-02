@@ -46,7 +46,7 @@ server.get(
 );
 
 // Photos.update
-server.patch(
+server.put(
   '/v1/photos/:photoId'
 , middleware.validate.body(schema)
 , middleware.applyGroups(applyGroups.owner)

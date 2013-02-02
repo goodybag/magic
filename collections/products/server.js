@@ -122,7 +122,7 @@ server.get(
 );
 
 // Products.update
-server.patch(
+server.put(
   '/v1/products/:productId'
 , middleware.permissions(permissions)
 , middleware.validate.body(schema)

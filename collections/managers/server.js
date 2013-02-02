@@ -37,7 +37,7 @@ server.post(
 );
 
 // managers.update
-server.patch(
+server.put(
   '/v1/managers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')
