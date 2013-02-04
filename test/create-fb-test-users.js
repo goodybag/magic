@@ -15,9 +15,6 @@ var
     utils.createTestOauthUser(function(error, results){
       if (error) return console.log(error), createUsers();
 
-      console.log("created User!");
-      console.log(results);
-
       if (users.push(results) < config.usersToCreate) return createUsers();
 
       return writeUsers()
