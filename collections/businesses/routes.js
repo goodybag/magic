@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
-  logger.routes.debug(TAGS, 'fetching business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -60,7 +60,7 @@ module.exports.get = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
-  logger.routes.debug(TAGS, 'deleting business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -85,7 +85,7 @@ module.exports.del = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of businesses', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of businesses');
 
   // retrieve pg client
   db.getClient(function(error, client){
@@ -108,11 +108,11 @@ module.exports.list = function(req, res){
 
     if (includeLocations) {
       query.locationJoin = 'LEFT JOIN locations ON locations."businessId" = businesses.id';
-      query.fields.add('array_to_json(array_agg(row_to_json(locations.*))) as locations');
-      // the above actually makes sense when you know what postgres does with its types
-      // locations.* is giving a row -- we want in JSON, so that we get a nice map object ({ col1:value, col2:value ...})
-      // so then we have a bunch of rows with jsons -- they are compressed with GROUP BY and array_agg()
-      // that gives us PostGres' array format, which array_to_json() then converts to JSON for us
+      // :TEMP: this is a temporary alternative to JSON functions that travis CI is forcing us to do those fuckers
+      for (var locationColumn in schemas.locations) {
+        if (locationColumn == 'position') continue;
+        query.fields.add('array_agg(locations."'+locationColumn+'"::text) as "location_'+locationColumn+'"');
+      }
     }
 
     // tag filtering
@@ -150,9 +150,27 @@ module.exports.list = function(req, res){
       logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      dataResult.rows.forEach(function(r) {
-        r.locations = (r.locations) ? JSON.parse(r.locations) : []; // would be nice if we could avoid this
-      });
+      if (total && typeof dataResult.rows[0].location_id != 'undefined') {
+        // :TEMP: hack to replace array_to_json and shit
+        dataResult.rows.forEach(function(r) {
+          // create locations objects
+          var locations = [];
+          for (var i=0; i < r.location_id.length; i++) {
+            locations.push({});
+          }
+
+          // extract data from row
+          for (var col in schemas.locations) {
+            var k = 'location_'+col;
+            if (!r[k]) { continue; }
+            r[k].forEach(function(v, i) {
+              locations[i][col] = v;
+            });
+            delete r[k];
+          }
+          r.locations = locations;
+        });
+      }
 
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
      });
@@ -266,7 +284,7 @@ module.exports.update = function(req, res){
  */
 module.exports.getLoyalty = function(req, res){
   var TAGS = ['get-business-loyalty', req.uuid];
-  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -296,7 +314,7 @@ module.exports.getLoyalty = function(req, res){
  */
 module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
-  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty', {uid: 'more'});
+  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

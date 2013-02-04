@@ -8,7 +8,7 @@ var
 
 describe('GET /v1/locations', function() {
 
-  it('should respond with a location listing', function(done) {
+  it('should respond with a location listing of all enabled locations', function(done) {
     tu.get('/v1/locations', function(err, payload, res) {
 
       assert(!err);
@@ -21,8 +21,29 @@ describe('GET /v1/locations', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[0].isEnabled == null || payload.data[0].isEnabled == undefined);
       assert(payload.meta.total > 1);
       done();
+    });
+  });
+
+  it('should respond with a location listing regardless of enabled state', function(done) {
+    tu.loginAsAdmin(function(error){
+      assert(!error);
+      tu.get('/v1/locations?all=true', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+
+        assert(payload.data[0].isEnabled != null && payload.data[0].isEnabled != undefined);
+
+        assert(payload.meta.total > 1);
+        tu.logout(done);
+      });
     });
   });
 
@@ -42,35 +63,22 @@ describe('GET /v1/locations', function() {
     });
   });
 
-  it('should filter by lat/lon', function(done) {
-    tu.get('/v1/locations?lat=10&lon=10', function(err, payload, res) {
-
-      assert(!err);
+  it('should filter by lat/lon/range', function(done) {
+    tu.get('/v1/locations?lat=10&lon=10&range=1000', function(err, payload, res) {
       assert(res.statusCode == 200);
-
       payload = JSON.parse(payload);
-
-      assert(!payload.error);
       assert(payload.data.length === 2);
       assert(payload.data[0].name == 'Location 1');
       assert(payload.data[1].name == 'Location 2');
       assert(payload.meta.total > 1);
-      done();
-    });
-  });
-
-  it('should filter by lat/lon/range', function(done) {
-    tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 1');
-      done();
+      
+      tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length === 1);
+        assert(payload.data[0].name == 'Location 1');
+        done();
+      });
     });
   });
 
