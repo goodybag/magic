@@ -59,10 +59,12 @@ module.exports.list = function(req, res){
     // location filtering
     if (req.query.lat && req.query.lon) {
       query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance')
-      query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.$('range', req.query.range || 1000);
+      if (req.query.range) {
+        query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
+        query.$('range', req.query.range);
+      }
     }
 
     // tag filtering
