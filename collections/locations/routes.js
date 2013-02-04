@@ -45,10 +45,17 @@ module.exports.list = function(req, res){
     var query = sql.query(
       'SELECT {fields} FROM locations {tagJoin} {where} GROUP BY locations.id {sort} {limit}'
     );
-    query.fields = sql.fields().add("locations.*");
+    query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+    // Show all or just enabled locatins
+    if (!req.query.all){
+      query.where.and('"isEnabled" = true');
+    } else {
+      query.fields.add('"isEnabled"');
+    }
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
@@ -103,6 +110,7 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, dataResult);
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
