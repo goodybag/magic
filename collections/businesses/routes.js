@@ -277,14 +277,12 @@ module.exports.getLoyalty = function(req, res){
     ]);
     query.fields = sql.fields().add('"businessLoyaltySettings".*');
     query.$('id', +req.params.id || 0);
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
+      if (result.rowCount === 0)
+        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
       return res.json({ error: null, data: result.rows[0] });
     });
