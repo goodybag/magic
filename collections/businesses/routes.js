@@ -282,7 +282,7 @@ module.exports.getLoyalty = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0)
-        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
+        return res.json({ error: null, data: null });
 
       return res.json({ error: null, data: result.rows[0] });
     });
