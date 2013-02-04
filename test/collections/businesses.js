@@ -269,8 +269,51 @@ describe('POST /v1/businesses', function(){
         results = JSON.parse(results);
         assert(!results.error);
         assert(results.data.id);
-        tu.logout(function(){
-          done();
+
+        tu.get('/v1/businesses/' + results.data.id, function(error, results){
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          // is gb false by default
+          assert(results.data.isGB === false);
+          tu.logout(function(){
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  it('should save a goodybag business and return the id', function(done){
+    var business = {
+      name: "Ballers, Inc. 3"
+    , charityId: 2
+    , url: "http://ballersinc.com"
+    , cardCode: "123456"
+    , street1: "123 Sesame St"
+    , street2: 'asdf'
+    , city: "Austin"
+    , state: "TX"
+    , zip: 78756
+    , isGB: true
+    , tags: ['foo', 'bar']
+    };
+
+    tu.loginAsSales(function(error, user){
+      tu.post('/v1/businesses', business, function(error, results, res){
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id);
+
+        tu.get('/v1/businesses/' + results.data.id, function(error, results){
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.isGB === true);
+          tu.logout(function(){
+            done();
+          });
         });
       });
     });
