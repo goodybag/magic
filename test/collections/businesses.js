@@ -376,6 +376,39 @@ describe('PATCH /v1/businesses/:id', function(){
     });
   });
 
+  it('should login as a businesses manager and upsert the loyalty settings', function(done){
+    tu.login({ email: 'manager_of_biz_without_loyalty@gmail.com', password: 'password' }, function(error, user){
+      assert(!error);
+      var loyalty = {
+        requiredItem: 'Something'
+      , reward: 'Some reward'
+      , regularPunchesRequired: 10
+      , elitePunchesRequired: 8
+      , eliteVisitsRequired: 12
+      };
+
+      tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
+        assert(!error);
+        results = JSON.parse(results);
+        console.log(results.error);
+        assert(res.statusCode == 200);
+
+        assert(!results.error);
+
+        tu.get('/v1/businesses/' + 4 + '/loyalty', function(error, results, res){
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+
+          assert(results.data.requiredItem === loyalty.requiredItem);
+          assert(results.data.reward === loyalty.reward);
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
   it('should fail to update the loyalty settings because of invalid permissions', function(done){
     tu.login({ email: 'manager_redeem3@gmail.com', password: 'password' }, function(error, user){
       assert(!error);

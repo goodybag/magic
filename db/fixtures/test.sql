@@ -76,6 +76,7 @@ INSERT INTO "users" (id, email, password) VALUES ('11112', 'manager_getting_dele
 INSERT INTO "users" (id, email, password) VALUES ('11113', 'manager_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11114', 'manager_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11115', 'manager_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11116', 'manager_of_biz_without_loyalty@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 
 INSERT INTO "users" (id, email, password) VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -115,6 +116,7 @@ INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALU
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11113', '1', '1', '123456-manager_redeem1');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11114', '1', '4', '123456-XXY');
 INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11115', '2', '2', '123456-XXY');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('7', '11116', '4', '2', '123456-XXY');
 COMMIT;
 SELECT setval('managers_id_seq', (SELECT MAX(id) from "managers")); -- advance the sequence past the IDs just used
 
@@ -179,6 +181,7 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11112', '11112', '1
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11113', '11113', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11114', '11114', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11115', '11115', '11110');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11116', '11116', '11110');
 
 -- cashier
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11120', '11120', '11111');

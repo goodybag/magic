@@ -319,19 +319,29 @@ module.exports.updateLoyalty = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
+    var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
+    updateQuery.updates = sql.fields().addUpdateMap(req.body, updateQuery);
+    updateQuery.$('id', req.params.id);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
+    var insertQuery = sql.query('INSERT INTO "businessLoyaltySettings" ({fields}) VALUES ({values})');
+    insertQuery.fields = sql.fields().addObjectKeys(req.body);
+    insertQuery.fields.add('"businessId"');
+    insertQuery.values = sql.fields().addObjectValues(req.body, insertQuery);
+    insertQuery.values.add(req.param('id'));
 
-      if (result.rowCount === 0) {
-        return res.status(404).end();
+    db.upsert(
+      client
+    , updateQuery.toString()
+    , updateQuery.$values
+    , insertQuery.toString()
+    , insertQuery.$values
+    , function(error, result){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        logger.db.debug(TAGS, result);
+
+        return res.json({ error: null, data: null });
       }
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    );
   });
 };
