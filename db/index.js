@@ -13,6 +13,8 @@ var
 , pooler = require('generic-pool')
 , Transaction = require('pg-transaction')
 
+, fields = require('./fields')
+
   // Promise to fullfil this variable!
 , client = null
 
@@ -27,7 +29,6 @@ exports.sql = sql;
 
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
-
 
 var pool = pooler.Pool({
   name: 'postgres'
@@ -183,6 +184,8 @@ exports.schemas = {
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
 };
+
+exports.fields = fields;
 
 function buildTable(name, schema) {
   var columns = [];
