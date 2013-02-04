@@ -276,3 +276,69 @@ module.exports.del = function(req, res){
     });
   });
 };
+
+/**
+ * Get location analytics
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getAnalytics = function(req, res){
+  var TAGS = ['get-location-analytics', req.uuid];
+  logger.routes.debug(TAGS, 'fetching location analytics');
+
+  db.getClient(function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query([
+      'SELECT {fields} FROM locations',
+        'LEFT JOIN "productLocations" pl ON pl."locationId" = locations.id',
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = pl."productId" AND "productLikes"."createdAt" > {startDate}',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = pl."productId" AND "productWants"."createdAt" > {startDate}',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = pl."productId" AND "productTries"."createdAt" > {startDate}',
+        'LEFT JOIN "tapinStations" ts ON ts."locationId" = locations.id',
+        'LEFT JOIN "tapins" ON "tapins"."tapinStationId" = ts.id AND "tapins"."dateTime" > {startDate}',
+        'WHERE locations.id=$id GROUP BY locations.id'
+    ]);
+    query.fields = sql.fields();
+    query.fields.add("locations.id");
+    query.fields.add('COUNT(DISTINCT "productLikes".id) AS likes');
+    query.fields.add('COUNT(DISTINCT "productWants".id) AS wants');
+    query.fields.add('COUNT(DISTINCT "productTries".id) AS tries');
+    query.fields.add('COUNT(DISTINCT "tapins".id) AS tapins');
+
+    query.$('id', +req.param('locationId') || 0);
+
+    var queries = [];
+    query.startDate = "now() - '1 day'::interval"; // past 24 hours
+    queries.push(query.toString());
+    query.startDate = "now() - '1 week'::interval"; // past week
+    queries.push(query.toString());
+    query.startDate = "now() - '1 month'::interval"; // past month
+    queries.push(query.toString());
+    query.startDate = "'1-1-1969'::date"; // all time
+    queries.push(query.toString());
+
+    require('async').map(queries, function(item, next) {
+      // console.log(item)
+      client.query(item, query.$values, next);
+    }, function(error, results) {
+      // console.log(error)
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, results);
+
+      if (results[0].rowCount === 0) {
+        return res.status(404).end();
+      }
+
+      var stats = {
+        day   : results[0].rows[0],
+        week  : results[1].rows[0],
+        month : results[2].rows[0],
+        all   : results[3].rows[0],
+      };
+      // console.log(stats);
+
+      return res.json({ error: null, data: stats });
+    });
+  });
+};
