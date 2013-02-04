@@ -7,4 +7,5 @@ module.exports = {
 , applyGroups : require('./apply-groups')
 , permissions : require('./permissions')
 , defaults    : require('./defaults')
+, profile     : require('./profile')
 }

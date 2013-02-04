@@ -31,7 +31,8 @@
     "when": "1.7.x",
     "winston": "0.6.x",
     "lodash": "1.0.x",
-    "generic-pool": "2.0.x"
+    "generic-pool": "2.0.x",
+    "clouseau": "https://github.com/goodybag/clouseau/tarball/master"
   },
   "devDependencies": {
     "better-assert": "0.1.x",

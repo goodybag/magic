@@ -9,9 +9,12 @@ var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 var routes      = require('./routes');
 
+
 // Businesses.list
 server.get(
   '/v1/businesses'
+, middleware.profile('/v1/businesses', ['include','limit'])
+, middleware.profile('validate query')
 , middleware.validate.query({
     tag        : { isAlpha:[] },
     sort       : { is:/(\+|-)?(name)/ },
@@ -19,7 +22,9 @@ server.get(
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
+, middleware.profile('permissions')
 , middleware.permissions(permissions.business)
+, middleware.profile('list businesses handler')
 , routes.list
 );
 
@@ -77,7 +82,10 @@ server.get(
 // Businesses.get
 server.get(
   '/v1/businesses/:id'
+, middleware.profile('/v1/business/:id')
+, middleware.profile('permissions')
 , middleware.permissions(permissions.business)
+, middleware.profile('get business handler')
 , routes.get
 );
 
