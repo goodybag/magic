@@ -66,13 +66,15 @@ module.exports.list = function(req, res){
     if (req.query.lat && req.query.lon) {
       query.locJoin = [
         'INNER JOIN "productLocations" ON',
-          '"productLocations"."productId" = products.id',
-          'AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)'
+          '"productLocations"."productId" = products.id'
       ].join(' ')
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), position)) AS distance')
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.$('range', req.query.range || 1000);
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), position)) AS distance')
+      if (req.query.range) {
+        query.locJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
+        query.$('range', req.query.range);
+      }
     }
 
     // tag filtering
@@ -120,6 +122,7 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
