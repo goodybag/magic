@@ -276,6 +276,7 @@ describe('POST /v1/businesses', function(){
           assert(!results.error);
           // is gb false by default
           assert(results.data.isGB === false);
+          assert(results.data.isVerified === false);
           tu.logout(function(){
             done();
           });
@@ -284,7 +285,7 @@ describe('POST /v1/businesses', function(){
     });
   });
 
-  it('should save a goodybag business and return the id', function(done){
+  it('should save a verified goodybag business and return the id', function(done){
     var business = {
       name: "Ballers, Inc. 3"
     , charityId: 2
@@ -296,6 +297,7 @@ describe('POST /v1/businesses', function(){
     , state: "TX"
     , zip: 78756
     , isGB: true
+    , isVerified: true
     , tags: ['foo', 'bar']
     };
 
@@ -311,6 +313,7 @@ describe('POST /v1/businesses', function(){
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.isGB === true);
+          assert(results.data.isVerified === true);
           tu.logout(function(){
             done();
           });
@@ -433,7 +436,6 @@ describe('PATCH /v1/businesses/:id', function(){
       tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
         assert(!error);
         results = JSON.parse(results);
-        console.log(results.error);
         assert(res.statusCode == 200);
 
         assert(!results.error);

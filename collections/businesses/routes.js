@@ -212,6 +212,11 @@ module.exports.create = function(req, res){
       query.values.add(false);
     }
 
+    if (req.body.isVerified == null || req.body.isVerified == undefined){
+      query.fields.add('"isVerified"');
+      query.values.add(false);
+    }
+
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
