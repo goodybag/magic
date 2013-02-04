@@ -628,8 +628,8 @@ describe('PATCH /v1/products/:id', function() {
             assert(res.statusCode == 200);
             payload = JSON.parse(payload);
             assert(!payload.error);
-            assert(payload.data.tags[0].id === 1);
-            assert(payload.data.categories[0].id === 1);
+            assert(payload.data.tags[0].id == 1);
+            assert(payload.data.categories[0].id == 1);
             tu.logout(done);
           });
         });

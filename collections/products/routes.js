@@ -10,6 +10,8 @@ var
 , errors  = require('../../lib/errors')
 
 , logger  = {}
+
+, schemas    = db.schemas
 ;
 
 // Setup loggers
@@ -142,9 +144,9 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT products.*,',
-        'array_to_json(array_agg(row_to_json("productCategories".*))) AS categories,',
-        'array_to_json(array_agg(row_to_json("productTags".*))) AS tags',
+      'SELECT products.*, {fields}',
+//        'array_to_json(array_agg(row_to_json("productCategories".*))) AS categories,',
+//        'array_to_json(array_agg(row_to_json("productTags".*))) AS tags',
       'FROM products',
         'LEFT JOIN "productsProductCategories" ppc',
           'ON ppc."productId" = products.id',
@@ -159,6 +161,15 @@ module.exports.get = function(req, res){
     ]);
     query.$('id', +req.param('productId') || 0)
 
+    // :TEMP: hack around travis ci's lack of PG json support
+    query.fields = sql.fields();
+    for (var tagColumn in schemas.productTags) {
+      query.fields.add('array_agg("productTags"."'+tagColumn+'"::text) as "tag_'+tagColumn+'"');
+    }
+    for (var categoryColumn in schemas.productCategories) {
+      query.fields.add('array_agg("productCategories"."'+categoryColumn+'"::text) as "cat_'+categoryColumn+'"');
+    }
+
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
@@ -166,8 +177,29 @@ module.exports.get = function(req, res){
       var product = result.rows[0];
       if (!product) return res.status(404).end();
 
-      product.categories = (product.categories) ? JSON.parse(product.categories) : []; // would be nice if we could avoid this
-      product.tags = (product.tags) ? JSON.parse(product.tags) : []; // would be nice if we could avoid this
+      // :TEMP: hack to replace array_to_json and shit
+      // create tags & cats objects
+      var tags = [], cats = [];
+      for (var i=0; i < product.tag_id.length; i++) { tags.push({}); }
+      for (var i=0; i < product.cat_id.length; i++) { cats.push({}); }
+
+      // extract data from row
+      for (var col in schemas.productTags) {
+        var k = 'tag_'+col;
+        if (!product[k]) { continue; }
+        product[k].forEach(function(v, i) { tags[i][col] = v; });
+        delete product[k];
+      }
+      for (var col in schemas.productCategories) {
+        var k = 'cat_'+col;
+        if (!product[k]) { continue; }
+        product[k].forEach(function(v, i) { cats[i][col] = v; });
+        delete product[k];
+      }
+      // :TEMP: have to filter out null rows generated during aggregation-- is there a way to do that in the SQL?
+      product.tags = tags.filter(function(t) { return !!t.id; });
+      product.categories = cats.filter(function(c) { return !!c.id; });;
+
       return res.json({ error: null, data: product });
     });
   });
