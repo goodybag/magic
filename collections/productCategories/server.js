@@ -14,14 +14,14 @@ var
 
 // ProductCategories.list
 server.get(
-  '/v1/productCategories'
+  '/v1/product-categories'
 , middleware.permissions(permissions)
 , routes.list
 );
 
 // ProductCategories.create
 server.post(
-  '/v1/productCategories'
+  '/v1/product-categories'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -30,14 +30,14 @@ server.post(
 
 // ProductCategories.get
 server.get(
-  '/v1/productCategories/:id'
+  '/v1/product-categories/:id'
 , middleware.permissions(permissions)
 , routes.get
 );
 
 // ProductCategories.update
 server.put(
-  '/v1/productCategories/:id'
+  '/v1/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -46,7 +46,7 @@ server.put(
 
 // ProductCategories.update
 server.put(
-  '/v1/productCategories/:id'
+  '/v1/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -55,7 +55,7 @@ server.put(
 
 // ProductCategories.update
 server.post(
-  '/v1/productCategories/:id'
+  '/v1/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -64,7 +64,7 @@ server.post(
 
 // ProductCategories.delete
 server.del(
-  '/v1/productCategories/:id'
+  '/v1/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , routes.del
@@ -72,14 +72,14 @@ server.del(
 
 // ProductCategories.list
 server.get(
-  '/v1/businesses/:businessId/productCategories'
+  '/v1/businesses/:businessId/product-categories'
 , middleware.permissions(permissions)
 , routes.list
 );
 
 // ProductCategories.create
 server.post(
-  '/v1/businesses/:businessId/productCategories'
+  '/v1/businesses/:businessId/product-categories'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -88,14 +88,14 @@ server.post(
 
 // ProductCategories.get
 server.get(
-  '/v1/businesses/:businessId/productCategories/:id'
+  '/v1/businesses/:businessId/product-categories/:id'
 , middleware.permissions(permissions)
 , routes.get
 );
 
 // ProductCategories.update
 server.put(
-  '/v1/businesses/:businessId/productCategories/:id'
+  '/v1/businesses/:businessId/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -104,7 +104,7 @@ server.put(
 
 // ProductCategories.update
 server.put(
-  '/v1/businesses/:businessId/productCategories/:id'
+  '/v1/businesses/:businessId/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -113,7 +113,7 @@ server.put(
 
 // ProductCategories.update
 server.post(
-  '/v1/businesses/:businessId/productCategories/:id'
+  '/v1/businesses/:businessId/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , validate(schema)
@@ -122,7 +122,7 @@ server.post(
 
 // ProductCategories.delete
 server.del(
-  '/v1/businesses/:businessId/productCategories/:id'
+  '/v1/businesses/:businessId/product-categories/:id'
 , auth.allow('admin', 'sales')
 , middleware.permissions(permissions)
 , routes.del

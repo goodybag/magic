@@ -8,9 +8,9 @@ var
 , baseUrl = config.baseUrl
 ;
 
-describe('GET /v1/productCategories', function() {
+describe('GET /v1/product-categories', function() {
   it('should respond with a productCategory listing', function(done) {
-    tu.get('/v1/productCategories', function(error, results) {
+    tu.get('/v1/product-categories', function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
@@ -21,7 +21,7 @@ describe('GET /v1/productCategories', function() {
     });
   });
   it('should paginate', function(done) {
-    tu.get('/v1/productCategories?offset=1&limit=1', function(error, results) {
+    tu.get('/v1/product-categories?offset=1&limit=1', function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
@@ -33,10 +33,10 @@ describe('GET /v1/productCategories', function() {
   });
 });
 
-describe('GET /v1/productCategories/:id', function() {
+describe('GET /v1/product-categories/:id', function() {
   var id = 1;
   it('should respond with a productCategory of id ' + id, function(done) {
-    tu.get('/v1/productCategories/' + id, function(error, results) {
+    tu.get('/v1/product-categories/' + id, function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
@@ -46,7 +46,7 @@ describe('GET /v1/productCategories/:id', function() {
   });
 });
 
-describe('POST /v1/productCategories', function() {
+describe('POST /v1/product-categories', function() {
   it('should create a productCategory and respond with the id', function(done) {
     tu.loginAsSales(function(error, user){
       var category = {
@@ -56,7 +56,7 @@ describe('POST /v1/productCategories', function() {
       , name: "Some Other Category"
       , description: "An amazing description of the category"
       };
-      tu.post('/v1/productCategories', category, function(error, results) {
+      tu.post('/v1/product-categories', category, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
@@ -67,7 +67,7 @@ describe('POST /v1/productCategories', function() {
   });
 });
 
-describe('PATCH /v1/productCategories/:id', function() {
+describe('PATCH /v1/product-categories/:id', function() {
   it('should update a productCategory and respond with no error', function(done) {
     tu.loginAsSales(function(error, user){
       var category = {
@@ -75,7 +75,7 @@ describe('PATCH /v1/productCategories/:id', function() {
       , isFeatured: false
       , description: 'Just a category'
       };
-      tu.patch('/v1/productCategories/' + category.id, category, function(error, results) {
+      tu.patch('/v1/product-categories/' + category.id, category, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
@@ -85,14 +85,14 @@ describe('PATCH /v1/productCategories/:id', function() {
   });
 });
 
-describe('PATCH /v1/productCategories/:id', function() {
+describe('PATCH /v1/product-categories/:id', function() {
   it('Should fail to update category because it does not exist', function(done) {
     tu.loginAsSales(function(error, user){
       var category = {
         id: 99999999999
       , isFeatured: false
       };
-      tu.patch(baseUrl + '/v1/productCategories/' + category.id, category, function(error, results) {
+      tu.patch(baseUrl + '/v1/product-categories/' + category.id, category, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);
@@ -102,12 +102,12 @@ describe('PATCH /v1/productCategories/:id', function() {
   });
 });
 
-describe('DEL /v1/productCategories/:id', function() {
+describe('DEL /v1/product-categories/:id', function() {
   it('should delete a single user document', function(done) {
     tu.loginAsSales(function(error, user){
       var id = 4; // Dumb category not used for anything
 
-      tu.del('/v1/productCategories/' + id, function(error, results) {
+      tu.del('/v1/product-categories/' + id, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
 
@@ -123,7 +123,7 @@ describe('DEL /v1/productCategories/:id', function() {
     tu.loginAsConsumer(function(error, user){
       var id = 6; // Dumb user not used for anything
 
-      tu.del('/v1/productCategories/' + id, function(error, results, res) {
+      tu.del('/v1/product-categories/' + id, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
 
