@@ -7,6 +7,7 @@ var middleware = require('../../middleware');
 var schema = require('../../db').schemas.locations;
 var routes = require('./routes');
 var permissions = require('./permissions');
+var applyGroups = require('./apply-groups');
 
 // Locations.list
 server.get(
@@ -148,6 +149,15 @@ server.del(
   '/v1/locations/:locationId'
 , middleware.auth.allow('admin', 'sales')
 , routes.del
+);
+
+// Locations.getAnalytics
+server.get(
+  '/v1/locations/:locationId/analytics'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.permissions(permissions)
+, routes.getAnalytics
 );
 
 module.exports = server;
