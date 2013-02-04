@@ -45,7 +45,7 @@ server.post(
 );
 
 // ProductTags.update
-server.patch(
+server.put(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.validate.body(schema)
 , middleware.permissions(permissions)

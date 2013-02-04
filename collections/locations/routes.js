@@ -26,7 +26,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-locations', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of locations', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of locations');
 
   // retrieve pg client
   db.getClient(function(error, client){
@@ -45,10 +45,17 @@ module.exports.list = function(req, res){
     var query = sql.query(
       'SELECT {fields} FROM locations {tagJoin} {where} GROUP BY locations.id {sort} {limit}'
     );
-    query.fields = sql.fields().add("locations.*");
+    query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+    // Show all or just enabled locatins
+    if (!req.query.all){
+      query.where.and('"isEnabled" = true');
+    } else {
+      query.fields.add('"isEnabled"');
+    }
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
@@ -59,10 +66,12 @@ module.exports.list = function(req, res){
     // location filtering
     if (req.query.lat && req.query.lon) {
       query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance')
-      query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.$('range', req.query.range || 1000);
+      if (req.query.range) {
+        query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
+        query.$('range', req.query.range);
+      }
     }
 
     // tag filtering
@@ -79,8 +88,8 @@ module.exports.list = function(req, res){
     if (includeTags) {
       if (!req.query.tag) {
         query.tagJoin = [
-        'LEFT JOIN "businessTags" ON',
-          '"businessTags"."businessId" = locations."businessId" AND',
+          'LEFT JOIN "businessTags" ON',
+            '"businessTags"."businessId" = locations."businessId"'
         ].join(' ');
       }
       query.fields.add('array_agg("businessTags".tag) as tags');
@@ -101,6 +110,7 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, dataResult);
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
@@ -113,7 +123,7 @@ module.exports.list = function(req, res){
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-location', req.uuid];
-  logger.routes.debug(TAGS, 'fetching location', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching location');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

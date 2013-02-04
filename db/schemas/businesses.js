@@ -71,6 +71,13 @@ define(function(require){
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
     }
+  , isFlagged: {
+      type: 'boolean'
+    , validators: {is: /true|false|1|0/ }
+    }
+  , comment: {
+      type: 'text'
+    }
   , createdAt: {
       type: 'timestamp'
     }

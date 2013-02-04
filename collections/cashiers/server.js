@@ -41,7 +41,7 @@ server.post(
 );
 
 // cashiers.update
-server.patch(
+server.put(
   '/v1/cashiers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales', 'owner')

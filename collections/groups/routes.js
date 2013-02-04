@@ -23,7 +23,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-groups', req.uuid];
-  logger.routes.debug(TAGS, 'fetching groups ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching groups ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -59,7 +59,7 @@ module.exports.get = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-groups', req.uuid];
-  logger.routes.debug(TAGS, 'fetching groups', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching groups');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -87,7 +87,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-groups', req.uuid];
-  logger.routes.debug(TAGS, 'creating group', {uid: 'more'});
+  logger.routes.debug(TAGS, 'creating group');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -123,7 +123,7 @@ module.exports.create = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-group', req.uuid];
-  logger.routes.debug(TAGS, 'deleting group ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting group ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

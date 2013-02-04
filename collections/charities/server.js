@@ -39,7 +39,7 @@ server.post(
 );
 
 // Charities.update
-server.patch(
+server.put(
   '/v1/charities/:id'
 , middleware.auth.allow('admin', 'sales')
 , middleware.permissions(permissions)

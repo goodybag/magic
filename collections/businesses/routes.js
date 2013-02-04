@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
-  logger.routes.debug(TAGS, 'fetching business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -60,7 +60,7 @@ module.exports.get = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
-  logger.routes.debug(TAGS, 'deleting business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -85,7 +85,7 @@ module.exports.del = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of businesses', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of businesses');
 
   // retrieve pg client
   db.getClient(function(error, client){
@@ -93,22 +93,50 @@ module.exports.list = function(req, res){
 
     var includes = [].concat(req.query.include);
     var includeLocations = includes.indexOf('locations') !== -1;
+    var includeTags = includes.indexOf('tags') !== -1;
 
-    var query = sql.query('SELECT {fields} FROM businesses {locationJoin} {where} GROUP BY businesses.id {sort} {limit}');
+    var query = sql.query([
+      'SELECT {fields} FROM businesses {locationJoin} {tagJoin}',
+        '{where} GROUP BY businesses.id {sort} {limit}'
+    ]);
     query.fields = sql.fields().add("businesses.*");
-    query.where  = sql.where().and('"isDeleted" = false');
+    query.where  = sql.where()
+      .and('businesses."isDeleted" = false')
+      .and('businesses."isEnabled" = true');
     query.sort   = sql.sort(req.query.sort || 'name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
     if (includeLocations) {
       query.locationJoin = 'LEFT JOIN locations ON locations."businessId" = businesses.id';
-      query.fields.add('array_to_json(array_agg(row_to_json(locations.*))) as locations');
-      // the above actually makes sense when you know what postgres does with its types
-      // locations.* is giving a row -- we want in JSON, so that we get a nice map object ({ col1:value, col2:value ...})
-      // so then we have a bunch of rows with jsons -- they are compressed with GROUP BY and array_agg()
-      // that gives us PostGres' array format, which array_to_json() then converts to JSON for us
+      // :TEMP: this is a temporary alternative to JSON functions that travis CI is forcing us to do those fuckers
+      for (var locationColumn in schemas.locations) {
+        if (locationColumn == 'position') continue;
+        query.fields.add('array_agg(locations."'+locationColumn+'"::text) as "location_'+locationColumn+'"');
+      }
     }
 
+    // tag filtering
+    if (req.query.tag) {
+      var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+      query.tagJoin = [
+        'INNER JOIN "businessTags" ON',
+          '"businessTags"."businessId" = businesses.id AND',
+          tagsClause
+      ].join(' ');
+    }
+
+    // tag include
+    if (includeTags) {
+      if (!req.query.tag) {
+        query.tagJoin = [
+          'LEFT JOIN "businessTags" ON',
+            '"businessTags"."businessId" = businesses.id'
+        ].join(' ');
+      }
+      query.fields.add('array_agg("businessTags".tag) as tags');
+    }
+
+    // name filter
     if (req.param('filter')) {
       query.where.and('businesses.name ILIKE $nameFilter');
       query.$('nameFilter', '%'+req.param('filter')+'%');
@@ -127,9 +155,27 @@ module.exports.list = function(req, res){
       logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      dataResult.rows.forEach(function(r) {
-        r.locations = (r.locations) ? JSON.parse(r.locations) : []; // would be nice if we could avoid this
-      });
+      if (total && typeof dataResult.rows[0].location_id != 'undefined') {
+        // :TEMP: hack to replace array_to_json and shit
+        dataResult.rows.forEach(function(r) {
+          // create locations objects
+          var locations = [];
+          for (var i=0; i < r.location_id.length; i++) {
+            locations.push({});
+          }
+
+          // extract data from row
+          for (var col in schemas.locations) {
+            var k = 'location_'+col;
+            if (!r[k]) { continue; }
+            r[k].forEach(function(v, i) {
+              locations[i][col] = v;
+            });
+            delete r[k];
+          }
+          r.locations = locations;
+        });
+      }
 
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
      });
@@ -162,6 +208,9 @@ module.exports.create = function(req, res){
     var query = sql.query('INSERT INTO businesses ({fields}) VALUES ({values}) RETURNING id');
     query.fields = sql.fields().addObjectKeys(inputs);
     query.values = sql.fields().addObjectValues(inputs, query);
+
+    query.fields.add('"createdAt"').add('"updatedAt"');
+    query.values.add('now()').add('now()');
 
     logger.db.debug(TAGS, query.toString());
 
@@ -197,14 +246,19 @@ module.exports.update = function(req, res){
     var inputs = req.body;
     var tags = inputs.tags;
     delete inputs.tags;
+
+    // PG should be handling this
+    delete inputs.createdAt;
+    delete inputs.updatedAt;
+
     inputs.id = req.params.id; // make sure there's always something in the update
 
     var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.updates.add('"updatedAt" = now()');
     query.$('id', req.params.id);
 
     logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
@@ -224,6 +278,65 @@ module.exports.update = function(req, res){
           return res.json({ error: null, data: null });
         });
       });
+    });
+  });
+};
+
+/**
+ * Get business loyalty settings
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getLoyalty = function(req, res){
+  var TAGS = ['get-business-loyalty', req.uuid];
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
+
+  db.getClient(function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query([
+      'SELECT {fields} FROM "businessLoyaltySettings"',
+        'WHERE "businessId" = $id'
+    ]);
+    query.fields = sql.fields().add('"businessLoyaltySettings".*');
+    query.$('id', +req.params.id || 0);
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0)
+        return res.json({ error: null, data: null });
+
+      return res.json({ error: null, data: result.rows[0] });
+    });
+  });
+};
+
+/**
+ * Update business loyalty settings
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.updateLoyalty = function(req, res){
+  var TAGS = ['update-business-loyalty', req.uuid];
+  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
+
+  db.getClient(function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE id=$id');
+    query.updates = sql.fields().addUpdateMap(req.body, query);
+    query.$('id', req.params.id);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0) {
+        return res.status(404).end();
+      }
+
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };

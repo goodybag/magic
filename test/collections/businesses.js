@@ -39,6 +39,24 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+
+  it('should filter by a single tag', function(done) {
+    tu.get('/v1/businesses?tag=uniquetag', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 1);
+      done();
+    });
+  });
+
+  it('should filter by mutliple tags', function(done) {
+    tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 4);
+      done();
+    });
+  });
   it('should paginate', function(done) {
     tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
       assert(!err);
@@ -56,6 +74,68 @@ describe('GET /v1/businesses', function() {
       var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data[0].locations.length > 0);
+      assert(payload.data[0].locations[0].lat != null && payload.data[0].locations[0].lat != undefined);
+      assert(payload.data[0].locations[0].lon != null && payload.data[0].locations[0].lon != undefined);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/food', function() {
+  it('should respond with food items', function(done) {
+    tu.get('/v1/businesses/food?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') === -1);
+      }).length === 0); // make sure all rows have the 'food' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/businesses/food?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/fashion', function() {
+  it('should respond with fashion items', function(done) {
+    tu.get('/v1/businesses/fashion?include=tags', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('apparel') === -1);
+      }).length === 0); // make sure all rows have the 'apparel' tag
+      done();
+    });
+  });
+
+  it('should not allow the user to filter by tags', function(done) {
+    tu.get('/v1/businesses/fashion?tag=foobar&include=tags', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/businesses/other', function() {
+  it('should respond with non-food and non-fashion items', function(done) {
+    tu.get('/v1/businesses/other?include=tags', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
       done();
     });
   });
@@ -89,7 +169,7 @@ describe('GET /v1/businesses/:id', function() {
     });
   });
 
-  it('should respond with a single business document with fields ' + perms.world.read.join(', '), function(done) {
+  it('should respond with a single business document with fields ' + perms.business.world.read.join(', '), function(done) {
     var id = 1;
     tu.get('/v1/businesses/' + id, function(err, results, res) {
       assert(!err);
@@ -98,14 +178,26 @@ describe('GET /v1/businesses/:id', function() {
       assert(payload.data.id === id);
 
       for (var key in payload.data){
-        assert(perms.world.read.indexOf(key) > -1);
+        assert(perms.business.world.read.indexOf(key) > -1);
       }
 
       done();
     });
+
   });
 
-  var permFields = perms.default.read.concat(perms.world.read);
+  it('should respond with a businesses loyalty settings', function(done) {
+    var id = 1;
+    tu.get('/v1/businesses/' + id + '/loyalty', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.businessId === id);
+      done();
+    });
+  });
+
+  var permFields = perms.business.default.read.concat(perms.business.world.read);
   it('should respond with a single business document with fields ' + permFields.join(', '), function(done) {
     tu.loginAsConsumer(function(error){
       assert(!error);
@@ -246,8 +338,69 @@ describe('PATCH /v1/businesses/:id', function(){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(!results.error);
         tu.logout(function(){
           done();
+        });
+      });
+    });
+  });
+
+  it('should login as a businesses manager and update the loyalty settings', function(done){
+    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error, user){
+      assert(!error);
+      var loyalty = {
+        requiredItem: 'Coffee'
+      , reward: 'Chicken'
+      };
+
+      tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
+        assert(!error);
+        results = JSON.parse(results);
+        assert(res.statusCode == 200);
+
+        assert(!results.error);
+
+        tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+
+          assert(results.data.requiredItem === loyalty.requiredItem);
+          assert(results.data.reward === loyalty.reward);
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should fail to update the loyalty settings because of invalid permissions', function(done){
+    tu.login({ email: 'manager_redeem3@gmail.com', password: 'password' }, function(error, user){
+      assert(!error);
+
+      var loyalty = {
+        requiredItem: 'Taco Bell'
+      , reward: 'Poop'
+      };
+
+      tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
+        assert(!error);
+
+        results = JSON.parse(results);
+        assert(results.error);
+        assert(results.error.name === "NOT_ALLOWED");
+
+        tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+
+          assert(results.data.requiredItem != loyalty.requiredItem);
+          assert(results.data.reward != loyalty.reward);
+
+          tu.logout(done);
         });
       });
     });

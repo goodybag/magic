@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-charities', req.uuid];
-  logger.routes.debug(TAGS, 'fetching charities ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching charities ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -54,7 +54,7 @@ module.exports.get = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-charity', req.uuid];
-  logger.routes.debug(TAGS, 'deleting charity ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting charity ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -79,7 +79,7 @@ module.exports.del = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-charities', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of charities', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of charities');
 
   // retrieve pg client
   db.getClient(function(error, client){

@@ -66,35 +66,21 @@ describe('GET /v1/products', function() {
     });
   });
 
-  it('should filter by lat/lon', function(done) {
-    tu.get('/v1/products?lat=10&lon=10', function(err, payload, res) {
-
-      assert(!err);
+  it('should filter by lat/lon/range', function(done) {
+    tu.get('/v1/products?lat=10&lon=10&range=1000', function(err, payload, res) {
       assert(res.statusCode == 200);
-
       payload = JSON.parse(payload);
-
-      assert(!payload.error);
       assert(payload.data.length === 3);
       assert(payload.meta.total > 1);
-      done();
-    });
-  });
-
-  it('should filter by lat/lon/range', function(done) {
-    tu.get('/v1/products?lat=10&lon=10&range=100', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].distance <= 100);
-      assert(payload.data[1].distance <= 100);
-      assert(payload.meta.total > 1);
-      done();
+      tu.get('/v1/products?lat=10&lon=10&range=100', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length === 2);
+        assert(payload.data[0].distance <= 100);
+        assert(payload.data[1].distance <= 100);
+        assert(payload.meta.total > 1);
+        done();
+      });
     });
   });
 
@@ -256,6 +242,26 @@ describe('GET /v1/businesses/:id/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should respond with a product listing', function(done) {
+    tu.get('/v1/businesses/1/products?include[]=tags&include[]=categories', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.data[0].id == 1);
+      assert(payload.data[0].businessId == 1);
+      assert(payload.data[0].name == 'Product 1');
+      assert(payload.data[0].tags.length > 0);
+      assert(payload.data[0].categories.length > 0);
       assert(payload.meta.total > 1);
       done();
     });
@@ -608,8 +614,8 @@ describe('PATCH /v1/products/:id', function() {
             assert(res.statusCode == 200);
             payload = JSON.parse(payload);
             assert(!payload.error);
-            assert(payload.data.tags[0].id === 1);
-            assert(payload.data.categories[0].id === 1);
+            assert(payload.data.tags[0].id == 1);
+            assert(payload.data.categories[0].id == 1);
             tu.logout(done);
           });
         });
