@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
-  logger.routes.debug(TAGS, 'fetching business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -60,7 +60,7 @@ module.exports.get = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
-  logger.routes.debug(TAGS, 'deleting business ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -85,7 +85,7 @@ module.exports.del = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of businesses', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of businesses');
 
   // retrieve pg client
   db.getClient(function(error, client){
@@ -266,7 +266,7 @@ module.exports.update = function(req, res){
  */
 module.exports.getLoyalty = function(req, res){
   var TAGS = ['get-business-loyalty', req.uuid];
-  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -298,7 +298,7 @@ module.exports.getLoyalty = function(req, res){
  */
 module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
-  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty', {uid: 'more'});
+  logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

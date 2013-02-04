@@ -224,7 +224,7 @@ module.exports.oauthAuthenticate = function(req, res){
  */
 module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
-  logger.routes.debug(TAGS, 'attempting to authenticate', {uid: 'more'});
+  logger.routes.debug(TAGS, 'attempting to authenticate');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

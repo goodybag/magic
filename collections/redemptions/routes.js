@@ -27,7 +27,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-redemptions', req.uuid];
-  logger.routes.debug(TAGS, 'fetching redemptions', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching redemptions');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
