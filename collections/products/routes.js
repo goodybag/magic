@@ -808,6 +808,11 @@ module.exports.updateFeelings = function(req, res) {
         if (inputs.isTried  != !!currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
         query.$('id', +req.param('productId') || 0);
 
+        if (query.updates.fields.length === 0) {
+          // no updates needed
+          return res.json({ data: null, meta: null }), tx.abort();
+        }
+
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
           if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);

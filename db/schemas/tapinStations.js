@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var consumers = {
+  var tapinStations = {
     id: {
       type: 'serial'
     , meta: 'primary key'
@@ -38,5 +38,5 @@ define(function(require){
     , validators: { is: /true|false|1|0/ }
     }
   };
-  return consumers;
+  return tapinStations;
 });

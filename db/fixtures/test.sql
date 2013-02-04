@@ -142,6 +142,20 @@ INSERT INTO "tapinStations" (id, "userId", "businessId", "locationId", "loyaltyE
 COMMIT;
 SELECT setval('"tapinStations_id_seq"', (SELECT MAX(id) from "tapinStations")); -- advance the sequence past the IDs just used
 
+-- TAPINS
+
+BEGIN;
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('1', '1', '1', '12345-ABC', now());
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('2', '1', '1', '12345-ABC', now() - '2 days'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('3', '1', '1', '12345-ABC', now() - '2 weeks'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('4', '1', '1', '12345-ABC', now() - '2 months'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('5', '2', '1', '12346-ABC', now());
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('6', '2', '1', '12346-ABC', now() - '2 days'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('7', '2', '1', '12346-ABC', now() - '2 weeks'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('8', '2', '1', '12346-ABC', now() - '2 months'::interval);
+COMMIT;
+SELECT setval('"tapins_id_seq"', (SELECT MAX(id) from "tapins")); -- advance the sequence past the IDs just used
+
 -- GROUPS
 
 BEGIN;
@@ -211,7 +225,7 @@ SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStat
 -- PRODUCTS
 
 BEGIN;
-INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('1', '1', 'Product 1', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('1', '1', 'Product 1', 'A product', 5500, 'http://placekitten.com/200/300', 4, 4, 4, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
@@ -250,6 +264,36 @@ INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0));
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
+
+-- PRODUCT LIKES
+
+BEGIN;
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);
+COMMIT;
+SELECT setval('"productLikes_id_seq"', (SELECT MAX(id) from "productLikes")); -- advance the sequence past the IDs just used
+
+-- PRODUCT WANTS
+
+BEGIN;
+INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
+INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
+INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);
+COMMIT;
+SELECT setval('"productWants_id_seq"', (SELECT MAX(id) from "productWants")); -- advance the sequence past the IDs just used
+
+-- PRODUCT TRIES
+
+BEGIN;
+INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
+INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
+INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);
+COMMIT;
+SELECT setval('"productTries_id_seq"', (SELECT MAX(id) from "productTries")); -- advance the sequence past the IDs just used
 
 -- PHOTOS
 

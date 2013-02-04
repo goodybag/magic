@@ -484,5 +484,55 @@ describe('DELETE /v1/locations/:id', function() {
       });
     });
   });
+});
 
+
+describe('GET /v1/locations/:id/analytics', function() {
+
+  it('should respond with a locations stats', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/locations/1/analytics', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+        assert(payload.data.day.likes == 1);
+        assert(payload.data.day.wants == 1);
+        assert(payload.data.day.tries == 1);
+        assert(payload.data.day.tapins == 2);
+        assert(payload.data.week.likes == 2);
+        assert(payload.data.week.wants == 2);
+        assert(payload.data.week.tries == 2);
+        assert(payload.data.week.tapins == 4);
+        assert(payload.data.month.likes == 3);
+        assert(payload.data.month.wants == 3);
+        assert(payload.data.month.tries == 3);
+        assert(payload.data.month.tapins == 6);
+        assert(payload.data.all.likes == 4);
+        assert(payload.data.all.wants == 4);
+        assert(payload.data.all.tries == 4);
+        assert(payload.data.all.tapins == 8);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond 404 with invalid location id', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/locations/100/analytics', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode == 404);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond 404 with invalid location id type', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/locations/abcd/analytics', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode == 404);
+        tu.logout(done);
+      });
+    });
+  });
 });
