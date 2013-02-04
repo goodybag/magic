@@ -23,7 +23,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching user ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -57,7 +57,7 @@ module.exports.get = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -88,7 +88,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-users', req.uuid];
-  logger.routes.debug(TAGS, 'creating user ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'creating user ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -143,7 +143,7 @@ module.exports.create = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id, {uid: 'more'});
+  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

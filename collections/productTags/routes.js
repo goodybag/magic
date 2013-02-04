@@ -24,7 +24,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-productTags', req.uuid];
-  logger.routes.debug(TAGS, 'fetching list of productTags', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching list of productTags');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -56,7 +56,7 @@ module.exports.list = function(req, res){
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-productTag', req.uuid];
-  logger.routes.debug(TAGS, 'fetching productTag', {uid: 'more'});
+  logger.routes.debug(TAGS, 'fetching productTag');
 
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
