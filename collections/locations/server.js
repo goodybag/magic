@@ -156,7 +156,6 @@ server.get(
   '/v1/locations/:locationId/analytics'
 , middleware.applyGroups(applyGroups.manager)
 , middleware.auth.allow('admin', 'sales', 'manager')
-, middleware.permissions(permissions)
 , routes.getAnalytics
 );
 
