@@ -207,6 +207,11 @@ module.exports.create = function(req, res){
     query.fields.add('"createdAt"').add('"updatedAt"');
     query.values.add('now()').add('now()');
 
+    if (req.body.isGB == null || req.body.isGB == undefined){
+      query.fields.add('"isGB"');
+      query.values.add(false);
+    }
+
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
