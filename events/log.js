@@ -83,5 +83,6 @@ module.exports = {
     insert('products.unwant', { userId: userId, productId: productId });
   }
 
-
+, 'loyalty.punch':
+  function(deltaPunches, consumerId, businessId, employeeId)
 };
