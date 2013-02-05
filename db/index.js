@@ -183,6 +183,7 @@ exports.schemas = {
 , productTries:              require('./schemas/productTries')
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
+, events:                    require('./schemas/events')
 };
 
 exports.fields = fields;

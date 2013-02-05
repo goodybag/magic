@@ -32,6 +32,7 @@ var config = {
   , 'productTries'
   , 'oddityLive'
   , 'oddityMeta'
+  , 'events'
   ]
 , fixtureFile: 'test'
 };

@@ -7,6 +7,7 @@ var
 
   db      = require('../../db')
 , utils   = require('../../lib/utils')
+, magic   = require('../../lib/magic')
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
 
@@ -148,7 +149,12 @@ module.exports.create = function(req, res){
         return res.error(errors.internal.DB_FAILURE);
       }
 
-      return res.json({ error: null, data: result.rows[0] });
+      res.json({ error: null, data: result.rows[0] });
+
+      req.body.consumerId = result.rows[0].consumerId;
+      req.body.userId = result.rows[0].userId;
+
+      magic.emit('consumers.registered', req.body);
     });
   });
 };
