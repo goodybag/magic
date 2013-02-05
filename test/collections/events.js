@@ -74,9 +74,8 @@ describe('Consumers Events: ', function() {
 
                   tu.logout(done);
                 }, 500);
+              });
             });
-          });
-
           });
         });
       });
