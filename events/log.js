@@ -57,4 +57,31 @@ module.exports = {
   function(userId, productId){
     insert('products.like', { userId: userId, productId: productId });
   }
+
+, 'products.try':
+  function(userId, productId){
+    insert('products.try', { userId: userId, productId: productId });
+  }
+
+, 'products.want':
+  function(userId, productId){
+    insert('products.want', { userId: userId, productId: productId });
+  }
+
+, 'products.unlike':
+  function(userId, productId){
+    insert('products.unlike', { userId: userId, productId: productId });
+  }
+
+, 'products.untry':
+  function(userId, productId){
+    insert('products.untry', { userId: userId, productId: productId });
+  }
+
+, 'products.unwant':
+  function(userId, productId){
+    insert('products.unwant', { userId: userId, productId: productId });
+  }
+
+
 };
