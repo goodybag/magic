@@ -45,7 +45,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{locJoin} {tagJoin} {catJoin}',
+        '{locJoin} {tagJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY products.id, businesses.id',
@@ -91,26 +91,24 @@ module.exports.list = function(req, res){
 
     // tag include
     if (includeTags) {
-      if (!req.query.tag) {
-        query.tagJoin = [
-          'LEFT JOIN "productsProductTags" ON',
-            '"productsProductTags"."productId" = products.id',
-          'LEFT JOIN "productTags" ON',
-            '"productTags".id = "productsProductTags"."productTagId"',
-        ].join(' ');
-      }
-      query.fields.add('array_to_string(array_agg("productTags"),\'\t\') as tags');
+      query.fields.add([
+        'array_to_string(array(SELECT row("productTags".*) FROM "productTags"',
+          'INNER JOIN "productsProductTags"',
+            'ON "productsProductTags"."productTagId" = "productTags".id',
+            'AND "productsProductTags"."productId" = products.id',
+        '), \'\t\') as tags'
+      ].join(' '));
     }
 
     // category include
     if (includeCats) {
-      query.catJoin = [
-        'LEFT JOIN "productsProductCategories" ON',
-          '"productsProductCategories"."productId" = products.id',
-        'LEFT JOIN "productCategories" ON',
-          '"productCategories".id = "productsProductCategories"."productCategoryId"',
-      ].join(' ');
-      query.fields.add('array_to_string(array_agg("productCategories" ORDER BY "productCategories".order ASC),\'\t\') as categories');
+      query.fields.add([
+        'array_to_string(array(SELECT row("productCategories".*) FROM "productCategories"',
+          'INNER JOIN "productsProductCategories"',
+            'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
+            'AND "productsProductCategories"."productId" = products.id',
+        '), \'\t\') as categories'
+      ].join(' '));
     }
 
     // custom sorts
