@@ -6,6 +6,7 @@ var
   db      = require('../../db')
   , utils   = require('../../lib/utils')
   , errors  = require('../../lib/errors')
+  , sql     = require('../../lib/sql')
 
   , logger  = {}
   ;
@@ -82,15 +83,15 @@ module.exports.get = function(req, res){
  * @param req
  * @param res
  */
-module.exports.hide = function(req, res){
+module.exports.update = function(req, res){
   var TAGS = ['hide-review', req.uuid];
   logger.routes.debug(TAGS, 'hide business from to review ' + req.params.id, {uid: "more"});
 
   db.getClient(function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE "oddityMeta" SET "isHidden"=$isHidden WHERE id=$id');
-    query.$('isHidden', !!req.body.isHidden);
+    var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
+    query.updates = sql.fields().addUpdateMap(req.body, query);
     query.$('id', +req.params.id || 0);
 
     logger.db.debug(TAGS, query.toString());
