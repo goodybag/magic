@@ -48,10 +48,10 @@ module.exports.list = function(req, res){
         '{locJoin} {tagJoin} {catJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
-        'GROUP BY products.id',
+        'GROUP BY products.id, businesses.id',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().add('products.*');
+    query.fields = sql.fields().add('products.*').add('businesses.name as "businessName"');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -182,6 +182,7 @@ module.exports.get = function(req, res){
 //        'array_to_json(array_agg(row_to_json("productCategories".*))) AS categories,',
 //        'array_to_json(array_agg(row_to_json("productTags".*))) AS tags',
       'FROM products',
+        'INNER JOIN businesses ON businesses.id = products."businessId"',
         'LEFT JOIN "productsProductCategories" ppc',
           'ON ppc."productId" = products.id',
         'LEFT JOIN "productCategories"',
@@ -191,12 +192,13 @@ module.exports.get = function(req, res){
         'LEFT JOIN "productTags"',
           'ON "productTags".id = ppt."productTagId"',
         'WHERE products.id = $id',
-        'GROUP BY products.id'
+        'GROUP BY products.id, businesses.id'
     ]);
-    query.$('id', +req.param('productId') || 0)
+    query.$('id', +req.param('productId') || 0);
 
     // :TEMP: hack around travis ci's lack of PG json support
     query.fields = sql.fields();
+    query.fields.add('businesses.name as "businessName"')
     for (var tagColumn in schemas.productTags) {
       query.fields.add('array_agg("productTags"."'+tagColumn+'"::text) as "tag_'+tagColumn+'"');
     }
