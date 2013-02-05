@@ -17,8 +17,8 @@ server.get(
     range      : { isInt:[] },
     businessId : { isInt:[] },
     tag        : { is:/[A-z\!\,]+/ },
-    sort       : { is:/(\+|-)?(name|distance|random)/ },
-    include    : { is:/tags|categories/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -37,8 +37,8 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     tag        : { isAlpha:[] },
-    sort       : { is:/(\+|-)?(name|distance|random)/ },
-    include    : { is:/tags|categories/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -54,8 +54,8 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
-    include    : { is:/tags|categories/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -74,8 +74,8 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
-    include    : { is:/tags|categories/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -94,8 +94,8 @@ server.get(
     lon        : { isFloat:[] },
     range      : { isInt:[] },
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name|distance|random|popular)/ },
-    include    : { is:/tags|categories/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
