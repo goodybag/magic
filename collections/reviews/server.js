@@ -21,6 +21,6 @@ server.get(
 
 server.put(
   '/v1/reviews/:id'
-  , routes.hide
+  , routes.update
 );
 module.exports = server;
