@@ -20,12 +20,14 @@ var
       var inputs = {
         type: type
       , date: new Date()
-      , data: JSON.stringify(data).replace(/\'/g, "\\'")
       };
 
       var query = sql.query('insert into events ({fields}) values ({values})');
       query.fields = sql.fields().addObjectKeys(inputs);
       query.values = sql.fields().addObjectValues(inputs, query);
+
+      query.fields.add('"data"');
+      query.values.add(sql.hstoreValue(data));
 
       client.query(query.toString(), query.$values, function(error){
         if (error) return logger.error(TAGS, error);
