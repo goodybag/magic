@@ -3,6 +3,7 @@ var
 , utils   = require('../lib/utils')
 , logger  = require('../lib/logger')
 , errors  = require('../lib/errors')
+, magic   = require('../lib/magic')
 
 , users       = db.tables.users
 , consumers   = db.tables.consumers
@@ -101,6 +102,7 @@ module.exports = function(req, res, next){
       client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
         if (result.rowCount === 0) return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
+        magic.emit('consumers.tapin', user, result.rows[0].id);
         stage.insertVisit(user, result.rows[0].id);
       });
     }

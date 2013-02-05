@@ -8,6 +8,7 @@ var
 , sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 
@@ -870,7 +871,25 @@ module.exports.updateFeelings = function(req, res) {
               // end transaction
               tx.commit();
 
-              return res.json({ error: null, data: null });
+              res.json({ error: null, data: null });
+
+              if (currentFeelings.isLiked != null && currentFeelings.isLiked != undefined){
+                magic.emit(
+                  'products.' + (currentFeelings.isLiked ? '' : 'un') + 'like'
+                , req.session.user.id, currentFeelings.productId)
+              }
+
+              if (currentFeelings.isTried != null && currentFeelings.isTried != undefined){
+                magic.emit(
+                  'products.' + (currentFeelings.isTried ? '' : 'un') + 'try'
+                , req.session.user.id, currentFeelings.productId)
+              }
+
+              if (currentFeelings.isWanted != null && currentFeelings.isWanted != undefined){
+                magic.emit(
+                  'products.' + (currentFeelings.isWanted ? '' : 'un') + 'want'
+                , req.session.user.id, currentFeelings.productId)
+              }
           });
         });
       });
