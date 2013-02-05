@@ -1,6 +1,6 @@
 language: node_js
 before_script:
-  - sudo apit-get install -qq postgresql-9.2
+  - sudo apt-get install -qq postgresql-9.2
   - psql -c 'create database "goodybag-test";' -U postgres
 env:
   - GB_ENV=test PG_CON="postgres://postgres@127.0.0.1/goodybag-test"
