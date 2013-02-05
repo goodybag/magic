@@ -28,7 +28,7 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT * FROM events WHERE id = $id');
+    var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events where id = $id {limit}) as e');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -36,9 +36,10 @@ module.exports.get = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
+        result.rows[0].data = JSON.parse(result.rows[0].data);
         return res.json({ error: null, data: result.rows[0] });
       } else {
-        return res.status(404).end();
+        return res.error({ error: errors.input.NOT_FOUND, data: null });
       }
     });
   });
@@ -56,7 +57,7 @@ module.exports.list = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM events {where} {limit}');
+    var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events {where} {limit}) as e');
     query.where = sql.where();
     query.limit = sql.limit(req.query.limit, req.query.offset);
 
@@ -66,10 +67,16 @@ module.exports.list = function(req, res){
     }
 
     client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+      dataResult.rows = dataResult.rows.map(function(r){
+        r.data = JSON.parse(r.data);
+        return r;
+      });
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });

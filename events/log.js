@@ -44,37 +44,17 @@ module.exports = {
     insert('consumers.registered', { consumerId: consumer.consumerId });
   }
 
-, 'consumers.donation':
-  function(consumer, donation){
-    insert('consumers.donation', {
-      consumerId: consumer.id
-    , donationId: donation.id
-    , amount:     donation.amount
-    });
+// , 'consumers.donation':
+//   function(consumer, donation){
+//     insert('consumers.donation', {
+//       consumerId: consumer.id
+//     , donationId: donation.id
+//     , amount:     donation.amount
+//     });
+//   }
+
+, 'products.like':
+  function(userId, productId){
+    insert('products.like', { userId: userId, productId: productId });
   }
-
-// , 'consumers.visit':
-//   function(consumer){
-//     console.log("Consumer visit!", consumer.id);
-//   }
-
-// , 'consumers.becameElite':
-//   function(consumer){
-//     console.log("Consumer becameElite!", consumer.id);
-//   }
-
-// , 'products.try':
-//   function(consumer){
-//     console.log("Consumer !", consumer.id);
-//   }
-
-// , 'products.like':
-//   function(consumer){
-//     console.log("Consumer donation!", consumer.id);
-//   }
-
-// , 'products.want':
-//   function(consumer){
-//     console.log("Consumer visit!", consumer.id);
-//   }
 };

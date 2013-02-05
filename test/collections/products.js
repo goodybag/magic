@@ -751,7 +751,7 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 describe('POST /v1/products/:id/feelings', function() {
 
   it('should add to the product feelings totals', function(done) {
-    tu.loginAsAdmin(function() {
+    tu.loginAsConsumer(function() {
       tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
@@ -774,7 +774,7 @@ describe('POST /v1/products/:id/feelings', function() {
   });
 
   it('should remove from the product feelings totals', function(done) {
-    tu.loginAsAdmin(function() {
+    tu.loginAsConsumer(function() {
       tu.post('/v1/products/3/feelings', { isWanted:false }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
