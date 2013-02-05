@@ -39,18 +39,17 @@ var
 module.exports = {
   'consumers.registered':
   function(consumer){
-    console.log("SAVING CONSUMER REGISTER EVENT", consumer);
     insert('consumers.registered', { consumerId: consumer.consumerId });
   }
 
-// , 'consumers.donation':
-//   function(consumer, donation){
-//     insert('consumers.donation', {
-//       consumerId: consumer.id
-//     , donationId: donation.id
-//     , amount:     donation.amount
-//     });
-//   }
+, 'consumers.donation':
+  function(consumer, donation){
+    insert('consumers.donation', {
+      consumerId: consumer.id
+    , donationId: donation.id
+    , amount:     donation.amount
+    });
+  }
 
 // , 'consumers.visit':
 //   function(consumer){
