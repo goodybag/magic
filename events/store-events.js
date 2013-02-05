@@ -26,7 +26,7 @@ var
       var query = sql.query('insert into events ({fields}) values ({values})');
       query.fields = sql.fields().addObjectKeys(inputs);
       query.values = sql.fields().addObjectValues(inputs, query);
-console.log(query.toString(), query.$values);
+
       client.query(query.toString(), query.$values, function(error){
         if (error) return logger.error(TAGS, error);
 
