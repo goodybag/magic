@@ -17,8 +17,8 @@ server.get(
 , middleware.profile('validate query')
 , middleware.validate.query({
     tag        : { isAlpha:[] },
-    sort       : { is:/(\+|-)?(name)/ },
-    include    : { is:/locations|tags/ },
+    sort       : { isIn:[['-name','name']] },
+    include    : { isIn:[['locations','tags']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -33,8 +33,8 @@ server.get(
   '/v1/businesses/food'
 , middleware.validate.query({
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name)/ },
-    include    : { is:/locations|tags/ },
+    sort       : { isIn:[['-name','name']] },
+    include    : { isIn:[['locations','tags']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -50,8 +50,8 @@ server.get(
   '/v1/businesses/fashion'
 , middleware.validate.query({
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name)/ },
-    include    : { is:/locations|tags/ },
+    sort       : { isIn:[['-name','name']] },
+    include    : { isIn:[['locations','tags']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
@@ -67,8 +67,8 @@ server.get(
   '/v1/businesses/other'
 , middleware.validate.query({
     tag        : { isNull:[] },
-    sort       : { is:/(\+|-)?(name)/ },
-    include    : { is:/locations|tags/ },
+    sort       : { isIn:[['-name','name']] },
+    include    : { isIn:[['locations','tags']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
