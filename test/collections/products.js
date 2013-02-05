@@ -144,21 +144,6 @@ describe('GET /v1/products', function() {
     });
   });
 
-  it('should sort ASC if a + prefix is given', function(done) {
-    tu.get('/v1/products?sort=+name', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.meta.total > 1);
-      done();
-    });
-  });
-
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/products?sort=name', function(err, payload, res) {
 
@@ -198,7 +183,7 @@ describe('GET /v1/products', function() {
   });
 
   it('should sort by distance if also given a location', function(done) {
-    tu.get('/v1/products?lat=10&lon=10&sort=+distance', function(err, payload, res) {
+    tu.get('/v1/products?lat=10&lon=10&sort=distance', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
@@ -211,7 +196,7 @@ describe('GET /v1/products', function() {
   });
 
   it('should return 400 if asked to sort by distance and not given a location', function(done) {
-    tu.get('/v1/products?sort=+distance', function(err, payload, res) {
+    tu.get('/v1/products?sort=distance', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 400);
