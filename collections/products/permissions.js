@@ -30,8 +30,8 @@ module.exports = {
     , 'likes'
     , 'wants'
     , 'tries'
-    , 'categories'
-    , 'tags'
+    , 'categories:productCategories'
+    , 'tags:productTags'
     ]
   , create: []
   , update: []

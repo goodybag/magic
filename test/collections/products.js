@@ -43,6 +43,8 @@ describe('GET /v1/products', function() {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data[0].tags);
+      assert(payload.data[0].tags[0].id);
+      assert(payload.data[0].tags[0].tag);
       done();
     });
   });
@@ -52,6 +54,8 @@ describe('GET /v1/products', function() {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data[0].categories);
+      assert(payload.data[0].categories[0].id);
+      assert(payload.data[0].categories[0].name);
       done();
     });
   });
@@ -92,7 +96,7 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') === -1);
+        return (p.tags.filter(function(t) { return t.tag == 'food'; })).length == 0;
       }).length === 0); // make sure all rows have the 'food' tag
       done();
     });
@@ -106,7 +110,7 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') === -1 && p.tags.indexOf('fashion') === -1);
+        return (p.tags.filter(function(t) { return t.tag == 'food' || t.tag == 'fashion'; })).length == 0;
       }).length === 0); // make sure all rows have the 'food' or 'fashion' tag
       done();
     });
@@ -303,7 +307,7 @@ describe('GET /v1/products/food', function() {
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') === -1);
+        return (p.tags.filter(function(t) { return t.tag == 'food'; })).length == 0;
       }).length === 0); // make sure all rows have the 'food' tag
       done();
     });
@@ -333,7 +337,7 @@ describe('GET /v1/products/fashion', function() {
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('apparel') === -1);
+        return (p.tags.filter(function(t) { return t.tag == 'apparel'; })).length == 0;
       }).length === 0); // make sure all rows have the 'apparel' tag
       done();
     });
@@ -349,7 +353,7 @@ describe('GET /v1/products/other', function() {
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
       assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+        return (p.tags.filter(function(t) { return t.tag != 'food' && t.tag != 'apparel'; })).length == 0;
       }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
       done();
     });
