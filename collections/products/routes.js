@@ -99,7 +99,7 @@ module.exports.list = function(req, res){
             '"productTags".id = "productsProductTags"."productTagId"',
         ].join(' ');
       }
-      query.fields.add('array_agg("productTags".tag) as tags');
+      query.fields.add('array_to_string(array_agg("productTags"),\'\t\') as tags');
     }
 
     // category include
@@ -110,7 +110,7 @@ module.exports.list = function(req, res){
         'LEFT JOIN "productCategories" ON',
           '"productCategories".id = "productsProductCategories"."productCategoryId"',
       ].join(' ');
-      query.fields.add('array_agg("productCategories".name ORDER BY "productCategories".order ASC) as categories');
+      query.fields.add('array_to_string(array_agg("productCategories" ORDER BY "productCategories".order ASC),\'\t\') as categories');
     }
 
     // custom sorts
@@ -129,6 +129,37 @@ module.exports.list = function(req, res){
 
       logger.db.debug(TAGS, dataResult);
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+      // parse out embedded results
+      if (includeTags || includeCats) {
+        var tagColumns = Object.keys(schemas.productTags);
+        var catColumns = Object.keys(schemas.productCategories);
+        dataResult.rows.forEach(function(row) {
+          if (typeof row.tags != 'undefined') {
+            if (row.tags) {
+              row.tags = row.tags
+                .split('\t') // entries are separated by \t (not the actual tab character, funny enough)
+                .map(function(tagRow) {
+                  var tagData = tagRow
+                    .slice(1,-1) // entries are surrounded by parens, so slice out
+                    .split(','); // split into individual columns (and pray there are no commas in the dataset)
+                  return utils.object(tagColumns, tagData);
+                });
+            } else {
+              row.tags = [];
+            }
+          }
+          if (typeof row.categories != 'undefined') {
+            row.categories = row.categories
+              .split('\t')
+              .map(function(catRow) {
+                var catData = catRow.slice(1,-1).split(',');
+                return utils.object(catColumns, catData);
+              });
+          }
+        });
+      }
+
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
