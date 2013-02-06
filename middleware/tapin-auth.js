@@ -108,24 +108,29 @@ module.exports = function(req, res, next){
     }
 
   , insertVisit: function(user, tapinId) {
+      if (!user.consumerId) return stage.end(user);
+
       // only inserts if no visit occured in the last 3 hours
       var query = [
-        'INSERT INTO visits ("tapinId", "locationId", "consumerId", "dateTime")',
+        'INSERT INTO visits ("tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime")',
           'WITH "lastVisit" AS (',
             'SELECT "dateTime" FROM visits',
               'WHERE visits."consumerId" = $2',
               'ORDER BY visits.id DESC',
             ')',
-          'SELECT $1, id, $2, now() FROM "tapinStations"',
+          'SELECT $1, "businessId", "locationId", id, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
             'LEFT JOIN "lastVisit" ON true',
             'WHERE "userId" = $3',
             'AND (',
               '"lastVisit"."dateTime" <= now() - \'3 hours\'::interval',
               'OR "lastVisit"."dateTime" IS NULL',
-            ')'
+            ')',
+          'RETURNING id, "businessId", "locationId", "isFirstVisit"'
       ].join(' ');
       client.query(query, [tapinId, user.consumerId, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
+        var visit = result.rows[0];
+        magic.emit('consumers.visit', user.consumerId, visit.id, visit.businessId, visit.locationId, visit.isFirstVisit);
         stage.end(user);
       });
     }

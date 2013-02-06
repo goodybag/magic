@@ -65,7 +65,7 @@ module.exports.create = function(req, res){
 
       // get the business' loyalty settings
       var query = [
-        'SELECT {bls}.* FROM {bls}',
+        'SELECT {bls}.*, {ts}."locationId" as "locationId" FROM {bls}',
           'INNER JOIN {ts} ON {ts}.id = $1 AND {ts}."businessId" = {bls}."businessId"'
       ] .join(' ')
         .replace(RegExp('{bls}','g'), '"businessLoyaltySettings"')
@@ -133,7 +133,9 @@ module.exports.create = function(req, res){
                 // send back the updated user stats
                 uls.numPunches = uls.numPunches + deltaPunches - lessPunches;
                 uls.totalPunches += deltaPunches;
-                return res.json({ error:null, data:uls });
+                res.json({ error:null, data:uls });
+
+                magic.emit('loyalty.redemption', deltaPunches, req.body.consumerId, bls.businessId, bls.locationId, req.session.user.id);
               });
             });
           });

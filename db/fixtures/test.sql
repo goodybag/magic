@@ -326,6 +326,19 @@ INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('5',
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used
 
+-- EVENTS
+
+BEGIN;
+INSERT INTO events (id, type, date, data) VALUES (1, 'loyalty.punch', NOW(), '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (2, 'loyalty.punch', NOW() - '2 days'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (3, 'loyalty.punch', NOW() - '2 weeks'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (4, 'loyalty.punch', NOW() - '2 months'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (5, 'loyalty.redemption', NOW(), '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (6, 'loyalty.redemption', NOW() - '2 days'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (7, 'loyalty.redemption', NOW() - '2 weeks'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (8, 'loyalty.redemption', NOW() - '2 months'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+COMMIT;
+SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
 --
 BEGIN;

@@ -289,7 +289,7 @@ module.exports.getAnalytics = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
+    var query1 = sql.query([
       'SELECT {fields} FROM locations',
         'LEFT JOIN "productLocations" pl ON pl."locationId" = locations.id',
         'LEFT JOIN "productLikes" ON "productLikes"."productId" = pl."productId" AND "productLikes"."createdAt" > {startDate}',
@@ -297,30 +297,41 @@ module.exports.getAnalytics = function(req, res){
         'LEFT JOIN "productTries" ON "productTries"."productId" = pl."productId" AND "productTries"."createdAt" > {startDate}',
         'LEFT JOIN "tapinStations" ts ON ts."locationId" = locations.id',
         'LEFT JOIN "tapins" ON "tapins"."tapinStationId" = ts.id AND "tapins"."dateTime" > {startDate}',
-        'WHERE locations.id=$id GROUP BY locations.id'
+        'WHERE locations.id=$locationId GROUP BY locations.id'
     ]);
-    query.fields = sql.fields();
-    query.fields.add("locations.id");
-    query.fields.add('COUNT(DISTINCT "productLikes".id) AS likes');
-    query.fields.add('COUNT(DISTINCT "productWants".id) AS wants');
-    query.fields.add('COUNT(DISTINCT "productTries".id) AS tries');
-    query.fields.add('COUNT(DISTINCT "tapins".id) AS tapins');
+    query1.$('locationId', +req.param('locationId') || 0);
+    query1.fields = sql.fields();
+    query1.fields.add('COUNT(DISTINCT "productLikes".id) AS likes');
+    query1.fields.add('COUNT(DISTINCT "productWants".id) AS wants');
+    query1.fields.add('COUNT(DISTINCT "productTries".id) AS tries');
+    query1.fields.add('COUNT(DISTINCT "tapins".id) AS tapins');
 
-    query.$('id', +req.param('locationId') || 0);
+    var query2 = sql.query([
+      'SELECT {fields} FROM events',
+        "WHERE data::hstore->'locationId' = $locationId",
+          'AND date > {startDate}',
+        "GROUP BY data::hstore->'locationId'"
+    ]);
+
+    query2.$('locationId', ''+req.param('locationId'));
+    query2.fields = sql.fields();
+    query2.fields.add("sum(case when type='loyalty.punch' or type='loyalty.redemption' then cast(data::hstore->'deltaPunches' as integer) else 0 end) as punches");
+    query2.fields.add("sum(case when type='loyalty.redemption' then 1 else 0 end) as redemptions");
 
     var queries = [];
-    query.startDate = "now() - '1 day'::interval"; // past 24 hours
-    queries.push(query.toString());
-    query.startDate = "now() - '1 week'::interval"; // past week
-    queries.push(query.toString());
-    query.startDate = "now() - '1 month'::interval"; // past month
-    queries.push(query.toString());
-    query.startDate = "'1-1-1969'::date"; // all time
-    queries.push(query.toString());
+    function addQuery(start) {
+      query1.startDate = query2.startDate = start;
+      queries.push({q:query1.toString(), v:query1.$values});
+      queries.push({q:query2.toString(), v:query2.$values});  
+    }
+    addQuery("now() - '1 day'::interval"); // past 24 hours
+    addQuery("now() - '1 week'::interval"); // past week
+    addQuery("now() - '1 month'::interval"); // past month
+    addQuery("'1-1-1969'::date"); // all time
 
     require('async').map(queries, function(item, next) {
-      // console.log(item)
-      client.query(item, query.$values, next);
+      // console.log(item);
+      client.query(item.q, item.v, next);
     }, function(error, results) {
       // console.log(error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -331,10 +342,10 @@ module.exports.getAnalytics = function(req, res){
       }
 
       var stats = {
-        day   : results[0].rows[0],
-        week  : results[1].rows[0],
-        month : results[2].rows[0],
-        all   : results[3].rows[0],
+        day   : utils.extend(results[0].rows[0], results[1].rows[0]),
+        week  : utils.extend(results[2].rows[0], results[3].rows[0]),
+        month : utils.extend(results[4].rows[0], results[5].rows[0]),
+        all   : utils.extend(results[6].rows[0], results[7].rows[0]),
       };
       // console.log(stats);
 

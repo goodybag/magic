@@ -38,7 +38,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should update the consumer stats', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:9, businessId:1 }, function(err, payload, res) {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:9, businessId:1, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
@@ -58,7 +58,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should create the consumer stats if DNE', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:4, businessId:1 }, function(err, payload, res) {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:4, businessId:1, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
@@ -88,7 +88,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should allow business managers to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XXX', { deltaPunches:5, businessId:1, consumerId:9 }, function(error, results, res) {
+      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XXX', { deltaPunches:5, businessId:1, locationId:1, consumerId:9 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(function() {
@@ -109,7 +109,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should allow business cashiers to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XYX', { deltaPunches:5, businessId:1, consumerId:9 }, function(error, results, res) {
+      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XYX', { deltaPunches:5, businessId:1, locationId:1, consumerId:9 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(function() {
@@ -130,7 +130,7 @@ describe('POST /v1/loyaltyStats', function() {
 
   it('should allow consumers to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-consumer4', { deltaPunches:5, businessId:1, consumerId:9 }, function(error, results, res) {
+      tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-consumer4', { deltaPunches:5, businessId:1, locationId:1, consumerId:9 }, function(error, results, res) {
         assert(res.statusCode === 403);
         tu.logout(done);
       });

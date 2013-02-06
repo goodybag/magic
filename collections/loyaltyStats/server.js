@@ -23,7 +23,7 @@ server.post(
 , middleware.applyGroups(applyGroups.employee)
 , middleware.auth.allow('admin', 'sales', 'employee')
 , middleware.permissions(permissions)
-, middleware.validate.body(null, { businessId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
+, middleware.validate.body(null, { businessId:{isInt:[]}, locationId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , routes.update
 );
 
