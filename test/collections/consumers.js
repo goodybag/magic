@@ -121,6 +121,20 @@ describe('POST /v1/consumers', function() {
       done();
     })
   });
+
+  it('should fail if there is a required field missing', function(done){
+    var consumer = {
+      password:   "password"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode === 400);
+      results = JSON.parse(results);
+      assert(results.error.name == 'VALIDATION_FAILED');
+      done();
+    })
+  });
 });
 
 describe('PATCH /v1/consumers/:id', function() {
