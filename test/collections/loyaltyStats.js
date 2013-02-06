@@ -36,7 +36,7 @@ describe('GET /v1/loyaltyStats', function() {
 
 describe('POST /v1/loyaltyStats', function() {
 
-  it('should update the consumer stats', function(done) {
+  it('should update the consumer stats and make them elite', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:9, businessId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
@@ -46,8 +46,10 @@ describe('POST /v1/loyaltyStats', function() {
               assert(res.statusCode == 200);
               payload = JSON.parse(payload);
               assert(!payload.error);
+
               assert(payload.data[0].numPunches === 10);
               assert(payload.data[0].totalPunches === 28);
+              assert(payload.data[0].isElite === true);
               tu.logout(done);
             });
           });
