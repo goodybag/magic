@@ -108,11 +108,7 @@ module.exports.list = function(req, res){
 
     if (includeLocations) {
       query.locationJoin = 'LEFT JOIN locations ON locations."businessId" = businesses.id';
-      // :TEMP: this is a temporary alternative to JSON functions that travis CI is forcing us to do those fuckers
-      for (var locationColumn in schemas.locations) {
-        if (locationColumn == 'position') continue;
-        query.fields.add('array_agg(locations."'+locationColumn+'"::text) as "location_'+locationColumn+'"');
-      }
+      query.fields.add('array_to_json(array_agg(row_to_json(locations.*))) as locations');
     }
 
     // tag filtering
@@ -150,25 +146,11 @@ module.exports.list = function(req, res){
       logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      if (total && typeof dataResult.rows[0].location_id != 'undefined') {
-        // :TEMP: hack to replace array_to_json and shit
-        dataResult.rows.forEach(function(r) {
-          // create locations objects
-          var locations = [];
-          for (var i=0; i < r.location_id.length; i++) {
-            locations.push({});
-          }
 
-          // extract data from row
-          for (var col in schemas.locations) {
-            var k = 'location_'+col;
-            if (!r[k]) { continue; }
-            r[k].forEach(function(v, i) {
-              locations[i][col] = v;
-            });
-            delete r[k];
-          }
-          r.locations = locations;
+      if (includeLocations) {
+        dataResult.rows.forEach(function(r) {
+          if (typeof r.locations != 'undefined')
+            r.locations = (r.locations) ? JSON.parse(r.locations) : [];
         });
       }
 
