@@ -42,6 +42,10 @@ describe('Consumers Events: ', function() {
       });
     });
   });
+
+  it('store an event when a user makes a visit and then becomes elite', function(done) {
+    done();
+  });
 });
 
 describe('Products Events: ', function() {
@@ -128,7 +132,6 @@ describe('Loyalty Events: ', function() {
             results = JSON.parse(results);
             assert(!results.error);
             assert(results.data.length > 0);
-            console.log(results.data);
             assert(results.data.filter(function(d){
               // Also need to check the consumerId
               return (d.type === "loyalty.punch"
