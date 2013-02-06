@@ -21,9 +21,9 @@ SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advan
 -- BUSINESS LOYALTY SETTINGS
 
 BEGIN;
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 20);
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 16);
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 25);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 20);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30);
 COMMIT;
 SELECT setval('"businessLoyaltySettings_id_seq"', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
 

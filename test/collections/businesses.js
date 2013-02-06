@@ -430,7 +430,7 @@ describe('PATCH /v1/businesses/:id', function(){
       , reward: 'Some reward'
       , regularPunchesRequired: 10
       , elitePunchesRequired: 8
-      , eliteVisitsRequired: 12
+      , punchesRequiredToBecomeElite: 24
       };
 
       tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
