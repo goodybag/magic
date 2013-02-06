@@ -120,7 +120,7 @@ module.exports.update = function(req, res){
 
           res.json({ error: null, data: null });
 
-          magic.emit('loyalty.punch', consumerId, businessId, req.session.user.id, result.rows[0].id)
+          magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.session.user.id)
         }
       );
     });

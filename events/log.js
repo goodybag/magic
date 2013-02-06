@@ -40,12 +40,17 @@ var
 
 module.exports = {
   'consumers.registered':
-  function(consumer){
+  function (consumer){
+    insert('consumers.registered', { consumerId: consumer.consumerId });
+  }
+
+, 'consumers.becameElite':
+  function (consumer){
     insert('consumers.registered', { consumerId: consumer.consumerId });
   }
 
 // , 'consumers.donation':
-//   function(consumer, donation){
+//   function (consumer, donation){
 //     insert('consumers.donation', {
 //       consumerId: consumer.id
 //     , donationId: donation.id
@@ -54,35 +59,42 @@ module.exports = {
 //   }
 
 , 'products.like':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.like', { userId: userId, productId: productId });
   }
 
 , 'products.try':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.try', { userId: userId, productId: productId });
   }
 
 , 'products.want':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.want', { userId: userId, productId: productId });
   }
 
 , 'products.unlike':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.unlike', { userId: userId, productId: productId });
   }
 
 , 'products.untry':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.untry', { userId: userId, productId: productId });
   }
 
 , 'products.unwant':
-  function(userId, productId){
+  function (userId, productId){
     insert('products.unwant', { userId: userId, productId: productId });
   }
 
 , 'loyalty.punch':
-  function(deltaPunches, consumerId, businessId, employeeId)
+  function (deltaPunches, consumerId, businessId, employeeId){
+    insert('loyalty.punch', {
+      deltaPunches: deltaPunches
+    , consumerId:   consumerId
+    , businessId:   businessId
+    , employeeId:   employeeId
+    });
+  }
 };
