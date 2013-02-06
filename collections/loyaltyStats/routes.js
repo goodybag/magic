@@ -105,13 +105,13 @@ module.exports.update = function(req, res){
           'SET',
             '"numPunches"   = "numPunches"   + $3,',
             '"totalPunches" = "totalPunches" + $3',
-          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id'
+          'WHERE "consumerId"=$1 AND "businessId"=$2'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         ['INSERT INTO "userLoyaltyStats"',
           '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit")',
           'SELECT $1, $2, $3, $3, 0, now() WHERE NOT EXISTS',
-            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id'
+            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2)'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         function(error, result) {

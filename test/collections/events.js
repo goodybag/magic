@@ -42,10 +42,6 @@ describe('Consumers Events: ', function() {
       });
     });
   });
-
-  it('store an event when a user makes a visit and then becomes elite', function(done) {
-    done();
-  });
 });
 
 describe('Products Events: ', function() {
