@@ -92,9 +92,11 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
           // success, we're done
           if (savePointed) { tx.release('upsert'); }
           if (shouldCommitOnFinish) {
-            tx.commit(originalCb);
+            tx.commit(function(error){
+              originalCb(error, results[1]);
+            });
           } else {
-            originalCb();
+            originalCb(null, results[1]);
           }
         } else {
           // carry on

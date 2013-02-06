@@ -8,6 +8,8 @@ var all = [
 , 'deltaPunches'
 , 'visitCount'
 , 'lastVisit'
+, 'isElite'
+, 'dateBecameElite'
 ];
 
 module.exports = {
@@ -28,6 +30,8 @@ module.exports = {
     , 'totalPunches'
     , 'visitCount'
     , 'lastVisit'
+    , 'isElite'
+    , 'dateBecameElite'
     ]
   }
 

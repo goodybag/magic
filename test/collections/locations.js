@@ -489,6 +489,8 @@ describe('GET /v1/locations/:id/analytics', function() {
         assert(payload.data.day.visits == 1);
         assert(payload.data.day.firstVisits == 0);
         assert(payload.data.day.returnVisits == 1);
+        assert(payload.data.day.becameElites == 1);
+        assert(payload.data.day.photos == 1);
         assert(payload.data.week.likes == 2);
         assert(payload.data.week.wants == 2);
         assert(payload.data.week.tries == 2);
@@ -498,6 +500,8 @@ describe('GET /v1/locations/:id/analytics', function() {
         assert(payload.data.week.visits == 2);
         assert(payload.data.week.firstVisits == 0);
         assert(payload.data.week.returnVisits == 2);
+        assert(payload.data.week.becameElites == 2);
+        assert(payload.data.week.photos == 1);
         assert(payload.data.month.likes == 3);
         assert(payload.data.month.wants == 3);
         assert(payload.data.month.tries == 3);
@@ -507,6 +511,8 @@ describe('GET /v1/locations/:id/analytics', function() {
         assert(payload.data.month.visits == 3);
         assert(payload.data.month.firstVisits == 0);
         assert(payload.data.month.returnVisits == 3);
+        assert(payload.data.month.becameElites == 3);
+        assert(payload.data.month.photos == 1);
         assert(payload.data.all.likes == 4);
         assert(payload.data.all.wants == 4);
         assert(payload.data.all.tries == 4);
@@ -516,6 +522,8 @@ describe('GET /v1/locations/:id/analytics', function() {
         assert(payload.data.all.visits == 4);
         assert(payload.data.all.firstVisits == 1);
         assert(payload.data.all.returnVisits == 3);
+        assert(payload.data.all.becameElites == 4);
+        assert(payload.data.all.photos == 1);
         tu.logout(done);
       });
     });

@@ -39,6 +39,12 @@ define(function(require){
   , lastVisit: {
       type: 'timestamp'
     }
+  , isElite: {
+      type: 'boolean'
+    }
+  , dateBecameElite: {
+      type: 'timestamp'
+    }
   };
   return userLoyaltyStats;
 });

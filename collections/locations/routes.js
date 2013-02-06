@@ -305,9 +305,9 @@ module.exports.getAnalytics = function(req, res){
     var query2 = sql.query([
       'SELECT {fields} FROM events',
         "WHERE (data::hstore->'locationId' = $locationId::text",
-          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT id FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer))",
-          'AND date > {startDate}',
-        // "GROUP BY data::hstore->'locationId'"
+          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT id FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
+          "OR CAST(data::hstore->'businessId' as integer) = (SELECT businesses.id FROM businesses INNER JOIN locations ON businesses.id=locations.\"businessId\" AND locations.id=$locationId::integer LIMIT 1))",
+          'AND date > {startDate}'
     ]);
     query2.$('locationId', +req.param('locationId') || 0);
     query2.fields = sql.fields();
@@ -317,12 +317,26 @@ module.exports.getAnalytics = function(req, res){
     query2.fields.add("SUM(CASE WHEN type='consumers.visit' AND data::hstore->'isFirstVisit' = 'true' THEN 1 ELSE 0 END) AS \"firstVisits\"");
     query2.fields.add("SUM(CASE WHEN type='consumers.visit' AND data::hstore->'isFirstVisit' = 'false' THEN 1 ELSE 0 END) AS \"returnVisits\"");
     query2.fields.add("SUM(CASE WHEN type='consumers.tapin' THEN 1 ELSE 0 END) AS tapins");
+    query2.fields.add("SUM(CASE WHEN type='consumers.becameElite' THEN 1 ELSE 0 END) AS \"becameElites\"");
+    
+    var query3 = sql.query([
+      'SELECT {fields} FROM photos',
+        'INNER JOIN locations',
+          'ON locations."businessId" = photos."businessId"',
+          'AND locations.id = $locationId',
+        'WHERE "consumerId" IS NOT NULL',
+          'AND "createdAt" > {startDate}'
+    ]);
+    query3.$('locationId', +req.param('locationId') || 0);
+    query3.fields = sql.fields();
+    query3.fields.add('COUNT(DISTINCT photos.id) as photos');
 
     var queries = [];
     function addQueryset(start) {
-      query1.startDate = query2.startDate = start;
+      query1.startDate = query2.startDate = query3.startDate = start;
       queries.push({q:query1.toString(), v:query1.$values});
       queries.push({q:query2.toString(), v:query2.$values});
+      queries.push({q:query3.toString(), v:query3.$values});
     }
     addQueryset("now() - '1 day'::interval"); // past 24 hours
     addQueryset("now() - '1 week'::interval"); // past week
@@ -342,10 +356,10 @@ module.exports.getAnalytics = function(req, res){
       }
 
       var stats = {
-        day   : utils.extend(results[0].rows[0], results[1].rows[0]),
-        week  : utils.extend(results[2].rows[0], results[3].rows[0]),
-        month : utils.extend(results[4].rows[0], results[5].rows[0]),
-        all   : utils.extend(results[6].rows[0], results[7].rows[0]),
+        day   : utils.extend(results[0].rows[0], results[1].rows[0], results[2].rows[0]),
+        week  : utils.extend(results[3].rows[0], results[4].rows[0], results[5].rows[0]),
+        month : utils.extend(results[6].rows[0], results[7].rows[0], results[8].rows[0]),
+        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0]),
       };
       // console.log(stats);
 

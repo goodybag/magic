@@ -21,9 +21,9 @@ SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advan
 -- BUSINESS LOYALTY SETTINGS
 
 BEGIN;
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 20);
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 16);
-INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "eliteVisitsRequired") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 25);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 20);
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30);
 COMMIT;
 SELECT setval('"businessLoyaltySettings_id_seq"', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
 
@@ -229,10 +229,10 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- USER LOYALTY STATS
 
 BEGIN;
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('1', '3', '1', 5, 23, 40, now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('2', '5', '1', 10, 10, 10, now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('3', '6', '1', 4, 4, 20, now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit") VALUES ('4', '9', '1', 5, 23, 40, now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('1', '3', '1', 5, 23, 40, 'false', now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('2', '5', '1', 10, 10, 10, 'false', now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit", "dateBecameElite") VALUES ('3', '6', '1', 4, 4, 20, 'true', now(), now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('4', '9', '1', 5, 23, 40, 'false', now());
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
@@ -312,7 +312,7 @@ SELECT setval('"productTries_id_seq"', (SELECT MAX(id) from "productTries")); --
 -- PHOTOS
 
 BEGIN;
-INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled") VALUES ('1', '1', '1', 9, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled", "createdAt") VALUES ('1', '1', '1', 9, 'http://placekitten.com/200/300', true, NOW());
 INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled") VALUES ('2', '1', null, 4, 'http://placekitten.com/200/300', true);
 INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
 COMMIT;
@@ -359,6 +359,10 @@ INSERT INTO events (id, type, date, data) VALUES (13, 'consumers.tapin', NOW(), 
 INSERT INTO events (id, type, date, data) VALUES (14, 'consumers.tapin', NOW() - '2 days'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (15, 'consumers.tapin', NOW() - '2 weeks'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (16, 'consumers.tapin', NOW() - '2 months'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (17, 'consumers.becameElite', NOW(), '"userId"=>"1", "businessId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (18, 'consumers.becameElite', NOW() - '2 days'::interval, '"userId"=>"2", "businessId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (19, 'consumers.becameElite', NOW() - '2 weeks'::interval, '"userId"=>"3", "businessId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (20, 'consumers.becameElite', NOW() - '2 months'::interval, '"userId"=>"4", "businessId"=>"1"');
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
