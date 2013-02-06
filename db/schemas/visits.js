@@ -19,9 +19,19 @@ define(function(require){
     , meta: 'references tapins(id)'
     , validators: { isInt:[] }
     }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses(id) on delete cascade'
+    , validators: { isInt:[] }
+    }
   , locationId: {
       type: 'int'
     , meta: 'references locations(id) on delete cascade'
+    , validators: { isInt:[] }
+    }
+  , tapinStationId: {
+      type: 'int'
+    , meta: 'references "tapinStations"(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , consumerId: {
@@ -29,6 +39,10 @@ define(function(require){
     , meta: 'references consumers(id) on delete set null'
     , validators: { isInt:[] }
     }
+  , isFirstVisit: {
+      type: 'boolean'
+    , validators: { is:/true|false|1|0/ }
+  }
   , dateTime: {
       type: 'timestamp'
     , meta: 'without time zone default now() not null'

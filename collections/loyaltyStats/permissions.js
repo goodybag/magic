@@ -2,6 +2,7 @@ var all = [
   'id'
 , 'consumerId'
 , 'businessId'
+, 'locationId'
 , 'numPunches'
 , 'totalPunches'
 , 'deltaPunches'

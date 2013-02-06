@@ -289,38 +289,63 @@ module.exports.getAnalytics = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM locations',
-        'LEFT JOIN "productLocations" pl ON pl."locationId" = locations.id',
-        'LEFT JOIN "productLikes" ON "productLikes"."productId" = pl."productId" AND "productLikes"."createdAt" > {startDate}',
-        'LEFT JOIN "productWants" ON "productWants"."productId" = pl."productId" AND "productWants"."createdAt" > {startDate}',
-        'LEFT JOIN "productTries" ON "productTries"."productId" = pl."productId" AND "productTries"."createdAt" > {startDate}',
-        'LEFT JOIN "tapinStations" ts ON ts."locationId" = locations.id',
-        'LEFT JOIN "tapins" ON "tapins"."tapinStationId" = ts.id AND "tapins"."dateTime" > {startDate}',
-        'WHERE locations.id=$id GROUP BY locations.id'
+    var query1 = sql.query([
+      'SELECT {fields} FROM "productLocations"',
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productLocations"."productId" AND "productLikes"."createdAt" > {startDate}',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = "productLocations"."productId" AND "productWants"."createdAt" > {startDate}',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = "productLocations"."productId" AND "productTries"."createdAt" > {startDate}',
+        'WHERE "productLocations"."locationId"=$locationId GROUP BY "productLocations"."locationId"'
     ]);
-    query.fields = sql.fields();
-    query.fields.add("locations.id");
-    query.fields.add('COUNT(DISTINCT "productLikes".id) AS likes');
-    query.fields.add('COUNT(DISTINCT "productWants".id) AS wants');
-    query.fields.add('COUNT(DISTINCT "productTries".id) AS tries');
-    query.fields.add('COUNT(DISTINCT "tapins".id) AS tapins');
+    query1.$('locationId', +req.param('locationId') || 0);
+    query1.fields = sql.fields();
+    query1.fields.add('COUNT(DISTINCT "productLikes".id) AS likes');
+    query1.fields.add('COUNT(DISTINCT "productWants".id) AS wants');
+    query1.fields.add('COUNT(DISTINCT "productTries".id) AS tries');
 
-    query.$('id', +req.param('locationId') || 0);
+    var query2 = sql.query([
+      'SELECT {fields} FROM events',
+        "WHERE (data::hstore->'locationId' = $locationId::text",
+          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT id FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
+          "OR CAST(data::hstore->'businessId' as integer) = (SELECT businesses.id FROM businesses INNER JOIN locations ON businesses.id=locations.\"businessId\" AND locations.id=$locationId::integer LIMIT 1))",
+          'AND date > {startDate}'
+    ]);
+    query2.$('locationId', +req.param('locationId') || 0);
+    query2.fields = sql.fields();
+    query2.fields.add("SUM(CASE WHEN type='loyalty.punch' OR type='loyalty.redemption' THEN CAST(data::hstore->'deltaPunches' AS integer) ELSE 0 END) AS punches");
+    query2.fields.add("SUM(CASE WHEN type='loyalty.redemption' THEN 1 ELSE 0 END) AS redemptions");
+    query2.fields.add("SUM(CASE WHEN type='consumers.visit' THEN 1 ELSE 0 END) AS visits");
+    query2.fields.add("SUM(CASE WHEN type='consumers.visit' AND data::hstore->'isFirstVisit' = 'true' THEN 1 ELSE 0 END) AS \"firstVisits\"");
+    query2.fields.add("SUM(CASE WHEN type='consumers.visit' AND data::hstore->'isFirstVisit' = 'false' THEN 1 ELSE 0 END) AS \"returnVisits\"");
+    query2.fields.add("SUM(CASE WHEN type='consumers.tapin' THEN 1 ELSE 0 END) AS tapins");
+    query2.fields.add("SUM(CASE WHEN type='consumers.becameElite' THEN 1 ELSE 0 END) AS \"becameElites\"");
+    
+    var query3 = sql.query([
+      'SELECT {fields} FROM photos',
+        'INNER JOIN locations',
+          'ON locations."businessId" = photos."businessId"',
+          'AND locations.id = $locationId',
+        'WHERE "consumerId" IS NOT NULL',
+          'AND "createdAt" > {startDate}'
+    ]);
+    query3.$('locationId', +req.param('locationId') || 0);
+    query3.fields = sql.fields();
+    query3.fields.add('COUNT(DISTINCT photos.id) as photos');
 
     var queries = [];
-    query.startDate = "now() - '1 day'::interval"; // past 24 hours
-    queries.push(query.toString());
-    query.startDate = "now() - '1 week'::interval"; // past week
-    queries.push(query.toString());
-    query.startDate = "now() - '1 month'::interval"; // past month
-    queries.push(query.toString());
-    query.startDate = "'1-1-1969'::date"; // all time
-    queries.push(query.toString());
+    function addQueryset(start) {
+      query1.startDate = query2.startDate = query3.startDate = start;
+      queries.push({q:query1.toString(), v:query1.$values});
+      queries.push({q:query2.toString(), v:query2.$values});
+      queries.push({q:query3.toString(), v:query3.$values});
+    }
+    addQueryset("now() - '1 day'::interval"); // past 24 hours
+    addQueryset("now() - '1 week'::interval"); // past week
+    addQueryset("now() - '1 month'::interval"); // past month
+    addQueryset("'1-1-1969'::date"); // all time
 
     require('async').map(queries, function(item, next) {
-      // console.log(item)
-      client.query(item, query.$values, next);
+      // console.log(item);
+      client.query(item.q, item.v, next);
     }, function(error, results) {
       // console.log(error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -331,10 +356,10 @@ module.exports.getAnalytics = function(req, res){
       }
 
       var stats = {
-        day   : results[0].rows[0],
-        week  : results[1].rows[0],
-        month : results[2].rows[0],
-        all   : results[3].rows[0],
+        day   : utils.extend(results[0].rows[0], results[1].rows[0], results[2].rows[0]),
+        week  : utils.extend(results[3].rows[0], results[4].rows[0], results[5].rows[0]),
+        month : utils.extend(results[6].rows[0], results[7].rows[0], results[8].rows[0]),
+        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0]),
       };
       // console.log(stats);
 
