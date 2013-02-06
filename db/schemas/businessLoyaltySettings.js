@@ -37,7 +37,7 @@ define(function(require){
       type: 'int'
     , validators: { isInt:[] }
     }
-  , eliteVisitsRequired: {
+  , punchesRequiredToBecomeElite: {
       type: 'int'
     , validators: { isInt:[] }
     }

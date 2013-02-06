@@ -82,22 +82,22 @@ module.exports.create = function(req, res){
 
         // check that the user has enough punches
         var query = [
-          'SELECT {uls}.*, ({uls}."visitCount" >= $2) AS "isElite" FROM {uls}',
+          'SELECT {uls}.* FROM {uls}',
             'WHERE',
               '{uls}."consumerId" = $1',
               'AND (',
                 '(',
-                  '{uls}."visitCount"     >= $2',//$2=eliteVisitsRequired
-                  'AND {uls}."numPunches" >= $3',//$3=elitePunchesRequired
+                  '{uls}."isElite"        =  true',
+                  'AND {uls}."numPunches" >= $2',  //$2=elitePunchesRequired
                 ') OR (',
-                  '{uls}."visitCount"     <  $2',//$2=eliteVisitsRequired
-                  'AND {uls}."numPunches" >= $4',//$4=regularPunchesRequired
+                  '{uls}."isElite"        =  false',
+                  'AND {uls}."numPunches" >= $3',   //$3=regularPunchesRequired
                 ')',
               ')',
             'FOR UPDATE OF {uls}'
         ] .join(' ')
           .replace(RegExp('{uls}','g'), '"userLoyaltyStats"');
-        client.query(query, [req.body.consumerId, bls.eliteVisitsRequired, elitePunchesReq, regularPunchesReq], function(error, result) {
+        client.query(query, [req.body.consumerId, elitePunchesReq, regularPunchesReq], function(error, result) {
           if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
           if (result.rowCount === 0) {
             return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort();
