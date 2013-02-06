@@ -54,6 +54,11 @@ module.exports = {
     insert('consumers.visit', { consumerId: consumerId, visitId:visitId, businessId:businessId, locationId:locationId, isFirstTime:isFirstTime });
   }
 
+, 'consumers.tapin':
+  function (user, tapinStationId) {
+    insert('consumers.visit', { userId:user.id, tapinStationId:tapinStationId });
+  }
+
 // , 'consumers.donation':
 //   function (consumer, donation){
 //     insert('consumers.donation', {

@@ -156,6 +156,20 @@ INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALU
 COMMIT;
 SELECT setval('"tapins_id_seq"', (SELECT MAX(id) from "tapins")); -- advance the sequence past the IDs just used
 
+-- VISITS
+
+BEGIN;
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (1, 1, 1, 1, 1, 1, false, now());
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (2, 2, 1, 1, 1, 1, false, now() - '2 days'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (3, 3, 1, 1, 1, 1, false, now() - '2 weeks'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (4, 4, 1, 1, 1, 1, true, now() - '2 months'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (5, 5, 1, 1, 2, 2, false, now());
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (6, 6, 1, 1, 2, 2, false, now() - '2 days'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (7, 7, 1, 1, 2, 2, false, now() - '2 weeks'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (8, 8, 1, 1, 2, 2, true, now() - '2 months'::interval);
+COMMIT;
+SELECT setval('"visits_id_seq"', (SELECT MAX(id) from "visits")); -- advance the sequence past the IDs just used
+
 -- GROUPS
 
 BEGIN;
@@ -337,6 +351,14 @@ INSERT INTO events (id, type, date, data) VALUES (5, 'loyalty.redemption', NOW()
 INSERT INTO events (id, type, date, data) VALUES (6, 'loyalty.redemption', NOW() - '2 days'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (7, 'loyalty.redemption', NOW() - '2 weeks'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (8, 'loyalty.redemption', NOW() - '2 months'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (9, 'consumers.visit', NOW(), '"consumerId"=>"1", "visitId"=>"1", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (10, 'consumers.visit', NOW() - '2 days'::interval, '"consumerId"=>"1", "visitId"=>"2", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (11, 'consumers.visit', NOW() - '2 weeks'::interval, '"consumerId"=>"1", "visitId"=>"3", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (12, 'consumers.visit', NOW() - '2 months'::interval, '"consumerId"=>"1", "visitId"=>"4", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"true"');
+INSERT INTO events (id, type, date, data) VALUES (13, 'consumers.tapin', NOW(), '"userId"=>"1", "tapinStationId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (14, 'consumers.tapin', NOW() - '2 days'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (15, 'consumers.tapin', NOW() - '2 weeks'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (16, 'consumers.tapin', NOW() - '2 months'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
