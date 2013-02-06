@@ -45,8 +45,12 @@ module.exports = {
   }
 
 , 'consumers.becameElite':
-  function (consumer){
-    insert('consumers.registered', { consumerId: consumer.consumerId });
+  function (consumerId, businessId, date){
+    insert('consumers.becameElite', {
+      consumerId: consumerId
+    , businessId: businessId
+    , date:       date
+    });
   }
 
 // , 'consumers.donation':

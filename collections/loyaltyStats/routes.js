@@ -105,13 +105,13 @@ module.exports.update = function(req, res){
           'SET',
             '"numPunches"   = "numPunches"   + $3,',
             '"totalPunches" = "totalPunches" + $3',
-          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "totalPunches"'
+          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "totalPunches", "isElite"'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         ['INSERT INTO "userLoyaltyStats"',
-          '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit")',
-          'SELECT $1, $2, $3, $3, 0, now() WHERE NOT EXISTS',
-            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "totalPunches"'
+          '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit", "isElite")',
+          'SELECT $1, $2, $3, $3, 0, now(), false WHERE NOT EXISTS',
+            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "totalPunches", "isElite"'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         function(error, result) {
@@ -120,8 +120,40 @@ module.exports.update = function(req, res){
 
           res.json({ error: null, data: null });
 
+          // See if we need to update the users isElite status
+          if (result.rows[0].isElite) return;
+
+          var id = result.rows[0].id, totalPunches = result.rows[0].totalPunches;
+
           // Look up the business loyalty settings
-          // var query = 'SELECT '
+          // Consider doing all of this in a transaction
+          client.query(
+            'SELECT "punchesRequiredToBecomeElite"'
+          + ' from "businessLoyaltySettings"'
+          + ' where "businessId" = $1'
+          , [businessId]
+          , function(error, result){
+              if (error) return logger.routes.error(TAGS, error);
+
+              if (result.rows[0].punchesRequiredToBecomeElite > totalPunches) return;
+
+              // Update the users loyalty stat with elite
+              client.query(
+                ['UPDATE "userLoyaltyStats"',
+                  'SET',
+                    '"isElite"          = true,',
+                    '"dateBecameElite"  = now()',
+                  'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING "dateBecameElite"'
+                ].join(' ')
+              , [consumerId, businessId]
+              , function(error, result){
+                  if (error) return logger.routes.error(TAGS, error);
+
+                  magic.emit('consumers.becameElite', consumerId, businessId, result.rows[0].dateBecameElite);
+                }
+              );
+            }
+          );
 
           magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.session.user.id)
         }
