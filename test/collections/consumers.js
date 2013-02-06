@@ -115,8 +115,8 @@ describe('POST /v1/consumers', function() {
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
       assert(!error);
-      assert(res.statusCode === 400);
       results = JSON.parse(results);
+      assert(res.statusCode === 400);
       assert(results.error.name == 'VALIDATION_FAILED');
       done();
     })
@@ -129,8 +129,8 @@ describe('POST /v1/consumers', function() {
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
       assert(!error);
-      assert(res.statusCode === 400);
       results = JSON.parse(results);
+      assert(res.statusCode === 400);
       assert(results.error.name == 'VALIDATION_FAILED');
       done();
     })
