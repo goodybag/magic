@@ -118,7 +118,9 @@ module.exports.update = function(req, res){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
           logger.db.debug(TAGS, result);
 
-          return res.json({ error: null, data: null });
+          res.json({ error: null, data: null });
+
+          magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.session.user.id)
         }
       );
     });

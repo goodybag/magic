@@ -42,7 +42,9 @@ describe('Consumers Events: ', function() {
       });
     });
   });
+});
 
+describe('Products Events: ', function() {
   it('store an event when a user likes a product', function(done) {
     tu.loginAsConsumer(function(error, user){
       assert(!error);
@@ -74,12 +76,77 @@ describe('Consumers Events: ', function() {
 
                   tu.logout(done);
                 }, 500);
+              });
             });
-          });
-
           });
         });
       });
     });
+  });
+});
+
+describe('Loyalty Events: ', function() {
+  it('store an event when a when a punch occurs', function(done) {
+    var punch = { deltaPunches: 5, businessId: 1, consumerId: 9 };
+    var stage = {
+      start: function(){
+        stage.loginAsTapInStation();
+      }
+
+    , loginAsTapInStation: function(){
+        var user = { email:'tapin_station_0@goodybag.com', password:'password' };
+        tu.login(user, function(error, user) {
+          assert(!error);
+
+          stage.updateLoyaltyStats();
+        });
+      }
+
+    , updateLoyaltyStats: function(){
+        tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XYX', punch, function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode === 200);
+
+          stage.loginAsAdmin();
+        });
+      }
+
+    , loginAsAdmin: function(){
+        tu.logout(function() {
+          tu.loginAsAdmin(function(error){
+            assert(!error);
+
+            stage.ensureEventFired();
+          });
+        });
+      }
+
+    , ensureEventFired: function(){
+        setTimeout(function(){
+          tu.get('/v1/events', function(error, results) {
+            assert(!error);
+            results = JSON.parse(results);
+            assert(!results.error);
+            assert(results.data.length > 0);
+            assert(results.data.filter(function(d){
+              // Also need to check the consumerId
+              return (d.type === "loyalty.punch"
+                && d.data.deltaPunches  == punch.deltaPunches
+                && d.data.businessId    == punch.businessId
+                && d.data.consumerId    == punch.consumerId
+              );
+            }).length >= 1);
+
+            stage.end();
+          }, 500);
+        });
+      }
+
+    , end: function(){
+        tu.logout(done);
+      }
+    };
+
+    stage.start();
   });
 });
