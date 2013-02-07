@@ -20,7 +20,6 @@ server.get(
 // LoyaltyStats.get
 server.get(
   '/v1/businesses/:businessId/loyaltyStats'
-, function(req,res,next){ console.log("#########################"); }
 , middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
 , routes.get
