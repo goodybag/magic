@@ -40,27 +40,29 @@ module.exports.get = function(req, res){
       var query = 'SELECT id FROM consumers WHERE "userId" = $1';
       getConsumerId = function(cb) { client.query(query, [req.session.user.id], cb); };
     }
-// console.log(req.param('businessId'), req.session.user);
+
     getConsumerId(function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       if (!consumerId) {
         if (result.rowCount === 0) {
-          return res.status(404).end();
+          return res.json({ error: null, data: [] });
         }
         consumerId = result.rows[0].id;
       }
 
       // get stats
-      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {where}');
-      query.fields = sql.fields().add('"userLoyaltyStats".*');
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {where}');
+      query.fields = sql.fields().add('"userLoyaltyStats".*, businesses.name as "businessName"');
+      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id'
       query.where = sql.where().and('"userLoyaltyStats"."consumerId" = $consumerId');
       query.$('consumerId', consumerId);
 
       if (req.param('businessId')){
-        query.where.and('userLoyaltyStats."businessId" = $businessId');
+        query.where.and('"userLoyaltyStats"."businessId" = $businessId');
         query.$('businessId', req.param('businessId'));
       }
+
 
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
