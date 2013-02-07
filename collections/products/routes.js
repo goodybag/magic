@@ -82,6 +82,10 @@ module.exports.list = function(req, res){
     // location id filtering
     if (req.param('locationId')){
       var joinType = "inner";
+
+      if (req.param('spotlight'))
+        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+
       query.prodLocJoin = [
       , '{joinType} join "productLocations"'
         , 'ON products."id" = "productLocations"."productId"'

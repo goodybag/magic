@@ -15,6 +15,7 @@ var all = [
 , 'categories:productCategories'
 , 'tags:productTags'
 , 'isAvailable'
+, 'isSpotlight'
 ];
 
 module.exports = {

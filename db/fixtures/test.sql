@@ -277,6 +277,7 @@ INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('9', '5', '1', '5', 0, 0, ll_to_earth(0, 0), false);
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
 

@@ -231,6 +231,27 @@ describe('GET /v1/locations/:locationId/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
+      assert(payload.data[0].isSpotlight == undefined);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should respond with a product listing per location with spotlight', function(done) {
+    var locationId = 1;
+    tu.get('/v1/locations/' + locationId + '/products?spotlight=true', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 1);
+      assert(payload.data[0].id == 1);
+      assert(payload.data[0].businessId == 1);
+      assert(payload.data[0].name == 'Product 1');
+      assert(payload.data[0].isSpotlight == true);
       assert(payload.meta.total > 1);
       done();
     });
