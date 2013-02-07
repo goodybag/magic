@@ -140,7 +140,6 @@ module.exports = function(req, res, next){
 
   , end: function(user) {
       tx.commit();
-      console.log("Setting user to: ", user);
       req.session.user = user;
       next();
     }

@@ -52,17 +52,23 @@ module.exports.get = function(req, res){
       }
 
       // get stats
-      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {where}');
-      query.fields = sql.fields().add('"userLoyaltyStats".*, businesses.name as "businessName"');
-      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id'
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {where}');
+
+      query.fields = sql.fields().add('"userLoyaltyStats".*');
+      query.fields.add('businesses.name as "businessName"');
+      query.fields.add('"businessLoyaltySettings".reward as reward');
+
+      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id';
+      query.loyaltyJoin = 'join "businessLoyaltySettings" on "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+
       query.where = sql.where().and('"userLoyaltyStats"."consumerId" = $consumerId');
+
       query.$('consumerId', consumerId);
 
       if (req.param('businessId')){
         query.where.and('"userLoyaltyStats"."businessId" = $businessId');
         query.$('businessId', req.param('businessId'));
       }
-
 
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

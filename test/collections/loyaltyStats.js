@@ -52,6 +52,7 @@ describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
         assert(payload.data.numPunches == 5);
         assert(payload.data.totalPunches == 23);
         assert(payload.data.visitCount == 40);
+        assert(payload.data.reward == 'Chicken');
 
         tu.logout(done);
       });

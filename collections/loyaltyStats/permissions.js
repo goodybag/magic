@@ -11,6 +11,7 @@ var all = [
 , 'lastVisit'
 , 'isElite'
 , 'dateBecameElite'
+, 'reward'
 ];
 
 module.exports = {
@@ -34,6 +35,7 @@ module.exports = {
     , 'lastVisit'
     , 'isElite'
     , 'dateBecameElite'
+    , 'reward'
     ]
   }
 
