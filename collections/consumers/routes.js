@@ -149,10 +149,19 @@ module.exports.create = function(req, res){
         return res.error(errors.internal.DB_FAILURE);
       }
 
-      res.json({ error: null, data: result.rows[0] });
-
       req.body.consumerId = result.rows[0].consumerId;
       req.body.userId = result.rows[0].userId;
+
+      // Log the user in
+      req.session.user = {
+        id: req.body.userId
+      , email: req.body.email
+      , singlyAccessToken: req.body.singlyAccessToken
+      , singlyId: req.body.singlyId
+      , groups: ['consumers']
+      };
+
+      res.json({ error: null, data: result.rows[0] });
 
       magic.emit('consumers.registered', req.body);
     });
