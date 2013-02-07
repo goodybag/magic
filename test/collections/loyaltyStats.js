@@ -47,8 +47,9 @@ describe('POST /v1/loyaltyStats', function() {
               payload = JSON.parse(payload);
               assert(!payload.error);
 
-              assert(payload.data[0].numPunches === 10);
+              assert(payload.data[0].numPunches === 2);
               assert(payload.data[0].totalPunches === 28);
+              assert(payload.data[0].numRewards === 1);
               assert(payload.data[0].isElite === true);
               tu.logout(done);
             });
@@ -98,8 +99,9 @@ describe('POST /v1/loyaltyStats', function() {
             tu.get('/v1/loyaltyStats', function(error, results, res) {
               assert(res.statusCode === 200);
               results = JSON.parse(results);
-              assert(results.data[0].numPunches === 15);
+              assert(results.data[0].numPunches === 3);
               assert(results.data[0].totalPunches === 33);
+              assert(results.data[0].numRewards === 2);
 
               tu.logout(done);
             });
@@ -119,8 +121,9 @@ describe('POST /v1/loyaltyStats', function() {
             tu.get('/v1/loyaltyStats', function(error, results, res) {
               assert(res.statusCode === 200);
               results = JSON.parse(results);
-              assert(results.data[0].numPunches === 20);
+              assert(results.data[0].numPunches === 0);
               assert(results.data[0].totalPunches === 38);
+              assert(results.data[0].numRewards === 4);
 
               tu.logout(done);
             });

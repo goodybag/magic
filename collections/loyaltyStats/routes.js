@@ -99,59 +99,70 @@ module.exports.update = function(req, res){
         consumerId = result.rows[0].id;
       }
 
+      console.log(':TODO: PUT POST /loyaltyStats IN A TRANSACTION')
+
       // run stats upsert
       db.upsert(client,
         ['UPDATE "userLoyaltyStats"',
           'SET',
             '"numPunches"   = "numPunches"   + $3,',
             '"totalPunches" = "totalPunches" + $3',
-          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "totalPunches", "isElite"'
+          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "numPunches", "totalPunches", "isElite"'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         ['INSERT INTO "userLoyaltyStats"',
           '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit", "isElite")',
           'SELECT $1, $2, $3, $3, 0, now(), false WHERE NOT EXISTS',
-            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "totalPunches", "isElite"'
+            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "numPunches", "totalPunches", "isElite"'
         ].join(' '),
         [consumerId, businessId, deltaPunches],
         function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
           logger.db.debug(TAGS, result);
+          var uls = result.rows[0];
 
+          // Send response now
           res.json({ error: null, data: null });
 
-          // See if we need to update the users isElite status
-          if (result.rows[0].isElite) return;
-
-          var id = result.rows[0].id, totalPunches = result.rows[0].totalPunches;
-
           // Look up the business loyalty settings
-          // Consider doing all of this in a transaction
-          client.query(
-            'SELECT "punchesRequiredToBecomeElite"'
-          + ' from "businessLoyaltySettings"'
-          + ' where "businessId" = $1'
-          , [businessId]
-          , function(error, result){
+          client.query('SELECT * from "businessLoyaltySettings" where "businessId" = $1', [businessId], function(error, result) {
               if (error) return logger.routes.error(TAGS, error);
+              var bls = result.rows[0];
 
-              if (result.rows[0].punchesRequiredToBecomeElite > totalPunches) return;
+              var query = sql.query([
+                'UPDATE "userLoyaltyStats" SET {updates}',
+                  'WHERE "consumerId"=$consumerId AND "businessId"=$businessId',
+                  'RETURNING "dateBecameElite"'
+              ]);
+              query.updates = sql.fields();
+              query.$('consumerId', consumerId);
+              query.$('businessId', businessId);
+
+              var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite);
+              if (hasBecomeElite) {
+                query.updates.add('"isElite" = true');
+                query.updates.add('"dateBecameElite"  = now()');
+              }
+           
+              var punchesRequired = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
+              var hasEarnedReward = (uls.numPunches >= punchesRequired);
+              if (hasEarnedReward) {
+                var rewardsGained = Math.floor(uls.numPunches / punchesRequired); // this accounts for the possibility that they punched more than the # required
+                query.updates.add('"numPunches" = "numPunches" - $punchesRequired');
+                query.updates.add('"numRewards" = "numRewards" + $rewardsGained');
+                query.$('punchesRequired', punchesRequired * rewardsGained);
+                query.$('rewardsGained', rewardsGained);
+              }
+              
 
               // Update the users loyalty stat with elite
-              client.query(
-                ['UPDATE "userLoyaltyStats"',
-                  'SET',
-                    '"isElite"          = true,',
-                    '"dateBecameElite"  = now()',
-                  'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING "dateBecameElite"'
-                ].join(' ')
-              , [consumerId, businessId]
-              , function(error, result){
-                  if (error) return logger.routes.error(TAGS, error);
+              client.query(query.toString(), query.$values, function(error, result) {
+                if (error) return logger.routes.error(TAGS, error);
 
+                if (hasBecomeElite)
                   magic.emit('consumers.becameElite', consumerId, businessId, result.rows[0].dateBecameElite);
-                }
-              );
+                // :TODO: emit on hasEarnedReward?
+              });
             }
           );
 

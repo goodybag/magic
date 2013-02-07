@@ -32,6 +32,10 @@ define(function(require){
       type: 'int'
     , validators: { isInt:[] }
     }
+  , numRewards: {
+      type: 'int'
+    , validators: { isInt:[] }
+    }
   , visitCount: {
       type: 'int'
     , validators: { isInt:[] }
