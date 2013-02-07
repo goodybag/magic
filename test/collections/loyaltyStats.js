@@ -7,7 +7,6 @@ var
 ;
 
 describe('GET /v1/loyaltyStats', function() {
-
   it('should respond with stats', function(done) {
     tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.get('/v1/loyaltyStats', function(err, payload, res) {
@@ -32,6 +31,29 @@ describe('GET /v1/loyaltyStats', function() {
       });
     });
   });
+});
+
+describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
+
+  it('should respond with stats', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/businesses/' + 1 + '/loyaltyStats', '123456-ABC', {}, function(error, payload){
+        console.log(error);
+        assert(!error);
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        console.log(payload);
+        assert(!payload.error);
+        // assert(payload.data[0].numPunches === 5);
+        // assert(payload.data[0].totalPunches === 23);
+        // assert(payload.data[0].visitCount === 40);
+        tu.logout(done);
+      });
+    });
+  });
+
 });
 
 describe('POST /v1/loyaltyStats', function() {

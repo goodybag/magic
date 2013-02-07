@@ -175,7 +175,7 @@ SELECT setval('"visits_id_seq"', (SELECT MAX(id) from "visits")); -- advance the
 BEGIN;
 INSERT INTO "groups" (id, name) VALUES ('1', 'admin');
 INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
-INSERT INTO "groups" (id, name) VALUES ('3', 'tapin-station');
+-- INSERT INTO "groups" (id, name) VALUES ('3', 'tapin-station');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
