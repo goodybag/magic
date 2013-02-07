@@ -13,7 +13,7 @@ exports.ownerManager = function(req, cb) {
   var businessId = req.param('id');
   var userId     = req.session.user.id;
 
-  db.getClient(function(error, client) {
+  db.getClient('businesses ownerManager', function(error, client) {
     if (error) cb(null);
 
     // were we given a consumer id in the request body?

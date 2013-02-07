@@ -33,6 +33,7 @@ var config = {
     }
   , passwordSalt: "$G00DYBAGR0CK$!"
   , consumerPasswordSaltLength: 10
+  , outputActivePoolIds: false
 
   , singly: {
       clientId: "e8171ccd4a3b90f15bbb41088efccc06"
@@ -58,6 +59,7 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost'
+  , outputActivePoolIds: false
   }
 
 , test: {
@@ -69,6 +71,7 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
+  , outputActivePoolIds: false
 
   , facebook: {
       id:     "159340790837933"
@@ -142,6 +145,7 @@ var config = {
     }
   , baseUrl: 'http://merlin.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
+  , outputActivePoolIds: false
   , repl: {
       enabled: false
     }

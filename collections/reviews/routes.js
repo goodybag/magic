@@ -26,7 +26,7 @@ module.exports.list = function(req, res){
   var TAGS = ['get-oddity-businesses list', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of oddity businesses', {uid: "more"});
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -56,7 +56,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-review', req.uuid];
   logger.routes.debug(TAGS, 'getting oddityMeta by id ' + req.params.id, {uid: "more"});
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if(error) res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -87,7 +87,7 @@ module.exports.update = function(req, res){
   var TAGS = ['hide-review', req.uuid];
   logger.routes.debug(TAGS, 'hide business from to review ' + req.params.id, {uid: "more"});
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');

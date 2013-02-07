@@ -31,6 +31,7 @@ exports.procedures = require('./procedures');
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
 
+var activePoolIds = {};
 var pool = pooler.Pool({
   name: 'postgres'
 , max: 10
@@ -45,6 +46,10 @@ var pool = pooler.Pool({
       });
 
       client.on('drain', function() {
+        if (client.assignedPoolId) {
+          delete activePoolIds[client.assignedPoolId];
+        }
+        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds))
         pool.release(client);
       });
 
@@ -59,9 +64,18 @@ var pool = pooler.Pool({
 , reapIntervalMillis: 1000
 });
 
-exports.getClient = function(callback){
+exports.getClient = function(id, callback){
+  if (typeof id == 'function') {
+    callback = id;
+    id = null;
+  } else {
+    activePoolIds[id] = true;
+  }
 
-  return pool.acquire(callback);
+  return pool.acquire(function(error, client) {
+    if (config.outputActivePoolIds && client) client.assignedPoolId = id;
+    callback(error, client);
+  });
   // callback(null, client);
 };
 

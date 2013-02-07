@@ -29,7 +29,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // ensure we have a consumer id
@@ -74,7 +74,7 @@ module.exports.get = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-loyaltystats', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var deltaPunches = req.body.deltaPunches;
