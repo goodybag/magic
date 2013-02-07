@@ -12,8 +12,9 @@ var all = [
 , 'isVerified'
 , 'isArchived'
 , 'isEnabled'
-, 'categories'
-, 'tags'
+, 'categories:productCategories'
+, 'tags:productTags'
+, 'isAvailable'
 ];
 
 module.exports = {
@@ -32,6 +33,8 @@ module.exports = {
     , 'tries'
     , 'categories:productCategories'
     , 'tags:productTags'
+    , 'isAvailable'
+    , 'isSpotlight'
     ]
   , create: []
   , update: []
