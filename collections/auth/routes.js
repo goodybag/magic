@@ -78,6 +78,7 @@ module.exports.oauthAuthenticate = function(req, res){
   ];
 
   if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
+    return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
 
   if (supportedGroups.indexOf(req.body.group) === -1)

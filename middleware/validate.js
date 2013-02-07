@@ -26,7 +26,7 @@ var
         data[key] = req.body[key];
       }
 
-      // validate
+      // validate1
       var error = utils.validate(data, schema);
       if (error) { return res.error(errors.input.VALIDATION_FAILED, error); }
 
@@ -58,7 +58,7 @@ var
       schema2[k] = { validators:schema[k] };
     }
     schema = schema2;
-    
+
     return function(req, res, next){
       // extract out relevant data
       var data = {};
@@ -72,7 +72,7 @@ var
       if (error) return res.error(errors.input.VALIDATION_FAILED, error);
 
       next();
-    }; 
+    };
   }
 , createPathValidator = function(schema) {
     // schema uses the { key:{ validator1:[], validator2:[] }} structure
@@ -82,7 +82,7 @@ var
       schema2[k] = { validators:schema[k] };
     }
     schema = schema2;
-    
+
     return function(req, res, next){
       // extract out relevant data
       var data = {};
@@ -96,7 +96,7 @@ var
       if (error) return res.error(errors.input.VALIDATION_FAILED, error);
 
       next();
-    }; 
+    };
   }
 ;
 module.exports.body = createBodyValidator;
