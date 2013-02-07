@@ -31,8 +31,6 @@ module.exports = function(req, res, next){
     req.session.user = tapinStationUser;
     origEndFn.apply(res, arguments);
   };
-  console.log(req.path);
-if (req.path == "/v1/businesses/1/loyaltyStats") console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
   var tx, client;
   var stage = {
     start: function() {
@@ -45,7 +43,6 @@ if (req.path == "/v1/businesses/1/loyaltyStats") console.log("!!!!!!!!!!!!!!!!!!
     }
 
   , lookupUser: function() {
-    console.log("lookupUser: function()");
       var query = [
         'SELECT users.id, users.email, users."singlyId", users."singlyAccessToken",',
             'consumers.id as "consumerId",',
@@ -62,19 +59,15 @@ if (req.path == "/v1/businesses/1/loyaltyStats") console.log("!!!!!!!!!!!!!!!!!!
             'OR consumers."cardId" = $1',
           'GROUP BY users.id, consumers.id'
       ].join(' ');
-      console.log(query.toString(), [cardId]);
       client.query(query, [cardId], function(error, result){
-        console.log("????????????????????????????????");
-        if (error) return console.log(error), stage.dbError(error);
-console.log(result);
+        if (error) return stage.dbError(error);
         var user = result.rows[0];
-        if (!user) return stage.createUser();
-        return stage.insertTapin(user);
+        if (!user) stage.createUser();
+        else       stage.insertTapin(user);
       });
     }
 
   , createUser: function() {
-    console.log("createUser: function()");
       var query = [
         'WITH',
           '"user" AS',
@@ -98,7 +91,6 @@ console.log(result);
     }
 
   , insertTapin: function(user) {
-    console.log("insertTapin: function(user)");
       var query = [
         'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime")',
           'SELECT $1, "tapinStations".id, $2, now() FROM "tapinStations"',
@@ -114,7 +106,6 @@ console.log(result);
     }
 
   , insertVisit: function(user, tapinId) {
-    console.log("insertVisit: function(user, tapinId)");
       if (!user.consumerId) return stage.end(user);
 
       // only inserts if no visit occured in the last 3 hours
@@ -143,13 +134,11 @@ console.log(result);
     }
 
   , dbError: function(error){
-    console.log("dbError: function(error)");
       tx.abort();
       res.error(errors.internal.DB_FAILURE, error);
     }
 
   , end: function(user) {
-    console.log("end: function(user)");
       tx.commit();
       req.session.user = user;
       next();
