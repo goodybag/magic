@@ -46,16 +46,17 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{locJoin} {tagJoin}',
+        '{prodLocJoin} {locJoin} {tagJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
-        'GROUP BY products.id, businesses.id',
+        'GROUP BY {group}',
         '{sort} {limit}'
     ]);
     query.fields = sql.fields().add('products.*').add('businesses.name as "businessName"');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
+    query.group  = "products.id, businesses.id";
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
@@ -76,6 +77,36 @@ module.exports.list = function(req, res){
         query.locJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
       }
+    }
+
+    // location id filtering
+    if (req.param('locationId')){
+      var joinType = "inner";
+
+      if (req.param('spotlight'))
+        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+
+      query.prodLocJoin = [
+      , '{joinType} join "productLocations"'
+        , 'ON products."id" = "productLocations"."productId"'
+        , 'and "productLocations"."locationId" = $locationId'
+      ].join(' ');
+
+      query.group += ', "productLocations".id';
+
+      query.$('locationId', req.param('locationId'));
+
+      if (req.param('all')){
+        joinType = "left";
+        query.fields.add('"productLocations".id is not null as "isAvailable"');
+        query.prodLocJoin += [
+          'inner join "locations"'
+        , 'on "locations"."businessId" = products."businessId"'
+        , 'and locations.id = $locationId'
+        ].join(' ');
+      }
+
+      query.prodLocJoin = query.prodLocJoin.replace("{joinType}", joinType);
     }
 
     // tag filtering
@@ -316,6 +347,10 @@ module.exports.create = function(req, res){
 
       var inputs = req.body;
       if (!inputs.isEnabled) inputs.isEnabled = true;
+
+      if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
+        inputs.isSpotlight = true;
+
       inputs.likes = 0;
       inputs.wants = 0;
       inputs.tries = 0;
@@ -324,6 +359,7 @@ module.exports.create = function(req, res){
       var tags = inputs.tags;
       delete inputs.categories;
       delete inputs.tags;
+
 
       var error = utils.validate(inputs, db.schemas.products);
       if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
