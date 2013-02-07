@@ -14,6 +14,14 @@ define(function(require){
       type: 'serial'
     , meta: 'primary key'
     }
+  , consumerId: {
+      type: 'int'
+    , meta: 'references consumers'
+    }
+  , businessId: {
+      type: 'int'
+    , meta: 'references businesses'
+    }
   , type: {
       type: 'text'
     }
