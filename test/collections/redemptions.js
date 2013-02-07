@@ -9,43 +9,86 @@ var
 describe('POST /v1/redemptions', function() {
 
   it('should update the consumer stats and create a redemption', function(done) {
+
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
         assert(!err);
-        payload = JSON.parse(payload);
         assert(res.statusCode == 200);
 
-        assert(!payload.error);
-        assert(payload.data.numPunches === 4);
-        assert(payload.data.totalPunches === 12);
-        assert(payload.data.visitCount === 10);
-        tu.logout(done);
+        tu.logout(function() {
+          tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
+
+            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+              assert(res.statusCode == 200);
+
+              payload = JSON.parse(payload);
+              assert(payload.data.numPunches === 4);
+              assert(payload.data.totalPunches === 12);
+              assert(payload.data.visitCount === 10);
+
+              tu.logout(done);
+            });
+          });
+        });
       });
     });
   });
 
-  it('should not allow a redemption if the consumer is short on punches', function(done) {
+  it('should not allow a redemption or update punches if the consumer is short on punches', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:1, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
-        tu.logout(done);
+        
+        tu.logout(function() {
+          tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
+
+            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+              assert(res.statusCode == 200);
+
+              payload = JSON.parse(payload);
+              assert(payload.data.numPunches === 4);
+              assert(payload.data.totalPunches === 12);
+              assert(payload.data.visitCount === 10);
+
+              tu.logout(done);
+            });
+          });
+        });
       });
     });
   });
 
   it('should use the elite requirement if the consumer is elite', function(done) {
-    tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:2, consumerId:6, tapinStationId:4 }, function(err, payload, res) {
-        assert(!err);
+    tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
+      tu.get('/v1/loyaltyStats', function(err, payload, res) {
         assert(res.statusCode == 200);
+        var orgStats = JSON.parse(payload).data;
 
-        payload = JSON.parse(payload);
-        assert(!payload.error);
-        assert(payload.data.numPunches === 2);
-        assert(payload.data.totalPunches === 6);
-        assert(payload.data.visitCount === 20);
-        tu.logout(done);
+        tu.logout(function() {
+          tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
+            tu.post('/v1/redemptions', { deltaPunches:2, consumerId:6, tapinStationId:4 }, function(err, payload, res) {
+              assert(!err);
+              assert(res.statusCode == 200);
+
+              tu.logout(function() {
+                tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
+
+                  tu.get('/v1/loyaltyStats', function(err, payload, res) {
+                    assert(res.statusCode == 200);
+
+                    payload = JSON.parse(payload);
+                    assert(payload.data.numPunches === orgStats.numPunches + 2);
+                    assert(payload.data.totalPunches === orgStats.totalPunches + 2);
+                    assert(payload.data.visitCount === orgStats.visitCount);
+
+                    tu.logout(done);
+                  });
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
@@ -61,17 +104,35 @@ describe('POST /v1/redemptions', function() {
   });
 
   it('should allow cashiers of the business to authorize', function(done) {
-    tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
-        assert(!err);
+    tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
+      tu.get('/v1/loyaltyStats', function(err, payload, res) {
         assert(res.statusCode == 200);
+        var orgStats = JSON.parse(payload).data;
+        tu.logout(function() {
 
-        payload = JSON.parse(payload);
-        assert(!payload.error);
-        assert(payload.data.numPunches === 4);
-        assert(payload.data.totalPunches === 20);
-        assert(payload.data.visitCount === 10);
-        tu.logout(done);
+          tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
+            tu.post('/v1/redemptions', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+              assert(!err);
+              assert(res.statusCode == 200);
+              tu.logout(function() {
+
+                tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
+                  tu.get('/v1/loyaltyStats', function(err, payload, res) {
+                    assert(!err);
+                    assert(res.statusCode == 200);
+
+                    payload = JSON.parse(payload);
+                    assert(!payload.error);
+                    assert(payload.data.numPunches === orgStats.numPunches); // 8 = number required for reward, so it rolled over
+                    assert(payload.data.totalPunches === orgStats.totalPunches + 8);
+                    assert(payload.data.visitCount === orgStats.visitCount);
+                    tu.logout(done);
+                  });
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
@@ -119,6 +180,7 @@ describe('POST /v1/redemptions', function() {
   it('should allow business owners to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-manager_redeem1', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(error, results, res) {
+        console.log(results)
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(done);

@@ -26,6 +26,7 @@ var
 
 exports.pg = pg;
 exports.sql = sql;
+exports.procedures = require('./procedures');
 
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
@@ -75,7 +76,12 @@ exports.getClient = function(callback){
  * @param  {Object} tx           Optional. PostGres transaction to use (created if not given)
  * @return undefined
  */
-exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb, tx) {
+exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, tx, originalCb) {
+  if (typeof tx == 'function') {
+    originalCb = tx;
+    tx = null;
+  }
+
   var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
   var stage = ''; // for logging

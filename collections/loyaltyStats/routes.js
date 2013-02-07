@@ -60,7 +60,7 @@ module.exports.get = function(req, res){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
-        return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: result.rows[0] });
       });
     });
   });
@@ -99,76 +99,24 @@ module.exports.update = function(req, res){
         consumerId = result.rows[0].id;
       }
 
-      console.log(':TODO: PUT POST /loyaltyStats IN A TRANSACTION')
+      // start a transaction
+      var tx = new Transaction(client);
+      tx.begin(function(error) {
 
-      // run stats upsert
-      db.upsert(client,
-        ['UPDATE "userLoyaltyStats"',
-          'SET',
-            '"numPunches"   = "numPunches"   + $3,',
-            '"totalPunches" = "totalPunches" + $3',
-          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "numPunches", "totalPunches", "isElite"'
-        ].join(' '),
-        [consumerId, businessId, deltaPunches],
-        ['INSERT INTO "userLoyaltyStats"',
-          '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit", "isElite")',
-          'SELECT $1, $2, $3, $3, 0, now(), false WHERE NOT EXISTS',
-            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "numPunches", "totalPunches", "isElite"'
-        ].join(' '),
-        [consumerId, businessId, deltaPunches],
-        function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
-          var uls = result.rows[0];
+        // update punches
+        db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-          // Send response now
-          res.json({ error: null, data: null });
-
-          // Look up the business loyalty settings
-          client.query('SELECT * from "businessLoyaltySettings" where "businessId" = $1', [businessId], function(error, result) {
-              if (error) return logger.routes.error(TAGS, error);
-              var bls = result.rows[0];
-
-              var query = sql.query([
-                'UPDATE "userLoyaltyStats" SET {updates}',
-                  'WHERE "consumerId"=$consumerId AND "businessId"=$businessId',
-                  'RETURNING "dateBecameElite"'
-              ]);
-              query.updates = sql.fields();
-              query.$('consumerId', consumerId);
-              query.$('businessId', businessId);
-
-              var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite);
-              if (hasBecomeElite) {
-                query.updates.add('"isElite" = true');
-                query.updates.add('"dateBecameElite"  = now()');
-              }
-           
-              var punchesRequired = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
-              var hasEarnedReward = (uls.numPunches >= punchesRequired);
-              if (hasEarnedReward) {
-                var rewardsGained = Math.floor(uls.numPunches / punchesRequired); // this accounts for the possibility that they punched more than the # required
-                query.updates.add('"numPunches" = "numPunches" - $punchesRequired');
-                query.updates.add('"numRewards" = "numRewards" + $rewardsGained');
-                query.$('punchesRequired', punchesRequired * rewardsGained);
-                query.$('rewardsGained', rewardsGained);
-              }
-              
-
-              // Update the users loyalty stat with elite
-              client.query(query.toString(), query.$values, function(error, result) {
-                if (error) return logger.routes.error(TAGS, error);
-
-                if (hasBecomeElite)
-                  magic.emit('consumers.becameElite', consumerId, businessId, result.rows[0].dateBecameElite);
-                // :TODO: emit on hasEarnedReward?
-              });
-            }
-          );
+          tx.commit();
+          res.json({ error:null, data:null });
 
           magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
-        }
-      );
+          if (hasBecomeElite)
+            magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
+          // :TODO: emit on hasEarnedReward?
+
+        });
+      });
     });
   });
 };

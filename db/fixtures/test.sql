@@ -200,6 +200,7 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('9', '10', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('10', '11', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11', '14', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('12', '15', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('13', '12', '5');
 
 -- manager
 

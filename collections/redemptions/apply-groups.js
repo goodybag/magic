@@ -16,7 +16,7 @@ exports.locationEmployee = function(req, cb) {
 
   // validate that the employee belongs to the same location as the tapin station
   db.getClient(function(error, client) {
-    if (error) return cb(null);
+    if (error) return cb(null), console.log('DB ERROR from redemptions/apply-groups:', error);
 
     var query = [
       'SELECT "tapinStations".id FROM "tapinStations"',
@@ -28,7 +28,7 @@ exports.locationEmployee = function(req, cb) {
       .replace(RegExp('{c}','g'), cashierTable)
 
     client.query(query, [tapinStationId, cashierUserId], function(error, result) {
-      if (error) return cb(null);
+      if (error) return cb(null), console.log('DB ERROR from redemptions/apply-groups:', error);
       if (result.rowCount === 0) { cb(null); }
       else { cb('locationEmployee'); }
     });
