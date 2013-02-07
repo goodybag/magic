@@ -6,24 +6,23 @@ var utils = require('../../lib/utils');
 
 describe('Consumers Events: ', function() {
   it('store an event when a user registers', function(done) {
-    tu.loginAsAdmin(function(error){
+    var consumer = {
+      email:      "testmctesterson8899@test.com"
+    , password:   "password"
+    , firstName:  "Test"
+    , lastName:   "McTesterson"
+    , screenName: "testies"
+    , cardId:     "123456-ZZZ"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results) {
       assert(!error);
-      var consumer = {
-        email:      "testmctesterson8899@test.com"
-      , password:   "password"
-      , firstName:  "Test"
-      , lastName:   "McTesterson"
-      , screenName: "testies"
-      , cardId:     "123456-ZZZ"
-      };
+      results = JSON.parse(results);
+      assert(!results.error);
+      assert(results.data.consumerId >= 0);
+      var consumerId = results.data.consumerId;
 
-      tu.post('/v1/consumers', consumer, function(error, results) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
-        assert(results.data.consumerId >= 0);
-        var consumerId = results.data.consumerId;
-
+      tu.loginAsAdmin(function(error){
         // Give server time to propagate events
         setTimeout(function(){
           tu.get('/v1/events', function(error, results) {
@@ -37,8 +36,8 @@ describe('Consumers Events: ', function() {
             }).length === 1);
 
             tu.logout(done);
-          }, 500);
-        });
+          });
+        }, 100);
       });
     });
   });
@@ -75,8 +74,8 @@ describe('Products Events: ', function() {
                   }).length === 1);
 
                   tu.logout(done);
-                }, 500);
-              });
+                });
+              }, 100);
             });
           });
         });
@@ -138,8 +137,8 @@ describe('Loyalty Events: ', function() {
             }).length >= 1);
 
             stage.end();
-          }, 500);
-        });
+          });
+        }, 100);
       }
 
     , end: function(){

@@ -65,7 +65,7 @@ describe('GET /v1/consumers/:id', function() {
 });
 
 describe('POST /v1/consumers', function() {
-  it('should create a consumer and respond with the user id', function(done) {
+  it('should create a consumer and respond with the user id and login', function(done) {
     var consumer = {
       email:      "testmctesterson99@test.com"
     , password:   "password"
@@ -80,11 +80,17 @@ describe('POST /v1/consumers', function() {
       results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.consumerId >= 0);
-      done();
+      tu.get('/v1/session', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id >= 0);
+        tu.logout(done);
+      });
     });
   });
 
-  it('should fail if consumer email existing', function(done){
+  it('should fail if consumer email exists', function(done){
     var consumer = {
       email:      "sales@goodybag.com"
     , password:   "password"
