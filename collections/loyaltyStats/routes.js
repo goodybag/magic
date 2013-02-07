@@ -155,7 +155,7 @@ module.exports.update = function(req, res){
             }
           );
 
-          magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.session.user.id)
+          magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
         }
       );
     });

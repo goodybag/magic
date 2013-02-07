@@ -53,6 +53,16 @@ module.exports = {
     });
   }
 
+, 'consumers.visit':
+  function (consumerId, visitId, businessId, locationId, isFirstTime) {
+    insert('consumers.visit', { consumerId: consumerId, visitId:visitId, businessId:businessId, locationId:locationId, isFirstTime:isFirstTime });
+  }
+
+, 'consumers.tapin':
+  function (user, tapinStationId) {
+    insert('consumers.visit', { userId:user.id, tapinStationId:tapinStationId });
+  }
+
 // , 'consumers.donation':
 //   function (consumer, donation){
 //     insert('consumers.donation', {
@@ -93,11 +103,23 @@ module.exports = {
   }
 
 , 'loyalty.punch':
-  function (deltaPunches, consumerId, businessId, employeeId){
+  function (deltaPunches, consumerId, businessId, locationId, employeeId){
     insert('loyalty.punch', {
       deltaPunches: deltaPunches
     , consumerId:   consumerId
     , businessId:   businessId
+    , locationId:   locationId
+    , employeeId:   employeeId
+    });
+  }
+
+, 'loyalty.redemption':
+  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+    insert('loyalty.redemption', {
+      deltaPunches: deltaPunches
+    , consumerId:   consumerId
+    , businessId:   businessId
+    , locationId:   locationId
     , employeeId:   employeeId
     });
   }
