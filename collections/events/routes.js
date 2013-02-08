@@ -25,7 +25,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events where id = $id {limit}) as e');
@@ -54,7 +54,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events {where} {limit}) as e');

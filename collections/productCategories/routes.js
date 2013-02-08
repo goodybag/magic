@@ -26,7 +26,7 @@ module.exports.get = function(req, res){
   logger.routes.debug(TAGS, 'fetching product category ' + req.params.id);
 
   // retrieve pg client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -53,7 +53,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productCategories', req.uuid];
   logger.routes.debug(TAGS, 'fetching product categories');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(*) OVER() AS "metaTotal" FROM "productCategories" {where} {sort} {limit}');
@@ -86,19 +86,19 @@ module.exports.create = function(req, res){
   var TAGS = ['create-productCategories', req.uuid];
   logger.routes.debug(TAGS, 'creating user');
 
-  db.getClient(function(error, client){
+  var inputs = {
+    businessId:  req.body.businessId || req.params.businessId
+  , order:       req.body.order      || 0
+  , isFeatured:  req.body.isFeatured || false
+  , name:        req.body.name
+  , description: req.body.description || ''
+  };
+
+  var error = utils.validate(inputs, db.schemas.productCategories);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var inputs = {
-      businessId:  req.body.businessId || req.params.businessId
-    , order:       req.body.order      || 0
-    , isFeatured:  req.body.isFeatured || false
-    , name:        req.body.name
-    , description: req.body.description || ''
-    };
-
-    var error = utils.validate(inputs, db.schemas.productCategories);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('INSERT INTO "productCategories" ({fields}) VALUES ({values}) RETURNING id');
     query.fields = sql.fields().addObjectKeys(inputs);
@@ -123,7 +123,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-product-category', req.uuid];
   logger.routes.debug(TAGS, 'deleting product-category ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM "productCategories" WHERE id=$id');
@@ -147,7 +147,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-productCategory', req.uuid];
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;

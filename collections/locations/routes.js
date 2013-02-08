@@ -29,7 +29,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of locations');
 
   // retrieve pg client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // if sort=distance, validate that we got lat/lon
@@ -125,7 +125,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-location', req.uuid];
   logger.routes.debug(TAGS, 'fetching location');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
@@ -153,15 +153,15 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-location', req.uuid];
 
+  var inputs = req.body;
+
+  // validate input
+  var error = utils.validate(inputs, schemas.locations);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
   // retrieve db client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
-
-    var inputs = req.body;
-
-    // validate input
-    var error = utils.validate(inputs, schemas.locations);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // build query
     var query = sql.query('INSERT INTO locations ({fields}) VALUES ({values}) RETURNING id');
@@ -206,7 +206,7 @@ module.exports.update = function(req, res){
   var TAGS = ['update-location', req.uuid];
 
   // retrieve db client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var inputs = req.body;
@@ -257,7 +257,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-location', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.error(errors.internal.DB_FAILURE, error);
@@ -286,7 +286,7 @@ module.exports.getAnalytics = function(req, res){
   var TAGS = ['get-location-analytics', req.uuid];
   logger.routes.debug(TAGS, 'fetching location analytics');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query1 = sql.query([

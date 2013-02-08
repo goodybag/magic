@@ -27,7 +27,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -62,7 +62,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
   logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE businesses SET "isDeleted"=true WHERE id=$id');
@@ -88,7 +88,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of businesses');
 
   // retrieve pg client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var includes = [].concat(req.query.include);
@@ -184,20 +184,20 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-business', req.uuid];
+  
+  // defaults
+  var inputs = req.body;
+  if (!inputs.cardCode) inputs.cardCode = "000000";
+  if (!inputs.isEnabled) inputs.isEnabled = true;
+  inputs.isDeleted = false;
+  var tags = inputs.tags; delete inputs.tags;
+  
+  // validation
+  var error = utils.validate(inputs, schemas.businesses);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    // defaults
-    var inputs = req.body;
-    if (!inputs.cardCode) inputs.cardCode = "000000";
-    if (!inputs.isEnabled) inputs.isEnabled = true;
-    inputs.isDeleted = false;
-    var tags = inputs.tags; delete inputs.tags;
-
-    // validation
-    var error = utils.validate(inputs, schemas.businesses);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // query
     var query = sql.query('INSERT INTO businesses ({fields}) VALUES ({values}) RETURNING id');
@@ -245,7 +245,7 @@ module.exports.create = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-business', req.uuid];
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
@@ -296,7 +296,7 @@ module.exports.getLoyalty = function(req, res){
   var TAGS = ['get-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -326,7 +326,7 @@ module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
