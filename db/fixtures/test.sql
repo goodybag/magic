@@ -347,6 +347,25 @@ INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('5',
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used
 
+-- COLLECTIONS
+
+BEGIN;
+INSERT INTO collections (id, "consumerId", "name") VALUES (1, 1, 'my first collection');
+INSERT INTO collections (id, "consumerId", "name") VALUES (2, 1, 'my second collection');
+COMMIT;
+SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
+
+-- PRODUCTS COLLECTIONS
+
+BEGIN;
+INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (1, 1, 1, now());
+INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (2, 2, 1, now());
+INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (3, 2, 2, now());
+INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (4, 3, 2, now());
+INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (5, 4, 2, now());
+COMMIT;
+SELECT setval('"productsCollections_id_seq"', (SELECT MAX(id) from "productsCollections")); -- advance the sequence past the IDs just used
+
 -- EVENTS
 
 BEGIN;

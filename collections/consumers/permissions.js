@@ -1,42 +1,82 @@
 module.exports = {
-  world: {
-    read:   [
-      'screenName'
-    , 'consumerId'
-    ]
-  , create: [
-      'email'
-    , 'password'
-    , 'singlyId'
-    , 'singlyAccessToken'
-    , 'firstName'
-    , 'lastName'
-    , 'screenName'
-    , 'cardId'
-    ]
-  , update: []
+  consumer: {
+    world: {
+      read:   [
+        'screenName'
+      , 'consumerId'
+      ]
+    , create: [
+        'email'
+      , 'password'
+      , 'singlyId'
+      , 'singlyAccessToken'
+      , 'firstName'
+      , 'lastName'
+      , 'screenName'
+      , 'cardId'
+      ]
+    , update: []
+    }
+
+  , default: {}
+
+  , owner: {
+      read:   true
+    , update: [
+        'email'
+      , 'password'
+      , 'singlyId'
+      , 'singlyAccessToken'
+      , 'firstName'
+      , 'lastName'
+      , 'screenName'
+      , 'cardId'
+      , 'consumerId'
+      ]
+    }
+
+  , admin: {
+      read:   true
+    , create: true
+    , update: true
+    }
   }
 
-, default: {}
+, collection: {
+    world: {
+      read:   []
+    , create: []
+    , update: []
+    }
 
-, owner: {
-    read:   true
-  , update: [
-      'email'
-    , 'password'
-    , 'singlyId'
-    , 'singlyAccessToken'
-    , 'firstName'
-    , 'lastName'
-    , 'screenName'
-    , 'cardId'
-    , 'consumerId'
-    ]
+  , default: {}
+
+  , consumer: {
+      create: ['name']
+    }
+
+  , owner: {
+      read:   true
+    , update: ['name']
+    }
+
+  , admin: {
+      read:   true
+    , create: true
+    , update: true
+    }
   }
 
-, admin: {
-    read:   true
-  , create: true
-  , update: true
+, collectionProducts: {
+    world: {
+      read:   []
+    , create: []
+    , update: []
+  }
+  , default: {}
+  , owner: {
+      read: true
+    , create: ['productId']
+    }
   }
 };

@@ -30,6 +30,8 @@ var config = {
   , 'productLikes'
   , 'productWants'
   , 'productTries'
+  , 'collections'
+  , 'productsCollections'
   , 'oddityLive'
   , 'oddityMeta'
   , 'events'

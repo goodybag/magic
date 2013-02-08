@@ -46,7 +46,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{prodLocJoin} {locJoin} {tagJoin}',
+        '{prodLocJoin} {locJoin} {tagJoin} {collectionJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY {group}',
@@ -119,6 +119,18 @@ module.exports.list = function(req, res){
           '"productTags".id = "productsProductTags"."productTagId" AND',
           tagsClause
       ].join(' ');
+    }
+
+    // consumer collection filtering
+    if (req.param('consumerId') && req.param('collectionId')) {
+      query.collectionJoin = [
+        'INNER JOIN collections ON',
+          'collections.id = $collectionId',
+        'INNER JOIN "productsCollections" ON',
+          '"productsCollections"."productId" = products.id AND',
+          '"productsCollections"."collectionId" = collections.id'
+      ].join(' ');
+      query.$('collectionId', req.param('collectionId'));
     }
 
     // tag include

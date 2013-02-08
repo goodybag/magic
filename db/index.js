@@ -203,6 +203,8 @@ exports.schemas = {
 , productLikes:              require('./schemas/productLikes')
 , productWants:              require('./schemas/productWants')
 , productTries:              require('./schemas/productTries')
+, collections:               require('./schemas/collections')
+, productsCollections:       require('./schemas/productsCollections')
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
 , events:                    require('./schemas/events')
