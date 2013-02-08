@@ -12,6 +12,13 @@ var applyGroups = require('./apply-groups');
 // Photos.list
 server.get(
   '/v1/photos'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );
@@ -19,6 +26,13 @@ server.get(
 // Photos.list
 server.get(
   '/v1/businesses/:businessId/photos'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );
@@ -26,6 +40,13 @@ server.get(
 // Photos.list
 server.get(
   '/v1/products/:productId/photos'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );
