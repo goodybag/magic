@@ -1,3 +1,4 @@
+language: node_js
 before_script:
   - echo "yes" | sudo add-apt-repository ppa:pitti/postgresql
   - sudo apt-get -y remove postgresql
@@ -10,3 +11,5 @@ before_script:
   - psql -c 'create database "goodybag-test";' -U postgres -w
 env:
   - DEBIAN_FRONTEND=noninteractive GB_ENV=test PGPASSWORD=postgres PG_CON="postgres://127.0.0.1:5433/goodybag-test"
+node_js:
+  - 0.8
