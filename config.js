@@ -67,7 +67,7 @@ var config = {
   , http: {
       port: 8986
     }
-  , postgresConnStr:  "postgres://localhost:5432/goodybag-test"
+  , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
 
   , facebook: {
