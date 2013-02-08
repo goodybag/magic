@@ -76,6 +76,7 @@ module.exports = {
   , default: {}
   , owner: {
       read: true
+    , create: ['productId']
     }
   }
 };

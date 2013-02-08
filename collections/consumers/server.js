@@ -99,12 +99,21 @@ server.post(
 , routes.createCollection
 );
 
-// consumers.listCollections
+// consumers.listCollectionProducts
 server.get(
   '/v1/consumers/:consumerId/collections/:collectionId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.permissions(permissions.collectionProducts)
 , require('../products/routes').list
+);
+
+// consumers.addCollectionProduct
+server.post(
+  '/v1/consumers/:consumerId/collections/:collectionId'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collectionProducts)
+, middleware.validate.body(schemas.productsCollections)
+, routes.addCollectionProduct
 );
 
 module.exports = server;

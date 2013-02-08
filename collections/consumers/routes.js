@@ -297,3 +297,33 @@ module.exports.createCollection = function(req, res){
     });
   });
 };
+
+/**
+ * Add product to consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.addCollectionProduct = function(req, res){
+  var TAGS = ['create-consumers-collection', req.uuid];
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId + ' collection');
+
+  var consumerId = req.param('consumerId');
+  var collectionId = req.param('collectionId');
+  var productId = req.body.productId;
+  if (!productId)
+    return res.error(errors.input.VALIDATION_FAILED, '`productId` is required');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "createdAt") VALUES ($consumerId, $productId, now()) RETURNING id');
+    query.$('consumerId', consumerId);
+    query.$('productId', productId);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.json({ error: null, data: { id:result.rows[0].id }});
+    });
+  });
+};

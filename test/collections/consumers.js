@@ -359,3 +359,30 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
   });
 });
 
+describe('POST /v1/consumers/:id/collections/:collectionId', function() {
+  it('should add a product to the collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/1/collections/1', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var oldProducts = JSON.parse(results).data;
+        tu.post('/v1/consumers/1/collections/1', { productId:4 }, function(error, results, res) {
+          assert(res.statusCode == 200);
+          tu.get('/v1/consumers/1/collections/1', function(error, results, res) {
+            assert(res.statusCode == 200);
+            var newProducts = JSON.parse(results).data;
+            assert(oldProducts.length + 1 == newProducts.length);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+  it('should fail validation if bad input is given', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/1/collections/1', {productId:null}, function(error, results, res) {
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
+});
