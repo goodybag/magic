@@ -152,6 +152,12 @@ module.exports.create = function(req, res){
       req.body.consumerId = result.rows[0].consumerId;
       req.body.userId = result.rows[0].userId;
 
+      if (req.body.email) {
+        utils.sendMail(req.body.email, config.emailFromAddress, 'Welcome to Goodybag!', 'body todo'/*, function(err, result) {
+          console.log('email cb', err, result);
+        }*/);
+      }
+
       // Log the user in
       req.session.user = {
         id: req.body.userId
