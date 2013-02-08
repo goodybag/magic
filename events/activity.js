@@ -311,6 +311,84 @@ module.exports = {
     stage.start();
   }
 
+, 'loyalty.redemption':
+  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+    var
+      stage = {
+        start: function(){
+          stage.lookUpUserAndBusiness();
+        }
+
+      , lookUpUserAndBusiness: function(){
+          utils.parallel({
+            consumer: function(done){
+              var options = { fields: ['"screenName"'] };
+              db.api.consumers.findOne(consumerId, options, function(e, r, m){
+                return done(e, r);
+              });
+            }
+          , business: function(done){
+              var options = { fields: ['name'] };
+              db.api.businesses.findOne(businessId, options, function(e, r, m){
+                return done(e, r);
+              });
+            }
+          , loyaltySettings: function(done){
+              var options = { fields: ['reward'] };
+              db.api.businessLoyaltySettings.findOne({ businessId: businessId }, options, function(e, r, m){
+                return done(e, r);
+              });
+            }
+          }, function(error, results){
+            if (error) return stage.error(error);
+            if (!results.consumer) return stage.error("Consumer not found!");
+            if (!results.business) return stage.error("Business not found!");
+            if (!results.loyaltySettings) return stage.error("Loyalty Settings not found!");
+
+            stage.saveEvent(
+              results.consumer.screenName
+            , results.business.name
+            , results.loyaltySettings.reward
+            );
+          });
+        }
+
+      , saveEvent: function(screenName, businessName, reward){
+          var data = {
+            type:       'redemption'
+          , date:       'now()'
+          , consumerId: consumerId
+          , businessId: businessId
+          , locationId: locationId
+
+          , data: JSON.stringify({
+              consumerScreenName: screenName
+            , businessName:       businessName
+            , employeeId:         employeeId
+            , deltaPunches:       deltaPunches
+            , reward:             reward
+            })
+          };
+
+          db.api.activity.insert(data, function(error){
+            if (error) return stage.error(error);
+            return stage.end();
+          });
+        }
+
+      , error: function(error){
+          return console.log(error), logger.error(TAGS, error);
+        }
+
+      , end: function(){
+          // yay!
+        }
+      }
+    ;
+
+    stage.start();
+  }
+
 // Don't do this yet
 // , 'loyalty.punch':
 //   function (deltaPunches, consumerId, businessId, locationId, employeeId){
