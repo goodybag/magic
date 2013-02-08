@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.id);
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.consumerId);
 
   db.getClient(TAGS[0], function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -36,7 +36,7 @@ module.exports.get = function(req, res){
         'WHERE consumers.id = $id'
     ]);
     query.fields = sql.fields().add("users.*, consumers.*");
-    query.$('id', +req.param('id') || 0);
+    query.$('id', +req.param('consumerId') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -61,7 +61,7 @@ module.exports.get = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumers ' + req.params.id);
+  logger.routes.debug(TAGS, 'fetching consumers ' + req.params.consumerId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -101,7 +101,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.id);
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -175,7 +175,7 @@ module.exports.create = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-consumer', req.uuid];
-  logger.routes.debug(TAGS, 'deleting consumer ' + req.params.id);
+  logger.routes.debug(TAGS, 'deleting consumer ' + req.params.consumerId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -185,7 +185,7 @@ module.exports.del = function(req, res){
         'WHERE users.id = consumers."userId"',
         'AND consumers.id = $id'
     ]);
-    query.$('id', +req.params.id || 0);
+    query.$('id', +req.params.consumerId || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -210,7 +210,7 @@ module.exports.update = function(req, res){
 
     var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
+    query.$('id', req.params.consumerId);
 
     logger.db.debug(TAGS, query.toString());
 
@@ -237,9 +237,9 @@ module.exports.update = function(req, res){
  */
 module.exports.listCollections = function(req, res){
   var TAGS = ['list-consumer-collections', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.id + ' collections');
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.consumerId + ' collections');
 
-  var consumerId = req.param('id');
+  var consumerId = req.param('consumerId');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -265,6 +265,35 @@ module.exports.listCollections = function(req, res){
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+    });
+  });
+};
+
+/**
+ * Create consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.createCollection = function(req, res){
+  var TAGS = ['create-consumers-collection', req.uuid];
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId + ' collection');
+
+  var consumerId = req.param('consumerId');
+  var name = req.body.name;
+  if (!name)
+    return res.error(errors.input.VALIDATION_FAILED, '`name` is required');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('INSERT INTO collections ("consumerId", name) VALUES ($consumerId, $name) RETURNING id');
+    query.$('consumerId', consumerId);
+    query.$('name', name);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.json({ error: null, data: { id:result.rows[0].id }});
     });
   });
 };

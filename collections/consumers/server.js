@@ -32,7 +32,7 @@ server.get(
 
 // consumers.get
 server.get(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.permissions(permissions.consumer)
 , routes.get
@@ -56,7 +56,7 @@ server.post(
 
 // consumers.update
 server.put(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.permissions(permissions.consumer)
@@ -66,7 +66,7 @@ server.put(
 
 // consumers.update
 server.post(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , middleware.permissions(permissions.consumer)
@@ -76,18 +76,35 @@ server.post(
 
 // consumers.delete
 server.del(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , routes.del
 );
 
-// consumers.get
+// consumers.listCollections
 server.get(
-  '/v1/consumers/:id/collections'
+  '/v1/consumers/:consumerId/collections'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.permissions(permissions.collection)
 , routes.listCollections
+);
+
+// consumers.createCollections
+server.post(
+  '/v1/consumers/:consumerId/collections'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collection)
+, middleware.validate.body(schemas.collection)
+, routes.createCollection
+);
+
+// consumers.listCollections
+server.get(
+  '/v1/consumers/:consumerId/collections/:collectionId'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collectionProducts)
+, require('../products/routes').list
 );
 
 module.exports = server;

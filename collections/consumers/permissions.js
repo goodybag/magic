@@ -51,9 +51,12 @@ module.exports = {
 
   , default: {}
 
+  , consumer: {
+      create: ['name']
+    }
+
   , owner: {
       read:   true
-    , create: ['name']
     , update: ['name']
     }
 
@@ -61,6 +64,18 @@ module.exports = {
       read:   true
     , create: true
     , update: true
+    }
+  }
+
+, collectionProducts: {
+    world: {
+      read:   []
+    , create: []
+    , update: []
+  }
+  , default: {}
+  , owner: {
+      read: true
     }
   }
 };
