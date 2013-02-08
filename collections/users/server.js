@@ -9,6 +9,18 @@ var schema      = require('../../db').schemas.users;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
+// Users.createPasswordReset
+server.post(
+  '/v1/users/password-reset'
+, routes.createPasswordReset
+);
+
+// Users.resetPassword
+server.post(
+  '/v1/users/password-reset/:token'
+, routes.resetPassword
+);
+
 // Users.list
 server.get(
   '/v1/users'
@@ -66,18 +78,6 @@ server.del(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , routes.del
-);
-
-// Users.createPasswordReset
-server.post(
-  '/v1/users/:id/password-reset'
-, routes.createPasswordReset
-);
-
-// Users.resetPassword
-server.post(
-  '/v1/users/:id/password-reset/:token'
-, routes.resetPassword
 );
 
 module.exports = server;

@@ -267,23 +267,25 @@ module.exports.createPasswordReset = function(req, res){
   var TAGS = ['create-user-password-reset', req.uuid];
   logger.routes.debug(TAGS, 'creating user ' + req.params.id + ' password reset');
 
+  var email = req.body.email;
+  if (!email) {
+    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.')
+  }
+
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query('SELECT email FROM users WHERE id=$1', [req.params.id], function(error, result) {
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var email = result.rows[0].email;
-      if (!email) {
-        return res.error(errors.registration.EMAIL_NEEDED), logger.routes.error(TAGS, 'User has no email assigned');
-      }
+    client.query('SELECT id FROM users WHERE email=$1', [email], function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+      var userId = result.rows[0].id;
 
       var token = require("randomstring").generate();
       var query = sql.query([
         'INSERT INTO "userPasswordResets" ("userId", token, expires, "createdAt")',
           'VALUES ($userId, $token, now() + \'1 day\'::interval, now())'
       ]);
-      query.$('userId', req.params.id);
+      query.$('userId', userId);
       query.$('token', token);
       client.query(query.toString(), query.$values, function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -319,13 +321,14 @@ module.exports.resetPassword = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query('SELECT id FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
+    client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) {
         return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.')
       }
+      var userId = result.rows[0].userId;
 
-      client.query('UPDATE users SET password=$1 WHERE id=$2', [utils.encryptPassword(newPassword), req.params.id], function(error, result) {
+      client.query('UPDATE users SET password=$1 WHERE id=$2', [utils.encryptPassword(newPassword), userId], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         res.json({ err:null, data:null });
