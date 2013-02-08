@@ -33,6 +33,13 @@ describe('GET /v1/loyaltyStats', function() {
       });
     });
   });
+
+  it('should respond with a 401 if no user is logged in', function(done) {
+    tu.get('/v1/loyaltyStats', function(err, payload, res) {
+      assert(res.statusCode == 401);
+      done();
+    });
+  });
 });
 
 describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
