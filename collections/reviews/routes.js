@@ -9,6 +9,7 @@ var
   , sql     = require('../../lib/sql')
 
   , logger  = {}
+  , schemas    = db.schemas
   ;
 
 // Setup loggers
@@ -30,18 +31,37 @@ module.exports.list = function(req, res){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT * FROM "oddityLive"',
+      'SELECT {fields} FROM "oddityLive"',
         'INNER JOIN "oddityMeta"',
           'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
-        'WHERE "oddityMeta"."toReview" = true',
-          'AND "oddityMeta"."changeColumns" = true',
-          'AND "oddityMeta"."isHidden" = false'
+        '{where} {limit}'
+
     ]);
 
+    query.fields = sql.fields().add("*");
+    query.where = sql.where()
+      .and('"oddityMeta"."toReview" = true')
+      .and('"oddityMeta"."changeColumns" = true')
+      .and('"oddityMeta"."isHidden" = false');
+    query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+//    query.sort   = sql.sort(req.query.sort || 'biz_name');
+//    query.limit  = sql.limit(req.query.limit, req.query.offset);
+    // name filter
+
+    if (req.param('filter')) {
+      query.where.and('"oddityLive"."biz_name" ILIKE $nameFilter');
+      query.$('nameFilter', '%'+req.param('filter')+'%');
+    }
+
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     client.query(query.toString(), query.$values, function(error, results){
+
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      return res.json({error: null, data: results.rows})
+      var total = (results.rows[0]) ? results.rows[0].metaTotal : 0;
+      return res.json({error: null, data: results.rows, meta: {total: total}});
     });
   });
 };
@@ -89,6 +109,7 @@ module.exports.update = function(req, res){
 
   db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
     var inputs = {
       businessId: req.body.businessId
     , locationId: req.body.locationId
@@ -105,7 +126,6 @@ module.exports.update = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
       logger.db.debug(TAGS, result);
 
       return res.json({error: null, data: null });

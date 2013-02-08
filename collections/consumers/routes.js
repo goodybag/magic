@@ -10,6 +10,7 @@ var
 , magic   = require('../../lib/magic')
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
+, templates = require('../../templates')
 
 , logger  = {}
 ;
@@ -151,6 +152,15 @@ module.exports.create = function(req, res){
 
       req.body.consumerId = result.rows[0].consumerId;
       req.body.userId = result.rows[0].userId;
+
+      if (req.body.email) {
+        var emailHtml = templates.email.complete_registration({
+          url:'http://loljk.com',
+        });
+        utils.sendMail(req.body.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
+          console.log('email cb', err, result);
+        }*/);
+      }
 
       // Log the user in
       req.session.user = {
