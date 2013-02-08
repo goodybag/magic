@@ -28,6 +28,20 @@ server.get(
 
 // Products.list
 server.get(
+  '/v1/locations/:locationId/products'
+, middleware.validate.query({
+    tag        : { is:/[A-z\!\,]+/ },
+    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
+    include    : { isIn:[['tags','categories']] },
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.permissions(permissions)
+, routes.list
+);
+
+// Products.list
+server.get(
   '/v1/businesses/:businessId/products'
 , middleware.validate.path({
     businessId : { isInt:[] }

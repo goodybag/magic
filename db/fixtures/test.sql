@@ -69,6 +69,7 @@ INSERT INTO "users" (id, email, password) VALUES ('12', 'consumer_redeem2@gmail.
 INSERT INTO "users" (id, email, password) VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('16', 'consumer5@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 
 INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -104,6 +105,7 @@ INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "c
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('7', '9', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2', '123456-YYZ');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('9', '15', 'Consumer', 'Four', 'consumer4', '123456-consumer4');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('10', '16', 'Consumer', 'Five', 'consumer5', '778899-CBA');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
@@ -175,7 +177,7 @@ SELECT setval('"visits_id_seq"', (SELECT MAX(id) from "visits")); -- advance the
 BEGIN;
 INSERT INTO "groups" (id, name) VALUES ('1', 'admin');
 INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
-INSERT INTO "groups" (id, name) VALUES ('3', 'tapin-station');
+-- INSERT INTO "groups" (id, name) VALUES ('3', 'tapin-station');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
@@ -200,6 +202,8 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('9', '10', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('10', '11', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11', '14', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('12', '15', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('13', '12', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('14', '16', '5');
 
 -- manager
 
@@ -229,10 +233,11 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- USER LOYALTY STATS
 
 BEGIN;
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('1', '3', '1', 5, 23, 40, 'false', now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('2', '5', '1', 10, 10, 10, 'false', now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit", "dateBecameElite") VALUES ('3', '6', '1', 4, 4, 20, 'true', now(), now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('4', '9', '1', 5, 23, 40, 'false', now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (1,  3, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (2,  5, 1, 2, 10, 10, 1, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (3,  6, 1, 0,  4, 20, 1,  true, now(), now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (4,  9, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (5, 10, 1, 5, 23, 40, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
@@ -243,6 +248,7 @@ INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", 
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('5', '1', 'Product 3.5', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 
@@ -268,14 +274,15 @@ SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "produc
 -- PRODUCT LOCATIONS
 
 BEGIN;
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('5', '3', '3', '3', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('5', '3', '3', '3', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('9', '5', '1', '5', 0, 0, ll_to_earth(0, 0), false);
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
 

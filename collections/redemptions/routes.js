@@ -29,7 +29,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-redemptions', req.uuid];
   logger.routes.debug(TAGS, 'fetching redemptions');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
@@ -54,88 +54,58 @@ module.exports.create = function(req, res){
   var TAGS = ['create-redemptions', req.uuid];
 
   var deltaPunches = +req.body.deltaPunches || 0;
+  var consumerId = req.body.consumerId;
+  var tapinStationId = req.body.tapinStationId;
+  var businessId = null, locationId = null;
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-    // start a transaction
+    // start transaction
     var tx = new Transaction(client);
     tx.begin(function(error) {
       if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
-      // get the business' loyalty settings
-      var query = [
-        'SELECT {bls}.*, {ts}."locationId" as "locationId" FROM {bls}',
-          'INNER JOIN {ts} ON {ts}.id = $1 AND {ts}."businessId" = {bls}."businessId"'
-      ] .join(' ')
-        .replace(RegExp('{bls}','g'), '"businessLoyaltySettings"')
-        .replace(RegExp('{ts}','g'), '"tapinStations"');
+      // get business
+      client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+        businessId = result.rows[0].businessId;
+        locationId = result.rows[0].locationId;
 
-      client.query(query, [req.body.tapinStationId], function(error, result) {
-        if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
-        if (result.rowCount === 0) { return res.error(errors.internal.BAD_DATA, 'Business loyalty settings not found'), tx.abort(), logger.routes.error(TAGS, error); }
-        var bls = result.rows[0];
+        // update punches
+        db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        // correct for the punches which are about to be added
-        var elitePunchesReq = bls.elitePunchesRequired - deltaPunches;
-        var regularPunchesReq = bls.regularPunchesRequired - deltaPunches;
-
-        // check that the user has enough punches
-        var query = [
-          'SELECT {uls}.* FROM {uls}',
-            'WHERE',
-              '{uls}."consumerId" = $1',
-              'AND (',
-                '(',
-                  '{uls}."isElite"        =  true',
-                  'AND {uls}."numPunches" >= $2',  //$2=elitePunchesRequired
-                ') OR (',
-                  '{uls}."isElite"        =  false',
-                  'AND {uls}."numPunches" >= $3',   //$3=regularPunchesRequired
-                ')',
-              ')',
-            'FOR UPDATE OF {uls}'
-        ] .join(' ')
-          .replace(RegExp('{uls}','g'), '"userLoyaltyStats"');
-        client.query(query, [req.body.consumerId, elitePunchesReq, regularPunchesReq], function(error, result) {
-          if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
-          if (result.rowCount === 0) {
+          if (numRewards === 0) {
             return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort();
           }
-          var uls = result.rows[0];
 
           // create the redemption
           var query = [
-            'INSERT INTO {ur} ("businessId","consumerId","cashierUserId","locationId","tapinStationId","dateTime")',
-              'SELECT {ts}."businessId", $1, $2, {ts}."locationId", $3, now() FROM {ts} WHERE {ts}.id = $3'
-          ] .join(' ')
-            .replace(RegExp('{ur}','g'), '"userRedemptions"')
-            .replace(RegExp('{ts}','g'), '"tapinStations"');
-          client.query(query, [req.body.consumerId, req.session.user.id, req.body.tapinStationId], function(error, result) {
+            'INSERT INTO "userRedemptions"',
+              '("businessId","locationId","consumerId","cashierUserId","tapinStationId","dateTime")',
+              'VALUES ($1, $2, $3, $4, $5, now())'
+          ] .join(' ');
+          client.query(query, [businessId, locationId, consumerId, req.session.user.id, tapinStationId], function(error, result) {
+            
             if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
             // update user's loyalty stats
-            var lessPunches = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
-            var query = [
-              'UPDATE {uls}',
-                'SET "numPunches"="numPunches" - $3 + $4,',
-                  '"totalPunches"="totalPunches" + $4',
-                'WHERE "consumerId"=$1 AND "businessId"=$2'
-            ] .join(' ')
-              .replace(RegExp('{uls}','g'), '"userLoyaltyStats"');
-            client.query(query, [req.body.consumerId, bls.businessId, lessPunches, deltaPunches], function(error, result) {
+            var query = 'UPDATE "userLoyaltyStats" SET "numRewards" = "numRewards" - 1 WHERE "consumerId"=$1 AND "businessId"=$2';
+            client.query(query, [consumerId, businessId], function(error, result) {
               if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
               // success!
               tx.commit(function(error) {
                 if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-                // send back the updated user stats
-                uls.numPunches = uls.numPunches + deltaPunches - lessPunches;
-                uls.totalPunches += deltaPunches;
-                res.json({ error:null, data:uls });
+                res.json({ error:null, data:null });
 
-                magic.emit('loyalty.redemption', deltaPunches, req.body.consumerId, bls.businessId, bls.locationId, req.session.user.id);
+                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
+                if (hasBecomeElite)
+                  magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
+                // :TODO: emit on hasEarnedReward?
+                magic.emit('loyalty.redemption', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
               });
             });
           });

@@ -29,7 +29,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // ensure we have a consumer id
@@ -46,21 +46,35 @@ module.exports.get = function(req, res){
 
       if (!consumerId) {
         if (result.rowCount === 0) {
-          return res.status(404).end();
+          return res.json({ error: null, data: [] });
         }
         consumerId = result.rows[0].id;
       }
 
       // get stats
-      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" WHERE "userLoyaltyStats"."consumerId" = $consumerId');
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {where}');
+
       query.fields = sql.fields().add('"userLoyaltyStats".*');
+      query.fields.add('businesses.name as "businessName"');
+      query.fields.add('"businessLoyaltySettings".reward as reward');
+
+      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id';
+      query.loyaltyJoin = 'join "businessLoyaltySettings" on "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+
+      query.where = sql.where().and('"userLoyaltyStats"."consumerId" = $consumerId');
+
       query.$('consumerId', consumerId);
+
+      if (req.param('businessId')){
+        query.where.and('"userLoyaltyStats"."businessId" = $businessId');
+        query.$('businessId', req.param('businessId'));
+      }
 
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
-        return res.json({ error: null, data: result.rows });
+        return res.json({ error: null, data: req.param('businessId') ? (result.rows[0] || null) : result.rows });
       });
     });
   });
@@ -74,7 +88,7 @@ module.exports.get = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-loyaltystats', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var deltaPunches = req.body.deltaPunches;
@@ -99,65 +113,24 @@ module.exports.update = function(req, res){
         consumerId = result.rows[0].id;
       }
 
-      // run stats upsert
-      db.upsert(client,
-        ['UPDATE "userLoyaltyStats"',
-          'SET',
-            '"numPunches"   = "numPunches"   + $3,',
-            '"totalPunches" = "totalPunches" + $3',
-          'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "totalPunches", "isElite"'
-        ].join(' '),
-        [consumerId, businessId, deltaPunches],
-        ['INSERT INTO "userLoyaltyStats"',
-          '("consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "lastVisit", "isElite")',
-          'SELECT $1, $2, $3, $3, 0, now(), false WHERE NOT EXISTS',
-            '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "totalPunches", "isElite"'
-        ].join(' '),
-        [consumerId, businessId, deltaPunches],
-        function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
+      // start a transaction
+      var tx = new Transaction(client);
+      tx.begin(function(error) {
 
-          res.json({ error: null, data: null });
+        // update punches
+        db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-          // See if we need to update the users isElite status
-          if (result.rows[0].isElite) return;
-
-          var id = result.rows[0].id, totalPunches = result.rows[0].totalPunches;
-
-          // Look up the business loyalty settings
-          // Consider doing all of this in a transaction
-          client.query(
-            'SELECT "punchesRequiredToBecomeElite"'
-          + ' from "businessLoyaltySettings"'
-          + ' where "businessId" = $1'
-          , [businessId]
-          , function(error, result){
-              if (error) return logger.routes.error(TAGS, error);
-
-              if (result.rows[0].punchesRequiredToBecomeElite > totalPunches) return;
-
-              // Update the users loyalty stat with elite
-              client.query(
-                ['UPDATE "userLoyaltyStats"',
-                  'SET',
-                    '"isElite"          = true,',
-                    '"dateBecameElite"  = now()',
-                  'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING "dateBecameElite"'
-                ].join(' ')
-              , [consumerId, businessId]
-              , function(error, result){
-                  if (error) return logger.routes.error(TAGS, error);
-
-                  magic.emit('consumers.becameElite', consumerId, businessId, result.rows[0].dateBecameElite);
-                }
-              );
-            }
-          );
+          tx.commit();
+          res.json({ error:null, data:null });
 
           magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
-        }
-      );
+          if (hasBecomeElite)
+            magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
+          // :TODO: emit on hasEarnedReward?
+
+        });
+      });
     });
   });
 };

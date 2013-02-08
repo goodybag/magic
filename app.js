@@ -82,7 +82,8 @@ if(config.repl.enabled && cluster.isMaster){
   });
 }
 
-httpServer = http.createServer(app).listen(config.http.port, function(err){
+httpServer = http.createServer(app);
+httpServer.listen(config.http.port, function(err){
   if(err) throw err;
   console.log("HTTP started on port", config.http.port);
 });
