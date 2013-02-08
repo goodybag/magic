@@ -6,10 +6,29 @@ var utils = require('../../lib/utils');
 
 describe('Consumers Activity: ', function() {
 
-  it('store an event when a raises funds for charity', function(done) {
-    return done(); // TODO
-  });
+  it('store an event when a consumer raises funds for charity', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      // Just like a product from a tablet and it will trigger a visit
+      tu.tapinAuthRequest('POST', '/v1/products/2222/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 200);
+        // Give server time to propagate Activity
+        setTimeout(function(){
+          tu.get('/v1/activity', function(error, results) {
+            assert(!error);
+            results = JSON.parse(results);
+            assert(!results.error);
+            assert(results.data.length > 0);
+            assert(results.data.filter(function(d){
+              return d.type === "donation" && d.consumerId === 12;
+            }).length === 1);
 
+            tu.logout(done);
+          });
+        }, 100);
+      });
+    });
+  });
 });
 
 describe('Loyalty Activity', function(){

@@ -16,15 +16,12 @@ define(function(require){
     }
   , consumerId: {
       type: 'int'
-    , meta: 'references consumers'
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
     }
   , locationId: {
       type: 'int'
-    , meta: 'references locations'
     }
   , type: {
       type: 'text'
