@@ -15,6 +15,9 @@ server.get(
   '/v1/businesses'
 , middleware.profile('/v1/businesses', ['include','limit'])
 , middleware.profile('validate query')
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     tag        : { isAlpha:[] },
     sort       : { isIn:[['-name','name']] },
@@ -31,6 +34,9 @@ server.get(
 // Businesses.list
 server.get(
   '/v1/businesses/food'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     tag        : { isNull:[] },
     sort       : { isIn:[['-name','name']] },
@@ -48,6 +54,9 @@ server.get(
 // Businesses.list
 server.get(
   '/v1/businesses/fashion'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     tag        : { isNull:[] },
     sort       : { isIn:[['-name','name']] },
@@ -56,7 +65,7 @@ server.get(
     limit      : { isInt:[], min:[1] }
   })
 , middleware.defaults.query({
-    tag : ['apparel']
+    tag   : ['apparel']
   })
 , middleware.permissions(permissions.business)
 , routes.list
@@ -65,6 +74,9 @@ server.get(
 // Businesses.list
 server.get(
   '/v1/businesses/other'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     tag        : { isNull:[] },
     sort       : { isIn:[['-name','name']] },

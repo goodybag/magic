@@ -13,6 +13,13 @@ var applyGroups = require('./apply-groups');
 server.get(
   '/v1/redemptions'
 , middleware.permissions(permissions)
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , routes.list
 );
 

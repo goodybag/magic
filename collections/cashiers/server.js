@@ -12,6 +12,9 @@ var applyGroups = require('./apply-groups');
 // cashiers.list
 server.get(
   '/v1/cashiers'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }

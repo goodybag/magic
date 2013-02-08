@@ -12,6 +12,9 @@ var applyGroups = require('./apply-groups');
 // Locations.list
 server.get(
   '/v1/locations'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -30,6 +33,9 @@ server.get(
 // Locations.list
 server.get(
   '/v1/businesses/:businessId/locations'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.path({
     businessId : { isInt:[] }
   })
@@ -50,6 +56,9 @@ server.get(
 // Locations.list
 server.get(
   '/v1/locations/food'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -71,6 +80,9 @@ server.get(
 // Locations.list
 server.get(
   '/v1/locations/fashion'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -92,6 +104,9 @@ server.get(
 // Locations.list
 server.get(
   '/v1/locations/other'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
