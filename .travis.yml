@@ -4,7 +4,7 @@ before_script:
   - sudo apt-get -y --purge remove postgresql
   - sudo apt-get update -qq
   - sudo apt-get -q -y -o Dpkg::Options::=--force-confnew install postgresql-9.2
-  - sudo su postgres -c "psql -d postgres -U postgres -c \"alter user postgres with password 'postgres'\"";
+  - sudo echo "local   all         all                               trust" > /etc/postgresql/9.2/main/pg_hba.conf
   - psql -c 'create database "goodybag-test";' -U postgres -h localhost -p 5433
 env:
   - DEBIAN_FRONTEND=noninteractive GB_ENV=test PGPASSWORD=postgres PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test"
