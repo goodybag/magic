@@ -33,9 +33,13 @@ before(function(done) {
   var self = this;
   var setupDb = require('../db/setup');
   setupDb(require('./db-config.js'), function() {
-    self.httpServer = require('http').createServer(app).listen(8986, function(err){
+    self.httpServer = require('http').createServer(app);
+    self.httpServer.listen(8986, function(err){
       if (err) throw err;
       done();
+    });
+    self.httpServer.on('connection', function(socket) {
+      socket.on('error', function(e) { console.log("SOCKET ERROR", e); });
     });
   });
 });

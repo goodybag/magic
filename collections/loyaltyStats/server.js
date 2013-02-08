@@ -17,6 +17,14 @@ server.get(
 , routes.get
 );
 
+// LoyaltyStats.get
+server.get(
+  '/v1/businesses/:businessId/loyaltyStats'
+, middleware.applyGroups(applyGroups.employee)
+, middleware.permissions(permissions)
+, routes.get
+);
+
 // LoyaltyStats.update
 server.post(
   '/v1/loyaltyStats'
