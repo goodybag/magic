@@ -1,4 +1,3 @@
-language: node_js
 before_script:
   - echo "yes" | sudo add-apt-repository ppa:pitti/postgresql
   - sudo apt-get -y --purge remove postgresql
