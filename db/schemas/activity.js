@@ -22,6 +22,10 @@ define(function(require){
       type: 'int'
     , meta: 'references businesses'
     }
+  , locationId: {
+      type: 'int'
+    , meta: 'references locations'
+    }
   , type: {
       type: 'text'
     }
