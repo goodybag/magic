@@ -71,9 +71,13 @@ server.del(
 // Users.createPasswordReset
 server.post(
   '/v1/users/:id/password-reset'
-, middleware.applyGroups(applyGroups.owner)
-, middleware.auth.allow('admin', 'owner')
 , routes.createPasswordReset
+);
+
+// Users.resetPassword
+server.post(
+  '/v1/users/:id/password-reset/:token'
+, routes.resetPassword
 );
 
 module.exports = server;
