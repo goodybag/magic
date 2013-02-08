@@ -12,11 +12,13 @@ before_script:
   - sudo echo "local   all         all                               trust" >> /etc/postgresql/9.2/main/pg_hba.conf
   - sudo echo "host    all         all         127.0.0.1/32          trust" >> /etc/postgresql/9.2/main/pg_hba.conf
   - sudo echo "host    all         all         ::1/128               trust" >> /etc/postgresql/9.2/main/pg_hba.conf
+  - sudo echo "host    all         all         0.0.0.0/0             trust" >> /etc/postgresql/9.2/main/pg_hba.conf
+  - sudo echo "host    all         all         0.0.0.0 255.255.255.255 trust" >> /etc/postgresql/9.2/main/pg_hba.conf
   - sudo /etc/init.d/postgresql restart
   - sudo -u postgres psql -c "ALTER user postgres with password 'postgres';"
   - psql -c 'create database "goodybag-test";' -U postgres -h localhost -p 5433
   - node db
 env:
-  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test"
+  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://djgmanhnnngynx:grAVcRvSoymDL0SUxeeKa2_CEJ@ec2-54-243-229-57.compute-1.amazonaws.com:5432/d6p6bdbqf16t00"
 node_js:
   - 0.8
