@@ -89,7 +89,6 @@ module.exports.update = function(req, res){
 
   db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-    console.log(req.body);
     var inputs = {
       businessId: req.body.businessId
     , locationId: req.body.locationId
@@ -105,7 +104,6 @@ module.exports.update = function(req, res){
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
-      console.log(error);
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

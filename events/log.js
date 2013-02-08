@@ -123,4 +123,15 @@ module.exports = {
     , employeeId:   employeeId
     });
   }
+
+, 'loyalty.redemption':
+  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+    insert('loyalty.hasEarnedReward', {
+      deltaPunches: deltaPunches
+    , consumerId:   consumerId
+    , businessId:   businessId
+    , locationId:   locationId
+    , employeeId:   employeeId
+    });
+  }
 };
