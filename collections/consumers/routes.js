@@ -229,3 +229,42 @@ module.exports.update = function(req, res){
     });
   });
 };
+
+/**
+ * List consumer collections
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.listCollections = function(req, res){
+  var TAGS = ['list-consumer-collections', req.uuid];
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.id + ' collections');
+
+  var consumerId = req.param('id');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    // build data query
+    var query = sql.query([
+      'SELECT {fields} FROM collections',
+        'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
+        'WHERE "consumerId" = $consumerId',
+        'GROUP BY collections.id {limit}'
+    ]);
+    query.fields = sql.fields().add("collections.*").add('COUNT("productsCollections".id) as "numProducts"');
+    query.where  = sql.where();
+    query.limit  = sql.limit(req.query.limit, req.query.offset);
+    query.$('consumerId', consumerId);
+
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+    // run data query
+    client.query(query.toString(), query.$values, function(error, dataResult){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
+
+      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+    });
+  });
+};

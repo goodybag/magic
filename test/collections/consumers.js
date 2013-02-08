@@ -292,3 +292,33 @@ describe('DEL /v1/consumers/:id', function() {
     });
   });
 });
+
+describe('GET /v1/consumers/:id/collections', function() {
+  it('should respond with a collection listing', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/1/collections', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.length > 0);
+        assert(results.data[0].id);
+        assert(results.data[0].name);
+        assert(results.data[0].numProducts == 2);
+        assert(results.data[1].numProducts == 3);
+        tu.logout(done);
+      });
+    });
+  });
+  it('should paginate', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/1/collections?offset=1&limit=1', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length === 1);
+        assert(payload.meta.total > 1);
+        done();
+      });
+    });
+  });
+});

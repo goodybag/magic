@@ -26,7 +26,7 @@ schema.password.validators['notNull'] = [];
 // consumers.list
 server.get(
   '/v1/consumers'
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , routes.list
 );
 
@@ -34,7 +34,7 @@ server.get(
 server.get(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , routes.get
 );
 
@@ -49,7 +49,7 @@ server.post(
     if (!req.body.password) req.body.password = null;
     next();
   }
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.create
 );
@@ -59,7 +59,7 @@ server.put(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -69,7 +69,7 @@ server.post(
   '/v1/consumers/:id'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.update
 );
@@ -80,6 +80,14 @@ server.del(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , routes.del
+);
+
+// consumers.get
+server.get(
+  '/v1/consumers/:id/collections'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collection)
+, routes.listCollections
 );
 
 module.exports = server;
