@@ -4,8 +4,8 @@ before_script:
   - sudo apt-get -y --purge remove postgresql
   - sudo apt-get update -qq
   - sudo apt-get -q -y -o Dpkg::Options::=--force-confnew install postgresql-9.2
-  - psql -c 'create database "goodybag-test";' -U postgres -h localhost
+  - psql -c 'create database "goodybag-test";' -U postgres -h localhost -p 5433
 env:
-  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1/goodybag-test"
+  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test"
 node_js:
   - 0.8
