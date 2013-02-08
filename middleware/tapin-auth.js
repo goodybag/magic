@@ -31,7 +31,6 @@ module.exports = function(req, res, next){
     req.session.user = tapinStationUser;
     origEndFn.apply(res, arguments);
   };
-
   var tx, client;
   var stage = {
     start: function() {
@@ -62,10 +61,9 @@ module.exports = function(req, res, next){
       ].join(' ');
       client.query(query, [cardId], function(error, result){
         if (error) return stage.dbError(error);
-
         var user = result.rows[0];
-        if (!user) return stage.createUser();
-        return stage.insertTapin(user);
+        if (!user) stage.createUser();
+        else       stage.insertTapin(user);
       });
     }
 
