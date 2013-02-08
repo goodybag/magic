@@ -92,6 +92,7 @@ module.exports.update = function(req, res){
 
     var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
     query.updates = sql.fields().addUpdateMap(req.body, query);
+    query.updates.add('"updatedAt" = now()');
     query.$('id', +req.params.id || 0);
 
     logger.db.debug(TAGS, query.toString());
