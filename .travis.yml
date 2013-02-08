@@ -1,5 +1,6 @@
 language: node_js
 before_script:
+  - sudo cat /etc/postgresql/9.1/main/pg_hba.conf
   - echo "yes" | sudo add-apt-repository ppa:pitti/postgresql
   - sudo apt-get -y remove postgresql
   - sudo apt-get update -qq
