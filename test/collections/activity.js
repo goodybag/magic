@@ -110,8 +110,6 @@ describe('Loyalty Activity', function(){
                   tu.logout(done);
                 });
               }, 100);
-
-              tu.logout(done);
             });
           });
         });
