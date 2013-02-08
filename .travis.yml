@@ -5,6 +5,7 @@ before_script:
   - sudo apt-get -q -y -o Dpkg::Options::=--force-confdef install postgresql-9.2
   - sudo chmod 777 /etc/postgresql/9.2/main/pg_hba.conf
   - sudo echo "local   all    all     md5" > /etc/postgresql/9.2/main/pg_hba.conf
+  - sudo /etc/init.d/postgresql restart
   - sudo -u postgres psql -c "ALTER user postgres with password 'postgres';"
   - psql -c 'create database "goodybag-test";' -U postgres
 env:
