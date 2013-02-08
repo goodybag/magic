@@ -7,7 +7,6 @@ var
 ;
 
 describe('GET /v1/loyaltyStats', function() {
-
   it('should respond with stats', function(done) {
     tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
       tu.get('/v1/loyaltyStats', function(err, payload, res) {
@@ -23,15 +22,43 @@ describe('GET /v1/loyaltyStats', function() {
     });
   });
 
-  it('should respond 404 if target user is not a consumer', function(done) {
+  it('should respond with an empty array if stats dont not exist', function(done) {
     tu.loginAsAdmin(function() {
       tu.get('/v1/loyaltyStats', function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 404);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+        assert(payload.data.length === 0);
         tu.logout(done);
       });
     });
   });
+});
+
+describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
+
+  it('should respond with stats', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/businesses/' + 1 + '/loyaltyStats', '778899-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+
+        assert(payload.data.consumerId == 10);
+        assert(payload.data.businessId == 1);
+        assert(payload.data.numPunches == 5);
+        assert(payload.data.totalPunches == 23);
+        assert(payload.data.visitCount == 40);
+        assert(payload.data.reward == 'Chicken');
+
+        tu.logout(done);
+      });
+    });
+  });
+
 });
 
 describe('POST /v1/loyaltyStats', function() {
@@ -47,8 +74,9 @@ describe('POST /v1/loyaltyStats', function() {
               payload = JSON.parse(payload);
               assert(!payload.error);
 
-              assert(payload.data[0].numPunches === 10);
+              assert(payload.data[0].numPunches === 2);
               assert(payload.data[0].totalPunches === 28);
+              assert(payload.data[0].numRewards === 1);
               assert(payload.data[0].isElite === true);
               tu.logout(done);
             });
@@ -98,8 +126,9 @@ describe('POST /v1/loyaltyStats', function() {
             tu.get('/v1/loyaltyStats', function(error, results, res) {
               assert(res.statusCode === 200);
               results = JSON.parse(results);
-              assert(results.data[0].numPunches === 15);
+              assert(results.data[0].numPunches === 3);
               assert(results.data[0].totalPunches === 33);
+              assert(results.data[0].numRewards === 2);
 
               tu.logout(done);
             });
@@ -119,8 +148,9 @@ describe('POST /v1/loyaltyStats', function() {
             tu.get('/v1/loyaltyStats', function(error, results, res) {
               assert(res.statusCode === 200);
               results = JSON.parse(results);
-              assert(results.data[0].numPunches === 20);
+              assert(results.data[0].numPunches === 0);
               assert(results.data[0].totalPunches === 38);
+              assert(results.data[0].numRewards === 4);
 
               tu.logout(done);
             });

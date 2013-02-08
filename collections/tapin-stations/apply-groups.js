@@ -22,7 +22,7 @@ exports.owner = function(req, cb) {
 
   var userId = req.param('id');
 
-  db.getClient(function(error, client){
+  db.getClient('tapinstations owner apply groups', function(error, client){
     if (error) return cb(null);
 
     var query = tapinStations.select(

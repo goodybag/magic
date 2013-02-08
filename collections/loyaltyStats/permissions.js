@@ -2,14 +2,17 @@ var all = [
   'id'
 , 'consumerId'
 , 'businessId'
+, 'businessName'
 , 'locationId'
 , 'numPunches'
 , 'totalPunches'
 , 'deltaPunches'
+, 'numRewards'
 , 'visitCount'
 , 'lastVisit'
 , 'isElite'
 , 'dateBecameElite'
+, 'reward'
 ];
 
 module.exports = {
@@ -26,12 +29,15 @@ module.exports = {
       'id'
     , 'consumerId'
     , 'businessId'
+    , 'businessName'
     , 'numPunches'
     , 'totalPunches'
+    , 'numRewards'
     , 'visitCount'
     , 'lastVisit'
     , 'isElite'
     , 'dateBecameElite'
+    , 'reward'
     ]
   }
 

@@ -25,7 +25,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -59,7 +59,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
@@ -90,7 +90,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-users', req.uuid];
   logger.routes.debug(TAGS, 'creating user ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var tx = new Transaction(client);
@@ -145,7 +145,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE id=$id');
@@ -168,7 +168,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-user', req.uuid];
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction

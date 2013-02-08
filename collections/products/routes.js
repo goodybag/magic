@@ -30,7 +30,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of products');
 
   // retrieve pg client
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // if sort=distance, validate that we got lat/lon
@@ -46,16 +46,17 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{locJoin} {tagJoin}',
+        '{prodLocJoin} {locJoin} {tagJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
-        'GROUP BY products.id, businesses.id',
+        'GROUP BY {group}',
         '{sort} {limit}'
     ]);
     query.fields = sql.fields().add('products.*').add('businesses.name as "businessName"');
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
+    query.group  = "products.id, businesses.id";
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
@@ -76,6 +77,36 @@ module.exports.list = function(req, res){
         query.locJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
       }
+    }
+
+    // location id filtering
+    if (req.param('locationId')){
+      var joinType = "inner";
+
+      if (req.param('spotlight'))
+        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+
+      query.prodLocJoin = [
+      , '{joinType} join "productLocations"'
+        , 'ON products."id" = "productLocations"."productId"'
+        , 'and "productLocations"."locationId" = $locationId'
+      ].join(' ');
+
+      query.group += ', "productLocations".id';
+
+      query.$('locationId', req.param('locationId'));
+
+      if (req.param('all')){
+        joinType = "left";
+        query.fields.add('"productLocations".id is not null as "isAvailable"');
+        query.prodLocJoin += [
+          'inner join "locations"'
+        , 'on "locations"."businessId" = products."businessId"'
+        , 'and locations.id = $locationId'
+        ].join(' ');
+      }
+
+      query.prodLocJoin = query.prodLocJoin.replace("{joinType}", joinType);
     }
 
     // tag filtering
@@ -173,7 +204,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-product', req.uuid];
   logger.routes.debug(TAGS, 'fetching product');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -316,6 +347,10 @@ module.exports.create = function(req, res){
 
       var inputs = req.body;
       if (!inputs.isEnabled) inputs.isEnabled = true;
+
+      if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
+        inputs.isSpotlight = true;
+
       inputs.likes = 0;
       inputs.wants = 0;
       inputs.tries = 0;
@@ -324,6 +359,7 @@ module.exports.create = function(req, res){
       var tags = inputs.tags;
       delete inputs.categories;
       delete inputs.tags;
+
 
       var error = utils.validate(inputs, db.schemas.products);
       if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
@@ -424,7 +460,7 @@ module.exports.create = function(req, res){
   };
 
   // Kick it off
-  db.getClient(stage.clientReceived);
+  db.getClient(TAGS[0], stage.clientReceived);
 };
 
 /**
@@ -648,7 +684,7 @@ module.exports.update = function(req, res){
   };
 
   // Kick it off
-  db.getClient(stage.clientReceived);
+  db.getClient(TAGS[0], stage.clientReceived);
 };
 
 /**
@@ -660,7 +696,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-product', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM products WHERE id=$productId');
@@ -687,7 +723,7 @@ module.exports.listCategories = function(req, res) {
   var TAGS = ['list-product-productcategory-relations', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of product\'s categories');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
@@ -718,15 +754,15 @@ module.exports.listCategories = function(req, res) {
 module.exports.addCategory = function(req, res) {
   var TAGS = ['create-product-productcategory-relation', req.uuid];
 
-  db.getClient(function(error, client){
+  var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
+  var error = utils.validate(inputs, db.schemas.productsProductCategories);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
     // :TODO: make sure product category's businessId is the same as products
-
-    var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
-    var error = utils.validate(inputs, db.schemas.productsProductCategories);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
       'INSERT INTO "productsProductCategories" ("productId", "productCategoryId")',
@@ -757,7 +793,7 @@ module.exports.addCategory = function(req, res) {
 module.exports.delCategory = function(req, res) {
   var TAGS = ['delete-product-productcategory-relation', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
@@ -794,7 +830,7 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var inputs = {

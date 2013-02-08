@@ -13,7 +13,7 @@ exports.owner = function(req, cb) {
 
   var userId = req.session.user.id;
 
-  db.getClient(function(error, client){
+  db.getClient('photo owner apply groups', function(error, client){
     if (error) return cb(null);
     
     var query = sql.query([
@@ -40,7 +40,7 @@ exports.businessOwner = function(req, cb) {
 
   var userId = req.session.user.id;
 
-  db.getClient(function(error, client){
+  db.getClient('photo businessOwner apply groups', function(error, client){
     if (error) return cb(null);
     
     var query = sql.query([
