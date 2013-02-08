@@ -26,15 +26,23 @@ var config = {
     , port: 4337
     }
   , numWorkers: os.cpus().length
+  , outputActivePoolIds: false
+
+  , emailEnabled: false
+  , emailFromAddress: 'team@goodybag.com'
+
   , cookieSecret: "g00dybagr0ck$!"
+  , passwordSalt: "$G00DYBAGR0CK$!"
+  , consumerPasswordSaltLength: 10
+
   , facebook: {
       id: "159340790837933"
     , openGraphUrl: "https://graph.facebook.com/"
     }
-  , passwordSalt: "$G00DYBAGR0CK$!"
-  , consumerPasswordSaltLength: 10
-  , outputActivePoolIds: false
-
+  , amazon: {
+      awsId: "AKIAJZTPY46ZWGWU5JRQ"
+    , awsSecret: "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"
+    }
   , singly: {
       clientId: "e8171ccd4a3b90f15bbb41088efccc06"
     , clientSecret: "73fa4013446e9985e9217455479d3c3c"
@@ -59,7 +67,9 @@ var config = {
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost'
+
   , outputActivePoolIds: false
+  , emailEnabled: true
   }
 
 , test: {
@@ -146,6 +156,7 @@ var config = {
   , baseUrl: 'http://merlin.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
   , outputActivePoolIds: false
+  , emailEnabled: true
   , repl: {
       enabled: false
     }
