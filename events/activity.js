@@ -20,13 +20,15 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+          var options = { fields: ['"screenName"', 'id'] };
+          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
 
       , lookupProduct: function(done){
-          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+          var options = { fields: ['name', '"businessId"'] };
+          db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -74,13 +76,15 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+          var options = { fields: ['"screenName"', 'id'] };
+          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
 
       , lookupProduct: function(done){
-          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+          var options = { fields: ['name', '"businessId"'] };
+          db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -128,13 +132,15 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+          var options = { fields: ['"screenName"', 'id'] };
+          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
 
       , lookupProduct: function(done){
-          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+          var options = { fields: ['name', '"businessId"'] };
+          db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -186,12 +192,16 @@ module.exports = {
       , lookUpUserAndBusiness: function(){
           utils.parallel({
             consumer: function(done){
-              db.api.consumers.findOne(consumerId, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+              var options = { fields: ['"screenName"'] };
+              db.api.consumers.findOne(consumerId, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , business: function(done){
-
+              var options = { fields: ['name'] };
+              db.api.businesses.findOne(businessId, options, function(e, r, m){
+                return done(e, r);
+              });
             }
           }, function(error, results){
             if (error) return stage.error(error);
@@ -204,10 +214,10 @@ module.exports = {
 
       , saveEvent: function(screenName, businessName){
           var data = {
-            type:       'try'
+            type:       'becameElite'
           , date:       'now()'
-          , consumerId: results.consumer.id
-          , businessId: results.product.businessId
+          , consumerId: consumerId
+          , businessId: businessId
 
           , data: JSON.stringify({
               consumerScreenName: screenName
