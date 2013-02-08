@@ -36,20 +36,26 @@ module.exports = {
           if (!results.consumer || !results.product)
             return logger.error(TAGS, "Failed to store like event");
 
-          db.api.activity.insert({
-            type:       'like'
-          , date:       'now()'
-          , consumerId: results.consumer.id
-          , businessId: results.product.businessId
+          var options = { fields: ['name'] };
+          db.api.businesses.findOne(results.product.businessId, options, function(error, business){
+            if (error) return logger.error(TAGS, error);
 
-          , data: JSON.stringify({
-              productId:          productId
-            , productName:        results.product.name
-            , consumerScreenName: results.consumer.screenName
-            })
-          }, function(error, result){
-            if (error)    return logger.error(TAGS, error);
-            if (!result)  return logger.error(TAGS, "Failed to store like event");
+            db.api.activity.insert({
+              type:       'like'
+            , date:       'now()'
+            , consumerId: results.consumer.id
+            , businessId: results.product.businessId
+
+            , data: JSON.stringify({
+                productId:          productId
+              , productName:        results.product.name
+              , consumerScreenName: results.consumer.screenName
+              , businessName:       business.name
+              })
+            }, function(error, result){
+              if (error)    return logger.error(TAGS, error);
+              if (!result)  return logger.error(TAGS, "Failed to store like event");
+            });
           });
         }
       }
@@ -84,20 +90,26 @@ module.exports = {
           if (!results.consumer || !results.product)
             return logger.error(TAGS, "Failed to store want event");
 
-          db.api.activity.insert({
-            type:       'want'
-          , date:       'now()'
-          , consumerId: results.consumer.id
-          , businessId: results.product.businessId
+          var options = { fields: ['name'] };
+          db.api.businesses.findOne(results.product.businessId, options, function(error, business){
+            if (error) return logger.error(TAGS, error);
 
-          , data: JSON.stringify({
-              productId:          productId
-            , productName:        results.product.name
-            , consumerScreenName: results.consumer.screenName
-            })
-          }, function(error, result){
-            if (error)    return logger.error(TAGS, error);
-            if (!result)  return logger.error(TAGS, "Failed to store want event");
+            db.api.activity.insert({
+              type:       'want'
+            , date:       'now()'
+            , consumerId: results.consumer.id
+            , businessId: results.product.businessId
+
+            , data: JSON.stringify({
+                productId:          productId
+              , productName:        results.product.name
+              , consumerScreenName: results.consumer.screenName
+              , businessName:       business.name
+              })
+            }, function(error, result){
+              if (error)    return logger.error(TAGS, error);
+              if (!result)  return logger.error(TAGS, "Failed to store want event");
+            });
           });
         }
       }
@@ -132,20 +144,26 @@ module.exports = {
           if (!results.consumer || !results.product)
             return logger.error(TAGS, "Failed to store try event");
 
-          db.api.activity.insert({
-            type:       'try'
-          , date:       'now()'
-          , consumerId: results.consumer.id
-          , businessId: results.product.businessId
+          var options = { fields: ['name'] };
+          db.api.businesses.findOne(results.product.businessId, options, function(error, business){
+            if (error) return logger.error(TAGS, error);
 
-          , data: JSON.stringify({
-              productId:          productId
-            , productName:        results.product.name
-            , consumerScreenName: results.consumer.screenName
-            })
-          }, function(error, result){
-            if (error)    return logger.error(TAGS, error);
-            if (!result)  return logger.error(TAGS, "Failed to store try event");
+            db.api.activity.insert({
+              type:       'try'
+            , date:       'now()'
+            , consumerId: results.consumer.id
+            , businessId: results.product.businessId
+
+            , data: JSON.stringify({
+                productId:          productId
+              , productName:        results.product.name
+              , consumerScreenName: results.consumer.screenName
+              , businessName:       business.name
+              })
+            }, function(error, result){
+              if (error)    return logger.error(TAGS, error);
+              if (!result)  return logger.error(TAGS, "Failed to store try event");
+            });
           });
         }
       }
@@ -155,6 +173,65 @@ module.exports = {
       consumer:  tasks.lookupConsumer
     , product:   tasks.lookupProduct
     }, tasks.complete);
+  }
+
+, 'consumers.becameElite':
+  function (consumerId, businessId){
+    var
+      stage = {
+        start: function(){
+          stage.lookUpUserAndBusiness();
+        }
+
+      , lookUpUserAndBusiness: function(){
+          utils.parallel({
+            consumer: function(done){
+              db.api.consumers.findOne(consumerId, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+                return done(e, r);
+              });
+            }
+          , business: function(done){
+
+            }
+          }, function(error, results){
+            if (error) return stage.error(error);
+            if (!results.consumer) return stage.error("Consumer not found!");
+            if (!results.business) return stage.error("Business not found!");
+
+            stage.saveEvent(results.consumer.screenName, results.business.name);
+          });
+        }
+
+      , saveEvent: function(screenName, businessName){
+          var data = {
+            type:       'try'
+          , date:       'now()'
+          , consumerId: results.consumer.id
+          , businessId: results.product.businessId
+
+          , data: JSON.stringify({
+              consumerScreenName: screenName
+            , businessName:       businessName
+            })
+          };
+
+          db.api.activity.insert(data, function(error){
+            if (error) return stage.error(error);
+            return stage.end();
+          });
+        }
+
+      , error: function(error){
+          return logger.error(TAGS, error);
+        }
+
+      , end: function(){
+          // yay!
+        }
+      }
+    ;
+
+    stage.start();
   }
 
 // Don't do this yet
