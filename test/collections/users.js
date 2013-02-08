@@ -317,3 +317,16 @@ describe('DEL /v1/users/:id', function() {
     });
   });
 });
+
+describe('POST /v1/users/:id/password-reset', function() {
+  it('should create a new password reset record', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/users/7/password-reset', {}, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.token);
+        tu.logout(done);
+      });
+    });
+  });
+});

@@ -7,6 +7,7 @@ var
 , sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, config  = require('../../config')
 
 , logger  = {}
 ;
@@ -243,6 +244,49 @@ module.exports.update = function(req, res){
           });
 
         });
+      });
+    });
+  });
+};
+
+/**
+ * Create user password reset record
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.createPasswordReset = function(req, res){
+  var TAGS = ['create-user-password-reset', req.uuid];
+  logger.routes.debug(TAGS, 'creating user ' + req.params.id + ' password reset');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    client.query('SELECT email FROM users WHERE id=$1', [req.params.id], function(error, result) {
+      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      var email = result.rows[0].email;
+      if (!email) {
+        return res.error(errors.registration.EMAIL_NEEDED), logger.routes.error(TAGS, 'User has no email assigned');
+      }
+
+      var token = require("randomstring").generate();
+      var query = sql.query([
+        'INSERT INTO "userPasswordResets" ("userId", token, expires, "createdAt")',
+          'VALUES ($userId, $token, now() + \'1 day\'::interval, now())'
+      ]);
+      query.$('userId', req.params.id);
+      query.$('token', token);
+      console.log(query.toString())
+      client.query(query.toString(), query.$values, function(error, result) {
+        console.log(error)
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var emailHtml = templates.email.reset_password({
+          url : config.baseUrl + '/v1/users/password-reset/' + token
+        });
+        utils.sendMail(email, config.emailFromAddress, 'Goodybag Password Reset Link', emailHtml);
+
+        res.json({ err:null, data:{ token:token }});
       });
     });
   });
