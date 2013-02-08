@@ -4,7 +4,7 @@ var sinon = require('sinon');
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
 
-describe('Consumers Events: ', function() {
+describe('Consumers Activity: ', function() {
 
   it('store an event when a raises funds for charity', function(done) {
     return done(); // TODO
@@ -12,10 +12,40 @@ describe('Consumers Events: ', function() {
 
 });
 
-describe('Loyalty Events', function(){
+describe('Loyalty Activity', function(){
 
   it('store an event when a user becomes elite', function(done) {
-    return done(); // TODO
+    tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:11, businessId:1, locationId:1 }, function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.logout(function() {
+          tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
+            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+              assert(res.statusCode == 200);
+              payload = JSON.parse(payload);
+              assert(!payload.error);
+
+              assert(payload.data[0].isElite === true);
+
+              // Give server time to propagate Activity
+              setTimeout(function(){
+                tu.get('/v1/activity', function(error, results) {
+                  assert(!error);
+                  results = JSON.parse(results);
+                  assert(!results.error);
+                  assert(results.data.length > 0);
+                  assert(results.data.filter(function(d){
+                    return d.type === "becameElite" && d.consumerId === 11;
+                  }).length === 1);
+
+                  tu.logout(done);
+                });
+              }, 100);
+            });
+          });
+        })
+      });
+    });
   });
 
   it('store an event when a user earns a punch', function(done) {
@@ -28,7 +58,7 @@ describe('Loyalty Events', function(){
 
 });
 
-describe('Products Events: ', function() {
+describe('Products Activity: ', function() {
   it('store an event when a user likes a product', function(done) {
     tu.login({email: 'consumer6@gmail.com', password: 'password' }, function(error, user){
       assert(!error);
