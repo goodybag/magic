@@ -202,7 +202,8 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('9', '10', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('10', '11', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11', '14', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('12', '15', '5');
-INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('13', '16', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('13', '12', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('14', '16', '5');
 
 -- manager
 
@@ -232,11 +233,11 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- USER LOYALTY STATS
 
 BEGIN;
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('1', '3', '1', 5, 23, 40, 'false', now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('2', '5', '1', 10, 10, 10, 'false', now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit", "dateBecameElite") VALUES ('3', '6', '1', 4, 4, 20, 'true', now(), now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('4', '9', '1', 5, 23, 40, 'false', now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "isElite", "lastVisit") VALUES ('5', '10', '1', 5, 23, 40, 'false', now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (1,  3, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (2,  5, 1, 2, 10, 10, 1, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (3,  6, 1, 0,  4, 20, 1,  true, now(), now());
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (4,  9, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (5, 10, 1, 5, 23, 40, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 

@@ -152,7 +152,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createOrUpdateUser: function(consumer){
-      db.getClient(function(error, client){
+      db.getClient(TAGS[0], function(error, client){
         if (error) return stage.dbError(error);
 
         var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
@@ -227,7 +227,7 @@ module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
   logger.routes.debug(TAGS, 'attempting to authenticate');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // First check for user existence

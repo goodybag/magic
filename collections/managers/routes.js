@@ -26,7 +26,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-managers', req.uuid];
   logger.routes.debug(TAGS, 'fetching manager ' + req.params.id);
 
-  db.getClient(function(error, client) {
+  db.getClient(TAGS[0], function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -59,7 +59,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -99,7 +99,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-managers', req.uuid];
   logger.routes.debug(TAGS, 'creating manager ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -158,7 +158,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -186,7 +186,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-manager', req.uuid];
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE managers SET {updates} WHERE id=$id');

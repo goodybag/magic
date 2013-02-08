@@ -26,7 +26,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productTags', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of productTags');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM "productTags" {where} {limit}');
@@ -58,7 +58,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-productTag', req.uuid];
   logger.routes.debug(TAGS, 'fetching productTag');
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT * FROM "productTags" WHERE id=$tagId');
@@ -82,17 +82,17 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-productTag', req.uuid];
 
-  db.getClient(function(error, client){
+  var inputs = req.body;
+  inputs.businessId = req.param('businessId');
+
+  var error = utils.validate(inputs, db.schemas.productTags);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
+  db.getClient(TAGS[0], function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.error(errors.internal.DB_FAILURE, error);
     }
-
-    var inputs = req.body;
-    inputs.businessId = req.param('businessId');
-
-    var error = utils.validate(inputs, db.schemas.productTags);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
       'INSERT INTO "productTags" ("businessId", tag)',
@@ -121,7 +121,7 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-productTag', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE "productTags" SET tag=$tag WHERE id=$id AND "businessId"=$businessId');
@@ -147,7 +147,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-productTag', req.uuid];
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM "productTags" WHERE id=$id AND "businessId"=$businessId');

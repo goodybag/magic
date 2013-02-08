@@ -26,10 +26,12 @@ var
 
 exports.pg = pg;
 exports.sql = sql;
+exports.procedures = require('./procedures');
 
 // TODO: I don't think this is using the connection pool
 // find out best way to do this
 
+var activePoolIds = {};
 var pool = pooler.Pool({
   name: 'postgres'
 , max: 10
@@ -44,6 +46,10 @@ var pool = pooler.Pool({
       });
 
       client.on('drain', function() {
+        if (client.assignedPoolId) {
+          delete activePoolIds[client.assignedPoolId];
+        }
+        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds))
         pool.release(client);
       });
 
@@ -58,9 +64,18 @@ var pool = pooler.Pool({
 , reapIntervalMillis: 1000
 });
 
-exports.getClient = function(callback){
+exports.getClient = function(id, callback){
+  if (typeof id == 'function') {
+    callback = id;
+    id = null;
+  } else {
+    activePoolIds[id] = true;
+  }
 
-  return pool.acquire(callback);
+  return pool.acquire(function(error, client) {
+    if (config.outputActivePoolIds && client) client.assignedPoolId = id;
+    callback(error, client);
+  });
   // callback(null, client);
 };
 
@@ -75,7 +90,12 @@ exports.getClient = function(callback){
  * @param  {Object} tx           Optional. PostGres transaction to use (created if not given)
  * @return undefined
  */
-exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, originalCb, tx) {
+exports.upsert = function(client, updateQuery, updateValues, insertQuery, insertValues, tx, originalCb) {
+  if (typeof tx == 'function') {
+    originalCb = tx;
+    tx = null;
+  }
+
   var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
   var stage = ''; // for logging
