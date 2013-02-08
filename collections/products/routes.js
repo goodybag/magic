@@ -152,7 +152,6 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -173,20 +172,34 @@ module.exports.list = function(req, res){
                   var tagData = tagRow
                     .slice(1,-1) // entries are surrounded by parens, so slice out
                     .split(','); // split into individual columns (and pray there are no commas in the dataset)
-                  return utils.object(tagColumns, tagData);
+                  tagData = utils.object(tagColumns, tagData);
+                  tagData.id = parseInt(tagData.id);
+                  return tagData;
                 });
             } else {
               row.tags = [];
             }
+            if (row.tags.length > 0 && row.tags[0].id == null)
+              row.tags = [];
           }
           if (typeof row.categories != 'undefined') {
             row.categories = row.categories
               .split('\t')
               .map(function(catRow) {
                 var catData = catRow.slice(1,-1).split(',');
-                return utils.object(catColumns, catData);
+                catData = utils.object(catColumns, catData);
+                catData.id = parseInt(catData.id);
+                catData.businessId = parseInt(catData.businessId);
+                catData.name = catData.name ? catData.name.replace(/\"/g, "") : null;
+                catData.description = catData.description ? catData.description.replace(/\"/g, "") : null;
+                return catData;
               });
-          }
+
+            var fid = parseInt(row.categories[0].id);
+            // Worlds craziest NaN check D:
+            if (row.categories.length > 0 && !(fid === 0 || fid < 0 || fid > 0))
+              row.categories = [];
+          } else row.categories = [];
         });
       }
 
