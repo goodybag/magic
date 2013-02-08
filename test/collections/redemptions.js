@@ -22,9 +22,9 @@ describe('POST /v1/redemptions', function() {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
-              assert(payload.data.numPunches === 4);
-              assert(payload.data.totalPunches === 12);
-              assert(payload.data.visitCount === 10);
+              assert(payload.data[0].numPunches === 4);
+              assert(payload.data[0].totalPunches === 12);
+              assert(payload.data[0].visitCount === 10);
 
               tu.logout(done);
             });
@@ -47,9 +47,9 @@ describe('POST /v1/redemptions', function() {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
-              assert(payload.data.numPunches === 4);
-              assert(payload.data.totalPunches === 12);
-              assert(payload.data.visitCount === 10);
+              assert(payload.data[0].numPunches === 4);
+              assert(payload.data[0].totalPunches === 12);
+              assert(payload.data[0].visitCount === 10);
 
               tu.logout(done);
             });
@@ -78,9 +78,9 @@ describe('POST /v1/redemptions', function() {
                     assert(res.statusCode == 200);
 
                     payload = JSON.parse(payload);
-                    assert(payload.data.numPunches === orgStats.numPunches + 2);
-                    assert(payload.data.totalPunches === orgStats.totalPunches + 2);
-                    assert(payload.data.visitCount === orgStats.visitCount);
+                    assert(payload.data[0].numPunches === orgStats[0].numPunches + 2);
+                    assert(payload.data[0].totalPunches === orgStats[0].totalPunches + 2);
+                    assert(payload.data[0].visitCount === orgStats[0].visitCount);
 
                     tu.logout(done);
                   });
@@ -123,9 +123,9 @@ describe('POST /v1/redemptions', function() {
 
                     payload = JSON.parse(payload);
                     assert(!payload.error);
-                    assert(payload.data.numPunches === orgStats.numPunches); // 8 = number required for reward, so it rolled over
-                    assert(payload.data.totalPunches === orgStats.totalPunches + 8);
-                    assert(payload.data.visitCount === orgStats.visitCount);
+                    assert(payload.data[0].numPunches === orgStats[0].numPunches); // 8 = number required for reward, so it rolled over
+                    assert(payload.data[0].totalPunches === orgStats[0].totalPunches + 8);
+                    assert(payload.data[0].visitCount === orgStats[0].visitCount);
                     tu.logout(done);
                   });
                 });
