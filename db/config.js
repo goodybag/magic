@@ -33,6 +33,7 @@ var config = {
   , 'oddityLive'
   , 'oddityMeta'
   , 'events'
+  , 'activity'
   ]
 , fixtureFile: 'test'
 };

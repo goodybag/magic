@@ -9,91 +9,152 @@ var
 
 , logger  = require('../lib/logger')({ app: 'api', component: 'activity' })
 
-, insert = function(type, inputs, data, callback){
-    var TAGS = ['store-activity', type];
-
-    callback = callback || utils.noop;
-
-    db.getClient(function(error, client){
-      if (error) return logger.error(TAGS, error);
-
-      var query = sql.query('insert into activity ({fields}) values ({values})');
-      query.fields = sql.fields().addObjectKeys(inputs);
-      query.values = sql.fields().addObjectValues(inputs, query);
-
-      query.fields.add('"date"');
-      query.values.add('now()');
-
-      query.fields.add('"data"');
-      query.values.add(sql.hstoreValue(data));
-
-      client.query(query.toString(), query.$values, function(error){
-        if (error) return logger.error(TAGS, error);
-
-        callback();
-      });
-    });
-  }
-
-, api = {
-    consumers: {
-      findOne: function(where, callback){
-        db.getClient(function(error, client){
-          if (error) return callback(error);
-
-          if (typeof where !== "object") where = { id: where };
-
-          var query = sql.query('select * from consumers {where}');
-          var values = [], keys = [];
-
-          for (var key in where){
-
-          }
-
-
-          client.query(query, values, function(error, result){
-            if (error) callback(error);
-
-            callback(null, result.rows.length > 0 ? result.rows[0] : null);
-          });
-        });
-      }
-    }
-  }
+, TAGS = ['events', 'activity']
 ;
 
 module.exports = {
   'products.like':
   function (userId, productId){
     var
-      inputs = {
-        consumerId:   consumerId
-      , businessId:   businessId
-      , locationId:   locationId
-      }
-    , data = {
-        deltaPunches: deltaPunches
+      inputs = {}
+
+    , tasks = {
+        lookupConsumer: function(done){
+          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , lookupProduct: function(done){
+          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , complete: function(error, results){
+          if (error) return logger.error(TAGS, error);
+          if (!results.consumer || !results.product)
+            return logger.error(TAGS, "Failed to store like event");
+
+          db.api.activity.insert({
+            type:       'like'
+          , date:       'now()'
+          , consumerId: results.consumer.id
+          , businessId: results.product.businessId
+
+          , data: JSON.stringify({
+              productId:          productId
+            , productName:        results.product.name
+            , consumerScreenName: results.consumer.screenName
+            })
+          }, function(error, result){
+            if (error)    return logger.error(TAGS, error);
+            if (!result)  return logger.error(TAGS, "Failed to store like event");
+          });
+        }
       }
     ;
 
-    // Look up user
-    api.consumers.findOne(consumerId, function(error, consumer){
-      if (error) return logger.error(TAGS, error);
-
-      data.consumerScreenName = consumer.screenName;
-
-      insert('loyalty.punch', inputs, data);
-    });
-  }
-
-, 'products.try':
-  function (userId, productId){
-    insert('products.try', { userId: userId, productId: productId });
+    utils.parallel({
+      consumer:  tasks.lookupConsumer
+    , product:   tasks.lookupProduct
+    }, tasks.complete);
   }
 
 , 'products.want':
   function (userId, productId){
-    insert('products.want', { userId: userId, productId: productId });
+    var
+      inputs = {}
+
+    , tasks = {
+        lookupConsumer: function(done){
+          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , lookupProduct: function(done){
+          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , complete: function(error, results){
+          if (error) return logger.error(TAGS, error);
+          if (!results.consumer || !results.product)
+            return logger.error(TAGS, "Failed to store want event");
+
+          db.api.activity.insert({
+            type:       'want'
+          , date:       'now()'
+          , consumerId: results.consumer.id
+          , businessId: results.product.businessId
+
+          , data: JSON.stringify({
+              productId:          productId
+            , productName:        results.product.name
+            , consumerScreenName: results.consumer.screenName
+            })
+          }, function(error, result){
+            if (error)    return logger.error(TAGS, error);
+            if (!result)  return logger.error(TAGS, "Failed to store want event");
+          });
+        }
+      }
+    ;
+
+    utils.parallel({
+      consumer:  tasks.lookupConsumer
+    , product:   tasks.lookupProduct
+    }, tasks.complete);
+  }
+
+, 'products.try':
+  function (userId, productId){
+    var
+      inputs = {}
+
+    , tasks = {
+        lookupConsumer: function(done){
+          db.api.consumers.findOne({ userId: userId }, { fields: ['"screenName"', 'id'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , lookupProduct: function(done){
+          db.api.products.findOne(productId, { fields: ['name', '"businessId"'] }, function(e, r, m){
+            return done(e, r);
+          });
+        }
+
+      , complete: function(error, results){
+          if (error) return logger.error(TAGS, error);
+          if (!results.consumer || !results.product)
+            return logger.error(TAGS, "Failed to store try event");
+
+          db.api.activity.insert({
+            type:       'try'
+          , date:       'now()'
+          , consumerId: results.consumer.id
+          , businessId: results.product.businessId
+
+          , data: JSON.stringify({
+              productId:          productId
+            , productName:        results.product.name
+            , consumerScreenName: results.consumer.screenName
+            })
+          }, function(error, result){
+            if (error)    return logger.error(TAGS, error);
+            if (!result)  return logger.error(TAGS, "Failed to store try event");
+          });
+        }
+      }
+    ;
+
+    utils.parallel({
+      consumer:  tasks.lookupConsumer
+    , product:   tasks.lookupProduct
+    }, tasks.complete);
   }
 
 // Don't do this yet

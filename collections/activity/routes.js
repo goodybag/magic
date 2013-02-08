@@ -54,53 +54,21 @@ module.exports.list = function(req, res){
   var TAGS = ['list-activity', req.uuid];
   logger.routes.debug(TAGS, 'fetching activity ' + req.params.id);
 
-  db.getClient(function(error, client){
+  var query = {}, options = { order: 'order by id desc' };
+
+  if (req.param('filter'))      query.type = '%' + req.param('filter') + '%';
+  if (req.param('consumerId'))  query.consumerId = req.param('consumerId');
+  if (req.param('businessId'))  query.businessId = req.param('businessId');
+  if (req.param('locationId'))  query.locationId = req.param('locationId');
+
+  db.api.activity.find(query, options, function(error, results, meta){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'select a.* from ('
-      , 'select {fields} from activity {where} {limit} order by id desc'
-    , ') as a'
-    ]);
-    var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from activity {where} {limit}) as e');
-
-    query.fields = sql.fields('id, type, date, to_json(data::hstore) as data');
-
-    query.where = sql.where();
-    query.limit = sql.limit(req.query.limit, req.query.offset);
-
-    if (req.param('filter')){
-      query.where.and('activity.type ILIKE $typeFilter');
-      query.$('typeFilter', '%' + req.param('filter') + '%');
-    }
-
-    if (req.param('consumerId')){
-      query.where.and('activity."consumerId" = $consumerId');
-      query.$('consumerId', req.param('consumerId'));
-    }
-
-    if (req.param('businessId')){
-      query.where.and('activity."businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-
-    if (req.param('locationId')){
-      query.where.and('activity."locationId" = $locationId');
-      query.$('locationId', req.param('locationId'));
-    }
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
-      dataResult.rows = dataResult.rows.map(function(r){
-        r.data = JSON.parse(r.data);
-        return r;
-      });
-
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+    results = results.map(function(r){
+      r.data = JSON.parse(r.data);
+      return r;
     });
+
+    return res.json({ error: null, data: results, meta: meta });
   });
 };

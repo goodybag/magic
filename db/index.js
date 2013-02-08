@@ -20,10 +20,12 @@ var
 
   // Other packages in use
 // , pooler = require('generic-pool')
+, Api = require('../lib/api')
 , async = require('async')
 , logger = require('../lib/logger')({app: 'api', component: 'db'});
 ;
 
+exports.api = {};
 exports.pg = pg;
 exports.sql = sql;
 exports.procedures = require('./procedures');
@@ -206,9 +208,14 @@ exports.schemas = {
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
 , events:                    require('./schemas/events')
+, activity:                  require('./schemas/activity')
 };
 
 exports.fields = fields;
+
+for (var key in exports.schemas){
+  exports.api[key] = new Api(key);
+}
 
 function buildTable(name, schema) {
   var columns = [];
