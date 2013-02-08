@@ -243,6 +243,7 @@ INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", 
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('2', '2', 'Product 2', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('3', '3', 'Product 3', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('4', '1', 'Product 4', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
+INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('5', '1', 'Product 3.5', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 
@@ -268,14 +269,15 @@ SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "produc
 -- PRODUCT LOCATIONS
 
 BEGIN;
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('5', '3', '3', '3', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0));
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position) VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0));
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('5', '3', '3', '3', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('6', '4', '1', '1', 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('9', '5', '1', '5', 0, 0, ll_to_earth(0, 0), false);
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
 
