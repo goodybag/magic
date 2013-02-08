@@ -248,10 +248,14 @@ module.exports.listCollections = function(req, res){
     var query = sql.query([
       'SELECT {fields} FROM collections',
         'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
+        'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
         'WHERE "consumerId" = $consumerId',
         'GROUP BY collections.id {limit}'
     ]);
-    query.fields = sql.fields().add("collections.*").add('COUNT("productsCollections".id) as "numProducts"');
+    query.fields = sql.fields()
+      .add("collections.*")
+      .add('COUNT("productsCollections".id) as "numProducts"')
+      .add('MIN(products."photoUrl") as "photoUrl"');
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
     query.$('consumerId', consumerId);
