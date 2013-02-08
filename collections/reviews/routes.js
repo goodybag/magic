@@ -89,14 +89,23 @@ module.exports.update = function(req, res){
 
   db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    console.log(req.body);
+    var inputs = {
+      businessId: req.body.businessId
+    , locationId: req.body.locationId
+    , toReview : req.body.toReview
+    , isHidden : req.body.isHidden
+    };
 
     var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
+    query.updates = sql.fields().addUpdateMap(inputs, query);
+    query.updates.add('"lastUpdated" = now()');
     query.$('id', +req.params.id || 0);
 
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
+      console.log(error);
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

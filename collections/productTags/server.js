@@ -11,6 +11,13 @@ var permissions = require('./permissions');
 // ProductTags.list
 server.get(
   '/v1/product-tags'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );
@@ -18,6 +25,13 @@ server.get(
 // ProductTags.list
 server.get(
   '/v1/businesses/:businessId/product-tags'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );

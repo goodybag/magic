@@ -29,6 +29,9 @@ module.exports.get = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats');
 
+  if (!req.session.user)
+    return res.error(errors.auth.NOT_AUTHENTICATED);
+
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

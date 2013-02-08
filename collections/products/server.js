@@ -11,6 +11,9 @@ var permissions = require('./permissions');
 // Products.list
 server.get(
   '/v1/products'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -29,6 +32,9 @@ server.get(
 // Products.list
 server.get(
   '/v1/locations/:locationId/products'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     tag        : { is:/[A-z\!\,]+/ },
     sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
@@ -43,6 +49,9 @@ server.get(
 // Products.list
 server.get(
   '/v1/businesses/:businessId/products'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.path({
     businessId : { isInt:[] }
   })
@@ -63,6 +72,9 @@ server.get(
 // Products.list
 server.get(
   '/v1/products/food'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -83,6 +95,9 @@ server.get(
 // Products.list
 server.get(
   '/v1/products/fashion'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },
@@ -103,6 +118,9 @@ server.get(
 // Products.list
 server.get(
   '/v1/products/other'
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.validate.query({
     lat        : { isFloat:[] },
     lon        : { isFloat:[] },

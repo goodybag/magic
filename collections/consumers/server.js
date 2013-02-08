@@ -26,15 +26,22 @@ schema.password.validators['notNull'] = [];
 // consumers.list
 server.get(
   '/v1/consumers'
-, middleware.permissions(permissions)
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
+, middleware.permissions(permissions.consumer)
 , routes.list
 );
 
 // consumers.get
 server.get(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , routes.get
 );
 
@@ -49,37 +56,71 @@ server.post(
     if (!req.body.password) req.body.password = null;
     next();
   }
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.create
 );
 
 // consumers.update
 server.put(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.update
 );
 
 // consumers.update
 server.post(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
-, middleware.permissions(permissions)
+, middleware.permissions(permissions.consumer)
 , middleware.validate.body(schema)
 , routes.update
 );
 
 // consumers.delete
 server.del(
-  '/v1/consumers/:id'
+  '/v1/consumers/:consumerId'
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'owner')
 , routes.del
+);
+
+// consumers.listCollections
+server.get(
+  '/v1/consumers/:consumerId/collections'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collection)
+, routes.listCollections
+);
+
+// consumers.createCollections
+server.post(
+  '/v1/consumers/:consumerId/collections'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collection)
+, middleware.validate.body(schemas.collection)
+, routes.createCollection
+);
+
+// consumers.listCollectionProducts
+server.get(
+  '/v1/consumers/:consumerId/collections/:collectionId'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collectionProducts)
+, require('../products/routes').list
+);
+
+// consumers.addCollectionProduct
+server.post(
+  '/v1/consumers/:consumerId/collections/:collectionId'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.permissions(permissions.collectionProducts)
+, middleware.validate.body(schemas.productsCollections)
+, routes.addCollectionProduct
 );
 
 module.exports = server;

@@ -12,7 +12,7 @@ var
 exports.owner = function(req, cb) {
   if (!req.session || !req.session.user) return cb(null);
 
-  var userId = req.param('id');
+  var consumerId = req.param('consumerId');
 
   db.getClient('consumers owner apply groups', function(error, client){
     if (error) return cb(null);
@@ -26,7 +26,7 @@ exports.owner = function(req, cb) {
       if (error) return cb(null);
 
       if (result.rows.length === 0) return cb(null);
-      if (result.rows[0].id != userId) return cb(null);
+      if (result.rows[0].id != consumerId) return cb(null);
 
       cb('owner');
     });

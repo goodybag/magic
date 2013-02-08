@@ -11,6 +11,13 @@ var permissions = require('./permissions');
 // Groups.list
 server.get(
   '/v1/groups'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.auth.allow('admin')
 , middleware.permissions(permissions)
 , routes.list
