@@ -9,6 +9,13 @@ var routes      = require('./routes');
 // Events.list
 server.get(
   '/v1/events'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.auth.allow('admin')
 , routes.list
 );

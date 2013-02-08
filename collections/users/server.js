@@ -12,6 +12,13 @@ var applyGroups = require('./apply-groups');
 // Users.list
 server.get(
   '/v1/users'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions)
 , routes.list
 );

@@ -26,6 +26,13 @@ schema.password.validators['notNull'] = [];
 // consumers.list
 server.get(
   '/v1/consumers'
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.validate.query({
+    offset     : { isInt:[], min:[0] },
+    limit      : { isInt:[], min:[1] }
+  })
 , middleware.permissions(permissions.consumer)
 , routes.list
 );
