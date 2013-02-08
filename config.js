@@ -66,7 +66,7 @@ var config = {
       port: 3000
     }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
-  , baseUrl: 'http://localhost'
+  , baseUrl: 'http://localhost:3000'
 
   , outputActivePoolIds: false
   , emailEnabled: true

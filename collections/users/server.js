@@ -9,6 +9,18 @@ var schema      = require('../../db').schemas.users;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 
+// Users.createPasswordReset
+server.post(
+  '/v1/users/password-reset'
+, routes.createPasswordReset
+);
+
+// Users.resetPassword
+server.post(
+  '/v1/users/password-reset/:token'
+, routes.resetPassword
+);
+
 // Users.list
 server.get(
   '/v1/users'
