@@ -124,22 +124,22 @@ module.exports.list = function(req, res){
     // tag include
     if (includeTags) {
       query.fields.add([
-        'array_to_string(array(SELECT row("productTags".*) FROM "productTags"',
+        'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
           'INNER JOIN "productsProductTags"',
             'ON "productsProductTags"."productTagId" = "productTags".id',
             'AND "productsProductTags"."productId" = products.id',
-        '), \'\t\') as tags'
+        ')) as tags'
       ].join(' '));
     }
 
     // category include
     if (includeCats) {
       query.fields.add([
-        'array_to_string(array(SELECT row("productCategories".*) FROM "productCategories"',
+        'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
           'INNER JOIN "productsProductCategories"',
             'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
             'AND "productsProductCategories"."productId" = products.id',
-        '), \'\t\') as categories'
+        ')) as categories'
       ].join(' '));
     }
 
@@ -161,45 +161,13 @@ module.exports.list = function(req, res){
 
       // parse out embedded results
       if (includeTags || includeCats) {
-        var tagColumns = Object.keys(schemas.productTags);
-        var catColumns = Object.keys(schemas.productCategories);
         dataResult.rows.forEach(function(row) {
-          if (typeof row.tags != 'undefined') {
-            if (row.tags) {
-              row.tags = row.tags
-                .split('\t') // entries are separated by \t (not the actual tab character, funny enough)
-                .map(function(tagRow) {
-                  var tagData = tagRow
-                    .slice(1,-1) // entries are surrounded by parens, so slice out
-                    .split(','); // split into individual columns (and pray there are no commas in the dataset)
-                  tagData = utils.object(tagColumns, tagData);
-                  tagData.id = parseInt(tagData.id);
-                  return tagData;
-                });
-            } else {
-              row.tags = [];
-            }
-            if (row.tags.length > 0 && row.tags[0].id == null)
-              row.tags = [];
+          if (includeTags) {
+            row.tags = (row.tags) ? JSON.parse(row.tags) : [];
           }
-          if (typeof row.categories != 'undefined') {
-            row.categories = row.categories
-              .split('\t')
-              .map(function(catRow) {
-                var catData = catRow.slice(1,-1).split(',');
-                catData = utils.object(catColumns, catData);
-                catData.id = parseInt(catData.id);
-                catData.businessId = parseInt(catData.businessId);
-                catData.name = catData.name ? catData.name.replace(/\"/g, "") : null;
-                catData.description = catData.description ? catData.description.replace(/\"/g, "") : null;
-                return catData;
-              });
-
-            var fid = parseInt(row.categories[0].id);
-            // Worlds craziest NaN check D:
-            if (row.categories.length > 0 && !(fid === 0 || fid < 0 || fid > 0))
-              row.categories = [];
-          } else row.categories = [];
+          if (includeCats) {
+            row.categories = (row.categories) ? JSON.parse(row.categories) : [];
+          }
         });
       }
 
@@ -221,33 +189,23 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT products.*, {fields}',
-//        'array_to_json(array_agg(row_to_json("productCategories".*))) AS categories,',
-//        'array_to_json(array_agg(row_to_json("productTags".*))) AS tags',
+      'SELECT products.*, businesses.name as "businessName",',
+        'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
+          'INNER JOIN "productsProductTags"',
+            'ON "productsProductTags"."productTagId" = "productTags".id',
+            'AND "productsProductTags"."productId" = products.id',
+        ')) as tags,',
+        'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
+          'INNER JOIN "productsProductCategories"',
+            'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
+            'AND "productsProductCategories"."productId" = products.id',
+        ')) as categories',
       'FROM products',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
-        'LEFT JOIN "productsProductCategories" ppc',
-          'ON ppc."productId" = products.id',
-        'LEFT JOIN "productCategories"',
-          'ON "productCategories".id = ppc."productCategoryId"',
-        'LEFT JOIN "productsProductTags" ppt',
-          'ON ppt."productId" = products.id',
-        'LEFT JOIN "productTags"',
-          'ON "productTags".id = ppt."productTagId"',
         'WHERE products.id = $id',
         'GROUP BY products.id, businesses.id'
     ]);
     query.$('id', +req.param('productId') || 0);
-
-    // :TEMP: hack around travis ci's lack of PG json support
-    query.fields = sql.fields();
-    query.fields.add('businesses.name as "businessName"')
-    for (var tagColumn in schemas.productTags) {
-      query.fields.add('array_agg("productTags"."'+tagColumn+'"::text) as "tag_'+tagColumn+'"');
-    }
-    for (var categoryColumn in schemas.productCategories) {
-      query.fields.add('array_agg("productCategories"."'+categoryColumn+'"::text) as "cat_'+categoryColumn+'"');
-    }
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -256,28 +214,10 @@ module.exports.get = function(req, res){
       var product = result.rows[0];
       if (!product) return res.status(404).end();
 
-      // :TEMP: hack to replace array_to_json and shit
-      // create tags & cats objects
-      var tags = [], cats = [];
-      for (var i=0; i < product.tag_id.length; i++) { tags.push({}); }
-      for (var i=0; i < product.cat_id.length; i++) { cats.push({}); }
-
-      // extract data from row
-      for (var col in schemas.productTags) {
-        var k = 'tag_'+col;
-        if (!product[k]) { continue; }
-        product[k].forEach(function(v, i) { tags[i][col] = v; });
-        delete product[k];
-      }
-      for (var col in schemas.productCategories) {
-        var k = 'cat_'+col;
-        if (!product[k]) { continue; }
-        product[k].forEach(function(v, i) { cats[i][col] = v; });
-        delete product[k];
-      }
-      // :TEMP: have to filter out null rows generated during aggregation-- is there a way to do that in the SQL?
-      product.tags = tags.filter(function(t) { return !!t.id; });
-      product.categories = cats.filter(function(c) { return !!c.id; });;
+      if (typeof product.tags != 'undefined')
+        product.tags = (product.tags) ? JSON.parse(product.tags) : [];
+      if (typeof product.categories != 'undefined')
+        product.categories = (product.categories) ? JSON.parse(product.categories) : [];
 
       return res.json({ error: null, data: product });
     });
