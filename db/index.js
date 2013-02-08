@@ -177,11 +177,14 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
 
 exports.schemas = {
   sessions:                  require('./schemas/sessions')
+
 , charities:                 require('./schemas/charities')
+
 , businesses:                require('./schemas/businesses')
 , businessLoyaltySettings:   require('./schemas/businessLoyaltySettings')
 , businessTags:              require('./schemas/businessTags')
 , locations:                 require('./schemas/locations')
+
 , users:                     require('./schemas/users')
 , consumers:                 require('./schemas/consumers')
 , managers:                  require('./schemas/managers')
@@ -191,22 +194,29 @@ exports.schemas = {
 , usersGroups:               require('./schemas/usersGroups')
 , userLoyaltyStats:          require('./schemas/userLoyaltyStats')
 , userRedemptions:           require('./schemas/userRedemptions')
+, userPasswordResets:        require('./schemas/userPasswordResets')
+
 , tapins:                    require('./schemas/tapins')
 , visits:                    require('./schemas/visits')
+
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')
 , productsProductCategories: require('./schemas/productsProductCategories')
 , productLocations:          require('./schemas/productLocations')
-, photos:                    require('./schemas/photos')
 , productTags:               require('./schemas/productTags')
 , productsProductTags:       require('./schemas/productsProductTags')
 , productLikes:              require('./schemas/productLikes')
 , productWants:              require('./schemas/productWants')
 , productTries:              require('./schemas/productTries')
+
+, photos:                    require('./schemas/photos')
+
 , collections:               require('./schemas/collections')
 , productsCollections:       require('./schemas/productsCollections')
+
 , oddityLive:                require('./schemas/oddityLive')
 , oddityMeta:                require('./schemas/oddityMeta')
+
 , events:                    require('./schemas/events')
 };
 

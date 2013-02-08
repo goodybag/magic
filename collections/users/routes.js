@@ -7,6 +7,7 @@ var
 , sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
+, config  = require('../../config')
 
 , logger  = {}
 ;
@@ -168,6 +169,11 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-user', req.uuid];
+
+  var email = req.body.email;
+  var password = req.body.password;
+  var groups = req.body.groups;
+
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -175,23 +181,27 @@ module.exports.update = function(req, res){
     var tx = new Transaction(client);
     tx.begin(function() {
 
-      var user = {
-        email    : req.body.email,
-        password : (req.body.password) ? utils.encryptPassword(req.body.password) : undefined,
-        groups   : req.body.groups
-      };
-
       // build update query
-      var query = [
-        'UPDATE users SET',
-        '  email    =', (user.email)    ? '$2' : 'email',
-        ', password =', (user.password) ? '$3' : 'password',
-        'WHERE users.id = $1 AND $2 NOT IN (SELECT email FROM users WHERE id != $1)' // this makes sure the user doesn't take an email in use
-      ].join(' ');
-      logger.db.debug(TAGS, query);
+      var query = sql.query([
+        'UPDATE users SET {updates}',
+          'WHERE users.id = $id {emailClause}'
+      ]);
+      query.updates = sql.fields();
+      query.$('id', req.params.id)
+      if (email) {
+        query.updates.add('email = $email');
+        query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id)'; // this makes sure the user doesn't take an email in use
+        query.$('email', email);
+      }
+      if (password) {
+        query.updates.add('password = $password');
+        query.$('password', utils.encryptPassword(password));
+      }
+
+      logger.db.debug(TAGS, query.toString());
 
       // run update query
-      client.query(query, [+req.param('id') || 0].concat(user.email || []).concat(user.password || []), function(error, result){
+      client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
@@ -224,7 +234,7 @@ module.exports.update = function(req, res){
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
           // add new group relations
-          async.series((user.groups || []).map(function(groupId) {
+          async.series((groups || []).map(function(groupId) {
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
               client.query(query, [req.param('id'), groupId], done);
@@ -243,6 +253,85 @@ module.exports.update = function(req, res){
           });
 
         });
+      });
+    });
+  });
+};
+
+/**
+ * Create user password reset record
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.createPasswordReset = function(req, res){
+  var TAGS = ['create-user-password-reset', req.uuid];
+  logger.routes.debug(TAGS, 'creating user ' + req.params.id + ' password reset');
+
+  var email = req.body.email;
+  if (!email) {
+    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.')
+  }
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    client.query('SELECT id FROM users WHERE email=$1', [email], function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+      var userId = result.rows[0].id;
+
+      var token = require("randomstring").generate();
+      var query = sql.query([
+        'INSERT INTO "userPasswordResets" ("userId", token, expires, "createdAt")',
+          'VALUES ($userId, $token, now() + \'1 day\'::interval, now())'
+      ]);
+      query.$('userId', userId);
+      query.$('token', token);
+      client.query(query.toString(), query.$values, function(error, result) {
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var emailHtml = templates.email.reset_password({
+          url : config.baseUrl + '/v1/users/password-reset/' + token
+        });
+        utils.sendMail(email, config.emailFromAddress, 'Goodybag Password Reset Link', emailHtml);
+
+        if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
+          res.json({ err:null, data:{ token:token }});
+        else
+          res.json({ err:null, data:null });
+      });
+    });
+  });
+};
+
+/**
+ * Reset user password
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.resetPassword = function(req, res){
+  var TAGS = ['reset-user-password', req.uuid];
+  logger.routes.debug(TAGS, 'resetting user ' + req.params.id + ' password');
+
+  var newPassword = req.body.password;
+  if (!newPassword) {
+    return res.error(errors.input.VALIDATION_FAILED, '`password` is required.')
+  }
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
+      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) {
+        return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.')
+      }
+      var userId = result.rows[0].userId;
+
+      client.query('UPDATE users SET password=$1 WHERE id=$2', [utils.encryptPassword(newPassword), userId], function(error, result) {
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        res.json({ err:null, data:null });
       });
     });
   });

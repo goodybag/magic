@@ -4,11 +4,14 @@ var config = {
 , postgresConnStr:  appConfig.postgresConnStr //"postgres://localhost:5432/goodybag"
 , schemaFiles: [
     'sessions'
+
   , 'charities'
+
   , 'businesses'
   , 'businessLoyaltySettings'
   , 'businessTags'
   , 'locations'
+
   , 'users'
   , 'consumers'
   , 'managers'
@@ -18,22 +21,29 @@ var config = {
   , 'usersGroups'
   , 'userLoyaltyStats'
   , 'userRedemptions'
+  , 'userPasswordResets'
+
   , 'tapins'
   , 'visits'
+
   , 'products'
   , 'productCategories'
   , 'productsProductCategories'
   , 'productLocations'
-  , 'photos'
   , 'productTags'
   , 'productsProductTags'
   , 'productLikes'
   , 'productWants'
   , 'productTries'
+
+  , 'photos'
+
   , 'collections'
   , 'productsCollections'
+
   , 'oddityLive'
   , 'oddityMeta'
+  
   , 'events'
   ]
 , fixtureFile: 'test'
