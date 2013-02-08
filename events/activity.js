@@ -182,7 +182,7 @@ module.exports = {
   }
 
 , 'consumers.becameElite':
-  function (consumerId, businessId){
+  function (consumerId, businessId, locationId){
     var
       stage = {
         start: function(){
@@ -218,6 +218,7 @@ module.exports = {
           , date:       'now()'
           , consumerId: consumerId
           , businessId: businessId
+          , locationId: locationId
 
           , data: JSON.stringify({
               consumerScreenName: screenName
@@ -232,7 +233,7 @@ module.exports = {
         }
 
       , error: function(error){
-          return logger.error(TAGS, error);
+          return console.log(error), logger.error(TAGS, error);
         }
 
       , end: function(){

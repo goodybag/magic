@@ -101,9 +101,10 @@ module.exports.create = function(req, res){
 
                 res.json({ error:null, data:null });
 
-                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
+                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+
                 if (hasBecomeElite)
-                  magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
+                  magic.emit('consumers.becameElite', consumerId, businessId, locationId);
 
                 magic.emit('loyalty.redemption', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
 

@@ -56,7 +56,7 @@ module.exports.list = function(req, res){
 
   var query = {}, options = { order: 'order by id desc' };
 
-  if (req.param('filter'))      query.type = '%' + req.param('filter') + '%';
+  // if (req.param('filter'))      query.type = '%' + req.param('filter') + '%';
   if (req.param('consumerId'))  query.consumerId = req.param('consumerId');
   if (req.param('businessId'))  query.businessId = req.param('businessId');
   if (req.param('locationId'))  query.locationId = req.param('locationId');
