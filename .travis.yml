@@ -10,6 +10,6 @@ before_script:
   - sudo -u postgres psql -c "ALTER user postgres with password 'postgres';"
   - psql -c 'create database "goodybag-test";' -U postgres -w
 env:
-  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PGPASSWORD=postgres PG_CON="postgres://127.0.0.1:5433/goodybag-test"
+  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PGPASSWORD=postgres PG_CON="postgres://127.0.0.1/goodybag-test"
 node_js:
   - 0.8
