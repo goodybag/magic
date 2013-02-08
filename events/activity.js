@@ -233,7 +233,7 @@ module.exports = {
         }
 
       , error: function(error){
-          return console.log(error), logger.error(TAGS, error);
+          return logger.error(TAGS, error);
         }
 
       , end: function(){
@@ -299,7 +299,7 @@ module.exports = {
         }
 
       , error: function(error){
-          return console.log(error), logger.error(TAGS, error);
+          return logger.error(TAGS, error);
         }
 
       , end: function(){
@@ -365,7 +365,7 @@ module.exports = {
         }
 
       , error: function(error){
-          return console.log(error), logger.error(TAGS, error);
+          return logger.error(TAGS, error);
         }
 
       , end: function(){
@@ -443,7 +443,7 @@ module.exports = {
         }
 
       , error: function(error){
-          return console.log(error), logger.error(TAGS, error);
+          return logger.error(TAGS, error);
         }
 
       , end: function(){
