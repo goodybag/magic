@@ -4,7 +4,6 @@ before_script:
   - sudo apt-get -q -y --purge remove postgresql
   - sudo apt-get update -qq
   - sudo apt-get -q -y -o Dpkg::Options::=--force-confdef install postgresql-9.2
-  - psql -c 'select version();' -U postgres -h localhost
   - psql -c 'create database "goodybag-test";' -U postgres -h localhost
 env:
   - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1/goodybag-test"
