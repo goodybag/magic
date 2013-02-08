@@ -49,7 +49,35 @@ describe('Loyalty Activity', function(){
   });
 
   it('store an event when a user earns a punch', function(done) {
-    return done(); // TODO
+    tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
+      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:11, businessId:1, locationId:1 }, function(err, payload, res) {
+        assert(res.statusCode == 200);
+        tu.logout(function() {
+          tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
+            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+              assert(res.statusCode == 200);
+              payload = JSON.parse(payload);
+              assert(!payload.error);
+
+              // Give server time to propagate Activity
+              setTimeout(function(){
+                tu.get('/v1/activity', function(error, results) {
+                  assert(!error);
+                  results = JSON.parse(results);
+                  assert(!results.error);
+                  assert(results.data.length > 0);
+                  assert(results.data.filter(function(d){
+                    return d.type === "punch" && d.consumerId === 11;
+                  }).length >= 1);
+
+                  tu.logout(done);
+                });
+              }, 100);
+            });
+          });
+        })
+      });
+    });
   });
 
   it('store an event when a user redeems a reward', function(done) {
