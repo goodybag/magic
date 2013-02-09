@@ -41,6 +41,10 @@ define(function(require){
       type: 'int'
     , validators: { isInt:[] }
     }
+  , photoUrl: {
+      type: 'text'
+    , validators: { isUrl:[] }
+    }
   };
   return businessLoyaltySettings;
 });

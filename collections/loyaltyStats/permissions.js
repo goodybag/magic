@@ -13,6 +13,7 @@ var all = [
 , 'isElite'
 , 'dateBecameElite'
 , 'reward'
+, 'photoUrl'
 ];
 
 module.exports = {
@@ -38,6 +39,7 @@ module.exports = {
     , 'isElite'
     , 'dateBecameElite'
     , 'reward'
+    , 'photoUrl'
     ]
   }
 
