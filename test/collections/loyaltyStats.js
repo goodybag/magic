@@ -76,6 +76,7 @@ describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
         assert(payload.data.totalPunches == 23);
         assert(payload.data.visitCount == 40);
         assert(payload.data.reward == 'Chicken');
+        assert(payload.data.photoUrl == 'http://placekitten.com/200/300');
 
         tu.logout(done);
       });
