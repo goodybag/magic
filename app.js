@@ -6,6 +6,7 @@
 var
 // Built-in
   cluster = require('cluster')
+, os = require('os')
 , http = require('http')
 , net = require('net')
 , repl = require('repl')
@@ -88,7 +89,6 @@ httpServer.listen(config.http.port, function(err){
   console.log("HTTP started on port", config.http.port);
 });
 
-return;
 
 /**
  * Clustering
