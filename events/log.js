@@ -134,4 +134,13 @@ module.exports = {
     , employeeId:   employeeId
     });
   }
+
+, 'tapinstations.heartbeat':
+  function (tapinStationId, businessId, locationId) {
+    insert('tapinstations.heartbeat', {
+      tapinStationId : tapinStationId,
+      businessId     : businessId,
+      locationId     : locationId
+    });
+  }
 };
