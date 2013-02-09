@@ -22,7 +22,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  * @param  {Object} res HTTP Result Object
  */
 module.exports.get = function(req, res){
-  var TAGS = ['get-users', req.uuid];
+  var TAGS = ['get-events', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
@@ -46,13 +46,13 @@ module.exports.get = function(req, res){
 };
 
 /**
- * List users
+ * List events
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
+  var TAGS = ['list-events', req.uuid];
+  logger.routes.debug(TAGS, 'fetching events ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
