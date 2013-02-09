@@ -44,6 +44,22 @@ describe('GET /v1/loyaltyStats', function() {
 
 describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
 
+  it('should perform a flash login, create a new user, and get the blank loyalty stats', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/businesses/' + 1 + '/loyaltyStats', '667788-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+        assert(payload.data == null);
+
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should respond with stats', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       assert(!error);
