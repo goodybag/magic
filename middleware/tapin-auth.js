@@ -20,16 +20,25 @@ module.exports = function(req, res, next){
   if (!authMatch) return next();
   var cardId = authMatch[1];
 
+  // Determines whether we should put "isFirstTapin" on meta object
+  var isFirstTapin = false;
+
   // get current session
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
   if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
 
-  // override the res.end to restore the tapin user after the response is sent
-  var origEndFn = res.end;
-  res.end = function() {
+  // override the res.json to restore the tapin user after the response is sent
+  var origjsonFn = res.json;
+  res.json = function(output) {
     req.session.user = tapinStationUser;
-    origEndFn.apply(res, arguments);
+
+    if (isFirstTapin){
+      if (!output.meta) output.meta = {};
+      output.meta.isFirstTapin = true;
+    }
+
+    origjsonFn.apply(res, arguments);
   };
   var tx, client;
   var stage = {
@@ -68,6 +77,9 @@ module.exports = function(req, res, next){
     }
 
   , createUser: function() {
+      // Flag response to send meta.isFirstTapin = true;
+      isFirstTapin = true;
+
       var query = [
         'WITH',
           '"user" AS',
@@ -127,6 +139,10 @@ module.exports = function(req, res, next){
       ].join(' ');
       client.query(query, [tapinId, user.consumerId, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
+
+        // No visit
+        if (result.rows.length === 0) return stage.end(user);
+
         var visit = result.rows[0];
         magic.emit('consumers.visit', user.consumerId, visit.id, visit.businessId, visit.locationId, visit.isFirstVisit);
         stage.end(user);
