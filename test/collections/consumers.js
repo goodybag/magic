@@ -386,3 +386,41 @@ describe('POST /v1/consumers/:id/collections/:collectionId', function() {
     });
   });
 });
+
+
+describe('POST /v1/consumers/cardupdate', function() {
+  it('should allow the user to reset their password', function(done) {
+    tu.loginAsAdmin(function(error){
+
+      tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.token);
+
+        tu.post('/v1/consumers/cardupdate/'+results.data.token, {}, function(error, results, res) {
+          assert(res.statusCode == 200);
+
+          tu.get('/v1/consumers/1', function(err, results, res) {
+            assert(res.statusCode == 200);
+            results = JSON.parse(results);
+            assert(results.data.cardId == '999999-ZZZ');
+
+            tu.patch('/v1/consumers/1', { cardId:'123456-ABC' }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout(done);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('should not return the token if session is not with admin', function(done) {
+    tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
+      assert(res.statusCode == 200);
+      results = JSON.parse(results);
+      assert(!results.data);
+      done();
+    });
+  });
+});

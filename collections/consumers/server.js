@@ -23,6 +23,19 @@ schema.email.validators['isEmail'] = [];
 
 schema.password.validators['notNull'] = [];
 
+// consumers.createCardupdate
+server.post(
+  '/v1/consumers/cardupdate'
+, middleware.validate.body({ email:schemas.users.email, cardId:schemas.consumerCardUpdates.newCardId })
+, routes.createCardupdate
+);
+
+// consumers.cardupdate
+server.post(
+  '/v1/consumers/cardupdate/:token'
+, routes.updateCard
+);
+
 // consumers.list
 server.get(
   '/v1/consumers'
