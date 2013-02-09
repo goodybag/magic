@@ -318,7 +318,7 @@ describe('DEL /v1/users/:id', function() {
   });
 });
 
-describe('POST /v1/users/:id/password-reset', function() {
+describe('POST /v1/users/password-reset', function() {
   it('should allow the user to reset their password', function(done) {
     tu.loginAsAdmin(function(error){
 

@@ -197,6 +197,7 @@ exports.schemas = {
 , userLoyaltyStats:          require('./schemas/userLoyaltyStats')
 , userRedemptions:           require('./schemas/userRedemptions')
 , userPasswordResets:        require('./schemas/userPasswordResets')
+, consumerCardUpdates:       require('./schemas/consumerCardUpdates')
 
 , tapins:                    require('./schemas/tapins')
 , visits:                    require('./schemas/visits')

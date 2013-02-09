@@ -22,6 +22,7 @@ var config = {
   , 'userLoyaltyStats'
   , 'userRedemptions'
   , 'userPasswordResets'
+  , 'consumerCardUpdates'
 
   , 'tapins'
   , 'visits'

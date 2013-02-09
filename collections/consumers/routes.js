@@ -341,3 +341,88 @@ module.exports.addCollectionProduct = function(req, res){
     });
   });
 };
+
+
+/**
+ * Create consumer cardupdate
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.createCardupdate = function(req, res){
+  var TAGS = ['create-consumer-cardupdate-token', req.uuid];
+  logger.routes.debug(TAGS, 'creating consumer cardupdate token');
+
+  var email = req.body.email;
+  var newCardId = req.body.cardId;
+  if (!email) {
+    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.')
+  }
+  if (!newCardId) {
+    return res.error(errors.input.VALIDATION_FAILED, '`cardId` is required.')
+  }
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = 'SELECT consumers.id as "consumerId", consumers."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
+    client.query(query, [email], function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+      var consumerId = result.rows[0].consumerId;
+      var oldCardId  = result.rows[0].cardId;
+
+      var token = require("randomstring").generate();
+      var query = sql.query([
+        'INSERT INTO "consumerCardUpdates" ("consumerId", "newCardId", "oldCardId", token, expires, "createdAt")',
+          'VALUES ($consumerId, $newCardId, $oldCardId, $token, now() + \'2 weeks\'::interval, now())'
+      ]);
+      query.$('consumerId', consumerId);
+      query.$('newCardId', newCardId);
+      query.$('oldCardId', oldCardId);
+      query.$('token', token);
+      client.query(query.toString(), query.$values, function(error, result) {
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var emailHtml = templates.email.cardupdate({
+          url : config.baseUrl + '/v1/consumers/cardupdate/' + token
+        });
+        utils.sendMail(email, config.emailFromAddress, 'Goodybag Assign New Card Link', emailHtml);
+
+        if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
+          res.json({ err:null, data:{ token:token }});
+        else
+          res.json({ err:null, data:null });
+      });
+    });
+  });
+};
+
+/**
+ * Assign a new card to an existing user
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.updateCard = function(req, res){
+  var TAGS = ['update-consumer-card', req.uuid];
+  logger.routes.debug(TAGS, 'changing consumer card');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    // get cardupdate info
+    client.query('SELECT "consumerId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) {
+        return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.')
+      }
+      var targetConsumerId = result.rows[0].consumerId;
+      var newCardId = result.rows[0].newCardId;
+
+      client.query('UPDATE consumers SET "cardId"=$1 WHERE id=$2', [newCardId, targetConsumerId], function(error, result) {
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        res.json({ err:null, data:null });
+      });
+    });
+  });
+};
