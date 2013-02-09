@@ -46,17 +46,17 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{prodLocJoin} {locJoin} {tagJoin} {collectionJoin}',
+        '{prodLocJoin} {locJoin} {tagJoin} {collectionJoin} {feelingsJoins}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
-        'GROUP BY {group}',
+        'GROUP BY {groupby}',
         '{sort} {limit}'
     ]);
-    query.fields = sql.fields().add('products.*').add('businesses.name as "businessName"');
-    query.where  = sql.where();
-    query.sort   = sql.sort(req.query.sort || '+name');
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
-    query.group  = "products.id, businesses.id";
+    query.fields  = sql.fields().add('products.*').add('businesses.name as "businessName"');
+    query.where   = sql.where();
+    query.sort    = sql.sort(req.query.sort || '+name');
+    query.limit   = sql.limit(req.query.limit, req.query.offset);
+    query.groupby = sql.fields().add('products.id').add('businesses.id');
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
@@ -92,7 +92,7 @@ module.exports.list = function(req, res){
         , 'and "productLocations"."locationId" = $locationId'
       ].join(' ');
 
-      query.group += ', "productLocations".id';
+      query.groupby.add('"productLocations".id');
 
       query.$('locationId', req.param('locationId'));
 
@@ -155,6 +155,25 @@ module.exports.list = function(req, res){
       ].join(' '));
     }
 
+    // user feelings join
+    if (req.session.user) {
+      query.feelingsJoins = [
+        'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
+      ].join(' ');
+      query.fields.add('BOOL_OR("productLikes" IS NOT NULL) AS "userLikes"');
+      query.fields.add('BOOL_OR("productWants" IS NOT NULL) AS "userWants"');
+      query.fields.add('BOOL_OR("productTries" IS NOT NULL) AS "userTried"');
+      query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
+      query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
+      query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
+      query.groupby.add('"productLikes".id');
+      query.groupby.add('"productWants".id');
+      query.groupby.add('"productTries".id');
+      query.$('userId', req.session.user.id);
+    }
+
     // custom sorts
     if (req.query.sort) {
       if (req.query.sort.indexOf('random') !== -1)
@@ -169,7 +188,13 @@ module.exports.list = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, dataResult);
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+      var total = 0, userLikes = 0, userWants = 0, userTries = 0;
+      if (dataResult.rowCount !== 0) {
+        total = dataResult.rows[0].metaTotal;
+        userLikes = dataResult.rows[0].metaUserLikes;
+        userWants = dataResult.rows[0].metaUserWants;
+        userTries = dataResult.rows[0].metaUserTries;
+      }
 
       // parse out embedded results
       if (includeTags || includeCats) {
@@ -183,7 +208,7 @@ module.exports.list = function(req, res){
         });
       }
 
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+      return res.json({ error: null, data: dataResult.rows, meta: { total:total, userLikes:userLikes, userWants:userWants, userTries:userTries } });
     });
   });
 };

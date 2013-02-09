@@ -16,7 +16,7 @@ define(function(require){
     }
   , productId: {
       type: 'int'
-    , meta: 'references products(id)'
+    , meta: 'references products(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , userId: {
