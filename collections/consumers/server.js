@@ -84,6 +84,16 @@ server.put(
 , routes.update
 );
 
+// consumers.update session user
+server.put(
+  '/v1/consumers'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.auth.allow('admin', 'owner')
+, middleware.permissions(permissions.consumer)
+, middleware.validate.body(schema)
+, routes.update
+);
+
 // consumers.update
 server.post(
   '/v1/consumers/:consumerId'

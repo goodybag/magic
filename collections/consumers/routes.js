@@ -215,28 +215,77 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-consumer', req.uuid];
+
+  var getConsumerId = function(callback){
+    if (req.param('consumerId'))
+      return callback(null, req.param('consumerId'));
+
+    if (!req.session || !req.session.user)
+      return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, .auth.NOT_AUTHENTICATED);
+
+    db.api.consumers.findOne({ userId: req.session.id }, { fields: ['id'] }, function(error, consumer){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      return callback()
+    });
+  };
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.consumerId);
 
-    logger.db.debug(TAGS, query.toString());
+    var tx = new Transaction(client);
 
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
+    tx.begin(function(error){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
-      // did the update occur?
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
+      var updateConsumerRecord = function(callback){
+        var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
+        query.updates = sql.fields().addUpdateMap(req.body, query);
+        query.$('id', req.params.consumerId);
 
-      // done
-      return res.json({ error: null, data: null });
+        logger.db.debug(TAGS, query.toString());
+
+        // run update query
+        tx.query(query.toString(), query.$values, function(error, result){
+          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          logger.db.debug(TAGS, result);
+
+          // did the update occur?
+          if (result.rowCount === 0) {
+            return res.status(404).end();
+          }
+
+          // done
+          return res.json({ error: null, data: null });
+        });
+      };
+
+      var updateUserRecord = function(callback){
+        if (!(req.body.email || req.body.password || req.body.singlyAccessToken || req.body.singlyId))
+          return callback();
+
+        var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
+        query.updates = sql.fields().addUpdateMap(req.body, query);
+        query.$('id', req.params.consumerId);
+
+        logger.db.debug(TAGS, query.toString());
+
+        // run update query
+        tx.query(query.toString(), query.$values, function(error, result){
+          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          logger.db.debug(TAGS, result);
+
+          // did the update occur?
+          if (result.rowCount === 0) {
+            return res.status(404).end();
+          }
+
+          // done
+          return res.json({ error: null, data: null });
+        });
+      };
     });
+
   });
 };
 
