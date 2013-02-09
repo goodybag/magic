@@ -46,12 +46,12 @@ module.exports.updateUserLoyaltyStats = function(client, tx, consumerId, busines
           query.$('consumerId', consumerId);
           query.$('businessId', businessId);
 
-          var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite);
+          var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite && !uls.isElite);
           if (hasBecomeElite) {
             query.updates.add('"isElite" = true');
             query.updates.add('"dateBecameElite"  = now()');
           }
-       
+
           var punchesRequired = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
           var hasEarnedReward = (uls.numPunches >= punchesRequired);
           var rewardsGained = 0;

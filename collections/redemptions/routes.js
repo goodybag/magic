@@ -87,7 +87,7 @@ module.exports.create = function(req, res){
               'VALUES ($1, $2, $3, $4, $5, now())'
           ] .join(' ');
           client.query(query, [businessId, locationId, consumerId, req.session.user.id, tapinStationId], function(error, result) {
-            
+
             if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
             // update user's loyalty stats
@@ -101,11 +101,15 @@ module.exports.create = function(req, res){
 
                 res.json({ error:null, data:null });
 
-                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
+                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+
                 if (hasBecomeElite)
-                  magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
-                // :TODO: emit on hasEarnedReward?
+                  magic.emit('consumers.becameElite', consumerId, businessId, locationId);
+
                 magic.emit('loyalty.redemption', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+
+                if (hasEarnedReward)
+                  magic.emit('loyalty.hasEarnedReward', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
               });
             });
           });

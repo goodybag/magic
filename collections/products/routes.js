@@ -874,22 +874,28 @@ module.exports.updateFeelings = function(req, res) {
 
               res.json({ error: null, data: null });
 
-              if (currentFeelings.isLiked != null && currentFeelings.isLiked != undefined){
-                magic.emit(
-                  'products.' + (currentFeelings.isLiked ? '' : 'un') + 'like'
-                , req.session.user.id, currentFeelings.productId)
+              if (req.body.isLiked != null && req.body.isLiked != undefined){
+                if (req.body.isLiked != currentFeelings.isLiked){
+                  magic.emit(
+                    'products.' + (req.body.isLiked ? '' : 'un') + 'like'
+                  , req.session.user.id, req.param('productId'));
+                }
               }
 
-              if (currentFeelings.isTried != null && currentFeelings.isTried != undefined){
-                magic.emit(
-                  'products.' + (currentFeelings.isTried ? '' : 'un') + 'try'
-                , req.session.user.id, currentFeelings.productId)
+              if (req.body.isTried != null && req.body.isTried != undefined){
+                if (req.body.isTried != currentFeelings.isTried){
+                  magic.emit(
+                    'products.' + (req.body.isTried ? '' : 'un') + 'try'
+                  , req.session.user.id, req.param('productId'));
+                }
               }
 
-              if (currentFeelings.isWanted != null && currentFeelings.isWanted != undefined){
-                magic.emit(
-                  'products.' + (currentFeelings.isWanted ? '' : 'un') + 'want'
-                , req.session.user.id, currentFeelings.productId)
+              if (req.body.isWanted != null && req.body.isWanted != undefined){
+                if (req.body.isWanted != currentFeelings.isWanted){
+                  magic.emit(
+                    'products.' + (req.body.isWanted ? '' : 'un') + 'want'
+                  , req.session.user.id, req.param('productId'));
+                }
               }
           });
         });

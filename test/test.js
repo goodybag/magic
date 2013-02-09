@@ -28,6 +28,7 @@ app.use(require('../collections/productTags/server'));
 app.use(require('../collections/reviews/server'));
 app.use(require('../collections/redemptions/server'));
 app.use(require('../collections/events/server'));
+app.use(require('../collections/activity/server'));
 
 before(function(done) {
   var self = this;
@@ -62,6 +63,7 @@ require('./collections/productTags');
 require('./collections/reviews');
 require('./collections/redemptions');
 require('./collections/events');
+require('./collections/activity');
 
 after(function() {
   this.httpServer.close();

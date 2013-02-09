@@ -45,6 +45,7 @@ var config = {
   , 'oddityMeta'
   
   , 'events'
+  , 'activity'
   ]
 , fixtureFile: 'test'
 };

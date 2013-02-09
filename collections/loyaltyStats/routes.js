@@ -129,9 +129,10 @@ module.exports.update = function(req, res){
 
           magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
           if (hasBecomeElite)
-            magic.emit('consumers.becameElite', consumerId, businessId, dateBecameElite);
-          // :TODO: emit on hasEarnedReward?
+            magic.emit('consumers.becameElite', consumerId, businessId, req.body.locationId);
 
+          if (hasEarnedReward)
+            magic.emit('loyalty.hasEarnedReward', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
         });
       });
     });
