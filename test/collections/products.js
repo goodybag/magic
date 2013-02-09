@@ -70,6 +70,22 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should include likes/wants/tried if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.meta.userLikes == 3);
+        assert(payload.meta.userWants == 1);
+        assert(payload.meta.userTries == 1);
+        assert(typeof payload.data[0].userLikes != 'undefined');
+        assert(typeof payload.data[0].userWants != 'undefined');
+        assert(typeof payload.data[0].userTried != 'undefined');
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should filter by lat/lon/range', function(done) {
     tu.get('/v1/products?lat=10&lon=10&range=1000', function(err, payload, res) {
       assert(res.statusCode == 200);
@@ -428,6 +444,19 @@ describe('GET /v1/products/:id', function() {
       assert(payload.data.categories.length > 1);
       assert(payload.data.tags.length > 1);
       done();
+    });
+  });
+
+  it('should include like/want/try if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products/1', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.userLikes);
+        assert(payload.data.userWants);
+        assert(payload.data.userTried);
+        done();
+      });
     });
   });
 

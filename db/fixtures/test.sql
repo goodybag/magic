@@ -300,17 +300,19 @@ SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocation
 -- PRODUCT LIKES
 
 BEGIN;
-INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '7', NOW());
 INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
 INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
 INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('5', '2', '7', NOW());
+INSERT INTO "productLikes" (id, "productId", "userId", "createdAt") VALUES ('6', '3', '7', NOW());
 COMMIT;
 SELECT setval('"productLikes_id_seq"', (SELECT MAX(id) from "productLikes")); -- advance the sequence past the IDs just used
 
 -- PRODUCT WANTS
 
 BEGIN;
-INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '7', NOW());
 INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
 INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
 INSERT INTO "productWants" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);
@@ -320,7 +322,7 @@ SELECT setval('"productWants_id_seq"', (SELECT MAX(id) from "productWants")); --
 -- PRODUCT TRIES
 
 BEGIN;
-INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '1', NOW());
+INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('1', '1', '7', NOW());
 INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('2', '1', '2', NOW() - '2 days'::interval);
 INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('3', '1', '3', NOW() - '2 weeks'::interval);
 INSERT INTO "productTries" (id, "productId", "userId", "createdAt") VALUES ('4', '1', '4', NOW() - '2 months'::interval);

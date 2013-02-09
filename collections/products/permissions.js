@@ -16,6 +16,9 @@ var all = [
 , 'tags:productTags'
 , 'isAvailable'
 , 'isSpotlight'
+, 'userLikes'
+, 'userWants'
+, 'userTried'
 ];
 
 module.exports = {
@@ -36,6 +39,9 @@ module.exports = {
     , 'tags:productTags'
     , 'isAvailable'
     , 'isSpotlight'
+    , 'userLikes'
+    , 'userWants'
+    , 'userTried'
     ]
   , create: []
   , update: []
