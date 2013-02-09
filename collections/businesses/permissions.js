@@ -41,6 +41,7 @@ module.exports.loyalty = {
     , 'regularPunchesRequired'
     , 'elitePunchesRequired'
     , 'punchesRequiredToBecomeElite'
+    , 'photoUrl'
     ]
   , create: []
   , update: []
@@ -49,7 +50,14 @@ module.exports.loyalty = {
 , default: {}
 
 , ownerManager: {
-    update: ['reward', 'requiredItem', 'regularPunchesRequired', 'elitePunchesRequired', 'punchesRequiredToBecomeElite']
+    update: [
+      'reward'
+    , 'requiredItem'
+    , 'regularPunchesRequired'
+    , 'elitePunchesRequired'
+    , 'punchesRequiredToBecomeElite'
+    , 'photoUrl'
+    ]
   }
 
 , sales: {

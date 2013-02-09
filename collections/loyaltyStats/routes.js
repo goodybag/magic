@@ -61,6 +61,7 @@ module.exports.get = function(req, res){
       query.fields = sql.fields().add('"userLoyaltyStats".*');
       query.fields.add('businesses.name as "businessName"');
       query.fields.add('"businessLoyaltySettings".reward as reward');
+      query.fields.add('"businessLoyaltySettings"."photoUrl" as "photoUrl"');
 
       query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id';
       query.loyaltyJoin = 'join "businessLoyaltySettings" on "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';

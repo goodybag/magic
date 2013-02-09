@@ -431,6 +431,7 @@ describe('PATCH /v1/businesses/:id', function(){
       , regularPunchesRequired: 10
       , elitePunchesRequired: 8
       , punchesRequiredToBecomeElite: 24
+      , photoUrl: 'http://placekitten.com/200/300'
       };
 
       tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
