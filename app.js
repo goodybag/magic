@@ -92,7 +92,6 @@ httpServer.listen(config.http.port, function(err){
   console.log("HTTP started on port", config.http.port);
 });
 
-return;
 
 /**
  * Clustering
