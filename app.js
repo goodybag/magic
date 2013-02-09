@@ -20,12 +20,18 @@ var
 , httpServer
 ;
 
+// Handle uncaught exceptions
+process.on('uncaughtException', function (err){
+  console.error('uncaughtException:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});
+
 // :DEBUG: profiler
 var Profiler = require('clouseau');
 Profiler.enabled = true;
 Profiler.catchAll = false;
 Profiler.init({ displayInterval:0, useMicrotime:true });
-
 
 // instantiate HTTP server
 var app = require('./lib/server').createAppServer();
@@ -76,13 +82,6 @@ if(config.repl.enabled && cluster.isMaster){
     });
   }).listen(config.repl.port, function(){
     console.log("REPL started on port", config.repl.port);
-  });
-
-  // Handle uncaught exceptions
-  process.on('uncaughtException', function (err){
-    console.error('uncaughtException:', err.message);
-    console.error(err.stack);
-    process.exit(1);
   });
 }
 
