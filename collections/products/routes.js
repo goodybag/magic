@@ -162,9 +162,9 @@ module.exports.list = function(req, res){
         'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
         'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
       ].join(' ');
-      query.fields.add('BOOL_OR("productLikes" IS NOT NULL) AS "userLikes"');
-      query.fields.add('BOOL_OR("productWants" IS NOT NULL) AS "userWants"');
-      query.fields.add('BOOL_OR("productTries" IS NOT NULL) AS "userTried"');
+      query.fields.add('("productLikes" IS NOT NULL) AS "userLikes"');
+      query.fields.add('("productWants" IS NOT NULL) AS "userWants"');
+      query.fields.add('("productTries" IS NOT NULL) AS "userTried"');
       query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
       query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
       query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
@@ -226,7 +226,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT products.*, businesses.name as "businessName",',
+      'SELECT {fields},',
         'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
           'INNER JOIN "productsProductTags"',
             'ON "productsProductTags"."productTagId" = "productTags".id',
@@ -239,10 +239,32 @@ module.exports.get = function(req, res){
         ')) as categories',
       'FROM products',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
+        '{feelingsJoins}',
         'WHERE products.id = $id',
-        'GROUP BY products.id, businesses.id'
+        'GROUP BY {groupby}'
     ]);
     query.$('id', +req.param('productId') || 0);
+    query.fields  = sql.fields();
+    query.groupby = sql.fields().add('products.id').add('businesses.id');
+
+    query.fields.add('products.*');
+    query.fields.add('businesses.name as "businessName"');
+
+    // user feelings join
+    if (req.session.user) {
+      query.feelingsJoins = [
+        'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
+      ].join(' ');
+      query.fields.add('("productLikes" IS NOT NULL) AS "userLikes"');
+      query.fields.add('("productWants" IS NOT NULL) AS "userWants"');
+      query.fields.add('("productTries" IS NOT NULL) AS "userTried"');
+      query.groupby.add('"productLikes".id');
+      query.groupby.add('"productWants".id');
+      query.groupby.add('"productTries".id');
+      query.$('userId', req.session.user.id);
+    }
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

@@ -447,6 +447,19 @@ describe('GET /v1/products/:id', function() {
     });
   });
 
+  it('should include like/want/try if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products/1', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.userLikes);
+        assert(payload.data.userWants);
+        assert(payload.data.userTried);
+        done();
+      });
+    });
+  });
+
   it('should respond 404 if product id is not in database', function(done){
     tu.get('/v1/products/100', function(err, payload, res) {
       assert(res.statusCode == 404);
