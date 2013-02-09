@@ -48,8 +48,9 @@ module.exports.get = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       if (!consumerId) {
+        // This really shouldn't happen, but whatevs
         if (result.rowCount === 0) {
-          return res.json({ error: null, data: [] });
+          return res.json({ error: null, data: req.param('businessId') ? null : [] });
         }
         consumerId = result.rows[0].id;
       }
@@ -77,7 +78,12 @@ module.exports.get = function(req, res){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
 
-        return res.json({ error: null, data: req.param('businessId') ? (result.rows[0] || null) : result.rows });
+        if (result.rows.length > 0)
+          return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows });
+        if (!req.param('businessId'))
+          return res.json({ error: null, data: [] });
+
+        return res.json({ error: null, data: null });
       });
     });
   });

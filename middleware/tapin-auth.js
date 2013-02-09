@@ -139,9 +139,10 @@ module.exports = function(req, res, next){
     }
 
   , end: function(user) {
-      tx.commit();
-      req.session.user = user;
-      next();
+      tx.commit(function() {;
+        req.session.user = user;
+        next();
+      });
     }
   };
 

@@ -13,6 +13,7 @@ var applyGroups = require('./apply-groups');
 server.get(
   '/v1/loyaltyStats'
 , middleware.applyGroups(applyGroups.employee)
+, middleware.auth.allow('admin', 'sales', 'consumer', 'employee')
 , middleware.permissions(permissions)
 , routes.get
 );
