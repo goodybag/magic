@@ -6,6 +6,7 @@
 var
 // Built-in
   cluster = require('cluster')
+, os = require('os')
 , http = require('http')
 , net = require('net')
 , repl = require('repl')
@@ -49,6 +50,9 @@ app.use(require('./collections/productTags/server'));
 app.use(require('./collections/reviews/server'));
 app.use(require('./collections/redemptions/server'));
 app.use(require('./collections/events/server'));
+
+console.log("CPUs: "+ os.cpus().length);
+
 /**
  * REPL
  */
