@@ -226,9 +226,15 @@ module.exports.update = function(req, res){
     db.api.consumers.findOne({ userId: req.session.id }, { fields: ['id'] }, function(error, consumer){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      return callback()
+      if (!consumer || !consumer.id)
+        return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, .auth.NOT_AUTHENTICATED);
+
+      return callback(consumer.id);
     });
   };
+
+  getConsumerId(function())
+
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
