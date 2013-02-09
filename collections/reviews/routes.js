@@ -113,8 +113,8 @@ module.exports.update = function(req, res){
     var inputs = {
       businessId: req.body.businessId
     , locationId: req.body.locationId
-    , toReview : req.body.toReview
-    , isHidden : req.body.isHidden
+    , toReview :  req.body.toReview
+    , isHidden :  req.body.isHidden
     };
 
     var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
