@@ -190,7 +190,7 @@ module.exports.update = function(req, res){
       query.$('id', req.params.id)
       if (email) {
         query.updates.add('email = $email');
-        query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id)'; // this makes sure the user doesn't take an email in use
+        query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id AND email IS NOT NULL)'; // this makes sure the user doesn't take an email in use
         query.$('email', email);
       }
       if (password) {

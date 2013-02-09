@@ -17,6 +17,7 @@ describe('GET /v1/loyaltyStats', function() {
         assert(payload.data[0].numPunches === 5);
         assert(payload.data[0].totalPunches === 23);
         assert(payload.data[0].visitCount === 40);
+        assert(payload.data[0].isRegistered === true);
         tu.logout(done);
       });
     });
@@ -38,6 +39,17 @@ describe('GET /v1/loyaltyStats', function() {
     tu.get('/v1/loyaltyStats', function(err, payload, res) {
       assert(res.statusCode == 401);
       done();
+    });
+  });
+
+  it('should give isRegistered false if no email or singly token', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/consumers/13/loyaltyStats', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data[0].isRegistered === false);
+        tu.logout(done);
+      });
     });
   });
 });

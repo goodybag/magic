@@ -20,6 +20,22 @@ server.get(
 
 // LoyaltyStats.get
 server.get(
+  '/v1/consumers/:consumerId/loyaltyStats'
+, middleware.applyGroups(applyGroups.employee)
+, middleware.permissions(permissions)
+, routes.get
+);
+
+// LoyaltyStats.get
+server.get(
+  '/v1/consumers/:consumerId/loyaltyStats/:businessId'
+, middleware.applyGroups(applyGroups.employee)
+, middleware.permissions(permissions)
+, routes.get
+);
+
+// LoyaltyStats.get
+server.get(
   '/v1/businesses/:businessId/loyaltyStats'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
