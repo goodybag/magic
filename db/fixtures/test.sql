@@ -103,7 +103,7 @@ INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "c
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '123456-ABD');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '723457-ABD');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2', '123456-ABD');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('7', '9', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2', '123456-YYZ');

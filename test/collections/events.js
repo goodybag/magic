@@ -102,7 +102,7 @@ describe('Loyalty Events: ', function() {
       }
 
     , updateLoyaltyStats: function(){
-        tu.tapinAuthRequest('POST', '/v1/loyaltyStats', '123456-XYX', punch, function(error, results, res) {
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + punch.consumerId + '/loyalty/' + punch.businessId, '123456-XYX', punch, function(error, results, res) {
           assert(!error);
           assert(res.statusCode === 200);
 
