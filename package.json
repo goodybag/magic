@@ -20,7 +20,7 @@
     "express-winston": "0.1.x",
     
     "nodemailer": "0.3.x",
-    "pubnub": "3.3.x",
+    "pubnub": "https://github.com/pfraze/pubnub-nodejs/tarball/master",
 
     "validator": "0.4.x",
     
