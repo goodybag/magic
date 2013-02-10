@@ -33,12 +33,25 @@ describe('POST /v1/redemptions', function() {
     });
   });
 
+  it('should not allow the redemption if the consumer is only partially registered', function(done) {
+    tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
+      tu.post('/v1/redemptions', { deltaPunches:2, consumerId:14, tapinStationId:4 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 412);
+        payload = JSON.parse(payload);
+        assert(payload.error);
+        assert(payload.error.name = "NOT_REGISTERED");
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should not allow a redemption or update punches if the consumer is short on punches', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:1, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
-        
+
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
 
