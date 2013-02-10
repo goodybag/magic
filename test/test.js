@@ -64,6 +64,7 @@ require('./collections/reviews');
 require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
+require('./events/pubnub');
 
 after(function() {
   this.httpServer.close();

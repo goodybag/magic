@@ -11,15 +11,16 @@
     "npm": "1.1.x"
   },
   "dependencies": {
+    "underscore": "1.4.x",
+    "lodash": "1.0.x",
+
     "express": "3.0.x",
 
     "winston": "0.6.x",
     "express-winston": "0.1.x",
     
-    "underscore": "1.4.x",
-    "lodash": "1.0.x",
-    
     "nodemailer": "0.3.x",
+    "pubnub": "3.3.x",
 
     "validator": "0.4.x",
     
