@@ -67,4 +67,12 @@ server.del(
 , routes.del
 );
 
+// tapinStations.createHeartbeat
+server.post(
+  '/v1/tapin-stations/:id/heartbeat'
+, middleware.applyGroups(applyGroups.owner)
+, middleware.auth.allow('owner')
+, routes.createHeartbeat
+);
+
 module.exports = server;
