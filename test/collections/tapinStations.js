@@ -198,3 +198,32 @@ describe('DEL /v1/tapin-stations/:id', function() {
     });
   });
 });
+
+
+describe('POST /v1/tapin-stations/:id/heartbeat', function() {
+
+  it('creates a heartbeat event', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      tu.post('/v1/tapin-stations/1/heartbeat', {}, function(err, results, res) {
+        assert(res.statusCode == 200);
+        tu.logout(function() {
+          // Give server time to handle the event
+          setTimeout(function(){
+            tu.loginAsAdmin(function() {
+              tu.get('/v1/events?filter=tapinstations.heartbeat', function(error, results) {
+                assert(res.statusCode == 200);
+                results = JSON.parse(results);
+                assert(results.data.length > 0);
+                assert(results.data.filter(function(d){
+                  return d.data.tapinStationId === '1';
+                }).length !== 0);
+
+                tu.logout(done);
+              });
+            });
+          }, 100);
+        });
+      });
+    });
+  });
+});
