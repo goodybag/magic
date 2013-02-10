@@ -29,7 +29,7 @@ module.exports = function(req, res, next){
   if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
 
   // override the res.json to restore the tapin user after the response is sent
-  var origjsonFn = res.json;
+  var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
     req.session.user = tapinStationUser;
 
@@ -40,6 +40,13 @@ module.exports = function(req, res, next){
 
     origjsonFn.apply(res, arguments);
   };
+
+  res.end = function(){
+    req.session.user = tapinStationUser;
+
+    origendFn.apply(res, arguments);
+  };
+
   var tx, client;
   var stage = {
     start: function() {
