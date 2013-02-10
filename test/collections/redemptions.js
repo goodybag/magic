@@ -9,7 +9,6 @@ var
 describe('POST /v1/redemptions', function() {
 
   it('should update the consumer stats and create a redemption', function(done) {
-
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
         assert(!err);
@@ -18,13 +17,13 @@ describe('POST /v1/redemptions', function() {
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
 
-            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+            tu.get('/v1/consumers/5/loyalty/' + 1, function(err, payload, res) {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
-              assert(payload.data[0].numPunches === 4);
-              assert(payload.data[0].totalPunches === 12);
-              assert(payload.data[0].visitCount === 10);
+              assert(payload.data.numPunches === 4);
+              assert(payload.data.totalPunches === 12);
+              assert(payload.data.visitCount === 10);
 
               tu.logout(done);
             });
@@ -43,13 +42,13 @@ describe('POST /v1/redemptions', function() {
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
 
-            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+            tu.get('/v1/consumers/5/loyalty/' + 1, function(err, payload, res) {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
-              assert(payload.data[0].numPunches === 4);
-              assert(payload.data[0].totalPunches === 12);
-              assert(payload.data[0].visitCount === 10);
+              assert(payload.data.numPunches === 4);
+              assert(payload.data.totalPunches === 12);
+              assert(payload.data.visitCount === 10);
 
               tu.logout(done);
             });
@@ -61,7 +60,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should use the elite requirement if the consumer is elite', function(done) {
     tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
-      tu.get('/v1/loyaltyStats', function(err, payload, res) {
+      tu.get('/v1/loyalty', function(err, payload, res) {
         assert(res.statusCode == 200);
         var orgStats = JSON.parse(payload).data;
 
@@ -74,7 +73,7 @@ describe('POST /v1/redemptions', function() {
               tu.logout(function() {
                 tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
 
-                  tu.get('/v1/loyaltyStats', function(err, payload, res) {
+                  tu.get('/v1/loyalty', function(err, payload, res) {
                     assert(res.statusCode == 200);
 
                     payload = JSON.parse(payload);
@@ -105,7 +104,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should allow cashiers of the business to authorize', function(done) {
     tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
-      tu.get('/v1/loyaltyStats', function(err, payload, res) {
+      tu.get('/v1/loyalty', function(err, payload, res) {
         assert(res.statusCode == 200);
         var orgStats = JSON.parse(payload).data;
         tu.logout(function() {
@@ -117,7 +116,7 @@ describe('POST /v1/redemptions', function() {
               tu.logout(function() {
 
                 tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
-                  tu.get('/v1/loyaltyStats', function(err, payload, res) {
+                  tu.get('/v1/loyalty', function(err, payload, res) {
                     assert(!err);
                     assert(res.statusCode == 200);
 
