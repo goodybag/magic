@@ -14,6 +14,8 @@ exports.owner = function(req, cb) {
 
   var consumerId = req.param('consumerId');
 
+  if (consumerId === 'session') return cb('owner');
+
   db.getClient('consumers owner apply groups', function(error, client){
     if (error) return cb(null);
 
