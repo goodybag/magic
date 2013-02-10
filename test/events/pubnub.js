@@ -94,3 +94,47 @@ describe('Business Loyalty Settings Updates: ', function() {
     });
   });
 });
+
+describe('Business Updates: ', function() {
+
+  it('should receive an event through pubnub when a business is updated', function(done) {
+
+    pubnub.subscribe({
+        channel:'business-1.update',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/businesses/1', { name:'Business 3D!' }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.updates.name == 'Business 3D!');
+          done();
+        }
+    });
+  });
+});
+
+describe('Business Logo Updates: ', function() {
+
+  it('should receive an event through pubnub when a business logo is updated', function(done) {
+
+    pubnub.subscribe({
+        channel:'business-1.updateLogo',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/businesses/1', { logoUrl:'http://loljk.net/logo.png' }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.updates.logoUrl == 'http://loljk.net/logo.png');
+          done();
+        }
+    });
+  });
+});

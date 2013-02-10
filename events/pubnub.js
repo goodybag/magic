@@ -80,6 +80,27 @@ module.exports = {
     });
   }
 
+// Businesses
+// ==========
+
+, 'businesses.update':
+  function (businessId, updates){
+    pubnub.publish({
+        channel:'business-' + businessId + '.update',
+        message:{ updates:updates },
+        callback:logErrors
+    });
+  }
+
+, 'businesses.logoUpdate':
+  function (businessId, logoUrl){
+    pubnub.publish({
+        channel:'business-' + businessId + '.update',
+        message:{ logoUrl:logoUrl },
+        callback:logErrors
+    });
+  }
+
 };
 
 function logErrors(response) {
