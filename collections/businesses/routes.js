@@ -332,7 +332,9 @@ module.exports.updateLoyalty = function(req, res){
 
         logger.db.debug(TAGS, result);
 
-        return res.json({ error: null, data: null });
+        res.json({ error: null, data: null });
+
+        magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
       }
     );
   });

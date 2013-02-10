@@ -72,3 +72,25 @@ describe('Product Updates: ', function() {
     });
   });
 });
+
+describe('Business Loyalty Settings Updates: ', function() {
+
+  it('should receive an event through pubnub when a business loyalty setting is updated', function(done) {
+
+    pubnub.subscribe({
+        channel:'business-1.loyaltySettingsUpdate',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/businesses/1/loyalty', { requiredItem:'The Triforce' }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.updates.requiredItem == 'The Triforce');
+          done();
+        }
+    });
+  });
+});

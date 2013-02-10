@@ -16,6 +16,10 @@ var
 
 
 module.exports = {
+
+// Products
+// ========
+
   'products.like':
   function (userId, productId){
     pubnub.publish({
@@ -63,6 +67,19 @@ module.exports = {
       });
     });
   }
+
+// Loyalty
+// =======
+
+, 'loyalty.settingsUpdate':
+  function (businessId, updates){
+    pubnub.publish({
+        channel:'business-' + businessId + '.loyaltySettingsUpdate',
+        message:{ updates:updates },
+        callback:logErrors
+    });
+  }
+
 };
 
 function logErrors(response) {
