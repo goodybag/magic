@@ -216,82 +216,137 @@ module.exports.del = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-consumer', req.uuid];
 
-  var getConsumerId = function(callback){
-    if (req.param('consumerId'))
-      return callback(null, req.param('consumerId'));
-
+  var getConsumerRecord = function(callback){
     if (!req.session || !req.session.user)
-      return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, .auth.NOT_AUTHENTICATED);
+      return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
 
-    db.api.consumers.findOne({ userId: req.session.id }, { fields: ['id'] }, function(error, consumer){
+    var query = {};
+
+    // Either way, we'll need to get the userId or consumerId
+    // Depending on how they're requesting this
+    if (req.param('consumerId') && req.param('consumerId') != 'session')
+      query.id = req.param('consumerId');
+    else
+      query.userId = req.session.user.id;
+
+    db.api.consumers.findOne(query, { fields: ['id', '"userId"'] }, function(error, consumer){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       if (!consumer || !consumer.id)
-        return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, .auth.NOT_AUTHENTICATED);
+        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-      return callback(consumer.id);
+      return callback(consumer);
     });
   };
 
-  getConsumerId(function())
-
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-
-    var tx = new Transaction(client);
-
-    tx.begin(function(error){
+  getConsumerRecord(function(consumer){
+    db.getClient(TAGS[0], function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      var updateConsumerRecord = function(callback){
-        var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
-        query.updates = sql.fields().addUpdateMap(req.body, query);
-        query.$('id', req.params.consumerId);
+      var tx = new Transaction(client);
 
-        logger.db.debug(TAGS, query.toString());
+      tx.begin(function(error){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        // run update query
-        tx.query(query.toString(), query.$values, function(error, result){
-          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
+        var updateConsumerRecord = function(callback){
+          var updateConsumer = false, data = {};
 
-          // did the update occur?
-          if (result.rowCount === 0) {
-            return res.status(404).end();
+          // Determine if we even need to update the consumer record
+          for (var i = db.fields.consumers.plain.length - 1; i >= 0; i--){
+            if (db.fields.consumers.plain[i] in req.body){
+              updateConsumer = true;
+              data[db.fields.consumers.plain[i]] = req.body[db.fields.consumers.plain[i]];
+            }
           }
 
-          // done
-          return res.json({ error: null, data: null });
-        });
-      };
+          if (!updateConsumer) return callback();
 
-      var updateUserRecord = function(callback){
-        if (!(req.body.email || req.body.password || req.body.singlyAccessToken || req.body.singlyId))
-          return callback();
+          var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
+          query.updates = sql.fields().addUpdateMap(data, query);
+          query.$('id', consumer.id);
 
-        var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
-        query.updates = sql.fields().addUpdateMap(req.body, query);
-        query.$('id', req.params.consumerId);
+          logger.db.debug(TAGS, query.toString());
 
-        logger.db.debug(TAGS, query.toString());
+          // run update query
+          tx.query(query.toString(), query.$values, function(error, result){
+            if (error) return callback(error);
+            logger.db.debug(TAGS, result);
 
-        // run update query
-        tx.query(query.toString(), query.$values, function(error, result){
-          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
+            // did the update occur?
+            if (result.rowCount === 0)
+              return callback(errors.input.NOT_FOUND);
 
-          // did the update occur?
-          if (result.rowCount === 0) {
-            return res.status(404).end();
+            callback();
+          });
+        };
+
+        var updateUserRecord = function(callback){
+          var updateUser = false, data = {};
+
+          // Determine if we even need to update the user record
+          for (var i = db.fields.users.plain.length - 1; i >= 0; i--){
+            if (db.fields.users.plain[i] in req.body){
+              updateUser = true;
+              data[db.fields.users.plain[i]] = req.body[db.fields.users.plain[i]];
+            }
           }
 
-          // done
-          return res.json({ error: null, data: null });
+          if (!updateUser) return callback();
+
+          var encryptPassword = function(cb){
+            if (!req.body.password) return cb();
+
+            utils.encryptPassword(req.body.password, function(error, encrypted){
+              data.password = encrypted;
+              cb();
+            });
+          };
+
+          encryptPassword(function(){
+            var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
+
+            query.updates = sql.fields().addUpdateMap(data, query);
+            query.$('id', consumer.userId);
+
+            logger.db.debug(TAGS, query.toString());
+
+            // run update query
+            tx.query(query.toString(), query.$values, function(error, result){
+              if (error) return callback(error);
+              logger.db.debug(TAGS, result);
+
+              // did the update occur?
+              if (result.rowCount === 0)
+                return callback(errors.input.NOT_FOUND);
+
+              return callback();;
+            });
+          });
+        };
+
+        utils.parallel({
+          consumer: updateConsumerRecord
+        , user:     updateUserRecord
+        }, function(error, results){
+          if (error){
+            tx.abort();
+            if (error.name === "DB_FAILURE"){
+              res.error(errors.internal.DB_FAILURE, error)
+            } else {
+              res.error(error);
+            }
+
+            return logger.routes.error(TAGS, error);
+          }
+
+          tx.commit(function(error){
+            if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+            res.json({ error: null, data: null });
+          });
         });
-      };
+      });
     });
-
   });
 };
 
