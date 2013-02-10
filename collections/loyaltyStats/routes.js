@@ -36,7 +36,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // ensure we have a consumer id
-    var consumerId = req.body.consumerId;
+    var consumerId = req.param('consumerId');
     var getConsumerId = function(cb) { cb(); };
     if (!consumerId) {
       // no consumerId given, look it up off the authed user
@@ -56,18 +56,19 @@ module.exports.get = function(req, res){
       }
 
       // get stats
-      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {where}');
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where}');
 
       query.fields = sql.fields().add('"userLoyaltyStats".*');
-      query.fields.add('businesses.name as "businessName"');
-      query.fields.add('"businessLoyaltySettings".reward as reward');
-      query.fields.add('"businessLoyaltySettings"."photoUrl" as "photoUrl"');
+      query.fields.add('businesses.name AS "businessName"');
+      query.fields.add('"businessLoyaltySettings".reward AS reward');
+      query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
+      query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
-      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id';
-      query.loyaltyJoin = 'join "businessLoyaltySettings" on "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+      query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
+      query.loyaltyJoin = 'JOIN "businessLoyaltySettings" ON "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+      query.userJoin = 'JOIN consumers ON consumers.id = "userLoyaltyStats"."consumerId" JOIN users ON users.id = consumers."userId"';
 
       query.where = sql.where().and('"userLoyaltyStats"."consumerId" = $consumerId');
-
       query.$('consumerId', consumerId);
 
       if (req.param('businessId')){
