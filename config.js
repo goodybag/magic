@@ -43,6 +43,11 @@ var config = {
       awsId: "AKIAJZTPY46ZWGWU5JRQ"
     , awsSecret: "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"
     }
+  , pubnub: {
+      publish_key: 'pub-c-2ae7884a-eb30-4466-9f8d-21e8ad2d4193',
+      subscribe_key: 'sub-c-48c5140a-73c7-11e2-8b02-12313f022c90',
+      secret_key: 'sec-c-M2JmZmY5MTUtNjkyZS00MGQ5LTgxYzMtMjhjNTJkYjk5NDVh'
+    }
   , singly: {
       clientId: "e8171ccd4a3b90f15bbb41088efccc06"
     , clientSecret: "73fa4013446e9985e9217455479d3c3c"
