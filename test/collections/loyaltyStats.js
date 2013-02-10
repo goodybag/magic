@@ -56,7 +56,7 @@ describe('GET /v1/loyaltyStats', function() {
 
 describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
 
-  it('should perform a flash login, create a new user, and get the blank loyalty stats', function(done) {
+  it('should perform a flash login, create a new user, and get the blank loyalty stats with the firstTapin flag', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       assert(!error);
 
@@ -66,6 +66,24 @@ describe('GET /v1/businesses/:businessId/loyaltyStats', function(){
         payload = JSON.parse(payload);
         assert(!payload.error);
         assert(payload.data == null);
+        assert(payload.meta.isFirstTapin == true);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should perform a flash login, get the blank loyalty stats, without the firstTapin flag', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/businesses/' + 1 + '/loyaltyStats', '667788-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+        assert(payload.data == null);
+        assert(!payload.meta || !payload.meta.isFirstTapin);
 
         tu.logout(done);
       });
