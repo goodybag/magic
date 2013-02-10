@@ -217,3 +217,34 @@ module.exports.update = function(req, res){
     });
   });
 };
+
+/**
+ * Emit heartbeat
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.createHeartbeat = function(req, res){
+  var TAGS = ['tapinStations-heartbeat', req.uuid];
+  logger.routes.debug(TAGS, 'emitting tapinStation ' + req.params.id + ' heartbeat');
+
+  db.getClient(TAGS[0], function(error, client) {
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query([
+      'SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id',
+    ]);
+    query.$('id', +req.param('id') || 0);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount == 1) {
+        res.json({ error: null, data: null });
+        magic.emit('tapinstations.heartbeat', req.param('id'), result.rows[0].businessId, result.rows[0].locationId);
+      } else {
+        res.error(errors.input.NOT_FOUND);
+      }
+    });
+  });
+};

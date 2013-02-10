@@ -19,6 +19,26 @@ logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 /**
+ * Get singly Loyalty Stat record
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ * :NOTE: req.body.consumerId will be correctly filled by the permissions middleware
+ *        (if it's not, the route will be stopped due to lack of credentials)
+ */
+module.exports.getOne = function(req, res){
+  var TAGS = ['get-loyaltystats', req.uuid];
+  logger.routes.debug(TAGS, 'fetching loyaltystats');
+
+  if (!req.session.user)
+    return res.error(errors.auth.NOT_AUTHENTICATED);
+  db.api.userLoyaltyStats.findOne(req.param('loyaltyId'), function(error, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.json({ error: null, data: result });
+  });
+};
+
+/**
  * Get Loyalty Stats
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
@@ -36,7 +56,7 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // ensure we have a consumer id
-    var consumerId = req.body.consumerId;
+    var consumerId = req.param('consumerId');
     var getConsumerId = function(cb) { cb(); };
     if (!consumerId) {
       // no consumerId given, look it up off the authed user
@@ -56,18 +76,19 @@ module.exports.get = function(req, res){
       }
 
       // get stats
-      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {where}');
+      var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where}');
 
       query.fields = sql.fields().add('"userLoyaltyStats".*');
-      query.fields.add('businesses.name as "businessName"');
-      query.fields.add('"businessLoyaltySettings".reward as reward');
-      query.fields.add('"businessLoyaltySettings"."photoUrl" as "photoUrl"');
+      query.fields.add('businesses.name AS "businessName"');
+      query.fields.add('"businessLoyaltySettings".reward AS reward');
+      query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
+      query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
-      query.busJoin = 'join businesses on "userLoyaltyStats"."businessId" = businesses.id';
-      query.loyaltyJoin = 'join "businessLoyaltySettings" on "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+      query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
+      query.loyaltyJoin = 'JOIN "businessLoyaltySettings" ON "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+      query.userJoin = 'JOIN consumers ON consumers.id = "userLoyaltyStats"."consumerId" JOIN users ON users.id = consumers."userId"';
 
       query.where = sql.where().and('"userLoyaltyStats"."consumerId" = $consumerId');
-
       query.$('consumerId', consumerId);
 
       if (req.param('businessId')){
@@ -81,10 +102,47 @@ module.exports.get = function(req, res){
 
         if (result.rows.length > 0)
           return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows });
+
         if (!req.param('businessId'))
           return res.json({ error: null, data: [] });
 
-        return res.json({ error: null, data: null });
+        // Create a default version of the record they're requesting
+        var stat = {
+          consumerId:       consumerId
+        , businessId:       req.param('businessId')
+        , numPunches:       0
+        , totalPunches:     0
+        , numRewards:       0
+
+          // If this is a tapin-auth, we know this is actually a visit
+          // Not TOTALLY accurate but mostly and will get updated eventually
+        , visitCount:       req.header('authorization').indexOf('Tapin') > -1 ? 1 : 0
+
+        , lastVisit:        'now()'
+        , isElite:          false
+        , dateBecameElite:  null
+        };
+
+        utils.parallel({
+          stats: function(done){
+            db.api.userLoyaltyStats.insert(stat, done);
+          }
+
+        , settings: function(done){
+            db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
+              done(e, r); // find passes back 3 params, which messes with the parallel fn results
+            });
+          }
+        }, function(error, results){
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          
+          stat.id = results.stats.id;
+          stat.lastVisit = new Date();
+          stat.reward = results.settings.reward;
+          stat.photoUrl = results.settings.photoUrl;
+
+          res.json({ error: null, data: stat });
+        });
       });
     });
   });
@@ -102,12 +160,12 @@ module.exports.update = function(req, res){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var deltaPunches = req.body.deltaPunches;
-    var consumerId = req.body.consumerId;
-    var businessId = req.body.businessId;
+    var consumerId = req.param('consumerId');
+    var businessId = req.param('businessId');
 
     // ensure we have a consumer id
     var getConsumerId = function(cb) { cb(); };
-    if (!consumerId) {
+    if (!consumerId && !req.param('loyaltyId')) {
       // no consumerId given, look it up off the authed user
       var query = 'SELECT id FROM consumers WHERE "userId" = $1';
       getConsumerId = function(cb) { client.query(query, [req.session.user.id], cb); };
@@ -116,7 +174,7 @@ module.exports.update = function(req, res){
     getConsumerId(function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      if (!consumerId) {
+      if (!consumerId && !req.param('loyaltyId')) {
         if (result.rowCount === 0) {
           return res.status(404).end();
         }
@@ -127,8 +185,16 @@ module.exports.update = function(req, res){
       var tx = new Transaction(client);
       tx.begin(function(error) {
 
-        // update punches
-        db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+        var args = [client, tx], updateFn;
+        if (req.param('loyaltyId')){
+          args.push(req.param('loyaltyId'));
+          updateFn = db.procedures.updateUserLoyaltyStatsById;
+        } else {
+          args.push(consumerId, businessId);
+          updateFn = db.procedures.updateUserLoyaltyStats;
+        }
+
+        args.push(deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
           tx.commit();
@@ -141,6 +207,9 @@ module.exports.update = function(req, res){
           if (hasEarnedReward)
             magic.emit('loyalty.hasEarnedReward', deltaPunches, consumerId, businessId, req.body.locationId, req.session.user.id);
         });
+
+        // update punches
+        updateFn.apply({}, args);
       });
     });
   });
