@@ -61,55 +61,67 @@ module.exports.create = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-    // start transaction
-    var tx = new Transaction(client);
-    tx.begin(function(error) {
-      if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+    // Ensure user is registered
+    var query = 'select users.* from users, consumers where consumers."userId" = users.id and consumers.id = $1';
+    client.query(query, [consumerId], function(error, result){
+      if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-      // get business
-      client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-        businessId = result.rows[0].businessId;
-        locationId = result.rows[0].locationId;
+      if (result.rows.length === 0)
+        return res.error(errors.input.INVALID_USERS), logger.routes.error(TAGS, errors.input.INVALID_USERS);
 
-        // update punches
-        db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+      if (!(result.rows[0].email && result.rows[0].password) && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
+        return res.error(errors.registration.NOT_REGISTERED), logger.routes.error(TAGS, errors.registration.NOT_REGISTERED);
+
+      // start transaction
+      var tx = new Transaction(client);
+      tx.begin(function(error) {
+        if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+
+        // get business
+        client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          businessId = result.rows[0].businessId;
+          locationId = result.rows[0].locationId;
 
-          if (numRewards === 0) {
-            return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort();
-          }
+          // update punches
+          db.procedures.updateUserLoyaltyStats(client, tx, consumerId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
+            if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-          // create the redemption
-          var query = [
-            'INSERT INTO "userRedemptions"',
-              '("businessId","locationId","consumerId","cashierUserId","tapinStationId","dateTime")',
-              'VALUES ($1, $2, $3, $4, $5, now())'
-          ] .join(' ');
-          client.query(query, [businessId, locationId, consumerId, req.session.user.id, tapinStationId], function(error, result) {
+            if (numRewards === 0) {
+              return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort();
+            }
 
-            if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+            // create the redemption
+            var query = [
+              'INSERT INTO "userRedemptions"',
+                '("businessId","locationId","consumerId","cashierUserId","tapinStationId","dateTime")',
+                'VALUES ($1, $2, $3, $4, $5, now())'
+            ] .join(' ');
+            client.query(query, [businessId, locationId, consumerId, req.session.user.id, tapinStationId], function(error, result) {
 
-            // update user's loyalty stats
-            var query = 'UPDATE "userLoyaltyStats" SET "numRewards" = "numRewards" - 1 WHERE "consumerId"=$1 AND "businessId"=$2';
-            client.query(query, [consumerId, businessId], function(error, result) {
               if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
-              // success!
-              tx.commit(function(error) {
-                if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+              // update user's loyalty stats
+              var query = 'UPDATE "userLoyaltyStats" SET "numRewards" = "numRewards" - 1 WHERE "consumerId"=$1 AND "businessId"=$2';
+              client.query(query, [consumerId, businessId], function(error, result) {
+                if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
-                res.json({ error:null, data:null });
+                // success!
+                tx.commit(function(error) {
+                  if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-                magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+                  res.json({ error:null, data:null });
 
-                if (hasBecomeElite)
-                  magic.emit('consumers.becameElite', consumerId, businessId, locationId);
+                  magic.emit('loyalty.punch', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
 
-                magic.emit('loyalty.redemption', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+                  if (hasBecomeElite)
+                    magic.emit('consumers.becameElite', consumerId, businessId, locationId);
 
-                if (hasEarnedReward)
-                  magic.emit('loyalty.hasEarnedReward', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+                  magic.emit('loyalty.redemption', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+
+                  if (hasEarnedReward)
+                    magic.emit('loyalty.hasEarnedReward', deltaPunches, consumerId, businessId, locationId, req.session.user.id);
+                });
               });
             });
           });
