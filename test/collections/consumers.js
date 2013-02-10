@@ -143,7 +143,7 @@ describe('POST /v1/consumers', function() {
   });
 });
 
-describe('PATCH /v1/consumers/:id', function() {
+describe('PUT /v1/consumers/:id', function() {
   it('should update a consumer', function(done) {
     var consumer = {
       firstName: "Terd"
@@ -160,6 +160,42 @@ describe('PATCH /v1/consumers/:id', function() {
           assert(!results.error);
           assert(results.data.firstName === "Terd");
           tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should update a consumers user record and consumer record via the session user id', function(done) {
+    var consumer = {
+      password: "password1"
+    , firstName: "Terrrrd"
+    };
+
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
+      tu.patch('/v1/consumers/session', consumer, function(error, results, res) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+
+        tu.logout(function(){
+          tu.login({ email: 'tferguson@gmail.com', password: consumer.password }, function(error, user){
+            assert(!error);
+            assert(user);
+
+            tu.patch('/v1/consumers/1', {password: 'password'}, function(error, results, res) {
+              assert(!error);
+              results = JSON.parse(results);
+              assert(!results.error);
+
+              tu.get('/v1/consumers/1', function(error, results) {
+                assert(!error);
+                results = JSON.parse(results);
+                assert(!results.error);
+                assert(results.data.firstName === "Terrrrd");
+                tu.logout(done);
+              });
+            });
+          });
         });
       });
     });
