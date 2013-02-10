@@ -11,7 +11,7 @@ var applyGroups = require('./apply-groups');
 
 // LoyaltyStats.get
 server.get(
-  '/v1/loyaltyStats'
+  '/v1/loyalty'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.auth.allow('admin', 'sales', 'consumer', 'employee')
 , middleware.permissions(permissions)
@@ -20,7 +20,26 @@ server.get(
 
 // LoyaltyStats.get
 server.get(
-  '/v1/consumers/:consumerId/loyaltyStats'
+  '/v1/loyalty/:loyaltyId'
+, middleware.applyGroups(applyGroups.employee)
+, middleware.auth.allow('admin', 'sales', 'consumer', 'employee')
+, middleware.permissions(permissions)
+, routes.getOne
+);
+
+// LoyaltyStats.update
+server.put(
+  '/v1/loyalty/:loyaltyId'
+, middleware.applyGroups(applyGroups.employee)
+, middleware.auth.allow('admin', 'sales', 'employee')
+, middleware.permissions(permissions)
+, middleware.validate.body(null, { locationId:{isInt:[]}, deltaPunches:{isInt:[]}})
+, routes.update
+);
+
+// LoyaltyStats.get
+server.get(
+  '/v1/consumers/:consumerId/loyalty'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
 , routes.get
@@ -28,7 +47,7 @@ server.get(
 
 // LoyaltyStats.get
 server.get(
-  '/v1/consumers/:consumerId/loyaltyStats/:businessId'
+  '/v1/consumers/:consumerId/loyalty/:businessId'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
 , routes.get
@@ -36,19 +55,19 @@ server.get(
 
 // LoyaltyStats.get
 server.get(
-  '/v1/businesses/:businessId/loyaltyStats'
+  '/v1/loyalty/businesses/:businessId'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.permissions(permissions)
 , routes.get
 );
 
 // LoyaltyStats.update
-server.post(
-  '/v1/loyaltyStats'
+server.put(
+  '/v1/consumers/:consumerId/loyalty/:businessId'
 , middleware.applyGroups(applyGroups.employee)
 , middleware.auth.allow('admin', 'sales', 'employee')
 , middleware.permissions(permissions)
-, middleware.validate.body(null, { businessId:{isInt:[]}, locationId:{isInt:[]}, consumerId:{isInt:[]}, deltaPunches:{isInt:[]}})
+, middleware.validate.body(null, { locationId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , routes.update
 );
 

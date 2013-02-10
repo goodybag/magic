@@ -35,11 +35,11 @@ describe('Loyalty Activity', function(){
 
   it('store an event when a user becomes elite', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:11, businessId:1, locationId:1 }, function(err, payload, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + 11 + '/loyalty/' + 1, '123456-XYX', {deltaPunches:5,locationId:1}, function(error, results, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
-            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+            tu.get('/v1/loyalty', function(err, payload, res) {
               assert(res.statusCode == 200);
               payload = JSON.parse(payload);
               assert(!payload.error);
@@ -69,11 +69,11 @@ describe('Loyalty Activity', function(){
 
   it('store an event when a user earns a punch', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.post('/v1/loyaltyStats', { deltaPunches:5, consumerId:11, businessId:1, locationId:1 }, function(err, payload, res) {
+      tu.put('/v1/consumers/' + 11 + '/loyalty/' + 1, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
-            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+            tu.get('/v1/loyalty', function(err, payload, res) {
               assert(res.statusCode == 200);
               payload = JSON.parse(payload);
               assert(!payload.error);
@@ -108,7 +108,7 @@ describe('Loyalty Activity', function(){
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
 
-            tu.get('/v1/loyaltyStats', function(err, payload, res) {
+            tu.get('/v1/loyalty', function(err, payload, res) {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
