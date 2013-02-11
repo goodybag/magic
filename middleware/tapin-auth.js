@@ -20,6 +20,10 @@ module.exports = function(req, res, next){
   if (!authMatch) return next();
   var cardId = authMatch[1];
 
+  // validate the id
+  if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
+    return res.error(errors.auth.INVALID_CARD_ID);
+
   // Determines whether we should put "isFirstTapin" on meta object
   var isFirstTapin = false;
 

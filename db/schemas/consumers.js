@@ -36,7 +36,7 @@ define(function(require){
     }
   , cardId: {
       type: 'text'
-    , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
+    , validators: { len:[10, 12], is: /^\d{6,7}-\w{3}$/ }
     , sanitizers: { trim:[] }
     }
   };
