@@ -397,7 +397,12 @@ module.exports.addProduct = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.json({ error: null, data: null });
+
+      if (result.rowCount !== 0)
+        magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
+      if (inputs.isSpotlight)
+        magic.emit('locations.productSpotlightUpdate', req.params.locationId, inputs.productId, true);
     });
   });
 };
@@ -430,7 +435,10 @@ module.exports.updateProduct = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      return res.json({ error: null, data: null });
+      res.json({ error: null, data: null });
+
+      if (typeof req.body.isSpotlight != 'undefined')
+        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.isSpotlight);
     });
   });
 };
@@ -458,7 +466,9 @@ module.exports.removeProduct = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      return res.json({ error: null, data: null });
+      res.json({ error: null, data: null });
+
+      magic.emit('locations.productStockUpdate', req.params.locationId, req.params.productId, false);
     });
   });
 };
