@@ -4,14 +4,19 @@
 
 var server = require('express')();
 var routes = require('./routes');
+var middleware  = require('../../middleware');
 
 server.get(
   '/v1/session'
+, middleware.profile('GET /v1/session')
+, middleware.profile('get session handler')
 , routes.session
 );
 
 server.post(
   '/v1/session'
+, middleware.profile('POST /v1/session')
+, middleware.profile('create session handler')
 , routes.authenticate
 );
 
@@ -24,17 +29,23 @@ server.post(
 
 server.del(
   '/v1/session'
+, middleware.profile('DELETE /v1/session')
+, middleware.profile('delete session handler')
 , routes.logout
 );
 
 server.post(
   '/v1/oauth'
-  , routes.oauthAuthenticate
+, middleware.profile('POST /v1/oauth')
+, middleware.profile('oauth authenticate handler')
+, routes.oauthAuthenticate
 );
 
 server.get(
   '/v1/oauth'
-  , routes.getOauthUrl
+, middleware.profile('GET /v1/oauth')
+, middleware.profile('oauth get handler')
+, routes.getOauthUrl
 );
 
 module.exports = server;
