@@ -549,3 +549,36 @@ describe('GET /v1/locations/:id/analytics', function() {
     });
   });
 });
+
+describe('/v1/locations/:id/products', function() {
+
+  it('should add and remove products from a location', function(done) {
+    tu.loginAsAdmin(function(error, user){
+      tu.del('/v1/locations/1/products/1', function(err, results, res) {
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/locations/1/products', function(err, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(product) {
+            return product.id === 1;
+          }).length === 0);
+
+          tu.post('/v1/locations/1/products', { productId:1, isSpotlight:false }, function(err, results, res) {
+            assert(res.statusCode == 200);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
+  it('should update the product location', function(done) {
+    tu.loginAsAdmin(function(error, user){
+      tu.put('/v1/locations/1/products/1', {isSpotlight:true}, function(err, results, res) {
+        assert(res.statusCode == 200);
+        tu.logout(done);
+      });
+    });
+  });
+});
