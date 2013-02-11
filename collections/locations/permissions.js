@@ -40,7 +40,7 @@ module.exports = {
   }
 
 , manager: {
-    ['lastKeyTagRequest', 'keyTagRequestPending']
+    read: ['lastKeyTagRequest', 'keyTagRequestPending']
   }
 
 , sales: {

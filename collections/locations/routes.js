@@ -489,6 +489,6 @@ module.exports.submitKeyTagRequest = function(req, res){
 
     magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
 
-    return res.json({ error: null, data: null }):
+    return res.json({ error: null, data: null });
   });
 };
