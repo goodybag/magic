@@ -174,4 +174,30 @@ server.get(
 , routes.getAnalytics
 );
 
+// Locations.addProduct
+server.post(
+  '/v1/locations/:locationId/products'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.validate.body(null, { productId:{ isInt:[] }, isSpotlight:{ is:/true|false|1|0/ }})
+, routes.addProduct
+);
+
+// Locations.updateProduct
+server.put(
+  '/v1/locations/:locationId/products/:productId'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.validate.body(null, { isSpotlight:{ is:/true|false|1|0/ }})
+, routes.updateProduct
+);
+
+// Locations.removeProduct
+server.del(
+  '/v1/locations/:locationId/products/:productId'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, routes.removeProduct
+);
+
 module.exports = server;
