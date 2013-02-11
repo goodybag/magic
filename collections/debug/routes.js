@@ -12,12 +12,29 @@ module.exports.getProfilerData = function(req, res){
     },
     'text/html':function() {
       var netTotalAvg = (data.tree.children || []).reduce(function(acc, node) { return acc + node.totalAverage }, 0);
+      var routes = data.totals.filter(routesFilter);
+      var functions = data.totals.filter(functionsFilter);
+      if (req.query.sort == '-avg') {
+        routes.sort(function(a, b) {
+          return a.totalAverage < b.totalAverage ? 1 : -1;
+        });
+        functions.sort(function(a, b) {
+          return a.localAverage < b.localAverage ? 1 : -1;
+        });
+      } else if (req.query.sort == 'avg') {
+        routes.sort(function(a, b) {
+          return a.totalAverage > b.totalAverage ? 1 : -1;
+        });
+        functions.sort(function(a, b) {
+          return a.localAverage > b.localAverage ? 1 : -1;
+        });
+      }
 
       res.end([
         '<h1>Route Totals</h1>',
         '<table>',
           '<tr><th>Name</th><th>Elapsed</th><th>Calls</th><th>% of All</th><th>Avg</th><th>% of Avg</th></tr>',
-          data.totals.filter(routes).map(function(total) {
+          routes.map(function(total) {
             return [
               '<tr>',
                 '<td>', total.name, '</td>',
@@ -33,7 +50,7 @@ module.exports.getProfilerData = function(req, res){
         '<h1>Function Totals</h1>',
         '<table>',
           '<tr><th>Name</th><th>Elapsed</th><th>Calls</th><th>% of All</th><th>Avg</th><th>% of Avg</th></tr>',
-          data.totals.filter(functions).map(function(total) {
+          functions.map(function(total) {
             return [
               '<tr>',
                 '<td>', total.name, '</td>',
@@ -63,9 +80,9 @@ module.exports.updateProfilerSettings = function(req, res) {
   res.redirect('/v1/debug/profile');
 }
 
-function routes(total) {
+function routesFilter(total) {
   return /^(GET|POST|PUT|PATCH|DELETE)/.test(total.name) == true;
 }
-function functions(total) {
+function functionsFilter(total) {
   return /^(GET|POST|PUT|PATCH|DELETE)/.test(total.name) == false;
 }
