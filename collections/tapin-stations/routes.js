@@ -213,7 +213,8 @@ module.exports.update = function(req, res){
       }
 
       // done
-      return res.json({ error: null, data: null });
+      res.json({ error: null, data: null });
+      magic.emit('tapinstations.update', req.params.id, req.body);
     });
   });
 };
