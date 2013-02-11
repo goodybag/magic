@@ -107,8 +107,7 @@ module.exports.list = function(req, res){
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
     if (includeLocations) {
-      query.locationJoin = 'LEFT JOIN locations ON locations."businessId" = businesses.id';
-      query.fields.add('array_to_json(array_agg(row_to_json(locations.*))) as locations');
+      query.fields.add('array_to_json(array(SELECT row_to_json("locations".*) FROM locations WHERE locations."businessId" = businesses.id)) as locations');
     }
 
     // tag filtering
