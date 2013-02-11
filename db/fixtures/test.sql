@@ -15,6 +15,7 @@ INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", str
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('2', 1, 'Business 2', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('3', 2, 'Business 3', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('4', 2, 'Business 4', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isDeleted") VALUES ('39', 2, 'Amys Ice Cream ', 'http://foobar.com', 'http://placekitten.com/500/500', '000000', '3500 guadalupe St', null, 'Austin', 'TX', 78705, true, false);
 COMMIT;
 SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advance the sequence past the IDs just used
 
@@ -24,6 +25,7 @@ BEGIN;
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (1, 1, 'Burrito', 'Taco', 8, 4, 25, 'http://placekitten.com/200/300');
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 20, 'http://placekitten.com/200/300');
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30, 'http://placekitten.com/200/300');
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (4, 39, 'Ice Cream', 'Treat', 8, 4, 10, 'http://placekitten.com/200/300');
 COMMIT;
 SELECT setval('"businessLoyaltySettings_id_seq"', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
 
@@ -47,6 +49,12 @@ INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, 
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('4', '1', 'Location 4', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('5', '1', 'Location 4', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
 INSERT INTO "locations" (id, "businessId", name, street1, street2, city, state, zip, country, lat, lon, position, "isEnabled") VALUES ('6', '4', 'Location 6', '123 Foobar St', '#1', 'Austin', 'TX', 78701, 'USA', 0, 0, ll_to_earth(0,0), true);
+
+-- amys
+INSERT INTO locations VALUES (51, 39, 'Loc 1', '3500 Guadalupe St', NULL, 'Austin', 'TX', 78705, 'us', NULL, NULL, 30.3012559999999986, -97.7391460000000052, '(-741564.946385488147, -5456652.12764491513, 3218082.66276435275)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true);
+INSERT INTO locations VALUES (52, 39, 'Loc 2', '600 W 28th St', NULL, 'Austin', 'TX', 78705, 'us', NULL, NULL, 30.2935039999999987, -97.7426930000000027, '(-741961.401262949454, -5457037.58970967866, 3217337.57317374088)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true);
+INSERT INTO locations VALUES (53, 39, 'Loc 3', '2109 Northland Drive', NULL, 'Austin', 'TX', 78756, 'us', NULL, NULL, 0, 0, '(6378168, 0, 0)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true);
+
 COMMIT;
 SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance the sequence past the IDs just used
 
