@@ -39,6 +39,10 @@ module.exports = {
     ]
   }
 
+, manager: {
+    ['lastKeyTagRequest', 'keyTagRequestPending']
+  }
+
 , sales: {
     read:   true
   , create: true

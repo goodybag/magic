@@ -318,7 +318,7 @@ module.exports.getAnalytics = function(req, res){
     query2.fields.add("SUM(CASE WHEN type='consumers.visit' AND data::hstore->'isFirstVisit' = 'false' THEN 1 ELSE 0 END) AS \"returnVisits\"");
     query2.fields.add("SUM(CASE WHEN type='consumers.tapin' THEN 1 ELSE 0 END) AS tapins");
     query2.fields.add("SUM(CASE WHEN type='consumers.becameElite' THEN 1 ELSE 0 END) AS \"becameElites\"");
-    
+
     var query3 = sql.query([
       'SELECT {fields} FROM photos',
         'INNER JOIN locations',
@@ -365,5 +365,23 @@ module.exports.getAnalytics = function(req, res){
 
       return res.json({ error: null, data: stats });
     });
+  });
+};
+
+/**
+ * Submit Keytag request
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.submitKeyTagRequest = function(req, res){
+  var TAGS = ['get-location-analytics', req.uuid];
+  logger.routes.debug(TAGS, 'fetching location analytics');
+
+  var $update = { lastKeyTagRequest: 'now', keyTagRequestPending: true };
+
+  db.locations.update(req.param('locationId'), $update, function(error){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    return res.json({ error: null, data: null }):
   });
 };

@@ -71,7 +71,7 @@ describe('GET /v1/locations', function() {
       assert(payload.data[0].name == 'Location 1');
       assert(payload.data[1].name == 'Location 2');
       assert(payload.meta.total > 1);
-      
+
       tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
@@ -332,6 +332,62 @@ describe('GET /v1/locations/:id', function() {
       done();
     });
   });
+
+  it('should let sales see keytag info', function(done) {
+    tu.loginAsSales(function(){
+      tu.get('/v1/locations/1/key-tag-requests', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should let managers see keytag info', function(done) {
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      tu.get('/v1/locations/1/key-tag-requests', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should not let consumers see keytag info', function(done) {
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      tu.get('/v1/locations/1/key-tag-requests', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/locations', function() {
@@ -544,6 +600,27 @@ describe('GET /v1/locations/:id/analytics', function() {
       tu.get('/v1/locations/abcd/analytics', function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 404);
+        tu.logout(done);
+      });
+    });
+  });
+});
+
+describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
+  it('should put in a request for key tags', function(done){
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      tu.get('/v1/locations/1/key-tag-requests', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
         tu.logout(done);
       });
     });

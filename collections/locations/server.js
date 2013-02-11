@@ -137,6 +137,7 @@ server.post(
 // Locations.get
 server.get(
   '/v1/locations/:locationId'
+, middleware.applyGroups(applyGroups.manager)
 , middleware.permissions(permissions)
 , routes.get
 );
@@ -172,6 +173,14 @@ server.get(
 , middleware.applyGroups(applyGroups.manager)
 , middleware.auth.allow('admin', 'sales', 'manager')
 , routes.getAnalytics
+);
+
+// Locations.submitKeyTagRequest
+server.post(
+  '/v1/locations/:locationId/key-tag-requests'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, routes.submitKeyTagRequest
 );
 
 module.exports = server;
