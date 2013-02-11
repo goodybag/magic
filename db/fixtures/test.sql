@@ -73,6 +73,7 @@ INSERT INTO "users" (id, email, password) VALUES ('16', 'consumer5@gmail.com', '
 INSERT INTO "users" (id, email, password) VALUES ('17', 'consumer6@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('18', 'consumer7@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('19', null, null);
+INSERT INTO "users" (id, email, password) VALUES ('20', 'not_registered@gmail.com', null);
 
 INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -112,6 +113,7 @@ INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "c
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('11', '17', 'Consumer', 'Six', 'consumer6', '778899-CBB');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('12', '18', 'Consumer', 'Six', 'consumer6', '778899-CBC');
 INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('13', '19', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAA');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('14', '20', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAB');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 

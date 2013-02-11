@@ -369,6 +369,101 @@ module.exports.getAnalytics = function(req, res){
 };
 
 /**
+ * Add a product to the location
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.addProduct = function(req, res){
+  var TAGS = ['location-add-product', req.uuid];
+
+  var inputs = req.body;
+
+  // retrieve db client
+  db.getClient(TAGS[0], function(error, client){
+    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+
+    var query = sql.query([
+      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "isSpotlight")',
+        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $isSpotlight',
+          'FROM locations',
+          'WHERE locations.id = $locationId',
+            'AND NOT EXISTS (SELECT 1 FROM "productLocations" WHERE "productId" = $productId AND "locationId" = $locationId)'
+    ]);
+    query.$('productId', inputs.productId);
+    query.$('locationId', req.params.locationId);
+    query.$('isSpotlight', !!inputs.isSpotlight);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
+ * Update the productLocation
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.updateProduct = function(req, res){
+  var TAGS = ['location-update-product', req.uuid];
+
+  if (typeof req.body.isSpotlight == 'undefined') {
+    return res.error(errors.input.VALIDATION_FAILED, 'No valid values supplied for update')
+  }
+
+  // retrieve db client
+  db.getClient(TAGS[0], function(error, client){
+    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+
+    var query = sql.query([
+      'UPDATE "productLocations" SET {updates} WHERE "locationId" = $locationId AND "productId" = $productId'
+    ]);
+    query.$('productId', req.params.productId);
+    query.$('locationId', req.params.locationId);
+    query.updates = sql.fields().addUpdateMap(req.body, query);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
+ * Remove a product from the location
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.removeProduct = function(req, res){
+  var TAGS = ['location-remove-product', req.uuid];
+
+  // retrieve db client
+  db.getClient(TAGS[0], function(error, client){
+    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+
+    var query = sql.query([
+      'DELETE FROM "productLocations" WHERE "locationId" = $locationId AND "productId" = $productId'
+    ]);
+    query.$('productId', req.params.productId);
+    query.$('locationId', req.params.locationId);
+
+    client.query(query.toString(), query.$values, function(error, result){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, result);
+
+      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+      return res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
  * Submit Keytag request
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
