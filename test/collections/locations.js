@@ -641,9 +641,9 @@ describe('/v1/locations/:id/products', function() {
 
 describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
   it('should put in a request for key tags', function(done){
-    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+    tu.login({email: 'manager_redeem3@gmail.com', password: 'password'}, function(error, user){
       assert(!error);
-      tu.get('/v1/locations/1/key-tag-requests', function(err, payload, res) {
+      tu.post('/v1/locations/2/key-tag-requests', function(err, payload, res) {
 
         assert(!err);
         assert(res.statusCode == 200);
@@ -651,10 +651,29 @@ describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
         payload = JSON.parse(payload);
 
         assert(!payload.error);
-        assert(payload.data.lastKeyTagRequest);
-        assert(payload.data.keyTagRequestPending);
 
         tu.logout(done);
+      });
+    });
+  });
+
+  it('should reset the request for the key tag', function(done){
+    tu.loginAsSales(function(){
+      tu.put('/v1/locations/2', { keyTagRequestPending: false }, function(error, results){
+        assert(!error);
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(!results.error);
+
+        tu.get('/v1/locations/2', function(error, results){
+          assert(!error);
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.keyTagRequestPending === false);
+
+          tu.logout(done);
+        });
       });
     });
   });

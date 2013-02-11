@@ -143,4 +143,11 @@ module.exports = {
       locationId     : locationId
     });
   }
+
+, 'locations.keyTagRequest':
+  function (locationId) {
+    insert('locations.keyTagRequest', {
+      locationId     : locationId
+    });
+  }
 };

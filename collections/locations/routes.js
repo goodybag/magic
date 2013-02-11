@@ -477,6 +477,8 @@ module.exports.submitKeyTagRequest = function(req, res){
   db.locations.update(req.param('locationId'), $update, function(error){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
+
     return res.json({ error: null, data: null }):
   });
 };
