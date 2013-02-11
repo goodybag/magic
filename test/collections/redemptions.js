@@ -124,7 +124,6 @@ describe('POST /v1/redemptions', function() {
 
           tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
             tu.post('/v1/redemptions', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
-              assert(!err);
               assert(res.statusCode == 200);
               tu.logout(function() {
 
