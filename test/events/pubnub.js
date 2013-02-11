@@ -167,3 +167,70 @@ describe('Tapin Station Updates: ', function() {
     });
   });
 });
+
+describe('Location Product Stock Updates: ', function() {
+
+  it('should receive an event through pubnub when a product is removed from a location', function(done) {
+
+    pubnub.subscribe({
+        channel:'location-1.productStockUpdate',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.del('/v1/locations/1/products/1', function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.productId === 1);
+          assert(message.isAvailable === false);
+          pubnub.unsubscribe({ channel:'location-1.productStockUpdate' });
+          done();
+        }
+    });
+  });
+
+  it('should receive an event through pubnub when a product is added to a location', function(done) {
+
+    pubnub.subscribe({
+        channel:'location-1.productStockUpdate',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.post('/v1/locations/1/products', {productId:1}, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          pubnub.unsubscribe({ channel:'location-1.productStockUpdate' });
+          done();
+        }
+    });
+  });
+});
+
+describe('Location Product Spotlight Updates: ', function() {
+
+  it('should receive an event through pubnub when a product spotlight is changed', function(done) {
+
+    pubnub.subscribe({
+        channel:'location-1.productSpotlightUpdate',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/locations/1/products/1', { isSpotlight:false }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.productId === 1);
+          assert(message.isSpotlight === false);
+          pubnub.unsubscribe({ channel:'location-1.productSpotlightUpdate' });
+          done();
+        }
+    });
+  });
+});
