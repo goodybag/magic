@@ -15,6 +15,15 @@ require('./utils');
 var Profiler = require('clouseau');
 Profiler.enabled = true;
 Profiler.catchAll = true;
+
+try {
+  var testProfileDump = require('fs').readFileSync('./test-profile-dump.json', 'utf8');
+  testProfileDump = JSON.parse(testProfileDump);
+  // Profiler.tree = testProfileDump.tree;
+  Profiler.totals = testProfileDump.totals;
+} catch (e) {
+  console.log('failed to load profile dump:', e);
+}
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
 // create server
@@ -78,9 +87,10 @@ require('./collections/activity');
 
 describe('GET /v1/debug/profile', function() {
   it('should give us profiling stats on the previous tests', function(done) {
-    tu.httpRequest({ path:'/v1/debug/profile', method:'GET', headers:{ accept:'text/html' }}, null, function(err, payload, res) {  
+    tu.httpRequest({ path:'/v1/debug/profile?sort=-avg', method:'GET', headers:{ accept:'text/html' }}, null, function(err, payload, res) {  
       assert(res.statusCode == 200);
       require('fs').writeFileSync('./test-profile.html', payload);
+      require('fs').writeFileSync('./test-profile-dump.json', JSON.stringify({ totals:Profiler.totals }));
       done();
     });
   });
