@@ -101,6 +101,27 @@ module.exports = {
     });
   }
 
+// Locations
+// =========
+
+, 'locations.productStockUpdate':
+  function (locationId, productId, isAvailable){
+    pubnub.publish({
+        channel:'location-' + locationId + '.productStockUpdate',
+        message:{ productId:+productId, isAvailable:!!isAvailable },
+        callback:logErrors
+    });
+  }
+
+, 'locations.productSpotlightUpdate':
+  function (locationId, productId, isSpotlight){
+    pubnub.publish({
+        channel:'location-' + locationId + '.productSpotlightUpdate',
+        message:{ productId:+productId, isSpotlight:!!isSpotlight },
+        callback:logErrors
+    });
+  }
+
 // Tapin Stations
 // ==============
 

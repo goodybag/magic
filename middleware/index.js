@@ -8,4 +8,5 @@ module.exports = {
 , permissions : require('./permissions')
 , defaults    : require('./defaults')
 , profile     : require('./profile')
+, dump        : require('./dump')
 }
