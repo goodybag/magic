@@ -291,6 +291,12 @@ module.exports.get = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-product', req.uuid];
 
+  var inputs = req.body;
+  var categories = inputs.categories;
+  var tags = inputs.tags;
+  delete inputs.categories;
+  delete inputs.tags;
+
   var stage = {
     // Once we receive the client, kick everything off by
     clientReceived: function(error, client){
@@ -306,8 +312,8 @@ module.exports.create = function(req, res){
     // If they didn't provide categories or tags, move on to the next step
   , ensureCategoriesAndTags: function(client){
       var
-        checkCategories = (req.body.categories && req.body.categories.length > 0)
-      , checkTags       = (req.body.tags && req.body.tags.length > 0)
+        checkCategories = (categories && categories.length > 0)
+      , checkTags       = (tags && tags.length > 0)
       ;
 
       // Run these guys in parallel and ensure in the end they both work
@@ -322,7 +328,7 @@ module.exports.create = function(req, res){
                 'AND "productCategories".id IN ({categoryIds})'
           ]);
           query.$('businessId', req.body.businessId);
-          query.categoryIds = [].concat(req.body.categories).map(function(i) { return parseInt(i,10); }).join(',');
+          query.categoryIds = [].concat(categories).map(function(i) { return parseInt(i,10); }).join(',');
           client.query(query.toString(), query.$values, done);
         }
 
@@ -336,17 +342,17 @@ module.exports.create = function(req, res){
                 'AND "productTags".id IN ({tagIds})'
           ]);
           query.$('businessId', req.body.businessId);
-          query.tagIds = [].concat(req.body.tags).map(function(i) { return parseInt(i,10); }).join(',');
+          query.tagIds = [].concat(tags).map(function(i) { return parseInt(i,10); }).join(',');
           client.query(query.toString(), query.$values, done);
         }
 
       }, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
+        if (checkCategories && results.categories.rows[0].count < categories.length)
           return res.error(errors.input.INVALID_CATEGORY_IDS);
 
-        if (checkTags && results.tags.rows[0].count < req.body.tags.length)
+        if (checkTags && results.tags.rows[0].count < tags.length)
           return res.error(errors.input.INVALID_TAGS);
 
         return stage.insertProduct(client);
@@ -357,7 +363,6 @@ module.exports.create = function(req, res){
     // Validate and insert the provided product
   , insertProduct: function(client){
 
-      var inputs = req.body;
       if (!inputs.isEnabled) inputs.isEnabled = true;
 
       if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
@@ -366,12 +371,6 @@ module.exports.create = function(req, res){
       inputs.likes = 0;
       inputs.wants = 0;
       inputs.tries = 0;
-
-      var categories = inputs.categories;
-      var tags = inputs.tags;
-      delete inputs.categories;
-      delete inputs.tags;
-
 
       var error = utils.validate(inputs, db.schemas.products);
       if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
@@ -387,7 +386,7 @@ module.exports.create = function(req, res){
 
         // If they didn't provide categories or tags, stop here
         if ((!categories || categories.length === 0) && (!tags || tags.length === 0))
-          return res.json({ error: null, data: results.rows[0] });
+          return stage.end(results.rows[0].id);
 
         // Move on to next stage
         stage.insertProductCategoriesTagsRelations(client, results.rows[0].id, categories, tags);
@@ -466,8 +465,19 @@ module.exports.create = function(req, res){
       client.query(query.toString(), query.$values, function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        return res.json({ error: null, data: { id: productId } });
+        stage.end(productId);
       });
+    }
+
+  , end: function(productId) {
+      res.json({ error: null, data: { id: productId } });
+
+      inputs.id = productId;
+      if (categories)
+        inputs.categories = categories;
+      if (tags)
+        inputs.tags = tags;
+      magic.emit('products.create', inputs);
     }
   };
 
@@ -483,6 +493,12 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-product', req.uuid];
 
+  var inputs = req.body;
+  var categories = inputs.categories;
+  var tags = inputs.tags;
+  delete inputs.categories;
+  delete inputs.tags;
+
   var stage = {
     // Once we receive the client, kick everything off by
     clientReceived: function(error, client){
@@ -496,8 +512,8 @@ module.exports.update = function(req, res){
 
    , ensureCategoriesAndTags: function(client){
       var
-        checkCategories = (req.body.categories && req.body.categories.length > 0)
-      , checkTags       = (req.body.tags && req.body.tags.length > 0)
+        checkCategories = (categories && categories.length > 0)
+      , checkTags       = (tags && tags.length > 0)
       ;
 
       // Run these guys in parallel and ensure in the end they both work
@@ -514,7 +530,7 @@ module.exports.update = function(req, res){
               'WHERE "productCategories".id IN ({categoryIds})'
           ]);
           query.$('productId', req.param('productId'));
-          query.categoryIds = [].concat(req.body.categories).map(function(i) { return parseInt(i,10); }).join(',');
+          query.categoryIds = [].concat(categories).map(function(i) { return parseInt(i,10); }).join(',');
           client.query(query.toString(), query.$values, done);
         }
 
@@ -530,17 +546,17 @@ module.exports.update = function(req, res){
               'WHERE "productTags".id IN ({tagIds})'
           ]);
           query.$('productId', req.param('productId'));
-          query.tagIds = [].concat(req.body.tags).map(function(i) { return parseInt(i,10); }).join(',');
+          query.tagIds = [].concat(tags).map(function(i) { return parseInt(i,10); }).join(',');
           client.query(query.toString(), query.$values, done);
         }
 
       }, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        if (checkCategories && results.categories.rows[0].count < req.body.categories.length)
+        if (checkCategories && results.categories.rows[0].count < categories.length)
           return res.error(errors.input.INVALID_CATEGORY_IDS);
 
-        if (checkTags && results.tags.rows[0].count < req.body.tags.length)
+        if (checkTags && results.tags.rows[0].count < tags.length)
           return res.error(errors.input.INVALID_TAGS);
 
         return stage.updateProduct(client);
@@ -549,16 +565,11 @@ module.exports.update = function(req, res){
 
     // Validate and insert the provided product
   , updateProduct: function(client){
-      var inputs = req.body;
+
       if (!inputs.isEnabled) inputs.isEnabled = true;
       delete inputs.likes;
       delete inputs.wants;
       delete inputs.tries;
-
-      var categories = inputs.categories;
-      var tags = inputs.tags;
-      delete inputs.categories;
-      delete inputs.tags;
 
       var error = utils.validate(inputs, db.schemas.products);
       if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
@@ -573,7 +584,7 @@ module.exports.update = function(req, res){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         if (!categories && !tags)
-          return res.json({ error: null, data: null });
+          return stage.end();
 
         stage.removeCategoriesAndTags(client, req.param('productId'), results.rows[0].businessId, categories, tags);
       });
@@ -687,11 +698,20 @@ module.exports.update = function(req, res){
       , onComplete = function(error, results){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          return res.json({ error: null, data: null });
+          stage.end();
         }
       ;
 
       utils.parallel(inParallel, onComplete);
+    }
+  , end: function() {
+    res.json({ error: null, data: null });
+
+    if (categories)
+      inputs.categories = categories;
+    if (tags)
+      inputs.tags = tags;
+    magic.emit('products.update', req.param('productId'), inputs);
     }
   };
 

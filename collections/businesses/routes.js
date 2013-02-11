@@ -250,19 +250,37 @@ module.exports.update = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      if (typeof tags == 'undefined') return res.json({ error: null, data: null });
+      if (typeof tags == 'undefined') {
+        res.json({ error: null, data: null });
+        magic.emit('businesses.update', req.params.id, inputs);
+        if (inputs.logoUrl)
+          magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
+        return;
+      }
 
       client.query('DELETE FROM "businessTags" WHERE "businessId" = $1', [req.params.id], function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        if (tags.length === 0) return res.json({ error: null, data: null });
+        if (tags.length === 0) {
+          res.json({ error: null, data: null });
+          magic.emit('businesses.update', req.params.id, inputs);
+          if (inputs.logoUrl)
+            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
+          return;
+        }
 
         var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
         query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
         client.query(query, [req.params.id].concat(tags), function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          return res.json({ error: null, data: null });
+          res.json({ error: null, data: null });
+
+          if (tags)
+            inputs.tags = tags;
+          magic.emit('businesses.update', req.params.id, inputs);
+          if (inputs.logoUrl)
+            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
         });
       });
     });
@@ -332,7 +350,9 @@ module.exports.updateLoyalty = function(req, res){
 
         logger.db.debug(TAGS, result);
 
-        return res.json({ error: null, data: null });
+        res.json({ error: null, data: null });
+
+        magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
       }
     );
   });
