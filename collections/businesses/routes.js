@@ -250,16 +250,22 @@ module.exports.update = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      if (typeof tags == 'undefined') return res.json({ error: null, data: null });
+      if (typeof tags == 'undefined') {
+        res.json({ error: null, data: null });
+        magic.emit('businesses.update', req.params.id, inputs);
+        if (inputs.logoUrl)
+          magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
+        return;
+      }
 
       client.query('DELETE FROM "businessTags" WHERE "businessId" = $1', [req.params.id], function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         if (tags.length === 0) {
           res.json({ error: null, data: null });
-          magic.emit('business.update', req.params.id, inputs);
+          magic.emit('businesses.update', req.params.id, inputs);
           if (inputs.logoUrl)
-            magic.emit('business.logoUpdate', req.params.id, inputs.logoUrl);
+            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
           return;
         }
 
@@ -272,9 +278,9 @@ module.exports.update = function(req, res){
 
           if (tags)
             inputs.tags = tags;
-          magic.emit('business.update', req.params.id, inputs);
+          magic.emit('businesses.update', req.params.id, inputs);
           if (inputs.logoUrl)
-            magic.emit('business.logoUpdate', req.params.id, inputs.logoUrl);
+            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
         });
       });
     });

@@ -95,7 +95,7 @@ module.exports = {
 , 'businesses.logoUpdate':
   function (businessId, logoUrl){
     pubnub.publish({
-        channel:'business-' + businessId + '.update',
+        channel:'business-' + businessId + '.logoUpdate',
         message:{ logoUrl:logoUrl },
         callback:logErrors
     });

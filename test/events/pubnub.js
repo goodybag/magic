@@ -22,6 +22,7 @@ describe('Product Likes: ', function() {
         callback:function (message) {
           assert(message.userId == '11130');
           assert(message.productId == '5');
+          pubnub.unsubscribe({ channel:'products.like' });
           done();
         }
     });
@@ -44,6 +45,7 @@ describe('Product Creates: ', function() {
         },
         callback:function (message) {
           assert(message.product.name == 'Pubnub Test Product');
+          pubnub.unsubscribe({ channel:'business-1.productCreate' });
           done();
         }
     });
@@ -67,6 +69,7 @@ describe('Product Updates: ', function() {
         callback:function (message) {
           assert(message.productId == '5');
           assert(message.updates.name == 'Product 3.5555555');
+          pubnub.unsubscribe({ channel:'business-1.productUpdate' });
           done();
         }
     });
@@ -89,7 +92,31 @@ describe('Business Loyalty Settings Updates: ', function() {
         },
         callback:function (message) {
           assert(message.updates.requiredItem == 'The Triforce');
+          pubnub.unsubscribe({ channel:'business-1.loyaltySettingsUpdate' });
           done();
+        }
+    });
+  });
+});
+
+describe('Business Logo Updates: ', function() {
+
+  it('should receive an event through pubnub when a business logo is updated', function(done) {
+
+    pubnub.subscribe({
+        channel:'business-1.logoUpdate',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/businesses/1', { logoUrl:'http://loljk.net/logo.png' }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.logoUrl == 'http://loljk.net/logo.png');
+          pubnub.unsubscribe({ channel:'business-1.logoUpdate' });
+          done(); 
         }
     });
   });
@@ -111,28 +138,7 @@ describe('Business Updates: ', function() {
         },
         callback:function (message) {
           assert(message.updates.name == 'Business 3D!');
-          done();
-        }
-    });
-  });
-});
-
-describe('Business Logo Updates: ', function() {
-
-  it('should receive an event through pubnub when a business logo is updated', function(done) {
-
-    pubnub.subscribe({
-        channel:'business-1.updateLogo',
-        connect:function() {
-          tu.loginAsAdmin(function(error, user) {
-            tu.put('/v1/businesses/1', { logoUrl:'http://loljk.net/logo.png' }, function(err, results, res) {
-              assert(res.statusCode == 200);
-              tu.logout();
-            });
-          });
-        },
-        callback:function (message) {
-          assert(message.updates.logoUrl == 'http://loljk.net/logo.png');
+          pubnub.unsubscribe({ channel:'business-1.update' });
           done();
         }
     });
