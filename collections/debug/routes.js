@@ -64,8 +64,8 @@ module.exports.updateProfilerSettings = function(req, res) {
 }
 
 function routes(total) {
-  return (total.name.charAt(0) == '/');
+  return /^(GET|POST|PUT|PATCH|DELETE)/.test(total.name) == true;
 }
 function functions(total) {
-  return (total.name.charAt(0) != '/');
+  return /^(GET|POST|PUT|PATCH|DELETE)/.test(total.name) == false;
 }
