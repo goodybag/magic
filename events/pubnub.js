@@ -101,6 +101,18 @@ module.exports = {
     });
   }
 
+// Tapin Stations
+// ==============
+
+, 'tapinstations.update':
+  function (tapinStationId, updates){
+    pubnub.publish({
+        channel:'tapinstation-' + tapinStationId + '.update',
+        message:{ updates:updates },
+        callback:logErrors
+    });
+  }
+
 };
 
 function logErrors(response) {

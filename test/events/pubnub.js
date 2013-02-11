@@ -144,3 +144,26 @@ describe('Business Updates: ', function() {
     });
   });
 });
+
+describe('Tapin Station Updates: ', function() {
+
+  it('should receive an event through pubnub when a tapin station is updated', function(done) {
+
+    pubnub.subscribe({
+        channel:'tapinstation-1.update',
+        connect:function() {
+          tu.loginAsAdmin(function(error, user) {
+            tu.put('/v1/tapin-stations/1', { galleryEnabled:false }, function(err, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout();
+            });
+          });
+        },
+        callback:function (message) {
+          assert(message.updates.galleryEnabled === false);
+          pubnub.unsubscribe({ channel:'tapinstation-1.update' });
+          done();
+        }
+    });
+  });
+});
