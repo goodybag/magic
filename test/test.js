@@ -1,4 +1,6 @@
 process.env['GB_ENV'] = 'test';
+var tu = require('../lib/test-utils');
+var assert = require('better-assert')
 
 // unit tests
 // ==========
@@ -8,8 +10,16 @@ require('./utils');
 // functional tests
 // ================
 
+
+// enable profiler
+var Profiler = require('clouseau');
+Profiler.enabled = true;
+Profiler.catchAll = true;
+Profiler.init({ displayInterval:0, useMicrotime:true });
+
 // create server
 var app = require('../lib/server').createAppServer();
+app.use(require('../collections/debug/server'));
 app.use(require('../collections/auth/server'));
 app.use(require('../collections/charities/server'));
 app.use(require('../collections/businesses/server'));
@@ -64,8 +74,18 @@ require('./collections/reviews');
 require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
-require('./events/pubnub');
+// require('./events/pubnub');
+
+describe('GET /v1/debug/profile', function() {
+  it('should give us profiling stats on the previous tests', function(done) {
+    tu.httpRequest({ path:'/v1/debug/profile', method:'GET', headers:{ accept:'text/html' }}, null, function(err, payload, res) {  
+      assert(res.statusCode == 200);
+      require('fs').writeFileSync('./test-profile.html', payload);
+      done();
+    });
+  });
+});    
 
 after(function() {
-  this.httpServer.close();
+  this.httpServer.close();  
 });

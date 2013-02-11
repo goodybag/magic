@@ -12,62 +12,95 @@ var applyGroups = require('./apply-groups');
 // cashiers.list
 server.get(
   '/v1/cashiers'
+, middleware.profile('GET /v1/cashiers', ['limit'])
+, middleware.profile('query defaults')
 , middleware.defaults.query({
     limit : 20
   })
+, middleware.profile('validate query')
 , middleware.validate.query({
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(perms)
+, middleware.profile('list cashiers handler')
 , routes.list
 );
 
 // cashiers.get
 server.get(
   '/v1/cashiers/:id'
+, middleware.profile('GET /v1/cashiers/:id')
+, middleware.profile('apply groups cashiers owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('permissions')
 , middleware.permissions(perms)
+, middleware.profile('get cashier handler')
 , routes.get
 );
 
 // cashiers.create
 server.post(
   '/v1/cashiers'
+, middleware.profile('POST /v1/cashiers')
+, middleware.profile('apply groups cashiers owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(perms)
+, middleware.profile('validate body')
 , middleware.validate.body(schema)
+, middleware.profile('create cashier handler')
 , routes.create
 );
 
 // cashiers.update
 server.put(
   '/v1/cashiers/:id'
+, middleware.profile('PUT /v1/cashiers/:id')
+, middleware.profile('apply groups cashiers owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('permissions')
 , middleware.permissions(perms)
+, middleware.profile('validate body')
 , middleware.validate.body(schema)
+, middleware.profile('update cashier handler')
 , routes.update
 );
 
 // cashiers.update
 server.post(
   '/v1/cashiers/:id'
+, middleware.profile('POST /v1/cashiers/:id')
+, middleware.profile('apply groups cashiers owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('permissions')
 , middleware.permissions(perms)
+, middleware.profile('validate body')
 , middleware.validate.body(schema)
+, middleware.profile('update cashier handler')
 , routes.update
 );
 
 // cashiers.delete
 server.del(
   '/v1/cashiers/:id'
+, middleware.profile('DELETE /v1/cashiers/:id')
+, middleware.profile('apply groups cashiers owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('delete cashier handler')
 , routes.del
 );
 
