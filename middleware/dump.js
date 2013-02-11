@@ -1,6 +1,6 @@
 var 
   logger = {
-    routes: require('../lib/logger')({app: 'api', component: 'routes'})
+    middleware: require('../lib/logger')({app: 'api', component: 'middleware'})
   }
 ;
 
@@ -9,12 +9,14 @@ module.exports = function(req, res, next){
   var TAGS = [req.uuid, 'dump'];
 
   var data = {
-    headers: req.headers
+    url: req.url
+  , method: req.method
+  , headers: req.headers
   , params: req.params
   , query: req.query
   , body: req.body
   };
 
-  logger.routes.debug(TAGS, data);
+  logger.middleware.debug(TAGS, data);
   next();
 };
