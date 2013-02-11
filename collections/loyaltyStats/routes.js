@@ -82,6 +82,9 @@ module.exports.get = function(req, res){
       query.fields.add('businesses.name AS "businessName"');
       query.fields.add('"businessLoyaltySettings".reward AS reward');
       query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
+      query.fields.add('"businessLoyaltySettings"."punchesRequiredToBecomeElite" AS "punchesRequiredToBecomeElite"');
+      query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
+      query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
       query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
       query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
@@ -95,7 +98,7 @@ module.exports.get = function(req, res){
         query.where.and('"userLoyaltyStats"."businessId" = $businessId');
         query.$('businessId', req.param('businessId'));
       }
-
+console.log(query.toString());
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
@@ -159,6 +162,9 @@ module.exports.get = function(req, res){
             stat.lastVisit = new Date();
             stat.reward = results.settings.reward;
             stat.photoUrl = results.settings.photoUrl;
+            stat.regularPunchesRequired = results.settings.regularPunchesRequired;
+            stat.elitePunchesRequired = results.settings.elitePunchesRequired;
+            stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
 
             res.json({ error: null, data: stat });
           });
