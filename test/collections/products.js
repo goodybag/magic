@@ -65,7 +65,11 @@ describe('GET /v1/products', function() {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data[0].tags);
+      assert(payload.data[0].tags[0].id);
+      assert(payload.data[0].tags[0].tag);
       assert(payload.data[0].categories);
+      assert(payload.data[0].categories[0].id);
+      assert(payload.data[0].categories[0].name);
       done();
     });
   });
