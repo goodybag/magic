@@ -2,163 +2,234 @@ var yaml = require('js-yaml');
 var tu = require('../lib/test-utils');
 var assert = require('better-assert');
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj)); // :TODO: non-hack deepclone
+}
+
+// Functions List
+// ==============
+// helper for collecting tests to run
+function FunctionsList() {
+  this.fns = [];
+}
+FunctionsList.prototype.add = function() {
+  this.fns.push({ fn:arguments[0], args:Array.prototype.slice.call(arguments, 1) });
+};
+FunctionsList.prototype.forEach = function(cb) {
+  return this.fns.forEach(function(item) {
+    cb(item.fn, item.args);
+  });
+};
+
+
+// Resource Document
+// =================
+// represents the entire resource -- the top of the structure
+function ResourceDoc(data) {
+  this.data = deepClone(data);
+}
+ResourceDoc.prototype.makePath = function() {
+  if (this.__path) { return this.__path; }
+  var path = this.data.resource.path;
+  for (var k in this.data.resource.params) {
+    path = path.replace(RegExp(':'+k,'ig'), this.data.resource.params[k].eg);
+  }
+  this.__path = path;
+  return path;
+};
+ResourceDoc.prototype.makeTestDescription = function() { return 'Chaos: '+this.data.resource.path; }
+ResourceDoc.prototype.iterateMethods = function(cb) {
+  for (var methodName in this.data.methods) {
+    if (/delete/i.test(methodName)) continue; // can't do DELETE without losing our test data
+    var method = new MethodDoc(this, methodName);
+    cb(method);
+  }
+};
+
+// Tests Composition
+// - decides which tests to run on the resource
+ResourceDoc.prototype.makeTests = function() {
+  var tests = new FunctionsList();
+  var resource = this.data.resource;
+  this.iterateMethods(function(method) {
+
+    tests.add(testValidRequest, method);
+
+    method.iterateAttributes(function(key) {
+      tests.add(testInvalidRequest, method, key);
+    })
+
+  });
+  return tests;
+};
+
+
+// Method Document
+// ===============
+// represents a single method on a resource
+function MethodDoc(resourceDoc, methodName) {
+  this.resourceDoc = resourceDoc;
+  this.methodName = methodName;
+  this.data = deepClone(resourceDoc.data.methods[methodName]);
+
+  this.attrs = (methodName == 'get') ? this.data.query : this.data.body;
+  this.attrKeys = (this.attrs) ? Object.keys(this.attrs) : [];
+  this.numAttr = this.attrKeys.length;
+}
+MethodDoc.prototype.getDesc = function() { return this.data.desc; };
+MethodDoc.prototype.getAttrType = function(key) { return this.attrs[key].type; };
+MethodDoc.prototype.needsAuth = function() { return (this.data.auth && this.data.auth.required) };
+MethodDoc.prototype.getAuthCreds = function() { return this.data.auth.eg; };
+MethodDoc.prototype.iterateAttributes = function(cb) { this.attrKeys.forEach(cb); };
+MethodDoc.prototype.makeRequestDoc = function() {
+  var reqDesc = {
+    method: this.methodName.toUpperCase(),
+    path: '/v1'+this.resourceDoc.makePath()
+  };
+  if (this.methodName == 'get')
+    reqDesc.query = this.data.query;
+  else 
+    reqDesc.body = this.data.body;
+  return new RequestDoc(reqDesc);
+};
+
+
+// Request Document
+// ================
+// represents a single request to a resource
+function RequestDoc(data) {
+  this.data = deepClone(data);
+}
+RequestDoc.prototype.setInput = function(key, value) {
+  if (this.data.query) {
+    this.data.query[key].eg = value;
+  } else if (this.data.body) {
+    this.data.body[key].eg = value;
+  }
+};
+RequestDoc.prototype.toOptions = function() {
+  var options = deepClone(this.data);
+  options.headers = options.headers || {};
+
+  if (options.body) {
+    delete options.body;
+    options.headers['content-type'] = 'application/json';
+  }
+
+  if (options.query) {
+    var queryParams = [];
+    for (var k in options.query) {
+      if (Array.isArray(options.query[k].eg)) {
+        for (var i=0; i < options.query[k].eg.length; i++) {
+          queryParams.push(k+'[]='+options.query[k].eg[i]);
+        }
+      } else {
+        queryParams.push(k+'='+options.query[k].eg);
+      }
+    }
+    options.path += '?'+queryParams.join('&').replace(/ /g, '+');
+    delete options.query;
+  }
+
+  return options;
+};
+RequestDoc.prototype.toPayload = function() {
+  if (this.data.body) {
+    var payload = {};
+    for (var k in this.data.body) {
+      payload[k] = this.data.body[k].eg;
+    }
+    return JSON.stringify(payload);
+  }
+  return null;
+};
+
+
+// Processes
+// =========
+
+// Main
+function doChaos(doc) {
+  describe(doc.makeTestDescription(), function() {
+    doc.makeTests().forEach(function(test, args) {
+      test.apply(null, args);
+    });
+  });
+}
+
+// Request dispatch helper
+function request(methodDoc, requestDoc, cb) {
+  var doRequest = function() {
+    tu.httpRequest(requestDoc.toOptions(), requestDoc.toPayload(), function(err, result, res) {
+      if (methodDoc.needsAuth()) {
+        tu.logout(function() { cb(res, result); })
+      } else {
+        cb(res, result);
+      }
+    });
+  };
+
+  if (methodDoc.needsAuth()) {
+    tu.login(methodDoc.getAuthCreds(), doRequest);
+  } else {
+    doRequest();
+  }
+};
+
+// A test type
+function testValidRequest(methodDoc) {
+  it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 200)
+        console.log('Failed chaos valid-request test'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+}
+
+// A test type
+function testInvalidRequest(methodDoc, corruptKey) {
+  // check if attribute is corruptable
+  if (/^any/.test(methodDoc.getAttrType(corruptKey)))
+    return;
+
+  it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    // corrupt the value
+    requestDoc.setInput(corruptKey, (function(type) {
+      switch (type) {
+        case 'string*':
+        case 'string':
+        case 'url':
+          return 123456789;
+        case 'int':
+          return 'CORRUPTION STRING';
+      }
+    })(methodDoc.getAttrType(corruptKey)));
+
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 400)
+        console.log('Failed chaos invalid-request test'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+}
+
+// Run Chaos Tests
+// ===============
 function loadDescription(collection, cb) {
   var doc = require('fs').readFileSync('./collections/'+collection+'/description.yaml', 'utf8');
-  yaml.loadAll(doc, cb);
-}
-
-function buildBaseRequest(method, path) {
-  return {
-    method: method.toUpperCase(),
-    path: '/v1'+path,
-    headers: {}
-  };
-}
-
-function badValue(type) {
-  switch (type) {
-    case 'string*':
-    case 'string':
-    case 'url':
-      return 123456789;
-    case 'int':
-      return 'CORRUPTION STRING';
-  }
-}
-
-function buildPayload(bodyDesc, badIndex) {
-  var payload = {};
-  var i = 0;
-  for (var k in bodyDesc) {
-    if (i++ === badIndex)
-      payload[k] = badValue(bodyDesc[k].type);
-    else
-      payload[k] = bodyDesc[k].eg;
-  }
-    
-  return JSON.stringify(payload);
-}
-
-function buildQuerystring(queryDesc, badIndex) {
-  var queryParams = [];
-  var i = 0;
-  for (var k in queryDesc) {
-    if (i++ === badIndex) {
-      queryParams.push(k+'='+badValue(queryDesc[k].type));
-    } else {
-      if (Array.isArray(queryDesc[k].eg)) {
-        for (var j=0; j < queryDesc[k].eg.length; j++)
-          queryParams.push(k+'[]='+queryDesc[k].eg[j]);
-      } else
-        queryParams.push(k+'='+queryDesc[k].eg);
-    }
-  }
-  return '?'+queryParams.join('&').replace(/ /g, '+');
-}
-
-function loginWrapper(auth, cb) {
-  if (auth && auth.required) {
-    tu.login(auth.eg, cb);
-  } else {
-    cb();
-  }
-}
-
-function doRequest(request, payload, expectedStatus, cb) {
-  tu.httpRequest(request, payload, function(err, result, res) {
-    if (res.statusCode !== expectedStatus)
-      console.log('Failed chaos request'),
-        console.log(request),
-        console.log(payload),
-        console.log(res.statusCode),
-        console.log(result);
-    assert(res.statusCode === expectedStatus);
-    cb();
-  });
-}
-
-function doChaos(doc) {
-  var k;
-  // fill path params
-  var path = doc.resource.path;
-  for (k in doc.resource.params) {
-    path = path.replace(RegExp(':'+k,'ig'), doc.resource.params[k].eg);
-  }
-  describe('Chaos: '+doc.resource.path, function() {
-    for (var method in doc.methods) {
-      if (/delete/i.test(method)) { continue; } // cant do DELETE -- we need the test data
-      (function(method) {
-
-        it('should respond 200 on '+doc.methods[method].desc+' with valid input', function(done) {
-
-          var payload = null;
-          var request = buildBaseRequest(method, path);
-
-          if (doc.methods[method].query)
-            request.path += buildQuerystring(doc.methods[method].query);
-          
-          if (doc.methods[method].body) {
-            payload = buildPayload(doc.methods[method].body);
-            request.headers['content-type'] = 'application/json';
-          }
-
-          loginWrapper(
-            doc.methods[method].auth,
-            function(err, user) { 
-              doRequest(request, payload, 200, function() {
-                if (user) tu.logout(done);
-                else done();
-              });
-            }
-          );
-        });
-
-        var numAttr = 0,
-          attrs = (method == 'get') ? doc.methods[method].query : doc.methods[method].body,
-          attrKeys = [];
-        if (attrs) {
-          attrKeys = Object.keys(attrs);
-          numAttr = attrKeys.length;
-        }
-
-        for (var i=0; i < numAttr; i++) {
-          (function(i) {
-
-            if (attrs[attrKeys[i]].type == 'any' || attrs[attrKeys[i]].type == 'any*') {
-              return; // can't corrupt the permissive
-            }
-
-            it('should respond 400 on '+doc.methods[method].desc+' with invalid input', function(done) {
-
-              var payload = null;
-              var request = buildBaseRequest(method, path);
-
-              if (doc.methods[method].query && method == 'get') {
-                request.path += buildQuerystring(doc.methods[method].query, i);
-              }
-                
-              if (doc.methods[method].body && method != 'get') {
-                payload = buildPayload(doc.methods[method].body, i);
-                request.headers['content-type'] = 'application/json';
-              }
-
-              loginWrapper(
-                doc.methods[method].auth,
-                function(err, user) { 
-                  doRequest(request, payload, 400, function() {
-                    if (user) tu.logout(done);
-                    else done();
-                  });
-                }
-              );
-            });
-
-          })(i);
-        }
-
-      })(method);
-    }
-  });
+  yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
 }
 
 loadDescription('businesses', doChaos);
