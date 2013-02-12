@@ -42,6 +42,7 @@ define(function(require){
   , isFirstVisit: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
   }
   , dateTime: {
       type: 'timestamp'

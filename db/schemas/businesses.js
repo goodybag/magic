@@ -58,22 +58,27 @@ define(function(require){
   , isGB: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isVerified: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isEnabled: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isDeleted: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isFlagged: {
       type: 'boolean'
     , validators: {is: /true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , comment: {
       type: 'text'

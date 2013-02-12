@@ -32,10 +32,12 @@ define(function(require){
   , loyaltyEnabled: {
       type: 'boolean'
     , validators: { is: /true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , galleryEnabled: {
       type: 'boolean'
     , validators: { is: /true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   };
   return tapinStations;
