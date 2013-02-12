@@ -258,7 +258,8 @@ module.exports.authenticate = function(req, res){
 
         // Setup groups
         query = sql.query([
-          'SELECT array_agg(groups.name) as groups FROM "usersGroups"',
+          'SELECT array_agg(groups.name) as groups, array_agg(groups.id) as "groupIds"',
+            'FROM "usersGroups"',
             'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
             'WHERE "usersGroups"."userId" = $id',
             'GROUP BY "usersGroups"."userId"'
@@ -269,6 +270,13 @@ module.exports.authenticate = function(req, res){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           user.groups = results.rows[0] ? results.rows[0].groups : [];
+          user.groupIds = {};
+
+          if (user.groups.length > 0 && results.rows[0].groupIds.length > 0){
+            for (var i = user.groups.length - 1; i >= 0; i--){
+              user.groupIds[user.groups[i]] = results.rows[0].groupIds[i];
+            }
+          }
 
           // Save user in session
           req.session.user = user;

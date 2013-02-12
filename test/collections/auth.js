@@ -24,6 +24,7 @@ describe('POST /v1/session', function() {
       assert(!results.error);
       assert(results.data.id);
       assert(utils.isArray(results.data.groups));
+      assert(results.data.groupIds.admin > 0);
       tu.logout(done);
     });
   });
