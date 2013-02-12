@@ -209,7 +209,7 @@ module.exports.create = function(req, res){
 
       // add tags
       var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
-      query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
+      query += (Array.isArray(tags) ? tags : [tags]).map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
       client.query(query, [business.id].concat(tags), function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
