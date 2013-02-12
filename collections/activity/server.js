@@ -10,6 +10,12 @@ var routes      = require('./routes');
 server.get(
   '/v1/activity'
 , middleware.profile('GET /v1/activity')
+, middleware.profile('validate query')
+, middleware.validate.query({
+    consumerId     : { isInt:[] },
+    locationId     : { isInt:[] },
+    businessId     : { isInt:[] }
+  })
 , middleware.profile('list activity handler')
 , routes.list
 );

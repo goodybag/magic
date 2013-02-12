@@ -62,6 +62,31 @@ function testValidRequest(methodDoc) {
 }
 
 // A test type
+function testPartialRequest(methodDoc, onlyKey) {
+  it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    // filter out all but the target key
+    var removedRequiredField = false;
+    methodDoc.iterateAttributes(function(key) {
+      if (key != onlyKey)
+        removedRequiredField = removedRequiredField || requestDoc.clearInput(key);
+    });
+
+    var expectedStatus = (removedRequiredField) ? 400 : 200;
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== expectedStatus)
+        console.log('Failed chaos partial-request test (expected '+expectedStatus+')'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == expectedStatus);
+      done();
+    });
+  });
+}
+
+// A test type
 function testInvalidRequest(methodDoc, corruptKey) {
   // check if attribute is corruptable
   if (/^any/.test(methodDoc.getAttrType(corruptKey)))
@@ -141,6 +166,7 @@ ResourceDoc.prototype.makeTests = function() {
   this.iterateMethods(function(method) {
     tests.add(testValidRequest, method);
     method.iterateAttributes(function(key) {
+      tests.add(testPartialRequest, method, key);
       tests.add(testInvalidRequest, method, key);
     })
   });
@@ -191,6 +217,17 @@ RequestDoc.prototype.setInput = function(key, value) {
     this.data.body[key].eg = value;
   }
 };
+RequestDoc.prototype.clearInput = function(key) {
+  var wasRequired = false;
+  if (this.data.query) {
+    wasRequired = this.data.query[key].required;
+    delete this.data.query[key];
+  } else if (this.data.body) {
+    wasRequired = this.data.body[key].required;
+    delete this.data.body[key];
+  }
+  return wasRequired;
+};
 RequestDoc.prototype.toOptions = function() {
   var options = deepClone(this.data);
   options.headers = options.headers || {};
@@ -236,4 +273,5 @@ function loadDescription(collection, cb) {
   yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
 }
 
+loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);

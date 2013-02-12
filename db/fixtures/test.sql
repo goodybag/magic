@@ -476,6 +476,13 @@ INSERT INTO events (id, type, date, data) VALUES (20, 'consumers.becameElite', N
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
+-- ACTIVITIY
+
+BEGIN;
+INSERT INTO activity (id, "consumerId", "businessId", "locationId", type, date, data) VALUES (1, 1, 1, 1, 'foobar', now(), '{"foo":"bar"}');
+COMMIT;
+SELECT setval('activity_id_seq', (SELECT MAX(id) from "activity")); -- advance the sequence past the IDs just used
+
 --
 BEGIN;
 INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd');
