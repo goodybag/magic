@@ -423,6 +423,22 @@ module.exports.createCollection = function(req, res){
 };
 
 /**
+ * Delete consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.deleteCollection = function(req, res){
+  var TAGS = ['delete-consumers-collection', req.uuid];
+  logger.routes.debug(TAGS, 'deleting collection ' + req.params.collectionId);
+
+  db.api.collections.remove(req.param('collectionId'), function(error){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.json({ error: null, data: null });
+  });
+};
+
+/**
  * Add product to consumer collection
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
