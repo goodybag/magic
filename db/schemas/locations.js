@@ -128,7 +128,7 @@ define(function(require){
     , validators: { is:/true|false|1|0/ }
     }
   , lastKeyTagRequest: {
-      type: 'date'
+      type: 'timestamp with time zone'
     }
   , keyTagRequestPending: {
       type: 'boolean'

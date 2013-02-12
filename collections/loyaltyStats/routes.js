@@ -98,7 +98,7 @@ module.exports.get = function(req, res){
         query.where.and('"userLoyaltyStats"."businessId" = $businessId');
         query.$('businessId', req.param('businessId'));
       }
-console.log(query.toString());
+
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);

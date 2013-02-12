@@ -223,14 +223,13 @@ module.exports.update = function(req, res){
     }
 
     logger.db.debug(TAGS, query.toString());
-
     // run update query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       // do we need to update the productLocations?
-      if (isUpdatingPosition) {
+      if (!isUpdatingPosition) {
         return res.json({ error: null, data: null });
       }
 
@@ -482,9 +481,9 @@ module.exports.submitKeyTagRequest = function(req, res){
   var TAGS = ['get-location-analytics', req.uuid];
   logger.routes.debug(TAGS, 'fetching location analytics');
 
-  var $update = { lastKeyTagRequest: 'now', keyTagRequestPending: true };
+  var $update = { lastKeyTagRequest: 'now()', keyTagRequestPending: true };
 
-  db.locations.update(req.param('locationId'), $update, function(error){
+  db.api.locations.update(req.param('locationId'), $update, function(error){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
