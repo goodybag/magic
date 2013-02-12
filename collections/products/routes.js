@@ -887,11 +887,15 @@ module.exports.updateFeelings = function(req, res) {
         if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
         if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
 
-        // fallback inputs to current feelings
+        // fallback inputs to current feelings and ensure it's a boolean
         var currentFeelings = result.rows[0];
         if (typeof inputs.isLiked == 'undefined') { inputs.isLiked = !!currentFeelings.isLiked; }
+        else { inputs.isLiked = toBool(inputs.isLiked); }
         if (typeof inputs.isWanted == 'undefined') { inputs.isWanted = !!currentFeelings.isWanted; }
+        else { inputs.isWanted = toBool(inputs.isWanted); }
         if (typeof inputs.isTried == 'undefined') { inputs.isTried = !!currentFeelings.isTried; }
+        else { inputs.isTried = toBool(inputs.isTried); }
+
 
         var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
         query.updates = sql.fields();
@@ -962,3 +966,7 @@ module.exports.updateFeelings = function(req, res) {
     });
   });
 };
+
+function toBool(v) {
+  return (typeof v == 'boolean') ? v : /1|true/.test(v);
+}
