@@ -199,12 +199,25 @@ module.exports.oauthAuthenticate = function(req, res){
     // This is a sham, but whatevs
   , lookupUsersGroups: function(user){
       var query = sql.query([
-        'SELECT array_agg(groups.name) as groups, array_agg(groups.id) as "groupIds"',
-          'FROM "usersGroups"',
-          'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
-          'WHERE "usersGroups"."userId" = $id',
-          'GROUP BY "usersGroups"."userId"'
-      ]);
+          'SELECT'
+        , '  consumers.id            as "consumerId"'
+        , ', managers.id             as "managerId"'
+        , ', cashiers.id             as "cashierId"'
+        , ', array_agg(groups.name)  as groups'
+        , 'FROM "usersGroups"'
+        , '  LEFT JOIN groups'
+        , '    ON "usersGroups"."groupId" = groups.id'
+        , '  LEFT JOIN consumers'
+        , '    ON consumers."userId" = "usersGroups"."userId"'
+        , '  LEFT JOIN managers'
+        , '    ON managers."userId"  = "usersGroups"."userId"'
+        , '  LEFT JOIN cashiers'
+        , '    ON cashiers."userId"  = "usersGroups"."userId"'
+        , 'WHERE cashiers."userId"  = $id'
+        , 'OR    managers."userId"  = $id'
+        , 'OR    consumers."userId" = $id'
+        , 'GROUP BY consumers.id, managers.id, cashiers.id;'
+        ]);
 
       query.$('id', user.id);
 
@@ -216,11 +229,10 @@ module.exports.oauthAuthenticate = function(req, res){
 
           user.groups = results.rows[0] ? results.rows[0].groups : [];
           user.groupIds = {};
-          if (user.groups.length > 0 && results.rows[0].groupIds.length > 0){
-            for (var i = user.groups.length - 1; i >= 0; i--){
-              user.groupIds[user.groups[i]] = results.rows[0].groupIds[i];
-            }
-          }
+
+          if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
+          if (result.managerId)   user.groupIds.manager   = result.managerId;
+          if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
 
           stage.setSessionAndSend(user);
         });
@@ -286,25 +298,38 @@ module.exports.authenticate = function(req, res){
 
         // Setup groups
         query = sql.query([
-          'SELECT array_agg(groups.name) as groups, array_agg(groups.id) as "groupIds"',
-            'FROM "usersGroups"',
-            'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
-            'WHERE "usersGroups"."userId" = $id',
-            'GROUP BY "usersGroups"."userId"'
+          'SELECT'
+        , '  consumers.id            as "consumerId"'
+        , ', managers.id             as "managerId"'
+        , ', cashiers.id             as "cashierId"'
+        , ', array_agg(groups.name)  as groups'
+        , 'FROM "usersGroups"'
+        , '  LEFT JOIN groups'
+        , '    ON "usersGroups"."groupId" = groups.id'
+        , '  LEFT JOIN consumers'
+        , '    ON consumers."userId" = "usersGroups"."userId"'
+        , '  LEFT JOIN managers'
+        , '    ON managers."userId"  = "usersGroups"."userId"'
+        , '  LEFT JOIN cashiers'
+        , '    ON cashiers."userId"  = "usersGroups"."userId"'
+        , 'WHERE cashiers."userId"  = $id'
+        , 'OR    managers."userId"  = $id'
+        , 'OR    consumers."userId" = $id'
+        , 'GROUP BY consumers.id, managers.id, cashiers.id;'
         ]);
+
         query.$('id', user.id);
 
         client.query(query.toString(), query.$values, function(error, results){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          user.groups = results.rows[0] ? results.rows[0].groups : [];
+          var result = results.rows[0];
+          user.groups = result ? result.groups : [];
           user.groupIds = {};
 
-          if (user.groups.length > 0 && results.rows[0].groupIds.length > 0){
-            for (var i = user.groups.length - 1; i >= 0; i--){
-              user.groupIds[user.groups[i]] = results.rows[0].groupIds[i];
-            }
-          }
+          if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
+          if (result.managerId)   user.groupIds.manager   = result.managerId;
+          if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
 
           // Save user in session
           req.session.user = user;

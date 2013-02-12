@@ -24,7 +24,24 @@ describe('POST /v1/session', function() {
       assert(!results.error);
       assert(results.data.id);
       assert(utils.isArray(results.data.groups));
-      assert(results.data.groupIds.admin > 0);
+      tu.logout(done);
+    });
+  });
+
+  it('should authenticate a user and return the user object', function(done) {
+    // First need to login
+    var user = {
+      email:    "tferguson@gmail.com"
+    , password: "password"
+    };
+    tu.post('/v1/session', user, function(error, results){
+      // Make sure there were no login errors
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      assert(results.data.id);
+      assert(utils.isArray(results.data.groups));
+      assert(results.data.groupsIds.consumer == 1);
       tu.logout(done);
     });
   });
