@@ -48,14 +48,17 @@ define(function(require){
   , isVerified: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isArchived: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , isEnabled: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   };
   return products;

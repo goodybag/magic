@@ -35,7 +35,7 @@ var
         if (schema[key].sanitizers) {
           var v = data[key];
           for (var s in schema[key].sanitizers) {
-            var sv = sanitize(''+v);
+            var sv = sanitize(v);
             v = sv[s].apply(sv, [].concat(schema[key].sanitizers[s]));
           }
           req.body[key] = v;

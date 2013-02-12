@@ -26,6 +26,7 @@ define(function(require){
   , isFeatured: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , name: {
       type: 'text'
