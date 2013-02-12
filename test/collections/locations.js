@@ -18,9 +18,9 @@ describe('GET /v1/locations', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 1);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Location 1');
+      assert(payload.data[0].id);
+      assert(payload.data[0].businessId);
+      assert(payload.data[0].name);
       assert(payload.data[0].isEnabled == null || payload.data[0].isEnabled == undefined);
       assert(payload.meta.total > 1);
       done();
@@ -57,7 +57,7 @@ describe('GET /v1/locations', function() {
 
       assert(!payload.error);
       assert(payload.data.length === 1);
-      assert(payload.data[0].name == 'Location 2');
+      assert(payload.data[0].name);
       assert(payload.meta.total > 1);
       done();
     });
@@ -119,8 +119,8 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.data[1].name == 'Location 2');
+      assert(payload.data[0].name == 'Loc 1');
+      assert(payload.data[1].name == 'Loc 2');
       done();
     });
   });

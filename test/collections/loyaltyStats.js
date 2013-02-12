@@ -113,6 +113,38 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
     });
   });
 
+  it('should respond with record not found for businesses that do not exist', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/loyalty/businesses/' + 999999999, '778899-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 404);
+        payload = JSON.parse(payload);
+        assert(payload.error);
+        assert(payload.error.name === "NOT_FOUND");
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond with record not found for businesses that do have not setup their loyalty program', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/loyalty/businesses/' + 5, '778899-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 404);
+        payload = JSON.parse(payload);
+        assert(payload.error);
+        assert(payload.error.name === "NOT_FOUND");
+
+        tu.logout(done);
+      });
+    });
+  });
+
 });
 
 describe('PUT /v1/loyalty/:loyaltyId', function() {
@@ -244,7 +276,7 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   it('should not allow consumers to make changes via tapin auth', function(done) {
     var consumerId = 9, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-consumer4', { deltaPunches:5, locationId:1 }, function(error, results, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-CO4', { deltaPunches:5, locationId:1 }, function(error, results, res) {
         assert(res.statusCode === 403);
         tu.logout(done);
       });

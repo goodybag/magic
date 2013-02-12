@@ -1,4 +1,6 @@
 process.env['GB_ENV'] = 'test';
+var tu = require('../lib/test-utils');
+var assert = require('better-assert')
 
 // unit tests
 // ==========
@@ -8,8 +10,25 @@ require('./utils');
 // functional tests
 // ================
 
+
+// enable profiler
+var Profiler = require('clouseau');
+Profiler.enabled = true;
+Profiler.catchAll = true;
+
+try {
+  var testProfileDump = require('fs').readFileSync('./test-profile-dump.json', 'utf8');
+  testProfileDump = JSON.parse(testProfileDump);
+  // Profiler.tree = testProfileDump.tree;
+  Profiler.totals = testProfileDump.totals;
+} catch (e) {
+  console.log('failed to load profile dump:', e);
+}
+Profiler.init({ displayInterval:0, useMicrotime:true });
+
 // create server
 var app = require('../lib/server').createAppServer();
+app.use(require('../collections/debug/server'));
 app.use(require('../collections/auth/server'));
 app.use(require('../collections/charities/server'));
 app.use(require('../collections/businesses/server'));
@@ -64,8 +83,19 @@ require('./collections/reviews');
 require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
-require('./events/pubnub');
+// require('./events/pubnub');
+
+describe('GET /v1/debug/profile', function() {
+  it('should give us profiling stats on the previous tests', function(done) {
+    tu.httpRequest({ path:'/v1/debug/profile?sort=-avg', method:'GET', headers:{ accept:'text/html' }}, null, function(err, payload, res) {  
+      assert(res.statusCode == 200);
+      require('fs').writeFileSync('./test-profile.html', payload);
+      require('fs').writeFileSync('./test-profile-dump.json', JSON.stringify({ totals:Profiler.totals }));
+      done();
+    });
+  });
+});    
 
 after(function() {
-  this.httpServer.close();
+  this.httpServer.close();  
 });

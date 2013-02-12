@@ -124,7 +124,6 @@ describe('POST /v1/redemptions', function() {
 
           tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
             tu.post('/v1/redemptions', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
-              assert(!err);
               assert(res.statusCode == 200);
               tu.logout(function() {
 
@@ -191,7 +190,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should allow business owners to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-manager_redeem1', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(error, results, res) {
+      tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-MA1', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(done);

@@ -15,6 +15,9 @@ var all = [
 , 'dateBecameElite'
 , 'reward'
 , 'photoUrl'
+, 'regularPunchesRequired'
+, 'elitePunchesRequired'
+, 'punchesRequiredToBecomeElite'
 ];
 
 module.exports = {
@@ -42,6 +45,9 @@ module.exports = {
     , 'dateBecameElite'
     , 'reward'
     , 'photoUrl'
+    , 'regularPunchesRequired'
+    , 'elitePunchesRequired'
+    , 'punchesRequiredToBecomeElite'
     ]
   }
 

@@ -82,6 +82,9 @@ module.exports.get = function(req, res){
       query.fields.add('businesses.name AS "businessName"');
       query.fields.add('"businessLoyaltySettings".reward AS reward');
       query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
+      query.fields.add('"businessLoyaltySettings"."punchesRequiredToBecomeElite" AS "punchesRequiredToBecomeElite"');
+      query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
+      query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
       query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
       query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
@@ -95,7 +98,7 @@ module.exports.get = function(req, res){
         query.where.and('"userLoyaltyStats"."businessId" = $businessId');
         query.$('businessId', req.param('businessId'));
       }
-
+console.log(query.toString());
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         logger.db.debug(TAGS, result);
@@ -106,42 +109,65 @@ module.exports.get = function(req, res){
         if (!req.param('businessId'))
           return res.json({ error: null, data: [] });
 
-        // Create a default version of the record they're requesting
-        var stat = {
-          consumerId:       consumerId
-        , businessId:       req.param('businessId')
-        , numPunches:       0
-        , totalPunches:     0
-        , numRewards:       0
+        // They've requested either a loyaltystat that hasn't been created yet
+        // Or a business that doesn't exist
+        // Or a business that hasn't setup their loyalty program
+        // First, check the two latter
+        query = [
+          'select businesses.id from businesses'
+        ,   'join "businessLoyaltySettings"'
+        ,     'on businesses.id = "businessLoyaltySettings"."businessId"'
+        , 'where businesses.id = $1'
+        ].join(' ');
 
-          // If this is a tapin-auth, we know this is actually a visit
-          // Not TOTALLY accurate but mostly and will get updated eventually
-        , visitCount:       req.header('authorization').indexOf('Tapin') > -1 ? 1 : 0
+        client.query(query, [req.param('businessId')], function(error, result){
+          if (error)
+            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        , lastVisit:        'now()'
-        , isElite:          false
-        , dateBecameElite:  null
-        };
+          if (result.rows.length === 0)
+            return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-        utils.parallel({
-          stats: function(done){
-            db.api.userLoyaltyStats.insert(stat, done);
-          }
+          // Ok, the business and business loyalty setting both existed
+          // Create a default version of the record they're requesting
+          var stat = {
+            consumerId:       consumerId
+          , businessId:       req.param('businessId')
+          , numPunches:       0
+          , totalPunches:     0
+          , numRewards:       0
 
-        , settings: function(done){
-            db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
-              done(e, r); // find passes back 3 params, which messes with the parallel fn results
-            });
-          }
-        }, function(error, results){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          
-          stat.id = results.stats.id;
-          stat.lastVisit = new Date();
-          stat.reward = results.settings.reward;
-          stat.photoUrl = results.settings.photoUrl;
+            // If this is a tapin-auth, we know this is actually a visit
+            // Not TOTALLY accurate but mostly and will get updated eventually
+          , visitCount:       req.header('authorization').indexOf('Tapin') > -1 ? 1 : 0
 
-          res.json({ error: null, data: stat });
+          , lastVisit:        'now()'
+          , isElite:          false
+          , dateBecameElite:  null
+          };
+
+          utils.parallel({
+            stats: function(done){
+              db.api.userLoyaltyStats.insert(stat, done);
+            }
+
+          , settings: function(done){
+              db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
+                done(e, r); // find passes back 3 params, which messes with the parallel fn results
+              });
+            }
+          }, function(error, results){
+            if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+            stat.id = results.stats.id;
+            stat.lastVisit = new Date();
+            stat.reward = results.settings.reward;
+            stat.photoUrl = results.settings.photoUrl;
+            stat.regularPunchesRequired = results.settings.regularPunchesRequired;
+            stat.elitePunchesRequired = results.settings.elitePunchesRequired;
+            stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
+
+            res.json({ error: null, data: stat });
+          });
         });
       });
     });

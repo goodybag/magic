@@ -73,9 +73,12 @@ describe('GET /v1/businesses', function() {
       assert(!err);
       var payload = JSON.parse(results);
       assert(!payload.error);
-      assert(payload.data[0].locations.length > 0);
-      assert(payload.data[0].locations[0].lat != null && payload.data[0].locations[0].lat != undefined);
-      assert(payload.data[0].locations[0].lon != null && payload.data[0].locations[0].lon != undefined);
+      for (var i = payload.data.length - 1; i >= 0; i--){
+        for (var ii = payload.data[i].locations.length - 1; ii >= 0; ii--){
+          assert(payload.data[i].locations[ii].lat != null && payload.data[i].locations[ii].lat != undefined);
+          assert(payload.data[i].locations[ii].lon != null && payload.data[i].locations[ii].lon != undefined);
+        }
+      }
       done();
     });
   });

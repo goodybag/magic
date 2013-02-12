@@ -15,116 +15,148 @@ var
 // ProductCategories.list
 server.get(
   '/v1/product-categories'
+, middleware.profile('GET /v1/product-categories')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('list product categories handler')
 , routes.list
 );
 
 // ProductCategories.create
 server.post(
   '/v1/product-categories'
+, middleware.profile('POST /v1/product-categories')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
+, middleware.profile('create product category handler')
 , routes.create
 );
 
 // ProductCategories.get
 server.get(
   '/v1/product-categories/:id'
+, middleware.profile('GET /v1/product-categories/:id')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('get product category handler')
 , routes.get
 );
 
 // ProductCategories.update
 server.put(
   '/v1/product-categories/:id'
+, middleware.profile('PUT /v1/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
-, routes.update
-);
-
-// ProductCategories.update
-server.put(
-  '/v1/product-categories/:id'
-, auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
-, validate(schema)
+, middleware.profile('update product category handler')
 , routes.update
 );
 
 // ProductCategories.update
 server.post(
   '/v1/product-categories/:id'
+, middleware.profile('POST /v1/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
+, middleware.profile('update product category handler')
 , routes.update
 );
 
 // ProductCategories.delete
 server.del(
   '/v1/product-categories/:id'
+, middleware.profile('DELETE /v1/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('delete product category handler')
 , routes.del
 );
 
 // ProductCategories.list
 server.get(
   '/v1/businesses/:businessId/product-categories'
+, middleware.profile('GET /v1/businesses/:businessId/product-categories')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('list product categories handler')
 , routes.list
 );
 
 // ProductCategories.create
 server.post(
   '/v1/businesses/:businessId/product-categories'
+, middleware.profile('POST /v1/businesses/:businessId/product-categories')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
+, middleware.profile('create product category handler')
 , routes.create
 );
 
 // ProductCategories.get
 server.get(
   '/v1/businesses/:businessId/product-categories/:id'
+, middleware.profile('GET /v1/businesses/:businessId/product-categories/:id')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('get product category handler')
 , routes.get
 );
 
 // ProductCategories.update
 server.put(
   '/v1/businesses/:businessId/product-categories/:id'
+, middleware.profile('PUT /v1/businesses/:businessId/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
-, routes.update
-);
-
-// ProductCategories.update
-server.put(
-  '/v1/businesses/:businessId/product-categories/:id'
-, auth.allow('admin', 'sales')
-, middleware.permissions(permissions)
-, validate(schema)
+, middleware.profile('update product category handler')
 , routes.update
 );
 
 // ProductCategories.update
 server.post(
   '/v1/businesses/:businessId/product-categories/:id'
+, middleware.profile('POST /v1/businesses/:businessId/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('validate body')
 , validate(schema)
+, middleware.profile('update product category handler')
 , routes.update
 );
 
 // ProductCategories.delete
 server.del(
   '/v1/businesses/:businessId/product-categories/:id'
+, middleware.profile('DELETE /v1/businesses/:businessId/product-categories/:id')
+, middleware.profile('auth allow')
 , auth.allow('admin', 'sales')
+, middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('delete product category handler')
 , routes.del
 );
 
