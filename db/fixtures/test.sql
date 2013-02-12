@@ -274,6 +274,23 @@ INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", 
 -- Make sure we're well ahead of the current product id
 INSERT INTO "products" (id, "businessId", name, description, price, "photoUrl", likes, wants, tries, "isVerified", "isEnabled") VALUES ('2222', '1', 'Product 3.6', 'A product', 5500, 'http://placekitten.com/200/300', 0, 0, 0, true, true);
 
+-- amy's
+
+INSERT INTO products VALUES (46175, 39, 'Cop Stop', 'Sweet Cream blended with espresso and mini sour cream donuts', NULL, 'https://www.filepicker.io/api/file/2Lig6wrwQzyN1w9OGIDS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46183, 39, 'Anchors Away', 'Sweet Cream blended with Mexican vanilla, Dr. Pepper, Sailor Jerry’s Run, and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/ZUlI4IzSSgxkCXIPMwsg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46172, 39, 'Butter Pecan', 'Sweet Cream infused with butter and brown sugar, blended with whole pecan and pecan pieces', NULL, 'https://www.filepicker.io/api/file/RkZ4ZzvGQMKltCuJwKbg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46173, 39, 'Pumpkin', 'Sweet cream blended with pumpkin custard mix, pumpkin, cinnamon, nutmeg, clove, and ginger', NULL, 'https://www.filepicker.io/api/file/oDnBUQewQ3yCKPOCCMLw', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46174, 39, 'Lemon Ginger', 'Sweet cream blended with pumpkin, cream cheese, clove, allspice, nutmeg, ground cinnamon and ginger, pasteurized egg yolks, and lemon juice.  ', NULL, 'https://www.filepicker.io/api/file/pWY6ORTlQDScxuAjy6af', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46177, 39, 'Shiner Ice Cream', 'Sweet cream bended with shiner bock beer and corn syrup', NULL, 'https://www.filepicker.io/api/file/O4jhkdktT3OUwlesxKJv', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46178, 39, 'Mexican Vanilla', 'Amy''s most popular flavor, made from a hybrid of vanilla bean that offers a richer, sweeter vanilla flavor', NULL, 'https://www.filepicker.io/api/file/y4fbBh3TVUlxCeG3KC0A', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46179, 39, 'Oreo', 'Sweet cream infused with Mexican vanilla blended with oreo cookies', NULL, 'https://www.filepicker.io/api/file/EjnEsxIuQ0W3JhYtTRA6', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46180, 39, 'Guinness', 'Sweet Cream blended with Guinness Beer and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/BHA51Fv0RQO2rHvFoszj', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46184, 39, 'Raspberry Ice', 'This is a tasty ice flavor', NULL, 'https://www.filepicker.io/api/file/wde2vjbYRtCq7vV9kcxZ', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46185, 39, 'Black Metal Stout', 'When Jeffery Stuffing moved to Austin to start a new brewery, Jester King, the first Austin Business he felt a connection to was amys ice creams.  Visiting the 6th street store with his brother Michael they both imagined "how cool it would be to have a Jester King Brewery ice cream flavor".', NULL, 'https://www.filepicker.io/api/file/R8FNWxejRECrxT5lIBJS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46186, 39, 'Strawberry', 'Sweet Cream blended with corn syrup and sugared strawberries', NULL, 'https://www.filepicker.io/api/file/OT5yTqOTRw27wfehnr2k', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46181, 39, 'Coffee Toffee', 'Sweet cream blended with espresso and Amys own homemade toffee', NULL, 'https://www.filepicker.io/api/file/jml0U62JTsGso8xb2LMF', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46176, 39, 'Milk Shakes', 'A blended Combination of milk and ice cream of your choice topped with complimentary whipped cream.  Additionally for a small charge feel free to have any of our crush’ns blended into your shake.', NULL, 'https://www.filepicker.io/api/file/vkwJeAMkQFCABPLOfpus', 0, 0, 0, NULL, NULL, true);
+
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 
@@ -284,6 +301,15 @@ INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeature
 INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('2', '1', '2', 'Category 2', false);
 INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('3', '2', '1', 'Category 1', true);
 INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES ('4', '3', '1', 'DUMB CATEGORY WILL BE DELETED', true);
+
+-- amys
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (114, 39, 0, 'Ice Creams', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (6458, 39, 0, 'Drinks', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (6459, 39, 0, 'Frozen Yogurt', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (6460, 39, 0, 'Fruit Ices', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (6461, 39, 0, 'Ice Cream Cakes', false);
+INSERT INTO "productCategories" ("id", "businessId", "order", "name", "isFeatured") VALUES (6462, 39, 0, 'Chocolate Covered Strawberries', false);
+
 COMMIT;
 SELECT setval('"productCategories_id_seq"', (SELECT MAX(id) from "productCategories")); -- advance the sequence past the IDs just used
 
@@ -293,6 +319,13 @@ BEGIN;
 INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('1', '1', '1');
 INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('2', '1', '2');
 INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES ('3', '2', '3');
+
+-- amys
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES (4, 46172, 114);
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES (5, 46173, 114);
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES (6, 46174, 114);
+INSERT INTO "productsProductCategories" ("id", "productId", "productCategoryId") VALUES (7, 46175, 114);
+
 COMMIT;
 SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "productsProductCategories")); -- advance the sequence past the IDs just used
 
@@ -308,6 +341,14 @@ INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('7', '4', '1', '4', 0, 0, ll_to_earth(0, 0), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('8', '4', '1', '5', 0, 0, ll_to_earth(0, 0), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES ('9', '5', '1', '5', 0, 0, ll_to_earth(0, 0), false);
+
+-- amys
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES (10, 46175, 39, 51, 10, 10, ll_to_earth(10, 10), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES (11, 46183, 39, 51, 10, 10, ll_to_earth(10, 10), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES (12, 46172, 39, 51, 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES (13, 46173, 39, 51, 10, 10, ll_to_earth(10, 10), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "isSpotlight") VALUES (14, 46174, 39, 51, 10, 10, ll_to_earth(10, 10), true);
+
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
 
@@ -360,6 +401,14 @@ INSERT INTO "productTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
 INSERT INTO "productTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
 INSERT INTO "productTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
 INSERT INTO "productTags" (id, "businessId", tag) VALUES ('5', '3', 'uniquetag');
+
+-- amys
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (6, 39, 'Tag1');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (7, 39, 'Tag2');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (8, 39, 'Tag3');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (9, 39, 'Tag4');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (10, 39, 'Tag5');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (11, 39, 'Tag6');
 COMMIT;
 SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used
 
@@ -371,9 +420,17 @@ INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('2',
 INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('3', '3', '2');
 INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('4', '4', '3');
 INSERT INTO "productsProductTags" (id, "productTagId", "productId") VALUES ('5', '5', '3');
+
+-- amys
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (6, 6, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (7, 7, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (8, 8, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (9, 9, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (10, 10, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (11, 11, 46183);
+
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used
-
 -- COLLECTIONS
 
 BEGIN;
