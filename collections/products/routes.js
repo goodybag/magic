@@ -419,6 +419,7 @@ module.exports.create = function(req, res){
             var query = sql.query('INSERT INTO "productsProductTags" ({fields}) VALUES ({values})');
             query.fields = sql.fields().addObjectKeys(values);
             query.values = sql.fields().addObjectValues(values, query);
+
             client.query(query.toString(), query.$values, complete);
           };
         }
