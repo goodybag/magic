@@ -49,11 +49,11 @@ define(function(require){
     }
   , state: {
       type: 'text'
-    , validators: { len:2 }
+    , validators: { len:2, isAlpha:[] }
     }
   , zip: {
       type: 'int'
-    , validators: { len:5 }
+    , validators: { len:5, isInt:[] }
     }
   , isGB: {
       type: 'boolean'

@@ -4,7 +4,7 @@
 
 var server      = require('express')();
 var middleware  = require('../../middleware');
-var schema      = require('../../db').schemas.businesses;
+var schemas     = require('../../db').schemas;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 var routes      = require('./routes');
@@ -138,6 +138,8 @@ server.put(
 , middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('permissions')
 , middleware.permissions(permissions.loyalty)
+, middleware.profile('validate body')
+, middleware.validate.body(schemas.businessLoyaltySettings)
 , middleware.profile('update business loyalty handler')
 , routes.updateLoyalty
 );
@@ -161,7 +163,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate.body(schemas.businesses)
 , middleware.profile('create business handler')
 , routes.create
 );
@@ -175,7 +177,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate.body(schemas.businesses)
 , middleware.profile('update business handler')
 , routes.update
 );
