@@ -178,7 +178,7 @@ server.del(
   '/v1/collections/:collectionId'
 , middleware.profile('DELETE /v1/consumers/:consumerId/collections/:collectionId')
 , middleware.profile('apply groups consumers owner')
-, middleware.applyGroups(applyGroups.owner)
+, middleware.applyGroups(applyGroups.collectionOwner)
 , middleware.profile('permissions')
 , middleware.auth.allow('admin', 'owner')
 , middleware.profile('delete consumer collection handler')

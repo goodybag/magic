@@ -423,6 +423,12 @@ describe('POST /v1/consumers/:id/collections/:collectionId', function() {
   });
 });
 
+describe('DELETE /v1/collections/:collectionId', function() {
+  it('should delete a users collection', function(done) {
+
+  });
+});
+
 
 describe('POST /v1/consumers/cardupdate', function() {
   it('should allow the user to reset their password', function(done) {
