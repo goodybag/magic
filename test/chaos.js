@@ -1,3 +1,12 @@
+/**
+ * The Chaos Tests
+ *
+ * split in two sections: document types, which abstract over the input data, and functions, which run against the document types
+ * - to add a test, implement the function in the Processes section, then add it to the ResourceDoc makeTests() list
+ * - input documents are listed at the bottom of the file
+ */
+
+
 var yaml = require('js-yaml');
 var tu = require('../lib/test-utils');
 var assert = require('better-assert');
@@ -5,6 +14,86 @@ var assert = require('better-assert');
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj)); // :TODO: non-hack deepclone
 }
+
+// request dispatch helper
+function request(methodDoc, requestDoc, cb) {
+  var doRequest = function() {
+    tu.httpRequest(requestDoc.toOptions(), requestDoc.toPayload(), function(err, result, res) {
+      if (methodDoc.needsAuth()) {
+        tu.logout(function() { cb(res, result); })
+      } else {
+        cb(res, result);
+      }
+    });
+  };
+
+  if (methodDoc.needsAuth()) {
+    tu.login(methodDoc.getAuthCreds(), doRequest);
+  } else {
+    doRequest();
+  }
+};
+
+
+// Processes
+// =========
+
+// Main
+function doChaos(resourceDoc) {
+  describe(resourceDoc.makeTestDescription(), function() {
+    resourceDoc.makeTests().runEach();
+  });
+}
+
+// A test type
+function testValidRequest(methodDoc) {
+  it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 200)
+        console.log('Failed chaos valid-request test'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 200);
+      done();
+    });
+  });
+}
+
+// A test type
+function testInvalidRequest(methodDoc, corruptKey) {
+  // check if attribute is corruptable
+  if (/^any/.test(methodDoc.getAttrType(corruptKey)))
+    return;
+
+  it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    // corrupt the value
+    requestDoc.setInput(corruptKey, (function(type) {
+      switch (type) {
+        case 'string*':
+        case 'string':
+        case 'url':
+          return 123456789;
+        case 'int':
+          return 'CORRUPTION STRING';
+      }
+    })(methodDoc.getAttrType(corruptKey)));
+
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 400)
+        console.log('Failed chaos invalid-request test'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+}
+
 
 // Functions List
 // ==============
@@ -15,9 +104,9 @@ function FunctionsList() {
 FunctionsList.prototype.add = function() {
   this.fns.push({ fn:arguments[0], args:Array.prototype.slice.call(arguments, 1) });
 };
-FunctionsList.prototype.forEach = function(cb) {
-  return this.fns.forEach(function(item) {
-    cb(item.fn, item.args);
+FunctionsList.prototype.runEach = function() {
+  this.fns.forEach(function(item) {
+    item.fn.apply(null, item.args);
   });
 };
 
@@ -46,8 +135,7 @@ ResourceDoc.prototype.iterateMethods = function(cb) {
   }
 };
 
-// Tests Composition
-// - decides which tests to run on the resource
+// Tests Composition: add any new tests here!
 ResourceDoc.prototype.makeTests = function() {
   var tests = new FunctionsList();
   var resource = this.data.resource;
@@ -144,86 +232,6 @@ RequestDoc.prototype.toPayload = function() {
   return null;
 };
 
-
-// Processes
-// =========
-
-// Main
-function doChaos(doc) {
-  describe(doc.makeTestDescription(), function() {
-    doc.makeTests().forEach(function(test, args) {
-      test.apply(null, args);
-    });
-  });
-}
-
-// Request dispatch helper
-function request(methodDoc, requestDoc, cb) {
-  var doRequest = function() {
-    tu.httpRequest(requestDoc.toOptions(), requestDoc.toPayload(), function(err, result, res) {
-      if (methodDoc.needsAuth()) {
-        tu.logout(function() { cb(res, result); })
-      } else {
-        cb(res, result);
-      }
-    });
-  };
-
-  if (methodDoc.needsAuth()) {
-    tu.login(methodDoc.getAuthCreds(), doRequest);
-  } else {
-    doRequest();
-  }
-};
-
-// A test type
-function testValidRequest(methodDoc) {
-  it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
-    var requestDoc = methodDoc.makeRequestDoc();
-    request(methodDoc, requestDoc, function(res, result) {
-      if (res.statusCode !== 200)
-        console.log('Failed chaos valid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
-          console.log(res.statusCode),
-          console.log(result);
-      assert(res.statusCode == 200);
-      done();
-    });
-  });
-}
-
-// A test type
-function testInvalidRequest(methodDoc, corruptKey) {
-  // check if attribute is corruptable
-  if (/^any/.test(methodDoc.getAttrType(corruptKey)))
-    return;
-
-  it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
-    var requestDoc = methodDoc.makeRequestDoc();
-
-    // corrupt the value
-    requestDoc.setInput(corruptKey, (function(type) {
-      switch (type) {
-        case 'string*':
-        case 'string':
-        case 'url':
-          return 123456789;
-        case 'int':
-          return 'CORRUPTION STRING';
-      }
-    })(methodDoc.getAttrType(corruptKey)));
-
-    request(methodDoc, requestDoc, function(res, result) {
-      if (res.statusCode !== 400)
-        console.log('Failed chaos invalid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
-          console.log(res.statusCode),
-          console.log(result);
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
-}
 
 // Run Chaos Tests
 // ===============
