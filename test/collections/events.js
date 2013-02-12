@@ -70,7 +70,7 @@ describe('Products Events: ', function() {
                   assert(results.data.length > 0);
                   assert(results.data.filter(function(d){
                     // Also need to check the consumerId
-                    return d.type === "products.like" && d.data.productId == 3;
+                    return d.type === "products.like" && d.data.productId == 3 && d.data.userId == 5;
                   }).length === 1);
 
                   tu.logout(done);
