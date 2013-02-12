@@ -138,15 +138,11 @@ ResourceDoc.prototype.iterateMethods = function(cb) {
 // Tests Composition: add any new tests here!
 ResourceDoc.prototype.makeTests = function() {
   var tests = new FunctionsList();
-  var resource = this.data.resource;
   this.iterateMethods(function(method) {
-
     tests.add(testValidRequest, method);
-
     method.iterateAttributes(function(key) {
       tests.add(testInvalidRequest, method, key);
     })
-
   });
   return tests;
 };
