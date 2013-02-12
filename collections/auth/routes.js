@@ -186,21 +186,49 @@ module.exports.oauthAuthenticate = function(req, res){
           // No need to log - already logged from the post
           if (result.error) return res.error(result.error);
 
-          consumer.groups = ['consumer'];
           consumer.id = result.data.userId;
 
-          return stage.setSessionAndSend(consumer);
+          return stage.lookupUsersGroups(consumer);
         });
       }else{
         res.error(errors.auth.INVALID_GROUP);
         return logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
       }
+    }
 
+    // This is a sham, but whatevs
+  , lookupUsersGroups: function(user){
+      var query = sql.query([
+        'SELECT array_agg(groups.name) as groups, array_agg(groups.id) as "groupIds"',
+          'FROM "usersGroups"',
+          'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
+          'WHERE "usersGroups"."userId" = $id',
+          'GROUP BY "usersGroups"."userId"'
+      ]);
+
+      query.$('id', user.id);
+
+      db.getClient(TAGS['oauth-authenticate-lookup-users-groups'], function(error, client){
+        if (error) return stage.dbError(error);
+
+        client.query(query.toString(), query.$values, function(error, results){
+          if (error) return stage.dbError(error);
+
+          user.groups = results.rows[0] ? results.rows[0].groups : [];
+          user.groupIds = {};
+          if (user.groups.length > 0 && results.rows[0].groupIds.length > 0){
+            for (var i = user.groups.length - 1; i >= 0; i--){
+              user.groupIds[user.groups[i]] = results.rows[0].groupIds[i];
+            }
+          }
+
+          stage.setSessionAndSend(user);
+        });
+      });
     }
 
   , setSessionAndSend: function(user){
       req.session.user = user;
-      // console.log(user);
       res.json({ error: null, data: user });
     }
 
@@ -258,7 +286,8 @@ module.exports.authenticate = function(req, res){
 
         // Setup groups
         query = sql.query([
-          'SELECT array_agg(groups.name) as groups FROM "usersGroups"',
+          'SELECT array_agg(groups.name) as groups, array_agg(groups.id) as "groupIds"',
+            'FROM "usersGroups"',
             'INNER JOIN "groups" ON "usersGroups"."groupId" = groups.id',
             'WHERE "usersGroups"."userId" = $id',
             'GROUP BY "usersGroups"."userId"'
@@ -269,6 +298,13 @@ module.exports.authenticate = function(req, res){
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           user.groups = results.rows[0] ? results.rows[0].groups : [];
+          user.groupIds = {};
+
+          if (user.groups.length > 0 && results.rows[0].groupIds.length > 0){
+            for (var i = user.groups.length - 1; i >= 0; i--){
+              user.groupIds[user.groups[i]] = results.rows[0].groupIds[i];
+            }
+          }
 
           // Save user in session
           req.session.user = user;
