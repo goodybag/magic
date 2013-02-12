@@ -332,6 +332,62 @@ describe('GET /v1/locations/:id', function() {
       done();
     });
   });
+
+  it('should let sales see keytag info', function(done) {
+    tu.loginAsSales(function(){
+      tu.get('/v1/locations/1', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should let managers see keytag info', function(done) {
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      tu.get('/v1/locations/1', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should not let consumers see keytag info', function(done) {
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      tu.get('/v1/locations/1', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.lastKeyTagRequest);
+        assert(payload.data.keyTagRequestPending);
+
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/locations', function() {
@@ -444,6 +500,23 @@ describe('PATCH /v1/locations/:id', function() {
     });
   });
 
+  it('should respond to a locations key tag request', function(done) {
+    tu.loginAsSales(function(error, user){
+      tu.patch('/v1/locations/2', { keyTagRequestPending: false }, function(err, results, res) {
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        tu.get('/v1/locations/2', function(error, results){
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.keyTagRequestPending === false);
+          tu.logout(done);
+        });
+
+      });
+    });
+  });
+
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/locations/2', { lat:'foobar' }, function(err, results, res) {
@@ -455,7 +528,6 @@ describe('PATCH /v1/locations/:id', function() {
       });
     });
   });
-
 });
 
 
@@ -577,6 +649,37 @@ describe('/v1/locations/:id/products', function() {
     tu.loginAsAdmin(function(error, user){
       tu.put('/v1/locations/1/products/1', {isSpotlight:true}, function(err, results, res) {
         assert(res.statusCode == 200);
+        tu.logout(done);
+      });
+    });
+  });
+});
+
+describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
+  it('should put in a request for key tags', function(done){
+    tu.login({email: 'manager_redeem3@gmail.com', password: 'password'}, function(error, user){
+      assert(!error);
+      var current = new Date();
+      tu.post('/v1/locations/2/key-tag-requests', {}, function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+
+        tu.get('/v1/locations/2', function(err, payload, res){
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          assert(!payload.error);
+          assert(new Date(payload.data.lastKeyTagRequest) >= current);
+          assert(payload.data.keyTagRequestPending === true);
+        });
+
         tu.logout(done);
       });
     });
