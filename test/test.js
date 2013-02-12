@@ -1,15 +1,13 @@
 process.env['GB_ENV'] = 'test';
 var tu = require('../lib/test-utils');
-var assert = require('better-assert')
+var assert = require('better-assert');
 
 // unit tests
 // ==========
 require('./utils');
 
-
 // functional tests
 // ================
-
 
 // enable profiler
 var Profiler = require('clouseau');
@@ -84,6 +82,11 @@ require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
 // require('./events/pubnub');
+
+// chaos tests
+// ===========
+require('./chaos');
+
 
 describe('GET /v1/debug/profile', function() {
   it('should give us profiling stats on the previous tests', function(done) {

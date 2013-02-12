@@ -1,0 +1,94 @@
+---
+resource:
+  type: collection
+  path: /businesses
+methods:
+  get:
+    desc: List Businesses
+    altpaths:
+      - /businesses/food
+      - /businesses/fashion
+      - /businesses/other
+    query:
+      tag:     { type: string*, eg: [food,apparel] }
+      sort:    { type: string,  eg: -name }
+      include: { type: string*, eg: [tags,locations] }
+      offset:  { type: int,     eg: 5 }
+      limit:   { type: int,     eg: 5 }
+      filter:  { type: string,  eg: business }
+  post:
+    desc: Add Business
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    body:
+      charityId:       { type: int,     eg: 1 }
+      name:            { type: string,  eg: My Business, required: true }
+      url:             { type: string,  eg: http://foo.com }
+      logoUrl:         { type: string,  eg: http://foo.com/image.png }
+      cardCode:        { type: string,  eg: 12345-ABC }
+      menuDescription: { type: string,  eg: This is the description of the business menu }
+      street1:         { type: string,  eg: 12345 FooBar Lane }
+      street2:         { type: string,  eg: Suite 8986 }
+      city:            { type: string,  eg: Austin }
+      state:           { type: string,  eg: TX }
+      zip:             { type: int,     eg: 78704 }
+      tags:            { type: string*, eg: [food,apparel] }
+children:
+  - /businesses/:id
+...
+---
+resource:
+  type: item
+  path: /businesses/:id
+  params:
+    id: { type: int, eg: 1 }
+methods:
+  get:
+    desc: Get Business
+  put:
+    desc: Update Business
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    body:
+      charityId:       { type: int,     eg: 1 }
+      name:            { type: string,  eg: My Business, required: true }
+      url:             { type: string,  eg: http://foo.com }
+      logoUrl:         { type: string,  eg: http://foo.com/image.png }
+      cardCode:        { type: string,  eg: 12345-ABC }
+      menuDescription: { type: string,  eg: This is the description of the business menu }
+      street1:         { type: string,  eg: 12345 FooBar Lane }
+      street2:         { type: string,  eg: Suite 8986 }
+      city:            { type: string,  eg: Austin }
+      state:           { type: string,  eg: TX }
+      zip:             { type: int,     eg: 78704 }
+      tags:            { type: string*, eg: [food,apparel] }
+  delete:
+    desc: Delete Business
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+parent:
+  - /businesses
+...
+resource:
+  type: item
+  path: /businesses/:id/loyalty
+  params:
+    id: { type: int, eg: 1 }
+methods:
+  get:
+    desc: Get Business Loyalty Settings
+  put:
+    desc: Update Business Loyalty Settings
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    body:
+      reward: { type: string, eg: A Burrito }
+      requiredItem: { type: string, eg: A Taco }
+      regularPunchesRequired: { type: int, eg: 10 }
+      elitePunchesRequired: { type: int, eg: 5 }
+      punchesRequiredToBecomeElite: { type: int, eg: 20 }
+      photoUrl: { type: string, eg: http://foo.com/image.png }
