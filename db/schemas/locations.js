@@ -127,6 +127,14 @@ define(function(require){
     , meta: 'default TRUE'
     , validators: { is:/true|false|1|0/ }
     }
+  , lastKeyTagRequest: {
+      type: 'timestamp with time zone'
+    }
+  , keyTagRequestPending: {
+      type: 'boolean'
+    , meta: 'default FALSE'
+    , validators: { is:/true|false|1|0/ }
+    }
   };
   return locations;
 });

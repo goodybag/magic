@@ -173,6 +173,7 @@ server.get(
   '/v1/locations/:locationId'
 , middleware.profile('GET /v1/locations/:locationId')
 , middleware.profile('permissions')
+, middleware.applyGroups(applyGroups.manager)
 , middleware.permissions(permissions)
 , middleware.profile('get location handler')
 , routes.get
@@ -266,6 +267,14 @@ server.del(
 , middleware.auth.allow('admin', 'sales', 'manager')
 , middleware.profile('remove product from location handler')
 , routes.removeProduct
+);
+
+// Locations.submitKeyTagRequest
+server.post(
+  '/v1/locations/:locationId/key-tag-requests'
+, middleware.applyGroups(applyGroups.manager)
+, middleware.auth.allow('admin', 'sales', 'manager')
+, routes.submitKeyTagRequest
 );
 
 module.exports = server;
