@@ -311,3 +311,4 @@ function loadDescription(collection, cb) {
 loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
 loadDescription('cashiers', doChaos);
+loadDescription('charities', doChaos);
