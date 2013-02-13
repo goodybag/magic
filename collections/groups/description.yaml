@@ -1,0 +1,48 @@
+collection:
+  resource:
+    type: collection
+    path: /groups
+  methods:
+    get:
+      desc: List Groups
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+    post:
+      desc: Add Group
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name:  { type: string, eg: My Group }
+        users: { type: int+, eg:[1,2] }
+  children:
+    - /groups/:id
+item:
+  resource:
+    type: item
+    path: /groups/:id
+    params:
+      id: { type: int, eg: 7 }
+  methods:
+    get:
+      desc: Get Group
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    put:
+      desc: Update Group
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name: { type: string, eg: My Group }
+        users: { type: int+, eg:[1,2] }
+    delete:
+      desc: Delete Group
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

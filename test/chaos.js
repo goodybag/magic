@@ -123,18 +123,10 @@ function testInvalidRequest(methodDoc, corruptKey) {
 
     // corrupt the value
     requestDoc.setInput(corruptKey, (function(type) {
-      switch (type) {
-        case 'string*':
-        case 'string':
-        case 'url':
-        case 'email':
-        case 'bool':
-          return 123456789;
-        case 'int':
-        case 'id':
-        case 'cardid':
-          return 'CORRUPTION STRING';
-      }
+      if (/string|url|email|bool/.test(type))
+        return 123456789;
+      if (/int|id|cardid/.test(type))
+        return 'CORRUPTION STRING';
     })(methodDoc.getAttrType(corruptKey)));
 
     request(methodDoc, requestDoc, function(res, result) {
@@ -326,3 +318,4 @@ loadDescription('cashiers', doChaos);
 loadDescription('charities', doChaos);
 loadDescription('consumers', doChaos);
 loadDescription('events', doChaos);
+loadDescription('groups', doChaos);

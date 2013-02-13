@@ -5,8 +5,8 @@
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
-var schema      = require('../../db').schemas.groups;
 var permissions = require('./permissions');
+var desc        = require('./description.yaml')
 
 // Groups.list
 server.get(
@@ -17,10 +17,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
 , middleware.profile('permissions')
@@ -45,10 +42,10 @@ server.post(
   '/v1/groups'
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create group handler')
 , routes.create
 );
@@ -58,10 +55,10 @@ server.put(
   '/v1/groups/:id'
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update group handler')
 , routes.update
 );
@@ -71,10 +68,10 @@ server.post(
   '/v1/groups/:id'
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update group handler')
 , routes.update
 );

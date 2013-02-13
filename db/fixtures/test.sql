@@ -198,6 +198,7 @@ INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
+INSERT INTO "groups" (id, name) VALUES ('7', 'foobar2');
 INSERT INTO "groups" (id, name) VALUES ('11110', 'manager');
 INSERT INTO "groups" (id, name) VALUES ('11111', 'cashier');
 INSERT INTO "groups" (id, name) VALUES ('11112', 'tapin-station');
