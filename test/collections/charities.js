@@ -15,7 +15,7 @@ describe('GET /v1/charities', function() {
       assert(payload.data.length > 0);
       assert(payload.data[0].id);
       assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);      
+      assert(payload.meta.total > 1);
       done();
     });
   });
