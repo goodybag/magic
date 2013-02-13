@@ -34,3 +34,17 @@ exports.owner = function(req, cb) {
     });
   });
 };
+
+exports.collectionOwner = function(req, callback){
+  if (!req.session || !req.session.user || !req.session.user.groupIds) return cb(null);
+
+  var
+    collectionId = req.param('collectionId')
+  , $query = { id: collectionId, consumerId: req.session.user.groupIds.consumer }
+  , options = { fields: ['id'] }
+  ;
+
+  db.api.collections.findOne($query, options, function(error, collection){
+    return callback(!error && collection ? 'owner' : null);
+  });
+};
