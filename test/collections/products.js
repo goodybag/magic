@@ -831,22 +831,110 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 describe('POST /v1/products/:id/feelings', function() {
 
   it('should add to the product feelings totals', function(done) {
-    tu.loginAsConsumer(function() {
-      tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
-        assert(!err);
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 0);
+        assert(payload.data.wants === 0);
+        assert(payload.data.tries === 0);
+        assert(payload.data.userLikes == false);
+        assert(payload.data.userWants == false);
+        assert(payload.data.userTried == false);
 
-        tu.get('/v1/products/3', function(err, payload, res) {
+        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
           assert(!err);
           assert(res.statusCode == 200);
 
-          payload = JSON.parse(payload);
-          assert(payload.data.likes == 1);
-          assert(payload.data.wants == 1);
-          assert(payload.data.tries == 1);
+          tu.get('/v1/products/3', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
 
-          tu.logout(function() {
-            done();
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 1);
+            assert(payload.data.wants == 1);
+            assert(payload.data.tries == 1);
+            assert(payload.data.userLikes == true);
+            assert(payload.data.userWants == true);
+            assert(payload.data.userTried == true);
+
+            tu.logout(function() {
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('should not alter the counters if the user has already felt', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/3', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 1);
+        assert(payload.data.wants === 1);
+        assert(payload.data.tries === 1);
+        assert(payload.data.userLikes == true);
+        assert(payload.data.userWants == true);
+        assert(payload.data.userTried == true);
+
+        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          tu.get('/v1/products/3', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 1);
+            assert(payload.data.wants == 1);
+            assert(payload.data.tries == 1);
+            assert(payload.data.userLikes == true);
+            assert(payload.data.userWants == true);
+            assert(payload.data.userTried == true);
+
+            tu.logout(function() {
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('should not be retardedly stymied by the string "true" as an input', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/3', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 1);
+        assert(payload.data.wants === 1);
+        assert(payload.data.tries === 1);
+        assert(payload.data.userLikes == true);
+        assert(payload.data.userWants == true);
+        assert(payload.data.userTried == true);
+
+        tu.post('/v1/products/3/feelings', { isLiked:'true', isWanted:'true', isTried:'true' }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          tu.get('/v1/products/3', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 1);
+            assert(payload.data.wants == 1);
+            assert(payload.data.tries == 1);
+            assert(payload.data.userLikes == true);
+            assert(payload.data.userWants == true);
+            assert(payload.data.userTried == true);
+
+            tu.logout(function() {
+              done();
+            });
           });
         });
       });
@@ -854,22 +942,36 @@ describe('POST /v1/products/:id/feelings', function() {
   });
 
   it('should remove from the product feelings totals', function(done) {
-    tu.loginAsConsumer(function() {
-      tu.post('/v1/products/3/feelings', { isWanted:false }, function(err, payload, res) {
-        assert(!err);
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 1);
+        assert(payload.data.wants === 1);
+        assert(payload.data.tries === 1);
+        assert(payload.data.userLikes == true);
+        assert(payload.data.userWants == true);
+        assert(payload.data.userTried == true);
 
-        tu.get('/v1/products/3', function(err, payload, res) {
+        tu.post('/v1/products/3/feelings', { isWanted:false }, function(err, payload, res) {
           assert(!err);
           assert(res.statusCode == 200);
 
-          payload = JSON.parse(payload);
-          assert(payload.data.likes == 1);
-          assert(payload.data.wants == 0);
-          assert(payload.data.tries == 1);
+          tu.get('/v1/products/3', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
 
-          tu.logout(function() {
-            done();
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 1);
+            assert(payload.data.wants == 0);
+            assert(payload.data.tries == 1);
+            assert(payload.data.userLikes == true);
+            assert(payload.data.userWants == false);
+            assert(payload.data.userTried == true);
+
+            tu.logout(function() {
+              done();
+            });
           });
         });
       });

@@ -33,6 +33,7 @@
     "node-uuid": "1.4.x",
     "node.extend": "1.0.x",
     "noop": "0.2.x",
+    "js-yaml": "2.0.x",
     
     "pg": "0.10.x",
     "pg-transaction": "0.1.x",
@@ -49,7 +50,7 @@
     "mocha": "1.7.x"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha test/test.js"
   },
   "repository": {
     "type": "git",

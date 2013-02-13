@@ -126,6 +126,7 @@ define(function(require){
       type: 'boolean'
     , meta: 'default TRUE'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   , lastKeyTagRequest: {
       type: 'timestamp with time zone'
@@ -134,6 +135,7 @@ define(function(require){
       type: 'boolean'
     , meta: 'default FALSE'
     , validators: { is:/true|false|1|0/ }
+    , sanitizers: { toBoolean:[] }
     }
   };
   return locations;

@@ -28,6 +28,24 @@ describe('POST /v1/session', function() {
     });
   });
 
+  it('should authenticate a user and return the user object', function(done) {
+    // First need to login
+    var user = {
+      email:    "tferguson@gmail.com"
+    , password: "password"
+    };
+    tu.post('/v1/session', user, function(error, results){
+      // Make sure there were no login errors
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      assert(results.data.id);
+      assert(utils.isArray(results.data.groups));
+      assert(results.data.groupIds.consumer == 1);
+      tu.logout(done);
+    });
+  });
+
   // it('should authenticate a user as a consumer and return the user object', function(done) {
   //   // First need to login
   //   var user = {
@@ -130,6 +148,7 @@ describe('POST /v1/oauth', function(){
       if (results.error) console.log(results.error);
       assert(!results.error);
       assert(results.data.id > 0);
+      assert(results.data.groupIds.consumer > 0);
       tu.logout(done);
     });
   });

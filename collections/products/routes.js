@@ -239,7 +239,6 @@ module.exports.get = function(req, res){
         ')) as categories',
       'FROM products',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
-        '{feelingsJoins}',
         'WHERE products.id = $id',
         'GROUP BY {groupby}'
     ]);
@@ -252,17 +251,9 @@ module.exports.get = function(req, res){
 
     // user feelings join
     if (req.session.user) {
-      query.feelingsJoins = [
-        'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
-        'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
-        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
-      ].join(' ');
-      query.fields.add('("productLikes" IS NOT NULL) AS "userLikes"');
-      query.fields.add('("productWants" IS NOT NULL) AS "userWants"');
-      query.fields.add('("productTries" IS NOT NULL) AS "userTried"');
-      query.groupby.add('"productLikes".id');
-      query.groupby.add('"productWants".id');
-      query.groupby.add('"productTries".id');
+      query.fields.add('((SELECT 1 FROM "productLikes" WHERE products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId) IS NOT NULL) AS "userLikes"');
+      query.fields.add('((SELECT 1 FROM "productWants" WHERE products.id = "productWants"."productId" AND "productWants"."userId" = $userId) IS NOT NULL) AS "userWants"');
+      query.fields.add('((SELECT 1 FROM "productTries" WHERE products.id = "productTries"."productId" AND "productTries"."userId" = $userId) IS NOT NULL) AS "userTried"');
       query.$('userId', req.session.user.id);
     }
 
@@ -896,11 +887,15 @@ module.exports.updateFeelings = function(req, res) {
         if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
         if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
 
-        // fallback inputs to current feelings
+        // fallback inputs to current feelings and ensure it's a boolean
         var currentFeelings = result.rows[0];
         if (typeof inputs.isLiked == 'undefined') { inputs.isLiked = !!currentFeelings.isLiked; }
+        else { inputs.isLiked = toBool(inputs.isLiked); }
         if (typeof inputs.isWanted == 'undefined') { inputs.isWanted = !!currentFeelings.isWanted; }
+        else { inputs.isWanted = toBool(inputs.isWanted); }
         if (typeof inputs.isTried == 'undefined') { inputs.isTried = !!currentFeelings.isTried; }
+        else { inputs.isTried = toBool(inputs.isTried); }
+
 
         var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
         query.updates = sql.fields();
@@ -971,3 +966,7 @@ module.exports.updateFeelings = function(req, res) {
     });
   });
 };
+
+function toBool(v) {
+  return (typeof v == 'boolean') ? v : /1|true/.test(v);
+}
