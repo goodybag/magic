@@ -1,0 +1,40 @@
+collection:
+  resource:
+    type: collection
+    path: /users
+  methods:
+    get:
+      desc: List Users
+      query:
+        offset:   { type: int,    eg: 5 }
+        limit:    { type: int,    eg: 5 }
+        filter:   { type: string, eg: tfergu }
+    post:
+      desc: Add User
+      body:
+        email:              { type: email required,   eg: goody@goodybag.com }
+        password:           { type: string required,  eg: password }
+  children:
+    - /users/:id
+item:
+  resource:
+    type: item
+    path: /users/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get User
+    put:
+      desc: Update User
+      auth:
+        required: true
+        eg: { email: tferguson@gmail.com, password: password }
+      body:
+        email:              { type: email required,   eg: goody@goodybag.com }
+        password:           { type: string required,  eg: password }
+    delete:
+      desc: Delete User
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
