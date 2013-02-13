@@ -425,7 +425,23 @@ describe('POST /v1/consumers/:id/collections/:collectionId', function() {
 
 describe('DELETE /v1/collections/:collectionId', function() {
   it('should delete a users collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/1/collections', {name:'my foobar collection'}, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id);
+        tu.del('/v1/collections/' + results.data.id, function(error, results, res){
+          assert(res.statusCode == 200);
+          tu.get('/v1/consumers/1/collections', function(error, results, res){
+            assert(res.statusCode == 200);
+            results = JSON.parse(results);
+            assert(results.filter(function(c){ return c.name === 'my foobar collection'}).length === 0);
+          })
 
+          tu.logout(done);
+        });
+      });
+    });
   });
 });
 
