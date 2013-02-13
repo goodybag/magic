@@ -72,8 +72,6 @@ item:
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
-  parent:
-    - /businesses
 loyaltySettings:
   resource:
     type: item
