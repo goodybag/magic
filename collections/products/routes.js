@@ -83,7 +83,7 @@ module.exports.list = function(req, res){
     if (req.param('locationId')){
       var joinType = "inner";
 
-      if (req.param('spotlight'))
+      if (req.param('spotlight') || includes.indexOf('isSpotlight') > -1 || includes.indexOf('inSpotlight') > -1)
         query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
 
       query.prodLocJoin = [

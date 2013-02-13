@@ -47,7 +47,7 @@ server.get(
 , middleware.validate.query({
     tag        : { is:/[A-z\!\,]+/ },
     sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
+    include    : { isIn:[['tags','categories', 'inSpotlight', 'isSpotlight']] },
     offset     : { isInt:[], min:[0] },
     limit      : { isInt:[], min:[1] }
   })
