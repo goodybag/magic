@@ -6,29 +6,16 @@ var server      = require('express')();
 var middleware  = require('../../middleware');
 var utils       = require('../../lib/utils');
 var routes      = require('./routes');
-var schemas     = require('../../db').schemas;
-var schema      = utils.clone(schemas.consumers);
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
-
-// this is a hack for now to get validation on email and password
-schema.email = utils.clone(schemas.users.email);
-schema.password = utils.clone(schemas.users.password);
-
-schema.email.validators = schema.email.validators || {};
-schema.password.validators = schema.password.validators || {};
-
-schema.email.validators['notNull'] = [];
-schema.email.validators['isEmail'] = [];
-
-schema.password.validators['notNull'] = [];
+var desc        = require('./description.yaml');
 
 // consumers.createCardupdate
 server.post(
   '/v1/consumers/cardupdate'
 , middleware.profile('POST /v1/consumers/cardupdate')
 , middleware.profile('validate body')
-, middleware.validate.body({ email:schemas.users.email, cardId:schemas.consumerCardUpdates.newCardId })
+, middleware.validate2.body(desc.cardUpdatesCollection.methods.post.body)
 , middleware.profile('create card update handler')
 , routes.createCardupdate
 );
@@ -50,10 +37,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.consumer)
 , middleware.profile('list consumers handler')
@@ -75,18 +59,12 @@ server.get(
 server.post(
   '/v1/consumers'
 , middleware.profile('POST /v1/consumers/:consumerId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
   // Make the requester owner so they can read their own fields after creation
 , function(req, res, next){ req.permittedGroups = ['owner']; next(); }
-, function(req, res, next){
-    if (req.body.singlyAccessToken && req.body.singlyId) return next();
-    if (!req.body.email) req.body.email = null;
-    if (!req.body.password) req.body.password = null;
-    next();
-  }
 , middleware.profile('permissions')
 , middleware.permissions(permissions.consumer)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create consumer handler')
 , routes.create
 );
@@ -95,14 +73,14 @@ server.post(
 server.put(
   '/v1/consumers/:consumerId'
 , middleware.profile('PUT /v1/consumers/:consumerId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
 , middleware.profile('permissions')
 , middleware.permissions(permissions.consumer)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update consumer handler')
 , routes.update
 );
@@ -111,14 +89,14 @@ server.put(
 server.post(
   '/v1/consumers/:consumerId'
 , middleware.profile('POST /v1/consumers/:consumerId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
 , middleware.profile('permissions')
 , middleware.permissions(permissions.consumer)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update consumer handler')
 , routes.update
 );
@@ -139,6 +117,8 @@ server.del(
 server.get(
   '/v1/consumers/:consumerId/collections'
 , middleware.profile('GET /v1/consumers/:consumerId/collections')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.collectionsCollection.methods.get.query)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
@@ -151,12 +131,12 @@ server.get(
 server.post(
   '/v1/consumers/:consumerId/collections'
 , middleware.profile('POST /v1/consumers/:consumerId/collections')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collectionsCollection.methods.post.body)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.collection)
-, middleware.profile('validate body')
-, middleware.validate.body(schemas.collection)
 , middleware.profile('create consumer collection handler')
 , routes.createCollection
 );
@@ -193,6 +173,8 @@ server.get(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.collectionProducts)
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.collectionsItem.methods.get.query)
 , middleware.profile('list consumer collection products handler')
 , require('../products/routes').list
 );
@@ -201,12 +183,12 @@ server.get(
 server.post(
   '/v1/consumers/:consumerId/collections/:collectionId'
 , middleware.profile('POST /v1/consumers/:consumerId/collections/:collectionID')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collectionsItem.methods.post.body)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.collectionProducts)
-, middleware.profile('validate body')
-, middleware.validate.body(schemas.productsCollections)
 , middleware.profile('add product to consumer collection handler')
 , routes.addCollectionProduct
 );

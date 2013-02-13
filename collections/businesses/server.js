@@ -4,11 +4,10 @@
 
 var server      = require('express')();
 var middleware  = require('../../middleware');
-var schemas     = require('../../db').schemas;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description.yaml');
 var routes      = require('./routes');
-
 
 // Businesses.list
 server.get(
@@ -18,13 +17,7 @@ server.get(
 , middleware.defaults.query({
     limit : 20
   })
-, middleware.validate.query({
-    tag        : { isAlpha:[] },
-    sort       : { isIn:[['-name','name']] },
-    include    : { isIn:[['locations','tags']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('list businesses handler')
@@ -40,13 +33,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name']] },
-    include    : { isIn:[['locations','tags']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('query defaults')
 , middleware.defaults.query({
     tag : ['food']
@@ -66,13 +53,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name']] },
-    include    : { isIn:[['locations','tags']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('query defaults')
 , middleware.defaults.query({
     tag   : ['apparel']
@@ -92,13 +73,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name']] },
-    include    : { isIn:[['locations','tags']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('query defaults')
 , middleware.defaults.query({
     tag : ['!food,!apparel']
@@ -113,6 +88,8 @@ server.get(
 server.get(
   '/v1/businesses/:id'
 , middleware.profile('GET /v1/businesses/:id')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.item.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('get business handler')
@@ -139,7 +116,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(permissions.loyalty)
 , middleware.profile('validate body')
-, middleware.validate.body(schemas.businessLoyaltySettings)
+, middleware.validate2.body(desc.loyaltySettings.methods.put.body)
 , middleware.profile('update business loyalty handler')
 , routes.updateLoyalty
 );
@@ -163,7 +140,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
-, middleware.validate.body(schemas.businesses)
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('create business handler')
 , routes.create
 );
@@ -177,7 +154,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
-, middleware.validate.body(schemas.businesses)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update business handler')
 , routes.update
 );

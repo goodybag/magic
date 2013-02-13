@@ -59,7 +59,7 @@ module.exports.list = function(req, res){
 
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
-      query.where.and('"businessId" = $businessId');
+      query.where.and('locations."businessId" = $businessId');
       query.$('businessId', req.param('businessId'));
     }
 
@@ -169,8 +169,10 @@ module.exports.create = function(req, res){
     query.values = sql.fields().addObjectValues(inputs, query);
 
     // add calculations
-    query.fields.add('position');
-    query.values.add('(ll_to_earth('+parseFloat(inputs.lat)+','+parseFloat(inputs.lon)+'))');
+    if (inputs.lat && inputs.lon) {
+      query.fields.add('position');
+      query.values.add('(ll_to_earth('+inputs.lat+','+inputs.lon+'))');
+    }
 
     logger.db.debug(TAGS, query.toString());
 
@@ -216,8 +218,8 @@ module.exports.update = function(req, res){
     query.$('id', req.param('locationId'));
 
     var isUpdatingPosition = (typeof inputs.lat != 'undefined' || typeof inputs.lon != 'undefined');
-    var lat = inputs.lat ? parseFloat(inputs.lat) : 'lat';
-    var lon = inputs.lon ? parseFloat(inputs.lon) : 'lon';
+    var lat = inputs.lat ? inputs.lat : '"lat"';
+    var lon = inputs.lon ? inputs.lon : '"lon"';
     if (isUpdatingPosition) {
       query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
     }
@@ -233,9 +235,13 @@ module.exports.update = function(req, res){
         return res.json({ error: null, data: null });
       }
 
+      var updates = {};
+      if (typeof lat == 'number') updates.lat = lat;
+      if (typeof lon == 'number') updates.lon = lon;
+
       // update related productLocations
       var query = sql.query('UPDATE "productLocations" SET {updates} WHERE "locationId"=$id');
-      query.updates = sql.fields().addUpdateMap({lat:lat, lon:lon}, query);
+      query.updates = sql.fields().addUpdateMap(updates, query);
       query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
       query.$('id', req.param('locationId'));
 

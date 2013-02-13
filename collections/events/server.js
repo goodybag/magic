@@ -5,6 +5,7 @@
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
+var desc        = require('./description.yaml');
 
 // Events.list
 server.get(
@@ -15,10 +16,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
 , middleware.profile('list events handler')

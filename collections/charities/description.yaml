@@ -1,0 +1,45 @@
+collection:
+  resource:
+    type: collection
+    path: /charities
+  methods:
+    get:
+      desc: List Charities
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: charity }
+    post:
+      desc: Add Charity
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name:            { type: string, eg: Helping Hands }
+        desc:            { type: string, eg: Helps with your hands }
+        logoUrl:         { type: url,    eg: http://mycharity.com/logo.png }
+  children:
+    - /charities/:id
+item:
+  resource:
+    type: item
+    path: /charities/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Charity
+    put:
+      desc: Update Charity
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name:            { type: string, eg: Helping Hands }
+        desc:            { type: string, eg: Helps with your hands }
+        logoUrl:         { type: url,    eg: http://mycharity.com/logo.png }
+    delete:
+      desc: Delete Charity
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
