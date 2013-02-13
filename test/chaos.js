@@ -236,4 +236,11 @@ function loadDescription(collection, cb) {
   yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
 }
 
+
+loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
+loadDescription('cashiers', doChaos);
+loadDescription('charities', doChaos);
+loadDescription('consumers', doChaos);
+loadDescription('events', doChaos);
+loadDescription('groups', doChaos);
