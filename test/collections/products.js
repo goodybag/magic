@@ -978,6 +978,43 @@ describe('POST /v1/products/:id/feelings', function() {
     });
   });
 
+  it('should only remove likes/wants/tries if the user had previously felt', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/4', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 0);
+        assert(payload.data.wants === 0);
+        assert(payload.data.tries === 0);
+        assert(payload.data.userLikes == false);
+        assert(payload.data.userWants == false);
+        assert(payload.data.userTried == false);
+
+        tu.post('/v1/products/4/feelings', { isLiked:false }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 0);
+            assert(payload.data.wants == 0);
+            assert(payload.data.tries == 0);
+            assert(payload.data.userLikes == false);
+            assert(payload.data.userWants == false);
+            assert(payload.data.userTried == false);
+
+            tu.logout(function() {
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
   it('should maintain the tally by user', function(done) {
     tu.loginAsSales(function() {
       tu.post('/v1/products/3/feelings', { isLiked:false, isWanted:true, isTried:true }, function(err, payload, res) {
