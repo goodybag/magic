@@ -325,3 +325,4 @@ loadDescription('managers', doChaos);
 loadDescription('photos', doChaos);
 loadDescription('productCategories', doChaos);
 loadDescription('products', doChaos);
+loadDescription('productTags', doChaos);
