@@ -213,9 +213,7 @@ module.exports.oauthAuthenticate = function(req, res){
         , '    ON managers."userId"  = "usersGroups"."userId"'
         , '  LEFT JOIN cashiers'
         , '    ON cashiers."userId"  = "usersGroups"."userId"'
-        , 'WHERE cashiers."userId"  = $id'
-        , 'OR    managers."userId"  = $id'
-        , 'OR    consumers."userId" = $id'
+        , 'WHERE "usersGroups"."userId"  = $id'
         , 'GROUP BY consumers.id, managers.id, cashiers.id;'
         ]);
 
@@ -227,12 +225,15 @@ module.exports.oauthAuthenticate = function(req, res){
         client.query(query.toString(), query.$values, function(error, results){
           if (error) return stage.dbError(error);
 
-          user.groups = results.rows[0] ? results.rows[0].groups : [];
+          var result = results.rows[0];
+          user.groups = result ? result.groups : [];
           user.groupIds = {};
 
-          if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
-          if (result.managerId)   user.groupIds.manager   = result.managerId;
-          if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
+          if (result){
+            if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
+            if (result.managerId)   user.groupIds.manager   = result.managerId;
+            if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
+          }
 
           stage.setSessionAndSend(user);
         });
@@ -312,9 +313,7 @@ module.exports.authenticate = function(req, res){
         , '    ON managers."userId"  = "usersGroups"."userId"'
         , '  LEFT JOIN cashiers'
         , '    ON cashiers."userId"  = "usersGroups"."userId"'
-        , 'WHERE cashiers."userId"  = $id'
-        , 'OR    managers."userId"  = $id'
-        , 'OR    consumers."userId" = $id'
+        , 'WHERE "usersGroups"."userId"  = $id'
         , 'GROUP BY consumers.id, managers.id, cashiers.id;'
         ]);
 
@@ -327,9 +326,11 @@ module.exports.authenticate = function(req, res){
           user.groups = result ? result.groups : [];
           user.groupIds = {};
 
-          if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
-          if (result.managerId)   user.groupIds.manager   = result.managerId;
-          if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
+          if (result){
+            if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
+            if (result.managerId)   user.groupIds.manager   = result.managerId;
+            if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
+          }
 
           // Save user in session
           req.session.user = user;

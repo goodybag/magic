@@ -74,7 +74,6 @@ describe('GET /v1/charities/:id', function() {
 describe('DEL /v1/charities/:id', function() {
   it('should delete a single charity document', function(done) {
     tu.loginAsAdmin(function(error, user){
-      console.log(error, user);
       // get the current count
       tu.get('/v1/charities', function(err, results, res) {
         var total = JSON.parse(results).meta.total;

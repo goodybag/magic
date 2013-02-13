@@ -41,7 +41,7 @@ describe('POST /v1/session', function() {
       assert(!results.error);
       assert(results.data.id);
       assert(utils.isArray(results.data.groups));
-      assert(results.data.groupsIds.consumer == 1);
+      assert(results.data.groupIds.consumer == 1);
       tu.logout(done);
     });
   });
