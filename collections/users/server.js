@@ -8,6 +8,7 @@ var routes      = require('./routes');
 var schema      = require('../../db').schemas.users;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description.yaml');
 
 // Users.createPasswordReset
 server.post(
@@ -34,10 +35,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list users handler')
@@ -65,7 +63,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('create user handler')
 , routes.create
 );
@@ -81,7 +79,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update user handler')
 , routes.update
 );
@@ -97,7 +95,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update user handler')
 , routes.update
 );
