@@ -34,18 +34,23 @@ function request(methodDoc, requestDoc, cb) {
   }
 };
 
+var counter = 1;
+function prepInputValue(v) {
+  if (typeof v == 'string')
+    return v.replace(/XXX/g, counter++);
+  return v;
+}
+
 
 // Processes
 // =========
 
-// Main
 function doChaos(resourceDoc) {
   describe(resourceDoc.makeTestDescription(), function() {
     resourceDoc.makeTests().runEach();
   });
 }
 
-// A test type
 function testValidRequest(methodDoc) {
   it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
@@ -61,7 +66,24 @@ function testValidRequest(methodDoc) {
   });
 }
 
-// A test type
+function testExtradataRequest(methodDoc) {
+  it('should respond 400 on '+methodDoc.getDesc()+' with unsupported input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    requestDoc.setInput('somekey'+Math.round(100 * Math.random()), 'foobar');
+
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 400)
+        console.log('Failed chaos extradata-request test'),
+          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+}
+
 function testPartialRequest(methodDoc, onlyKey) {
   it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
@@ -86,10 +108,9 @@ function testPartialRequest(methodDoc, onlyKey) {
   });
 }
 
-// A test type
 function testInvalidRequest(methodDoc, corruptKey) {
   // check if attribute is corruptable
-  if (/^any/.test(methodDoc.getAttrType(corruptKey)))
+  if (/^string/.test(methodDoc.getAttrType(corruptKey)))
     return;
 
   it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
@@ -103,6 +124,8 @@ function testInvalidRequest(methodDoc, corruptKey) {
         case 'url':
           return 123456789;
         case 'int':
+        case 'id':
+        case 'cardid':
           return 'CORRUPTION STRING';
       }
     })(methodDoc.getAttrType(corruptKey)));
@@ -165,6 +188,7 @@ ResourceDoc.prototype.makeTests = function() {
   var tests = new FunctionsList();
   this.iterateMethods(function(method) {
     tests.add(testValidRequest, method);
+    // tests.add(testExtradataRequest, method);
     method.iterateAttributes(function(key) {
       tests.add(testPartialRequest, method, key);
       tests.add(testInvalidRequest, method, key);
@@ -212,9 +236,15 @@ function RequestDoc(data) {
 }
 RequestDoc.prototype.setInput = function(key, value) {
   if (this.data.query) {
-    this.data.query[key].eg = value;
+    if (this.data.query[key])
+      this.data.query[key].eg = value;
+    else
+      this.data.query[key] = { eg:value };
   } else if (this.data.body) {
-    this.data.body[key].eg = value;
+    if (this.data.body[key])
+      this.data.body[key].eg = value;
+    else
+      this.data.body[key] = { eg:value };
   }
 };
 RequestDoc.prototype.clearInput = function(key) {
@@ -242,10 +272,10 @@ RequestDoc.prototype.toOptions = function() {
     for (var k in options.query) {
       if (Array.isArray(options.query[k].eg)) {
         for (var i=0; i < options.query[k].eg.length; i++) {
-          queryParams.push(k+'[]='+options.query[k].eg[i]);
+          queryParams.push(k+'[]='+prepInputValue(options.query[k].eg[i]));
         }
       } else {
-        queryParams.push(k+'='+options.query[k].eg);
+        queryParams.push(k+'='+prepInputValue(options.query[k].eg));
       }
     }
     options.path += '?'+queryParams.join('&').replace(/ /g, '+');
@@ -258,7 +288,7 @@ RequestDoc.prototype.toPayload = function() {
   if (this.data.body) {
     var payload = {};
     for (var k in this.data.body) {
-      payload[k] = this.data.body[k].eg;
+      payload[k] = prepInputValue(this.data.body[k].eg);
     }
     return JSON.stringify(payload);
   }
@@ -273,5 +303,6 @@ function loadDescription(collection, cb) {
   yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
 }
 
-loadDescription('activity', doChaos);
+// loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
+// loadDescription('cashiers', doChaos);

@@ -1,0 +1,58 @@
+---
+resource:
+  type: collection
+  path: /cashiers
+methods:
+  get:
+    desc: List Cashiers
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    query:
+      offset:  { type: int,     eg: 5 }
+      limit:   { type: int,     eg: 5 }
+      filter:  { type: any,     eg: business }
+  post:
+    desc: Add Cashier
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    body:
+      email:           { type: any,    eg: some_cashier_XXX@thebusiness.com }
+      password:        { type: any,    eg: password }
+      cardId:          { type: any,    eg: 123456-ABC }
+      businessId:      { type: int,    eg: 1 }
+      locationId:      { type: int,    eg: 1 }
+children:
+  - /cashiers/:id
+...
+---
+resource:
+  type: item
+  path: /cashiers/:id
+  params:
+    id: { type: int, eg: 1 }
+methods:
+  get:
+    desc: Get Cashier
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+  put:
+    desc: Update Cashier
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+    body:
+      email:           { type: any,    eg: some_cashier_XXX@thebusiness.com }
+      password:        { type: any,    eg: password }
+      cardId:          { type: any,    eg: 123456-ABC }
+      businessId:      { type: int,    eg: 1 }
+      locationId:      { type: int,    eg: 1 }
+  delete:
+    desc: Delete Cashier
+    auth:
+      required: true
+      eg: { email: admin@goodybag.com, password: password }
+parent:
+  - /cashiers

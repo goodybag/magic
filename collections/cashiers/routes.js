@@ -198,6 +198,7 @@ module.exports.update = function(req, res){
 
     // run update query
     client.query(query.toString(), query.$values, function(error, result){
+      console.log(query.toString(), error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
