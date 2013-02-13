@@ -25,6 +25,7 @@ collection:
         locationId:      { type: int,    eg: 1 }
   children:
     - /cashiers/:id
+
 item:
   resource:
     type: item

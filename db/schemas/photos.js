@@ -36,12 +36,6 @@ define(function(require){
   , notes: {
       type: 'text'
     }
-  , lat: {
-      type: 'int'
-    }
-  , lon: {
-      type: 'int'
-    }
   , isEnabled: {
       type: 'boolean'
     , validators: { is:/true|false|1|0/ }

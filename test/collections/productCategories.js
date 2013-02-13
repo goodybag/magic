@@ -71,11 +71,10 @@ describe('PATCH /v1/product-categories/:id', function() {
   it('should update a productCategory and respond with no error', function(done) {
     tu.loginAsSales(function(error, user){
       var category = {
-        id: 1
-      , isFeatured: false
+        isFeatured: false
       , description: 'Just a category'
       };
-      tu.patch('/v1/product-categories/' + category.id, category, function(error, results) {
+      tu.patch('/v1/product-categories/1', category, function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
