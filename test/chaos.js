@@ -172,7 +172,7 @@ MethodDoc.prototype.makeRequestDoc = function() {
   };
   if (this.methodName == 'get')
     reqDesc.query = this.data.query;
-  else 
+  else
     reqDesc.body = this.data.body;
   return new RequestDoc(reqDesc);
 };
