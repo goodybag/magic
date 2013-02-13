@@ -4,31 +4,19 @@
 
 var server = require('express')();
 var middleware = require('../../middleware');
-var schema = require('../../db').schemas.locations;
 var routes = require('./routes');
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc = require('./description')
 
 // Locations.list
 server.get(
   '/v1/locations'
 , middleware.profile('GET /v1/locations', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    businessId : { isInt:[] },
-    tag        : { isAlpha:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list locations handler')
@@ -40,24 +28,11 @@ server.get(
   '/v1/businesses/:businessId/locations'
 , middleware.profile('GET /v1/businesses/:businessId/locations', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate path')
-, middleware.validate.path({
-    businessId : { isInt:[] }
-  })
+, middleware.validate2.path({ businessId: { type:'int' }})
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    tag        : { isAlpha:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list locations handler')
@@ -69,25 +44,10 @@ server.get(
   '/v1/locations/food'
 , middleware.profile('GET /v1/locations/food', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = 'food'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    businessId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['food']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list locations handler')
@@ -97,27 +57,12 @@ server.get(
 // Locations.list
 server.get(
   '/v1/locations/fashion'
-, middleware.profile('GET /v1/locations/food', ['include','limit','sort'])
+, middleware.profile('GET /v1/locations/fashion', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = 'apparel'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    businessId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['apparel']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list locations handler')
@@ -127,27 +72,12 @@ server.get(
 // Locations.list
 server.get(
   '/v1/locations/other'
-, middleware.profile('GET /v1/locations/food', ['include','limit','sort'])
+, middleware.profile('GET /v1/locations/other', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = '!food,!apparel'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    businessId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['!food,!apparel']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list locations handler')
@@ -160,10 +90,10 @@ server.post(
 , middleware.profile('POST /v1/locations')
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create location handler')
 , routes.create
 );
@@ -185,10 +115,10 @@ server.put(
 , middleware.profile('PUT /v1/locations/:locationId')
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update location handler')
 , routes.update
 );
@@ -199,10 +129,10 @@ server.post(
 , middleware.profile('POST /v1/locations/:locationId')
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update location handler')
 , routes.update
 );
@@ -238,7 +168,7 @@ server.post(
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'manager')
 , middleware.profile('validate body')
-, middleware.validate.body(null, { productId:{ isInt:[] }, isSpotlight:{ is:/true|false|1|0/ }})
+, middleware.validate2.body(desc.productsCollection.methods.post.body)
 , middleware.profile('add product to location handler')
 , routes.addProduct
 );
@@ -252,7 +182,7 @@ server.put(
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'manager')
 , middleware.profile('validate body')
-, middleware.validate.body(null, { isSpotlight:{ is:/true|false|1|0/ }})
+, middleware.validate2.body(desc.productsItem.methods.put.body)
 , middleware.profile('update product at location handler')
 , routes.updateProduct
 );
@@ -272,8 +202,12 @@ server.del(
 // Locations.submitKeyTagRequest
 server.post(
   '/v1/locations/:locationId/key-tag-requests'
+, middleware.profile('POST /v1/locations/:locationId/key-tag-requests')
+, middleware.profile('apply groups locations manager')
 , middleware.applyGroups(applyGroups.manager)
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('request key tag handler')
 , routes.submitKeyTagRequest
 );
 

@@ -125,13 +125,13 @@ function testInvalidRequest(methodDoc, corruptKey) {
     requestDoc.setInput(corruptKey, (function(type) {
       if (/string|url|email|bool/.test(type))
         return 123456789;
-      if (/int|id|cardid/.test(type))
+      if (/int|float|id|cardid|time/.test(type))
         return 'CORRUPTION STRING';
     })(methodDoc.getAttrType(corruptKey)));
 
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 400)
-        console.log('Failed chaos invalid-request test'),
+        console.log('Failed chaos invalid-request test ('+corruptKey+')'),
           console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
@@ -319,3 +319,4 @@ loadDescription('charities', doChaos);
 loadDescription('consumers', doChaos);
 loadDescription('events', doChaos);
 loadDescription('groups', doChaos);
+loadDescription('locations', doChaos);
