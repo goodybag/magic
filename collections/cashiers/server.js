@@ -1,14 +1,15 @@
 /**
  * cashiers server
  */
-
+ 
+require('js-yaml');
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
 var schema      = require('../../db').schemas.cashiers;
 var perms       = require('./permissions');
 var applyGroups = require('./apply-groups');
-var desc        = require('./description')
+var desc        = require('./description.yaml')
 
 // cashiers.list
 server.get(
@@ -53,7 +54,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate2.body(desc.collection.methods.post.query)
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('create cashier handler')
 , routes.create
 );
@@ -69,7 +70,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate2.body(desc.item.methods.put.query)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update cashier handler')
 , routes.update
 );
@@ -85,7 +86,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate2.body(desc.item.methods.put.query)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update cashier handler')
 , routes.update
 );

@@ -25,10 +25,30 @@ var
         unvalidatedKeys.splice(kIndex, 1);
 
       // required validation
-      if (typeof v == 'undefined' || v === '') {
+      if (typeof v == 'undefined' || v === '' || v === null) {
         if (schema[k].required)
           errors[k] = 'Required.';
         continue;
+      }
+
+      // choices validation
+      if (schema[k].choices) {
+        if (!Array.isArray(schema[k].choices))
+          throw "Schema `choices` must be an array";
+
+        if (Array.isArray(v)) {
+          for (var i=0; i < v.length; i++) {
+            if (schema[k].choices.indexOf(v[i]) === -1) {
+              errors[k] = 'Must be one of: '+schema[k].choices.join(', ');
+              continue;
+            }
+          }
+        } else {
+          if (schema[k].choices.indexOf(v) === -1) {
+            errors[k] = 'Must be one of: '+schema[k].choices.join(', ');
+            continue;
+          }
+        }
       }
 
       // types validation
@@ -95,7 +115,7 @@ var
       for (var k in schema) {
         if (typeof req.body[k] == 'undefined')
           continue;
-        
+
         var sanitizers = schema[k].type.split(' ');
         for (var i=0; i < sanitizers.length; i++) {
 

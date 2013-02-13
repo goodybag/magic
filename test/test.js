@@ -62,25 +62,25 @@ before(function(done) {
   });
 });
 
-// require('./collections/charities');
-// require('./collections/businesses');
-// require('./collections/locations');
-// require('./collections/users');
-// require('./collections/consumers');
-// require('./collections/managers');
-// require('./collections/tapinStations');
-// require('./collections/cashiers');
-// require('./collections/groups');
-// require('./collections/loyaltyStats');
-// require('./collections/auth');
-// require('./collections/products');
-// require('./collections/productCategories');
-// require('./collections/photos');
-// require('./collections/productTags');
-// require('./collections/reviews');
-// require('./collections/redemptions');
-// require('./collections/events');
-// require('./collections/activity');
+require('./collections/charities');
+require('./collections/businesses');
+require('./collections/locations');
+require('./collections/users');
+require('./collections/consumers');
+require('./collections/managers');
+require('./collections/tapinStations');
+require('./collections/cashiers');
+require('./collections/groups');
+require('./collections/loyaltyStats');
+require('./collections/auth');
+require('./collections/products');
+require('./collections/productCategories');
+require('./collections/photos');
+require('./collections/productTags');
+require('./collections/reviews');
+require('./collections/redemptions');
+require('./collections/events');
+require('./collections/activity');
 
 // require('./events/pubnub');
 

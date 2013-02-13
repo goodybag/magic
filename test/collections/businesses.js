@@ -98,13 +98,6 @@ describe('GET /v1/businesses/food', function() {
       done();
     });
   });
-
-  it('should not allow the user to filter by tags', function(done) {
-    tu.get('/v1/businesses/food?tag=foobar&include=tags', function(err, payload, res) {
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
 });
 
 describe('GET /v1/businesses/fashion', function() {
@@ -118,13 +111,6 @@ describe('GET /v1/businesses/fashion', function() {
       assert(payload.data.filter(function(p) {
         return (p.tags.indexOf('apparel') === -1);
       }).length === 0); // make sure all rows have the 'apparel' tag
-      done();
-    });
-  });
-
-  it('should not allow the user to filter by tags', function(done) {
-    tu.get('/v1/businesses/fashion?tag=foobar&include=tags', function(err, payload, res) {
-      assert(res.statusCode == 400);
       done();
     });
   });
@@ -306,9 +292,8 @@ describe('POST /v1/businesses', function(){
 
     tu.loginAsSales(function(error, user){
       tu.post('/v1/businesses', business, function(error, results, res){
-        assert(!error);
+        assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(!results.error);
         assert(results.data.id);
 
         tu.get('/v1/businesses/' + results.data.id, function(error, results){
@@ -341,9 +326,8 @@ describe('POST /v1/businesses', function(){
 
     tu.loginAsSales(function(error, user){
       tu.post('/v1/businesses', business, function(error, results, res){
-        assert(!error);
+        assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(!results.error);
         assert(results.data.id);
         tu.logout(function(){
           done();

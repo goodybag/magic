@@ -11,8 +11,8 @@ collection:
         - /businesses/other
       query:
         tag:     { type: string*, eg: [food,apparel] }
-        sort:    { type: string,  eg: -name }
-        include: { type: string*, eg: [tags,locations] }
+        sort:    { type: string,  eg: -name, choices:[name, -name] }
+        include: { type: string*, eg: [tags,locations], choices:[tags, locations] }
         offset:  { type: int,     eg: 5, default: 0 }
         limit:   { type: int,     eg: 5, default: 20 }
         filter:  { type: string,  eg: business }
@@ -34,6 +34,8 @@ collection:
         state:           { type: string,  eg: TX }
         zip:             { type: int,     eg: 78704 }
         tags:            { type: string*, eg: [food,apparel] }
+        isGB:            { type: bool,    eg: true }
+        isVerified:      { type: bool,    eg: true }
   children:
     - /businesses/:id
 item:
@@ -63,6 +65,8 @@ item:
         state:           { type: string,  eg: TX }
         zip:             { type: int,     eg: 78704 }
         tags:            { type: string*, eg: [food,apparel] }
+        isGB:            { type: bool,    eg: true }
+        isVerified:      { type: bool,    eg: true }
     delete:
       desc: Delete Business
       auth:

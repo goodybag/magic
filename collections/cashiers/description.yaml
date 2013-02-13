@@ -18,7 +18,7 @@ collection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        email:           { type: email,  eg: some_cashier_XXX@thebusiness.com }
+        email:           { type: email,  eg: a_cashier_XXX@thebusiness.com }
         password:        { type: string, eg: password }
         cardId:          { type: cardid, eg: 123456-ABC }
         businessId:      { type: int,    eg: 1 }
@@ -43,8 +43,6 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        email:           { type: email,  eg: some_cashier_XXX@thebusiness.com }
-        password:        { type: string, eg: password }
         cardId:          { type: cardid, eg: 123456-ABC }
         businessId:      { type: int,    eg: 1 }
         locationId:      { type: int,    eg: 1 }

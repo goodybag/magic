@@ -2,11 +2,12 @@
  * Businesses server
  */
 
+require('js-yaml');
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
-var desc        = require('./description')
+var desc        = require('./description.yaml');
 var routes      = require('./routes');
 
 // Businesses.list

@@ -36,8 +36,9 @@ function request(methodDoc, requestDoc, cb) {
 
 var counter = 1;
 function prepInputValue(v) {
-  if (typeof v == 'string')
-    return v.replace(/XXX/g, counter++);
+  if (typeof v == 'string') {
+    v = v.replace(/XXX/g, counter++);
+  }
   return v;
 }
 
@@ -57,7 +58,7 @@ function testValidRequest(methodDoc) {
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 200)
         console.log('Failed chaos valid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == 200);
@@ -75,7 +76,7 @@ function testExtradataRequest(methodDoc) {
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 400)
         console.log('Failed chaos extradata-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == 400);
@@ -99,7 +100,7 @@ function testPartialRequest(methodDoc, onlyKey) {
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== expectedStatus)
         console.log('Failed chaos partial-request test (expected '+expectedStatus+')'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == expectedStatus);
@@ -122,6 +123,8 @@ function testInvalidRequest(methodDoc, corruptKey) {
         case 'string*':
         case 'string':
         case 'url':
+        case 'email':
+        case 'bool':
           return 123456789;
         case 'int':
         case 'id':
@@ -133,7 +136,7 @@ function testInvalidRequest(methodDoc, corruptKey) {
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 400)
         console.log('Failed chaos invalid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == 400);
