@@ -198,6 +198,7 @@ INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
+INSERT INTO "groups" (id, name) VALUES ('7', 'foobar2');
 INSERT INTO "groups" (id, name) VALUES ('11110', 'manager');
 INSERT INTO "groups" (id, name) VALUES ('11111', 'cashier');
 INSERT INTO "groups" (id, name) VALUES ('11112', 'tapin-station');
@@ -436,6 +437,7 @@ SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProd
 BEGIN;
 INSERT INTO collections (id, "consumerId", "name") VALUES (1, 1, 'my first collection');
 INSERT INTO collections (id, "consumerId", "name") VALUES (2, 1, 'my second collection');
+INSERT INTO collections (id, "consumerId", "name") VALUES (3, 3, 'my third collection');
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
@@ -475,6 +477,13 @@ INSERT INTO events (id, type, date, data) VALUES (19, 'consumers.becameElite', N
 INSERT INTO events (id, type, date, data) VALUES (20, 'consumers.becameElite', NOW() - '2 months'::interval, '"userId"=>"4", "businessId"=>"1"');
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
+
+-- ACTIVITIY
+
+BEGIN;
+INSERT INTO activity (id, "consumerId", "businessId", "locationId", type, date, data) VALUES (1, 1, 1, 1, 'foobar', now(), '{"foo":"bar"}');
+COMMIT;
+SELECT setval('activity_id_seq', (SELECT MAX(id) from "activity")); -- advance the sequence past the IDs just used
 
 --
 BEGIN;

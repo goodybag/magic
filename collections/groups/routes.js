@@ -92,21 +92,21 @@ module.exports.create = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var inputs = {
-      name:req.body.name,
-      users:req.body.users
-    };
-
     var query = sql.query([
       'WITH',
-        '"group" AS (INSERT INTO groups (name) VALUES ($name) RETURNING ID),',
-        '"userGroup" AS',
-          '(INSERT INTO "usersGroups" ("groupId", "userId")',
-            'SELECT "group".id, "users".id FROM "group", users WHERE users.id IN ({userIds}))',
+        '"group" AS (INSERT INTO groups (name) VALUES ($name) RETURNING ID)',
+        '{userGroups}',
       'SELECT "group".id as id FROM "group"'
     ]);
-    query.$('name', inputs.name);
-    query.userIds = [].concat(inputs.users).map(function(i) { return parseInt(i,10); }).join(',');
+    query.$('name', req.body.name);
+
+    if (req.body.users && req.body.users.length) {
+      query.userGroups = [', "userGroup" AS',
+        '(INSERT INTO "usersGroups" ("groupId", "userId")',
+          'SELECT "group".id, "users".id FROM "group", users WHERE users.id IN ({userIds}))'
+      ].join(' ');
+      query.userIds = [].concat(req.body.users).map(function(i) { return parseInt(i,10); }).join(',');
+    }
 
     client.query(query.toString(), query.$values, function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

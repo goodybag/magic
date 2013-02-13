@@ -404,8 +404,6 @@ module.exports.createCollection = function(req, res){
 
   var consumerId = req.param('consumerId');
   var name = req.body.name;
-  if (!name)
-    return res.error(errors.input.VALIDATION_FAILED, '`name` is required');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -450,8 +448,6 @@ module.exports.addCollectionProduct = function(req, res){
   var consumerId = req.param('consumerId');
   var collectionId = req.param('collectionId');
   var productId = req.body.productId;
-  if (!productId)
-    return res.error(errors.input.VALIDATION_FAILED, '`productId` is required');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -480,12 +476,6 @@ module.exports.createCardupdate = function(req, res){
 
   var email = req.body.email;
   var newCardId = req.body.cardId;
-  if (!email) {
-    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.')
-  }
-  if (!newCardId) {
-    return res.error(errors.input.VALIDATION_FAILED, '`cardId` is required.')
-  }
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

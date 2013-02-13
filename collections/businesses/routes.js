@@ -173,10 +173,6 @@ module.exports.create = function(req, res){
   inputs.isDeleted = false;
   var tags = inputs.tags; delete inputs.tags;
   
-  // validation
-  var error = utils.validate(inputs, schemas.businesses);
-  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
-
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

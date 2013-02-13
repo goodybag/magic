@@ -1,0 +1,24 @@
+collection:
+  resource:
+    type: collection
+    path: /activity
+  methods:
+    get:
+      desc: List Activity
+      altpaths:
+        - /consumers/:consumerId/activity
+      query:
+        consumerId: { type: int, eg: 1 }
+        businessId: { type: int, eg: 1 }
+        locationId: { type: int, eg: 1 }
+  children:
+    - /activity/:id
+item:
+  resource:
+    type: item
+    path: /activity/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Activity
