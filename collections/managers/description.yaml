@@ -1,45 +1,44 @@
 collection:
   resource:
     type: collection
-    path: /cashiers
+    path: /managers
   methods:
     get:
-      desc: List Cashiers
+      desc: List Managers
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       query:
         offset:  { type: int,     eg: 5 }
         limit:   { type: int,     eg: 5 }
-        filter:  { type: string,  eg: business }
+        filter:  { type: string,  eg: bob }
     post:
-      desc: Add Cashier
+      desc: Add Manager
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        email:           { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        email:           { type: email,  eg: a_manager_XXX@thebusiness.com }
         password:        { type: string, eg: password }
         cardId:          { type: cardid, eg: 123456-ABC }
         businessId:      { type: int,    eg: 1 }
         locationId:      { type: int,    eg: 1 }
   children:
-    - /cashiers/:id
-
+    - /managers/:id
 item:
   resource:
     type: item
-    path: /cashiers/:id
+    path: /managers/:id
     params:
       id: { type: int, eg: 1 }
   methods:
     get:
-      desc: Get Cashier
+      desc: Get Manager
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
     put:
-      desc: Update Cashier
+      desc: Update Manager
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
@@ -48,7 +47,7 @@ item:
         businessId:      { type: int,    eg: 1 }
         locationId:      { type: int,    eg: 1 }
     delete:
-      desc: Delete Cashier
+      desc: Delete Manager
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }

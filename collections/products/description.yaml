@@ -1,0 +1,120 @@
+collection:
+  resource:
+    type: collection
+    path: /products
+  methods:
+    get:
+      desc: List Products
+      altpaths:
+        - /location/:locationId/products
+        - /business/:businessId/products
+        - /products/food
+        - /products/fashion
+        - /products/other
+      query:
+        lat:        { type: float,   eg: 10.123 }
+        lon:        { type: float,   eg: 10.123 }
+        range:      { type: int,     eg: 500 }
+        businessId: { type: id,      eg: 1 }
+        locationId: { type: id,      eg: 1 }
+        tag:        { type: string*, eg: [food, apparel] }
+        sort:       { type: string,  eg: -name, choices: [-name, name, -distance, distance, -random, random, -popular, popular] }
+        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, isSpotlight] }
+        offset:     { type: int,     eg: 5, default: 0 }
+        limit:      { type: int,     eg: 5, default: 20 }
+        spotlight:  { type: bool,    eg: false }
+        all:        { type: bool,    eg: false }
+    post:
+      desc: Add Product
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:      { type: id,      eg: 1 }
+        name:            { type: string,  eg: My Product, required: true }
+        description:     { type: string,  eg: This is the description of the product }
+        price:           { type: int,     eg: 1299 }
+        categories:      { type: int+,    eg: [2] }
+        tags:            { type: int+,    eg: [1] }
+        photoUrl:        { type: url,     eg: http://foo.com/image.png }
+        isVerified:      { type: bool,    eg: true }
+        isArchived:      { type: bool,    eg: true }
+        isEnabled:       { type: bool,    eg: true }
+  children:
+    - /products/:id
+
+item:
+  resource:
+    type: item
+    path: /products/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Product
+    put:
+      desc: Update Product
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:      { type: id,      eg: 1 }
+        name:            { type: string,  eg: My Product, required: true }
+        description:     { type: string,  eg: This is the description of the product }
+        price:           { type: int,     eg: 1299 }
+        photoUrl:        { type: url,     eg: http://foo.com/image.png }
+        categories:      { type: int+,    eg: [2] }
+        tags:            { type: int+,    eg: [1] }
+        isVerified:      { type: bool,    eg: true }
+        isArchived:      { type: bool,    eg: true }
+        isEnabled:       { type: bool,    eg: true }
+    delete:
+      desc: Delete Product
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+categoriesCollection:
+  resource:
+    type: collection
+    path: /products/:productId/categories
+    params:
+      productId: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Lists Product Categories
+    post:
+      desc: Adds the Product to a Category
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        id: { type: id, eg: 1 }
+
+categoriesItem:
+  resource:
+    type: item
+    path: /products/:productId/categories/:categoryId
+  methods:
+    delete:
+      desc: Removes the Product from the Category
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+feelingsCollection:
+  resource:
+    type: collection
+    path: /products/:productId/feelings
+    params:
+      productId: { type: int, eg: 1 }
+  methods:
+    post:
+      desc: Updates the User's Feelings on the Product
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        isLiked:  { type: bool, eg: true }
+        isWanted: { type: bool, eg: true }
+        isTried:  { type: bool, eg: true }

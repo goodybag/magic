@@ -1,0 +1,35 @@
+collection:
+  resource:
+    type: collection
+    path: /loyalty
+  methods:
+    get:
+      desc: List Loyalty Stats
+      altpaths:
+        - /consumers/:consumerId/loyalty
+        - /consumers/:consumerId/loyalty/:businessId
+        - /consumers/businesses/:businessId
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        businessId:  { type: id, eg: 1 }
+  children:
+    - /loyalty/:id
+item:
+  resource:
+    type: item
+    path: /loyalty/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    put:
+      desc: Update Loyalty Stats
+      altpaths:
+        - /consumers/:consumerId/loyalty/:businessId
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        deltaPunches: { type: int, eg: 3 }
+        locationId:   { type: id,  eg: 1 }

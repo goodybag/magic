@@ -25,7 +25,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  * :NOTE: req.body.consumerId will be correctly filled by the permissions middleware
  *        (if it's not, the route will be stopped due to lack of credentials)
  */
-module.exports.getOne = function(req, res){
+module.exports.get = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats');
 
@@ -45,7 +45,7 @@ module.exports.getOne = function(req, res){
  * :NOTE: req.body.consumerId will be correctly filled by the permissions middleware
  *        (if it's not, the route will be stopped due to lack of credentials)
  */
-module.exports.get = function(req, res){
+module.exports.list = function(req, res){
   var TAGS = ['get-loyaltystats', req.uuid];
   logger.routes.debug(TAGS, 'fetching loyaltystats');
 
