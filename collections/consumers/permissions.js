@@ -21,7 +21,16 @@ module.exports = {
   , default: {}
 
   , owner: {
-      read:   true
+      read:   [
+        'email'
+      , 'singlyId'
+      , 'singlyAccessToken'
+      , 'firstName'
+      , 'lastName'
+      , 'screenName'
+      , 'cardId'
+      , 'consumerId'
+      ]
     , update: [
         'email'
       , 'password'
