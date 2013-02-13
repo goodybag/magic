@@ -5,23 +5,18 @@
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
-var schema      = require('../../db').schemas.managers;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description');
 
 // managers.list
 server.get(
   '/v1/managers'
 , middleware.profile('GET /v1/managers', ['limit'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
@@ -51,10 +46,10 @@ server.post(
 , middleware.profile('apply groups managers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.auth.allow('admin', 'sales')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create manager handler')
 , routes.create
 );
@@ -67,10 +62,10 @@ server.put(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update manager handler')
 , routes.update
 );
@@ -83,10 +78,10 @@ server.post(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update manager handler')
 , routes.update
 );

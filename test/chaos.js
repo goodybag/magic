@@ -321,3 +321,5 @@ loadDescription('events', doChaos);
 loadDescription('groups', doChaos);
 loadDescription('locations', doChaos);
 loadDescription('loyaltyStats', doChaos);
+loadDescription('managers', doChaos);
+loadDescription('photos', doChaos);
