@@ -8,6 +8,7 @@ var routes      = require('./routes');
 var schema      = require('../../db').schemas.cashiers;
 var perms       = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description')
 
 // cashiers.list
 server.get(
@@ -18,10 +19,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
@@ -55,7 +53,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.collection.methods.post.query)
 , middleware.profile('create cashier handler')
 , routes.create
 );
@@ -71,7 +69,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.query)
 , middleware.profile('update cashier handler')
 , routes.update
 );
@@ -87,7 +85,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(perms)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.query)
 , middleware.profile('update cashier handler')
 , routes.update
 );
