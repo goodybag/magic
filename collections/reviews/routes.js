@@ -18,7 +18,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 
 /**
- * Get List of Oddity Business with business name and addresses
+ * Get List of Oddity Business, can set limit and offset for the list
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
@@ -45,9 +45,7 @@ module.exports.list = function(req, res){
       .and('"oddityMeta"."isHidden" = false');
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
-//    query.sort   = sql.sort(req.query.sort || 'biz_name');
-//    query.limit  = sql.limit(req.query.limit, req.query.offset);
-    // name filter
+    // filter list by name
 
     if (req.param('filter')) {
       query.where.and('"oddityLive"."biz_name" ILIKE $nameFilter');
@@ -67,8 +65,7 @@ module.exports.list = function(req, res){
 };
 
 /**
- * Get 1 business by joining table between oddityLive and oddityMeta, return business name, address
- * city, postal and web url
+ * Get 1 business by joining table between oddityLive and oddityMeta, return business information
  * @param req
  * @param res
  */
@@ -99,22 +96,25 @@ module.exports.get = function(req, res){
   });
 };
 /**
- * Function to hide one business in oddityMeta table and isHidden is set to false
+ * Function to update one business in oddityMeta table and add timestamp to lastUpdated
  * @param req
  * @param res
  */
 module.exports.update = function(req, res){
-  var TAGS = ['hide-review', req.uuid];
-  logger.routes.debug(TAGS, 'hide business from to review ' + req.params.id, {uid: "more"});
+  var TAGS = ['update-review', req.uuid];
+  logger.routes.debug(TAGS, 'update business from to review ' + req.params.id, {uid: "more"});
 
   db.getClient(TAGS[0], function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = {
-      businessId: req.body.businessId
+      userId: req.body.userId
+    , businessId: req.body.businessId
     , locationId: req.body.locationId
-    , toReview :  req.body.toReview
-    , isHidden :  req.body.isHidden
+    , toReview : req.body.toReview
+    , isHidden : req.body.isHidden ? true : false
+    , hiddenBy: req.body.hiddenBy
+    , reviewedBy: req.body.reviewedBy
     };
 
     var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
@@ -132,3 +132,14 @@ module.exports.update = function(req, res){
     });
   });
 };
+
+module.exports.hide = function(req, res){
+  var TAGS = ['hide-reviews', req.uuid];
+  logger.routes.debug(TAGS, 'hide multiple businesses from to review ' , {uid: "more"});
+
+  db.getClient(TAGS[0], function(error, client){
+      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    }
+  )
+}
