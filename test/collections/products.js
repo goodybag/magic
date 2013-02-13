@@ -376,13 +376,6 @@ describe('GET /v1/products/food', function() {
     });
   });
 
-  it('should not allow the user to filter by tags', function(done) {
-    tu.get('/v1/products/food?tag=foobar&include=tags', function(err, payload, res) {
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
-
   it('should allow the user to sort by popular', function(done) {
     tu.get('/v1/products/food?sort=-popular', function(err, payload, res) {
       assert(res.statusCode == 200);

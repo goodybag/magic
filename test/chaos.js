@@ -324,3 +324,4 @@ loadDescription('loyaltyStats', doChaos);
 loadDescription('managers', doChaos);
 loadDescription('photos', doChaos);
 loadDescription('productCategories', doChaos);
+loadDescription('products', doChaos);
