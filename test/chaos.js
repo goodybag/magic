@@ -95,6 +95,8 @@ function testPartialRequest(methodDoc, onlyKey) {
       if (key != onlyKey)
         removedRequiredField = removedRequiredField || requestDoc.clearInput(key);
     });
+    if (/requires/.test(methodDoc.getAttrType(onlyKey)))
+      removedRequiredField = true;
 
     var expectedStatus = (removedRequiredField) ? 400 : 200;
     request(methodDoc, requestDoc, function(res, result) {
@@ -301,9 +303,15 @@ RequestDoc.prototype.toPayload = function() {
 
 // Run Chaos Tests
 // ===============
+var blacklist = [
+  'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
+  'consumers.cardUpdatesItem',
+];
+
 function loadDescription(collection, cb) {
   var data = require('../collections/'+collection+'/description.yaml', 'utf8');
   for (var k in data) {
+    if (blacklist.indexOf(collection+'.'+k) !== -1) continue;
     cb(new ResourceDoc(data[k]));
   }
 }
@@ -312,3 +320,4 @@ loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
 loadDescription('cashiers', doChaos);
 loadDescription('charities', doChaos);
+loadDescription('consumers', doChaos);

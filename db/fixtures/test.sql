@@ -436,6 +436,7 @@ SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProd
 BEGIN;
 INSERT INTO collections (id, "consumerId", "name") VALUES (1, 1, 'my first collection');
 INSERT INTO collections (id, "consumerId", "name") VALUES (2, 1, 'my second collection');
+INSERT INTO collections (id, "consumerId", "name") VALUES (3, 3, 'my third collection');
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
