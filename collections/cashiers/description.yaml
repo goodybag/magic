@@ -11,16 +11,16 @@ methods:
     query:
       offset:  { type: int,     eg: 5 }
       limit:   { type: int,     eg: 5 }
-      filter:  { type: any,     eg: business }
+      filter:  { type: string,  eg: business }
   post:
     desc: Add Cashier
     auth:
       required: true
       eg: { email: admin@goodybag.com, password: password }
     body:
-      email:           { type: any,    eg: some_cashier_XXX@thebusiness.com }
-      password:        { type: any,    eg: password }
-      cardId:          { type: any,    eg: 123456-ABC }
+      email:           { type: email,  eg: some_cashier_XXX@thebusiness.com }
+      password:        { type: string, eg: password }
+      cardId:          { type: cardid, eg: 123456-ABC }
       businessId:      { type: int,    eg: 1 }
       locationId:      { type: int,    eg: 1 }
 children:

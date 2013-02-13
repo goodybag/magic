@@ -299,8 +299,10 @@ RequestDoc.prototype.toPayload = function() {
 // Run Chaos Tests
 // ===============
 function loadDescription(collection, cb) {
-  var doc = require('fs').readFileSync('./collections/'+collection+'/description.yaml', 'utf8');
-  yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
+  var data = require('../collections/'+collection+'/description.yaml', 'utf8');
+  for (var k in data) {
+    cb(new ResourceDoc(data[k]));
+  }
 }
 
 // loadDescription('activity', doChaos);

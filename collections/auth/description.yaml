@@ -8,8 +8,8 @@ methods:
   post:
     desc: Start Session
     body:
-      email:    { type: any, eg: user@goodybag.com, required: true }
-      password: { type: any, eg: password, required: true }
+      email:    { type: email required, eg: user@goodybag.com }
+      password: { type: string required, eg: password }
   delete:
     desc: End Session
 ...
