@@ -68,6 +68,8 @@ function testValidRequest(methodDoc) {
 }
 
 function testExtradataRequest(methodDoc) {
+  if (methodDoc.hasNoAttrs()) return;
+
   it('should respond 400 on '+methodDoc.getDesc()+' with unsupported input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
 
@@ -193,7 +195,7 @@ ResourceDoc.prototype.makeTests = function() {
   var tests = new FunctionsList();
   this.iterateMethods(function(method) {
     tests.add(testValidRequest, method);
-    // tests.add(testExtradataRequest, method);
+    tests.add(testExtradataRequest, method);
     method.iterateAttributes(function(key) {
       tests.add(testPartialRequest, method, key);
       tests.add(testInvalidRequest, method, key);
@@ -217,6 +219,7 @@ function MethodDoc(resourceDoc, methodName) {
 }
 MethodDoc.prototype.getDesc = function() { return this.data.desc; };
 MethodDoc.prototype.getAttrType = function(key) { return this.attrs[key].type; };
+MethodDoc.prototype.hasNoAttrs = function() { return !this.attrs; };
 MethodDoc.prototype.needsAuth = function() { return (this.data.auth && this.data.auth.required) };
 MethodDoc.prototype.getAuthCreds = function() { return this.data.auth.eg; };
 MethodDoc.prototype.iterateAttributes = function(cb) { this.attrKeys.forEach(cb); };
@@ -239,6 +242,7 @@ MethodDoc.prototype.makeRequestDoc = function() {
 function RequestDoc(data) {
   this.data = deepClone(data);
 }
+RequestDoc.prototype.hasNoInputs = function() { return (!this.data.query && !this.data.body); };
 RequestDoc.prototype.setInput = function(key, value) {
   if (this.data.query) {
     if (this.data.query[key])

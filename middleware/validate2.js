@@ -160,3 +160,6 @@ var
 module.exports.body = createBodyValidator;
 module.exports.query = createQueryValidator;
 module.exports.path = createPathValidator;
+module.exports.noBody = createBodyValidator({});
+module.exports.noQuery = createBodyValidator({});
+module.exports.noPath = createBodyValidator({});
