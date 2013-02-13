@@ -44,7 +44,7 @@ exports.collectionOwner = function(req, callback){
   , options = { fields: ['id'] }
   ;
 
-  db.api.collections.findOne($query, options, function(error, colllection){
+  db.api.collections.findOne($query, options, function(error, collection){
     return callback(!error && collection ? 'owner' : null);
   });
 };

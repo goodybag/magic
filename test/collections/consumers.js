@@ -430,15 +430,48 @@ describe('DELETE /v1/collections/:collectionId', function() {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.id);
-        tu.del('/v1/collections/' + results.data.id, function(error, results, res){
+        var id = results.data.id;
+        tu.get('/v1/consumers/1/collections', function(error, results, res){
           assert(res.statusCode == 200);
-          tu.get('/v1/consumers/1/collections', function(error, results, res){
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 1);
+          tu.del('/v1/collections/' + id, function(error, results, res){
             assert(res.statusCode == 200);
-            results = JSON.parse(results);
-            assert(results.filter(function(c){ return c.name === 'my foobar collection'}).length === 0);
-          })
+            tu.get('/v1/consumers/1/collections', function(error, results, res){
+              assert(res.statusCode == 200);
+              results = JSON.parse(results);
+              assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 0);
+              tu.logout(done);
+            })
+          });
+        });
 
-          tu.logout(done);
+      });
+    });
+  });
+
+  it('should fail to delete a users collection because of unsufficient permissions', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/1/collections', {name:'my foobar2 collection'}, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id);
+        var id = results.data.id;
+        tu.get('/v1/consumers/1/collections', function(error, results, res){
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'}).length === 1);
+          tu.logout(function(){
+            tu.login({ email: 'consumer4@gmail.com', password: 'password' }, function(error){
+              tu.del('/v1/collections/' + id, function(error, results, res){
+                assert(res.statusCode == 403);
+                results = JSON.parse(results);
+                assert(results.error);
+                assert(results.error.name === "NOT_ALLOWED");
+                tu.logout(done);
+              });
+            });
+          });
         });
       });
     });
