@@ -86,7 +86,7 @@ describe('Products Events: ', function() {
 
 describe('Loyalty Events: ', function() {
   it('store an event when a when a punch occurs', function(done) {
-    var punch = { deltaPunches: 5, businessId: 1, consumerId: 9 };
+    var punch = { deltaPunches: 5 }, businessId = 1, consumerId = 9;
     var stage = {
       start: function(){
         stage.loginAsTapInStation();
@@ -102,7 +102,7 @@ describe('Loyalty Events: ', function() {
       }
 
     , updateLoyaltyStats: function(){
-        tu.tapinAuthRequest('PUT', '/v1/consumers/' + punch.consumerId + '/loyalty/' + punch.businessId, '123456-XYX', punch, function(error, results, res) {
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-XYX', punch, function(error, results, res) {
           assert(!error);
           assert(res.statusCode === 200);
 
@@ -131,8 +131,8 @@ describe('Loyalty Events: ', function() {
               // Also need to check the consumerId
               return (d.type === "loyalty.punch"
                 && d.data.deltaPunches  == punch.deltaPunches
-                && d.data.businessId    == punch.businessId
-                && d.data.consumerId    == punch.consumerId
+                && d.data.businessId    == businessId
+                && d.data.consumerId    == consumerId
               );
             }).length >= 1);
 
