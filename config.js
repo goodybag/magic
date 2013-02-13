@@ -158,7 +158,7 @@ var config = {
   , http: {
       port: process.env['PORT'] || 5000
     }
-  , baseUrl: 'http://merlin.staging.goodybag.com'
+  , baseUrl: 'http://magic.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
   , outputActivePoolIds: false
   , emailEnabled: true
@@ -168,7 +168,16 @@ var config = {
   }
 
 , production: {
-
+    logging: {
+      enabled: true
+    , transports: { console: true }
+    }
+  , http: { port: process.env['PORT'] || 5000 }
+  , baseUrl: 'http://magic.goodybag.com'
+  , postgresConnStr: process.env['DATABASE_URL']
+  , outputActivePoolIds: false
+  , emailEnabled: true
+  , repl: { enabled: false }
   }
 };
 
