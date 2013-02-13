@@ -198,15 +198,6 @@ define(function(require){
     , type    : 'UNIQUE'
     , columns : '(id)'
     }
-  , userLoyaltyStats_consumerId_idx: {
-      table   : 'userLoyaltyStats'
-    , type    : 'UNIQUE'
-    , columns : '("consumerId")'
-    }
-  , userRedemptions_consumerId_idx: {
-      table   : 'userRedemptions'
-    , columns : '("consumerId")'
-    }
   , users_id_idx: {
       table   : 'users'
     , type    : 'UNIQUE'
