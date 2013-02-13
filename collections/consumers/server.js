@@ -161,6 +161,30 @@ server.post(
 , routes.createCollection
 );
 
+// consumers.deleteCollections
+server.del(
+  '/v1/consumers/:consumerId/collections/:collectionId'
+, middleware.profile('DELETE /v1/consumers/:consumerId/collections/:collectionId')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('permissions')
+, middleware.auth.allow('admin', 'owner')
+, middleware.profile('delete consumer collection handler')
+, routes.deleteCollection
+);
+
+// consumers.deleteCollections
+server.del(
+  '/v1/collections/:collectionId'
+, middleware.profile('DELETE /v1/consumers/:consumerId/collections/:collectionId')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.collectionOwner)
+, middleware.profile('permissions')
+, middleware.auth.allow('admin', 'owner')
+, middleware.profile('delete consumer collection handler')
+, routes.deleteCollection
+);
+
 // consumers.listCollectionProducts
 server.get(
   '/v1/consumers/:consumerId/collections/:collectionId'
