@@ -177,8 +177,37 @@ module.exports.update = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // start transaction
     var tx = new Transaction(client);
+
+    var applyGroupRelations = function(){
+      // delete all group relations
+      var query = usersGroups.delete()
+        .where(usersGroups.userId.equals(req.param('id')));
+      client.query(query.toQuery(), function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+
+        // add new group relations
+        async.series((groups || []).map(function(groupId) {
+          return function(done) {
+            var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
+            client.query(query, [req.param('id'), groupId], done);
+          }
+        }), function(err, results) {
+          // did any insert fail?
+          if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
+            // the target group must not have existed
+            tx.abort();
+            return res.error(errors.input.INVALID_GROUPS);
+          }
+
+          // done
+          tx.commit();
+          return res.json({ error: null, data: null });
+        });
+      });
+    };
+
+    // start transaction
     tx.begin(function() {
 
       // build update query
@@ -199,6 +228,8 @@ module.exports.update = function(req, res){
       }
 
       logger.db.debug(TAGS, query.toString());
+
+      if (query.updates.fields.length === 0) return applyGroupRelations();
 
       // run update query
       client.query(query.toString(), query.$values, function(error, result){
@@ -227,32 +258,7 @@ module.exports.update = function(req, res){
           return res.json({ error: null, data: null });
         }
 
-        // delete all group relations
-        var query = usersGroups.delete()
-          .where(usersGroups.userId.equals(req.param('id')));
-        client.query(query.toQuery(), function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-
-          // add new group relations
-          async.series((groups || []).map(function(groupId) {
-            return function(done) {
-              var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [req.param('id'), groupId], done);
-            }
-          }), function(err, results) {
-            // did any insert fail?
-            if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
-              // the target group must not have existed
-              tx.abort();
-              return res.error(errors.input.INVALID_GROUPS);
-            }
-
-            // done
-            tx.commit();
-            return res.json({ error: null, data: null });
-          });
-
-        });
+        applyGroupRelations();
       });
     });
   });

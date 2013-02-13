@@ -168,7 +168,7 @@ module.exports.create = function(req, res){
       , email: req.body.email
       , singlyAccessToken: req.body.singlyAccessToken
       , singlyId: req.body.singlyId
-      , groups: ['consumers']
+      , groups: [5]
       };
 
       res.json({ error: null, data: result.rows[0] });

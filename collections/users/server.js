@@ -8,6 +8,7 @@ var routes      = require('./routes');
 var schema      = require('../../db').schemas.users;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description.yaml');
 
 // Users.createPasswordReset
 server.post(
@@ -34,10 +35,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list users handler')
@@ -62,10 +60,10 @@ server.post(
 , middleware.profile('POST /v1/users')
 , middleware.profile('apply groups users owner')
 , middleware.applyGroups(applyGroups.owner)
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create user handler')
 , routes.create
 );
@@ -78,10 +76,10 @@ server.put(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update user handler')
 , routes.update
 );
@@ -94,10 +92,10 @@ server.post(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update user handler')
 , routes.update
 );
