@@ -186,8 +186,8 @@ describe('PATCH /v1/users/:id', function() {
     , password: "whatever"
     , groups:[2, 3]
     };
-    tu.login({ email: 'consumer@goodybag.com', password: 'password' }, function(error, user){
-      tu.patch('/v1/users/' + user.id, user, function(error, results, res) {
+    tu.login({ email: 'consumer@goodybag.com', password: 'password' }, function(error, authedUser){
+      tu.patch('/v1/users/' + authedUser.id, user, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);

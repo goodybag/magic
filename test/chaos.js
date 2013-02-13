@@ -328,3 +328,4 @@ loadDescription('productCategories', doChaos);
 loadDescription('products', doChaos);
 loadDescription('productTags', doChaos);
 loadDescription('redemptions', doChaos);
+loadDescription('users', doChaos);

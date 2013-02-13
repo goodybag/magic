@@ -1,0 +1,49 @@
+collection:
+  resource:
+    type: collection
+    path: /users
+  methods:
+    get:
+      desc: List Users
+      query:
+        offset:   { type: int,    eg: 5 }
+        limit:    { type: int,    eg: 5 }
+        filter:   { type: string, eg: tfergu }
+    post:
+      desc: Add User
+      body:
+        email:              { type: email,    required: true, eg: goody@goodybag.com }
+        password:           { type: string,   required: true, eg: password }
+        groups:             { type: int*,     eg: [1,2] }
+        singlyId:           { type: string }
+        singlyAccesToken:   { type: string }
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+  children:
+    - /users/:id
+item:
+  resource:
+    type: item
+    path: /users/:id
+    params:
+      id: { type: int, eg: 11134 }
+  methods:
+    get:
+      desc: Get User
+    put:
+      desc: Update User
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        email:              { type: email,  eg: goody2@goodybag.com }
+        password:           { type: string, eg: password }
+        groups:             { type: int*,   eg: [1,2] }
+        singlyId:           { type: string }
+        singlyAccesToken:   { type: string }
+    delete:
+      desc: Delete User
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
