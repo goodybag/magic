@@ -487,14 +487,14 @@ SELECT setval('activity_id_seq', (SELECT MAX(id) from "activity")); -- advance t
 
 --
 BEGIN;
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('2', 'Abilene', '1866 Pine St');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('11', 'Abilene', '18677 Pine St');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('22', 'Abilene', '18677 Guaterloop St');
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd', '78749-1234', 'Austin', 'TX', 'www.subway.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('2', 'Abilene', '1866 Pine St', '78749-1234', 'Houston', 'TX', 'www.abilene.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('11', 'Abilene', '18677 Pine St', '78749-1234', 'Austin', 'TX', 'www.abilene.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('22', 'Abilene', '18677 Guaterloop St', '78749-1234', 'Austin', 'TX', 'www.abilene.com' );
 COMMIT;
 
 --
 BEGIN;
-INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('1', '11', true, true, false);
-INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('2', '22', true, true, false);
+INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('1','1', '11', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-02-13 15:21:57.497542');
+INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('2','2', '22', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-01-13 15:21:57.497542');
 COMMIT;
