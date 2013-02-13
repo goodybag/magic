@@ -302,6 +302,7 @@ RequestDoc.prototype.toPayload = function() {
 var blacklist = [
   'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
   'consumers.cardUpdatesItem',
+  'redemptions.collection'
 ];
 
 function loadDescription(collection, cb) {
@@ -320,4 +321,11 @@ loadDescription('consumers', doChaos);
 loadDescription('events', doChaos);
 loadDescription('groups', doChaos);
 loadDescription('locations', doChaos);
+loadDescription('loyaltyStats', doChaos);
+loadDescription('managers', doChaos);
+loadDescription('photos', doChaos);
+loadDescription('productCategories', doChaos);
+loadDescription('products', doChaos);
+loadDescription('productTags', doChaos);
+loadDescription('redemptions', doChaos);
 loadDescription('users', doChaos);

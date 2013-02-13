@@ -104,6 +104,8 @@ module.exports.create = function(req, res){
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
+      if (error)
+        console.log(query.toString(), query.$values, error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

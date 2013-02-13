@@ -46,7 +46,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{prodLocJoin} {locJoin} {tagJoin} {collectionJoin} {feelingsJoins}',
+        '{prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY {groupby}',
@@ -66,15 +66,15 @@ module.exports.list = function(req, res){
 
     // location filtering
     if (req.query.lat && req.query.lon) {
-      query.locJoin = [
+      query.prodLocJoin = [
         'INNER JOIN "productLocations" ON',
           '"productLocations"."productId" = products.id'
       ].join(' ')
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), position)) AS distance')
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance')
       if (req.query.range) {
-        query.locJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
+        query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
       }
     }
@@ -86,11 +86,15 @@ module.exports.list = function(req, res){
       if (req.param('spotlight') || includes.indexOf('isSpotlight') > -1 || includes.indexOf('inSpotlight') > -1)
         query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
 
-      query.prodLocJoin = [
-      , '{joinType} join "productLocations"'
-        , 'ON products."id" = "productLocations"."productId"'
-        , 'and "productLocations"."locationId" = $locationId'
-      ].join(' ');
+      if (!query.prodLocJoin) {
+        query.prodLocJoin = [
+        , '{joinType} join "productLocations"'
+          , 'ON products."id" = "productLocations"."productId"'
+          , 'and "productLocations"."locationId" = $locationId'
+        ].join(' ');
+      } else {
+        query.prodLocJoin += ' AND "productLocations"."locationId" = $locationId';
+      }
 
       query.groupby.add('"productLocations".id');
 
@@ -779,8 +783,6 @@ module.exports.addCategory = function(req, res) {
   var TAGS = ['create-product-productcategory-relation', req.uuid];
 
   var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
-  var error = utils.validate(inputs, db.schemas.productsProductCategories);
-  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

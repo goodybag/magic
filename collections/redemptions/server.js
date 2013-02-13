@@ -4,10 +4,10 @@
 
 var server = require('express')();
 var middleware = require('../../middleware');
-var schema = require('../../db').schemas.userRedemptions;
 var routes = require('./routes');
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc = require('./description')
 
 // Redemptions.list
 server.get(
@@ -16,14 +16,9 @@ server.get(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('list redemptions handler')
 , routes.list
 );
@@ -33,7 +28,7 @@ server.post(
   '/v1/redemptions'
 , middleware.profile('POST /v1/redemptions')
 , middleware.profile('validate body')
-, middleware.validate.body(schema, { deltaPunches:{ isInt:[] }})
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('apply groups redemptions locationEmployee')
 , middleware.applyGroups(applyGroups.locationEmployee)
 , middleware.profile('auth allow')

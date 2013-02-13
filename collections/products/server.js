@@ -5,30 +5,17 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var schema = require('../../db').schemas.products;
 var permissions = require('./permissions');
+var desc = require('./description')
 
 // Products.list
 server.get(
   '/v1/products'
 , middleware.profile('GET /v1/products', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    businessId : { isInt:[] },
-    locationId : { isInt:[] },
-    tag        : { is:/[A-z\!\,]+/ },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -40,17 +27,9 @@ server.get(
   '/v1/locations/:locationId/products'
 , middleware.profile('GET /v1/locations/:locationId/products', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    tag        : { is:/[A-z\!\,]+/ },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories', 'inSpotlight', 'isSpotlight']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -62,25 +41,13 @@ server.get(
   '/v1/businesses/:businessId/products'
 , middleware.profile('GET /v1/businesses/:businessId/products', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate path')
 , middleware.validate.path({
     businessId : { isInt:[] }
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    locationId : { isInt:[] },
-    tag        : { isAlpha:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -92,25 +59,10 @@ server.get(
   '/v1/products/food'
 , middleware.profile('GET /v1/products/food', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = 'food'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    locationId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['food']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -122,25 +74,10 @@ server.get(
   '/v1/products/fashion'
 , middleware.profile('GET /v1/products/fashion', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = 'apparel'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    locationId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['apparel']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -152,25 +89,10 @@ server.get(
   '/v1/products/other'
 , middleware.profile('GET /v1/products/other', ['include','limit','sort'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
+, function(req, res, next) { req.query.tag = '!food,!apparel'; next(); }
 , middleware.profile('validate query')
-, middleware.validate.query({
-    lat        : { isFloat:[] },
-    lon        : { isFloat:[] },
-    range      : { isInt:[] },
-    locationId : { isInt:[] },
-    tag        : { isNull:[] },
-    sort       : { isIn:[['-name','name','-distance','distance','-random','random','-popular','popular']] },
-    include    : { isIn:[['tags','categories']] },
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
-, middleware.profile('query defaults')
-, middleware.defaults.query({
-    tag : ['!food,!apparel']
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -181,10 +103,10 @@ server.get(
 server.post(
   '/v1/products'
 , middleware.profile('POST /v1/products')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create product handler')
 , routes.create
 );
@@ -203,10 +125,10 @@ server.get(
 server.put(
   '/v1/products/:productId'
 , middleware.profile('PUT /v1/products/:productId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update product handler')
 , routes.update
 );
@@ -215,10 +137,10 @@ server.put(
 server.post(
   '/v1/products/:productId'
 , middleware.profile('POST /v1/products/:productId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update product handler')
 , routes.update
 );
@@ -227,6 +149,7 @@ server.post(
 server.del(
   '/v1/products/:productId'
 , middleware.profile('DELETE /v1/products/:productId')
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('delete product handler')
 , routes.del
@@ -246,6 +169,8 @@ server.get(
 server.post(
   '/v1/products/:productId/categories'
 , middleware.profile('POST /v1/products/:productId/categories')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.categoriesCollection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('add product category handler')
@@ -264,6 +189,10 @@ server.del(
 server.post(
   '/v1/products/:productId/feelings'
 , middleware.profile('POST /v1/products/:productId/feelings')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales', 'manager', 'cashier', 'consumer')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.feelingsCollection.methods.post.body)
 , middleware.profile('update product feelings handler')
 , routes.updateFeelings
 );

@@ -5,22 +5,17 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var schema = require('../../db').schemas.productTags;
 var permissions = require('./permissions');
+var desc = require('./description');
 
 // ProductTags.list
 server.get(
   '/v1/product-tags'
 , middleware.profile('GET /v1/product-tags', ['limit'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list product tags handler')
@@ -32,14 +27,9 @@ server.get(
   '/v1/businesses/:businessId/product-tags'
 , middleware.profile('GET /v1/businesses/:businessId/product-tags', ['limit'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list product tags handler')
@@ -71,7 +61,7 @@ server.post(
   '/v1/businesses/:businessId/product-tags'
 , middleware.profile('POST /v1/businesses/:businessId/product-tags')
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('create product tag handler')
@@ -83,7 +73,7 @@ server.put(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.profile('PUT /v1/businesses/:businessId/product-tags/:tagId')
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('update product tag handler')
@@ -95,7 +85,7 @@ server.post(
   '/v1/businesses/:businessId/product-tags/:tagId'
 , middleware.profile('POST /v1/businesses/:businessId/product-tags/:tagId')
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('update product tag handler')

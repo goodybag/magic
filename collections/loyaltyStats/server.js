@@ -4,12 +4,12 @@
 
 var server = require('express')();
 var middleware = require('../../middleware');
-var schema = require('../../db').schemas.userLoyaltyStats;
 var routes = require('./routes');
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc = require('./description')
 
-// LoyaltyStats.get
+// LoyaltyStats.list
 server.get(
   '/v1/loyalty'
 , middleware.profile('GET /v1/loyalty')
@@ -17,10 +17,48 @@ server.get(
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'consumer', 'employee')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('get loyaltyStats handler')
-, routes.get
+, routes.list
+);
+
+// LoyaltyStats.list
+server.get(
+  '/v1/consumers/:consumerId/loyalty'
+, middleware.profile('GET /v1/consumers/:consumerId/loyalty')
+, middleware.profile('apply groups loyaltyStats employee')
+, middleware.applyGroups(applyGroups.employee)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('get loyaltyStats handler')
+, routes.list
+);
+
+// LoyaltyStats.list
+server.get(
+  '/v1/consumers/:consumerId/loyalty/:businessId'
+, middleware.profile('GET /v1/consumers/:consumerId/loyalty/:businessId')
+, middleware.profile('apply groups loyaltyStats employee')
+, middleware.applyGroups(applyGroups.employee)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('getOne loyaltyStats handler')
+, routes.list
+);
+
+// LoyaltyStats.list
+server.get(
+  '/v1/loyalty/businesses/:businessId'
+, middleware.profile('GET /v1/loyalty/businesses/:businessId')
+, middleware.profile('apply groups loyaltyStats employee')
+, middleware.applyGroups(applyGroups.employee)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('getOne loyaltyStats handler')
+, routes.list
 );
 
 // LoyaltyStats.get
@@ -34,7 +72,7 @@ server.get(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('getOne loyaltyStats handler')
-, routes.getOne
+, routes.get
 );
 
 // LoyaltyStats.update
@@ -45,48 +83,12 @@ server.put(
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'employee')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(null, { locationId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , middleware.profile('update loyaltyStats handler')
 , routes.update
-);
-
-// LoyaltyStats.get
-server.get(
-  '/v1/consumers/:consumerId/loyalty'
-, middleware.profile('GET /v1/consumers/:consumerId/loyalty')
-, middleware.profile('apply groups loyaltyStats employee')
-, middleware.applyGroups(applyGroups.employee)
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
-, middleware.profile('get loyaltyStats handler')
-, routes.get
-);
-
-// LoyaltyStats.get
-server.get(
-  '/v1/consumers/:consumerId/loyalty/:businessId'
-, middleware.profile('GET /v1/consumers/:consumerId/loyalty/:businessId')
-, middleware.profile('apply groups loyaltyStats employee')
-, middleware.applyGroups(applyGroups.employee)
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
-, middleware.profile('getOne loyaltyStats handler')
-, routes.get
-);
-
-// LoyaltyStats.get
-server.get(
-  '/v1/loyalty/businesses/:businessId'
-, middleware.profile('GET /v1/loyalty/businesses/:businessId')
-, middleware.profile('apply groups loyaltyStats employee')
-, middleware.applyGroups(applyGroups.employee)
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
-, middleware.profile('getOne loyaltyStats handler')
-, routes.get
 );
 
 // LoyaltyStats.update
@@ -97,10 +99,10 @@ server.put(
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'employee')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(null, { locationId:{isInt:[]}, deltaPunches:{isInt:[]}})
 , middleware.profile('update loyaltyStats handler')
 , routes.update
 );
