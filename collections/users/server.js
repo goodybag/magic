@@ -60,10 +60,10 @@ server.post(
 , middleware.profile('POST /v1/users')
 , middleware.profile('apply groups users owner')
 , middleware.applyGroups(applyGroups.owner)
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collection.methods.post.body)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
 , middleware.profile('create user handler')
 , routes.create
 );
@@ -76,10 +76,10 @@ server.put(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
 , middleware.profile('update user handler')
 , routes.update
 );
@@ -92,10 +92,10 @@ server.post(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
-, middleware.profile('permissions')
-, middleware.permissions(permissions)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
 , middleware.profile('update user handler')
 , routes.update
 );
