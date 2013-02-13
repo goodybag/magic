@@ -320,3 +320,4 @@ loadDescription('consumers', doChaos);
 loadDescription('events', doChaos);
 loadDescription('groups', doChaos);
 loadDescription('locations', doChaos);
+loadDescription('loyaltyStats', doChaos);
