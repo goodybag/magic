@@ -25,6 +25,7 @@ module.exports = {
         'email'
       , 'singlyId'
       , 'singlyAccessToken'
+      , 'userId'
       , 'firstName'
       , 'lastName'
       , 'screenName'
