@@ -325,3 +325,4 @@ loadDescription('businesses', doChaos);
 loadDescription('cashiers', doChaos);
 loadDescription('charities', doChaos);
 loadDescription('consumers', doChaos);
+loadDescription('events', doChaos);

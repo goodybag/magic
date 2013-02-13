@@ -2,7 +2,6 @@
  * consumers server
  */
 
-require('js-yaml');
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var utils       = require('../../lib/utils');

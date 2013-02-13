@@ -2,7 +2,6 @@
  * activity server
  */
 
-require('js-yaml');
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
