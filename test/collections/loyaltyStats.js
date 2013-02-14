@@ -86,6 +86,7 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
         assert(payload.data.totalPunches == 0);
 
         assert(payload.meta.isFirstTapin == true);
+        assert(payload.meta.consumerId);
 
         tu.logout(done);
       });
