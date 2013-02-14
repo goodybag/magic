@@ -1,0 +1,53 @@
+collection:
+  resource:
+    type: collection
+    path: /managers
+  methods:
+    get:
+      desc: List Managers
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: bob }
+    post:
+      desc: Add Manager
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        email:           { type: email,  eg: a_manager_XXX@thebusiness.com }
+        password:        { type: string, eg: password }
+        cardId:          { type: cardid, eg: 123456-ABC }
+        businessId:      { type: int,    eg: 1 }
+        locationId:      { type: int,    eg: 1 }
+  children:
+    - /managers/:id
+item:
+  resource:
+    type: item
+    path: /managers/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Manager
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    put:
+      desc: Update Manager
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        cardId:          { type: cardid, eg: 123456-ABC }
+        businessId:      { type: int,    eg: 1 }
+        locationId:      { type: int,    eg: 1 }
+    delete:
+      desc: Delete Manager
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

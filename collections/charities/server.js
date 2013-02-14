@@ -4,9 +4,9 @@
 
 var server      = require('express')();
 var middleware  = require('../../middleware');
-var schema      = require('../../db').schemas.charities;
 var permissions = require('./permissions');
 var routes      = require('./routes');
+var desc        = require('./description.yaml');
 
 // Charities.list
 server.get(
@@ -17,10 +17,7 @@ server.get(
     limit : 20
   })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list charities handler')
@@ -55,7 +52,7 @@ server.post(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('create charity handler')
 , routes.create
 );
@@ -69,7 +66,7 @@ server.put(
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('update charity handler')
 , routes.update
 );
@@ -81,7 +78,7 @@ server.post(
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('validate body')
-, middleware.validate.body(schema)
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('update charity handler')

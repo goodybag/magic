@@ -14,7 +14,6 @@ var
 ;
 
 module.exports = function(req, res, next){
-
   // pull out the tapin authorization
   var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
   if (!authMatch) return next();
@@ -31,16 +30,19 @@ module.exports = function(req, res, next){
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
   if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
-
   // override the res.json to restore the tapin user after the response is sent
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
-    req.session.user = tapinStationUser;
-
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
+
       output.meta.isFirstTapin = true;
+
+      if (req.session.user.groupIds && req.session.user.groupIds.consumer)
+        output.meta.consumerId = req.session.user.groupIds.consumer;
     }
+
+    req.session.user = tapinStationUser;
 
     origjsonFn.apply(res, arguments);
   };
@@ -167,6 +169,14 @@ module.exports = function(req, res, next){
 
   , end: function(user) {
       tx.commit(function() {;
+        // First groupIds
+        if (!user.groupIds){
+          user.groupIds = {};
+          for (var i = user.groups.length - 1; i >= 0; i--){
+            if (user[user.groups[i] + 'Id'])
+              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id']
+          }
+        }
         req.session.user = user;
         next();
       });

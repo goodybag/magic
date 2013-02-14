@@ -259,12 +259,6 @@ describe('GET /v1/locations/food', function() {
     });
   });
 
-  it('should not allow the user to filter by tags', function(done) {
-    tu.get('/v1/locations/food?tag=foobar&include=tags', function(err, payload, res) {
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
 });
 
 describe('GET /v1/locations/fashion', function() {

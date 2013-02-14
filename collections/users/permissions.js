@@ -4,6 +4,7 @@ var all = [
 , 'singlyUserId'
 , 'singlyAccessToken'
 , 'groups'
+, 'groupIds'
 ];
 
 module.exports = {

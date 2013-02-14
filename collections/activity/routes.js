@@ -28,7 +28,7 @@ module.exports.get = function(req, res){
   db.getClient(function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from activity where id = $id {limit}) as e');
+    var query = sql.query('select id, type, date, to_json(data) as data from activity where id = $id {limit}');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -39,7 +39,7 @@ module.exports.get = function(req, res){
         result.rows[0].data = JSON.parse(result.rows[0].data);
         return res.json({ error: null, data: result.rows[0] });
       } else {
-        return res.error({ error: errors.input.NOT_FOUND, data: null });
+        return res.error(errors.input.NOT_FOUND);
       }
     });
   });
@@ -65,7 +65,11 @@ module.exports.list = function(req, res){
     if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     results = results.map(function(r){
-      r.data = JSON.parse(r.data);
+      try {
+        r.data = JSON.parse(r.data);
+      } catch (e) {
+        r.data = null;
+      }
       return r;
     });
 

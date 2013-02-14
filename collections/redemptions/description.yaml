@@ -1,0 +1,22 @@
+collection:
+  resource:
+    type: collection
+    path: /redemptions
+  methods:
+    get:
+      desc: List User Redemptions
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+    post:
+      desc: Redeem Reward
+      auth:
+        required: true
+        eg: { email: some_cashier2@gmail.com, password: password }
+      body:
+        deltaPunches:   { type: int, eg: 20 }
+        consumerId:     { type: id,  eg: 1 }
+        tapinStationId: { type: id,  eg: 2 }

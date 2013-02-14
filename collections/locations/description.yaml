@@ -1,0 +1,178 @@
+collection:
+  resource:
+    type: collection
+    path: /locations
+  methods:
+    get:
+      desc: List Locations
+      altpaths:
+        - /locations/food
+        - /locations/fashion
+        - /locations/other
+      query:
+        all:        { type: bool,    eg: false }
+        lat:        { type: float,   eg: 10.123 }
+        lon:        { type: float,   eg: 10.123 }
+        range:      { type: int,     eg: 500 }
+        businessId: { type: id,      eg: 1 }
+        tag:        { type: string*, eg: [food,apparel] }
+        sort:       { type: string,  eg: -name, choices:[name, -name, distance, -distance, random, -random] }
+        include:    { type: string*, eg: [tags,locations], choices:[tags, locations] }
+        offset:     { type: int,     eg: 5, default: 0 }
+        limit:      { type: int,     eg: 5, default: 20 }
+    post:
+      desc: Add Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:           { type: id,      eg: 1 }
+        name:                 { type: string,  eg: My Location, required: true }
+        street1:              { type: string,  eg: 12345 FooBar Lane }
+        street2:              { type: string,  eg: Suite 8986 }
+        city:                 { type: string,  eg: Austin }
+        state:                { type: string,  eg: TX }
+        zip:                  { type: int,     eg: 78704 }
+        country:              { type: string,  eg: USA }
+        phone:                { type: string,  eg: 555-555-5555 }
+        fax:                  { type: string,  eg: 555-555-5555 }
+        lat:                  { type: float,   eg: 10.123 }
+        lon:                  { type: float,   eg: 10.123 }
+        startSunday:          { type: time,    eg: 12:15pm }
+        startMonday:          { type: time,    eg: 12:15pm }
+        startTuesday:         { type: time,    eg: 12:15pm }
+        startWednesday:       { type: time,    eg: 12:15pm }
+        startThursday:        { type: time,    eg: 12:15pm }
+        startFriday:          { type: time,    eg: 12:15pm }
+        startSaturday:        { type: time,    eg: 12:15pm }
+        endSunday:            { type: time,    eg: 12:15pm }
+        endMonday:            { type: time,    eg: 12:15pm }
+        endTuesday:           { type: time,    eg: 12:15pm }
+        endWednesday:         { type: time,    eg: 12:15pm }
+        endThursday:          { type: time,    eg: 12:15pm }
+        endFriday:            { type: time,    eg: 12:15pm }
+        endSaturday:          { type: time,    eg: 12:15pm }
+        keyTagRequestPending: { type: bool,    eg: false }
+  children:
+    - /locations/:id
+
+item:
+  resource:
+    type: item
+    path: /locations/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Location
+    put:
+      desc: Update Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:           { type: id,      eg: 1 }
+        name:                 { type: string,  eg: My Location }
+        street1:              { type: string,  eg: 12345 FooBar Lane }
+        street2:              { type: string,  eg: Suite 8986 }
+        city:                 { type: string,  eg: Austin }
+        state:                { type: string,  eg: TX }
+        zip:                  { type: int,     eg: 78704 }
+        country:              { type: string,  eg: USA }
+        phone:                { type: string,  eg: 555-555-5555 }
+        fax:                  { type: string,  eg: 555-555-5555 }
+        lat:                  { type: float,   eg: 10.123 }
+        lon:                  { type: float,   eg: 10.123 }
+        startSunday:          { type: time,    eg: 12:15pm }
+        startMonday:          { type: time,    eg: 12:15pm }
+        startTuesday:         { type: time,    eg: 12:15pm }
+        startWednesday:       { type: time,    eg: 12:15pm }
+        startThursday:        { type: time,    eg: 12:15pm }
+        startFriday:          { type: time,    eg: 12:15pm }
+        startSaturday:        { type: time,    eg: 12:15pm }
+        endSunday:            { type: time,    eg: 12:15pm }
+        endMonday:            { type: time,    eg: 12:15pm }
+        endTuesday:           { type: time,    eg: 12:15pm }
+        endWednesday:         { type: time,    eg: 12:15pm }
+        endThursday:          { type: time,    eg: 12:15pm }
+        endFriday:            { type: time,    eg: 12:15pm }
+        endSaturday:          { type: time,    eg: 12:15pm }
+        keyTagRequestPending: { type: bool,    eg: false }
+    delete:
+      desc: Delete Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+  children:
+    - /locations/:locationId/analytics
+    - /locations/:locationId/products
+    - /locations/:locationId/key-tag-requests
+
+analytics:
+  resource:
+    type: item
+    path: /locations/:id/analytics
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Location Analytics
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+productsCollection:
+  resource:
+    type: collection
+    path: /locations/:locationId/products
+    params:
+      locationId: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Location Products
+    post:
+      desc: Add Product to Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        productId:   { type: int, eg: 1 }
+        isSpotlight: { type: bool, eg: true }
+  children:
+    - /locations/:locationId/products/:productId
+
+productsItem:
+  resource:
+    type: item
+    path: /locations/:locationId/products/:productId
+    params:
+      locationId: { type: int, eg: 1 }
+      productId:  { type: int, eg: 1 }
+  methods:
+    put:
+      desc: Update Product Membership in Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        isSpotlight: { type: bool, eg: true }
+    delete:
+      desc: Remove Product from Location
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+keytagRequestsCollection:
+  resource:
+    type: collection
+    path: /locations/:locationId/key-tag-requests
+    params:
+      locationId: { type: int, eg: 1 }
+  methods:
+    post:
+      desc: Request Key Tags
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+  children:
+    - /locations/:locationId/products/:productId

@@ -34,25 +34,31 @@ function request(methodDoc, requestDoc, cb) {
   }
 };
 
+var counter = 1;
+function prepInputValue(v) {
+  if (typeof v == 'string') {
+    v = v.replace(/XXX/g, counter++);
+  }
+  return v;
+}
+
 
 // Processes
 // =========
 
-// Main
 function doChaos(resourceDoc) {
   describe(resourceDoc.makeTestDescription(), function() {
     resourceDoc.makeTests().runEach();
   });
 }
 
-// A test type
 function testValidRequest(methodDoc) {
   it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 200)
         console.log('Failed chaos valid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == 200);
@@ -61,10 +67,55 @@ function testValidRequest(methodDoc) {
   });
 }
 
-// A test type
+function testExtradataRequest(methodDoc) {
+  if (methodDoc.hasNoAttrs()) return;
+
+  it('should respond 400 on '+methodDoc.getDesc()+' with unsupported input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    requestDoc.setInput('somekey'+Math.round(100 * Math.random()), 'foobar');
+
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== 400)
+        console.log('Failed chaos extradata-request test'),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+}
+
+function testPartialRequest(methodDoc, onlyKey) {
+  it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
+    var requestDoc = methodDoc.makeRequestDoc();
+
+    // filter out all but the target key
+    var removedRequiredField = false;
+    methodDoc.iterateAttributes(function(key) {
+      if (key != onlyKey)
+        removedRequiredField = removedRequiredField || requestDoc.clearInput(key);
+    });
+    if (/requires/.test(methodDoc.getAttrType(onlyKey)))
+      removedRequiredField = true;
+
+    var expectedStatus = (removedRequiredField) ? 400 : 200;
+    request(methodDoc, requestDoc, function(res, result) {
+      if (res.statusCode !== expectedStatus)
+        console.log('Failed chaos partial-request test (expected '+expectedStatus+')'),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
+          console.log(res.statusCode),
+          console.log(result);
+      assert(res.statusCode == expectedStatus);
+      done();
+    });
+  });
+}
+
 function testInvalidRequest(methodDoc, corruptKey) {
   // check if attribute is corruptable
-  if (/^any/.test(methodDoc.getAttrType(corruptKey)))
+  if (/^string/.test(methodDoc.getAttrType(corruptKey)))
     return;
 
   it('should respond 400 on '+methodDoc.getDesc()+' with invalid input', function(done) {
@@ -72,20 +123,16 @@ function testInvalidRequest(methodDoc, corruptKey) {
 
     // corrupt the value
     requestDoc.setInput(corruptKey, (function(type) {
-      switch (type) {
-        case 'string*':
-        case 'string':
-        case 'url':
-          return 123456789;
-        case 'int':
-          return 'CORRUPTION STRING';
-      }
+      if (/string|url|email|bool/.test(type))
+        return 123456789;
+      if (/int|float|id|cardid|time/.test(type))
+        return 'CORRUPTION STRING';
     })(methodDoc.getAttrType(corruptKey)));
 
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 400)
-        console.log('Failed chaos invalid-request test'),
-          console.log(require('util').inspect(requestDoc, true, 10)),
+        console.log('Failed chaos invalid-request test ('+corruptKey+')'),
+          console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
       assert(res.statusCode == 400);
@@ -140,7 +187,9 @@ ResourceDoc.prototype.makeTests = function() {
   var tests = new FunctionsList();
   this.iterateMethods(function(method) {
     tests.add(testValidRequest, method);
+    tests.add(testExtradataRequest, method);
     method.iterateAttributes(function(key) {
+      tests.add(testPartialRequest, method, key);
       tests.add(testInvalidRequest, method, key);
     })
   });
@@ -162,6 +211,7 @@ function MethodDoc(resourceDoc, methodName) {
 }
 MethodDoc.prototype.getDesc = function() { return this.data.desc; };
 MethodDoc.prototype.getAttrType = function(key) { return this.attrs[key].type; };
+MethodDoc.prototype.hasNoAttrs = function() { return !this.attrs; };
 MethodDoc.prototype.needsAuth = function() { return (this.data.auth && this.data.auth.required) };
 MethodDoc.prototype.getAuthCreds = function() { return this.data.auth.eg; };
 MethodDoc.prototype.iterateAttributes = function(cb) { this.attrKeys.forEach(cb); };
@@ -184,12 +234,30 @@ MethodDoc.prototype.makeRequestDoc = function() {
 function RequestDoc(data) {
   this.data = deepClone(data);
 }
+RequestDoc.prototype.hasNoInputs = function() { return (!this.data.query && !this.data.body); };
 RequestDoc.prototype.setInput = function(key, value) {
   if (this.data.query) {
-    this.data.query[key].eg = value;
+    if (this.data.query[key])
+      this.data.query[key].eg = value;
+    else
+      this.data.query[key] = { eg:value };
   } else if (this.data.body) {
-    this.data.body[key].eg = value;
+    if (this.data.body[key])
+      this.data.body[key].eg = value;
+    else
+      this.data.body[key] = { eg:value };
   }
+};
+RequestDoc.prototype.clearInput = function(key) {
+  var wasRequired = false;
+  if (this.data.query) {
+    wasRequired = this.data.query[key].required;
+    delete this.data.query[key];
+  } else if (this.data.body) {
+    wasRequired = this.data.body[key].required;
+    delete this.data.body[key];
+  }
+  return wasRequired;
 };
 RequestDoc.prototype.toOptions = function() {
   var options = deepClone(this.data);
@@ -205,10 +273,10 @@ RequestDoc.prototype.toOptions = function() {
     for (var k in options.query) {
       if (Array.isArray(options.query[k].eg)) {
         for (var i=0; i < options.query[k].eg.length; i++) {
-          queryParams.push(k+'[]='+options.query[k].eg[i]);
+          queryParams.push(k+'[]='+prepInputValue(options.query[k].eg[i]));
         }
       } else {
-        queryParams.push(k+'='+options.query[k].eg);
+        queryParams.push(k+'='+prepInputValue(options.query[k].eg));
       }
     }
     options.path += '?'+queryParams.join('&').replace(/ /g, '+');
@@ -221,7 +289,7 @@ RequestDoc.prototype.toPayload = function() {
   if (this.data.body) {
     var payload = {};
     for (var k in this.data.body) {
-      payload[k] = this.data.body[k].eg;
+      payload[k] = prepInputValue(this.data.body[k].eg);
     }
     return JSON.stringify(payload);
   }
@@ -231,9 +299,33 @@ RequestDoc.prototype.toPayload = function() {
 
 // Run Chaos Tests
 // ===============
+var blacklist = [
+  'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
+  'consumers.cardUpdatesItem',
+  'redemptions.collection'
+];
+
 function loadDescription(collection, cb) {
-  var doc = require('fs').readFileSync('./collections/'+collection+'/description.yaml', 'utf8');
-  yaml.loadAll(doc, function(data) { cb(new ResourceDoc(data)); });
+  var data = require('../collections/'+collection+'/description.yaml', 'utf8');
+  for (var k in data) {
+    if (blacklist.indexOf(collection+'.'+k) !== -1) continue;
+    cb(new ResourceDoc(data[k]));
+  }
 }
 
+loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
+loadDescription('cashiers', doChaos);
+loadDescription('charities', doChaos);
+loadDescription('consumers', doChaos);
+loadDescription('events', doChaos);
+loadDescription('groups', doChaos);
+loadDescription('locations', doChaos);
+loadDescription('loyaltyStats', doChaos);
+loadDescription('managers', doChaos);
+loadDescription('photos', doChaos);
+loadDescription('productCategories', doChaos);
+loadDescription('products', doChaos);
+loadDescription('productTags', doChaos);
+loadDescription('redemptions', doChaos);
+loadDescription('users', doChaos);

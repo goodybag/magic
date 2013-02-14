@@ -103,6 +103,7 @@ INSERT INTO "users" (id, email, password) VALUES ('11130', 'tapin_station_0@good
 INSERT INTO "users" (id, email, password) VALUES ('11131', 'tapin_station_1@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11132', 'tapin_station_2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11133', 'ts_redeem1@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password) VALUES ('11134', 'consumer_mutated@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
@@ -198,6 +199,7 @@ INSERT INTO "groups" (id, name) VALUES ('2', 'sales');
 INSERT INTO "groups" (id, name) VALUES ('4', 'client');
 INSERT INTO "groups" (id, name) VALUES ('5', 'consumer');
 INSERT INTO "groups" (id, name) VALUES ('6', 'foobar');
+INSERT INTO "groups" (id, name) VALUES ('7', 'foobar2');
 INSERT INTO "groups" (id, name) VALUES ('11110', 'manager');
 INSERT INTO "groups" (id, name) VALUES ('11111', 'cashier');
 INSERT INTO "groups" (id, name) VALUES ('11112', 'tapin-station');
@@ -436,6 +438,7 @@ SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProd
 BEGIN;
 INSERT INTO collections (id, "consumerId", "name") VALUES (1, 1, 'my first collection');
 INSERT INTO collections (id, "consumerId", "name") VALUES (2, 1, 'my second collection');
+INSERT INTO collections (id, "consumerId", "name") VALUES (3, 3, 'my third collection');
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
@@ -476,16 +479,23 @@ INSERT INTO events (id, type, date, data) VALUES (20, 'consumers.becameElite', N
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
+-- ACTIVITIY
+
+BEGIN;
+INSERT INTO activity (id, "consumerId", "businessId", "locationId", type, date, data) VALUES (1, 1, 1, 1, 'foobar', now(), '{"foo":"bar"}');
+COMMIT;
+SELECT setval('activity_id_seq', (SELECT MAX(id) from "activity")); -- advance the sequence past the IDs just used
+
 --
 BEGIN;
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('2', 'Abilene', '1866 Pine St');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('11', 'Abilene', '18677 Pine St');
-INSERT INTO "oddityLive" (id, "biz_name", "e_address") VALUES ('22', 'Abilene', '18677 Guaterloop St');
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('1', 'Subway', '4424 Buffalo Gap Rd', '78749-1234', 'Austin', 'TX', 'www.subway.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('2', 'Abilene', '1866 Pine St', '78749-1234', 'Houston', 'TX', 'www.abilene.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('11', 'Abilene', '18677 Pine St', '78749-1234', 'Austin', 'TX', 'www.abilene.com' );
+INSERT INTO "oddityLive" (id, "biz_name", "e_address", "e_postal", "e_city", "e_state", "web_url") VALUES ('22', 'Abilene', '18677 Guaterloop St', '78749-1234', 'Austin', 'TX', 'www.abilene.com' );
 COMMIT;
 
 --
 BEGIN;
-INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('1', '11', true, true, false);
-INSERT INTO "oddityMeta" (id, "oddityLiveId", "toReview", "changeColumns", "isHidden") VALUES ('2', '22', true, true, false);
+INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('1','1', '11', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-02-13 15:21:57.497542');
+INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('2','2', '22', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-01-13 15:21:57.497542');
 COMMIT;

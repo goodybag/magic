@@ -1,0 +1,115 @@
+collection:
+  resource:
+    type: collection
+    path: /consumers
+  methods:
+    get:
+      desc: List Consumers
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: business }
+    post:
+      desc: Add Consumer
+      body:
+        email:             { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        password:          { type: string requires-email, eg: password }
+        singlyId:          { type: string, eg: asdf }
+        singlyAccessToken: { type: string requires-singlyid, eg: asdf }
+        firstName:         { type: string, eg: John }
+        lastName:          { type: string, eg: Doe }
+        cardId:            { type: cardid, eg: 123456-ABC }
+        screenName:        { type: string, eg: jdoe }
+  children:
+    - /consumers/:id
+
+item:
+  resource:
+    type: item
+    path: /consumers/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Consumer
+    put:
+      desc: Update Consumer
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        email:           { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        password:        { type: string, eg: password }
+        firstName:       { type: string, eg: John }
+        lastName:        { type: string, eg: Doe }
+        cardId:          { type: cardid, eg: 123456-ABC }
+        screenName:      { type: string, eg: jdoe }
+    delete:
+      desc: Delete Consumer
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+cardUpdatesCollection:
+  resource:
+    type: collection
+    path: /consumers/cardupdate
+  methods:
+    post:
+      desc: Request Card Change
+      body:
+        email:  { type: email,  eg: a_consumer_XXX@home.com }
+        cardId: { type: cardid, eg: 123456-ABC }
+  children:
+    - /consumers/cardupdate/:token
+
+cardUpdatesItem:
+  resource:
+    type: item
+    path: /consumers/cardupdate/:token
+    params:
+      token: { type: string, eg: abcdefghijklmnopqrstuvwxyz }
+  methods:
+    post:
+      desc: Finalize Card Change
+
+collectionsCollection:
+  resource:
+    type: collection
+    path: /consumers/:consumerId/collections
+    params:
+      consumerId: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: List Consumer Collections
+      query:
+        offset:  { type: int, eg: 5 }
+        limit:   { type: int, eg: 5 }
+    post:
+      desc: Create Consumer Collection
+      auth:
+        required: true
+        eg: { email: consumer@goodybag.com, password: password }
+      body:
+        name:    { type: string, eg: My Collection, required: true }
+
+collectionsItem:
+  resource:
+    type: item
+    path: /consumers/:consumerId/collections/:collectionId
+    params:
+      consumerId:   { type: int, eg: 3 }
+      collectionId: { type: int, eg: 3 }
+  methods:
+    get:
+      desc: List Consumer Collection Products
+      query:
+        offset:  { type: int, eg: 5 }
+        limit:   { type: int, eg: 5 }
+    post:
+      desc: Add Product to Consumer Collection
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
+      body:
+        productId: { type: int, eg: 1, required: true }

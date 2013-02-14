@@ -1,0 +1,28 @@
+collection:
+  resource:
+    type: collection
+    path: /events
+  methods:
+    get:
+      desc: List Events
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: like }
+  children:
+    - /events/:id
+item:
+  resource:
+    type: item
+    path: /events/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Event
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

@@ -376,13 +376,6 @@ describe('GET /v1/products/food', function() {
     });
   });
 
-  it('should not allow the user to filter by tags', function(done) {
-    tu.get('/v1/products/food?tag=foobar&include=tags', function(err, payload, res) {
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
-
   it('should allow the user to sort by popular', function(done) {
     tu.get('/v1/products/food?sort=-popular', function(err, payload, res) {
       assert(res.statusCode == 200);
@@ -828,7 +821,27 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 
 });
 
-describe('POST /v1/products/:id/feelings', function() {
+describe('POST /v1/products/:id/feelings', function(done) {
+  it('should tapin-auth a new user and update their feelings and return firstTapin, consumerId', function(){
+    // someone forgot to logout D:
+    tu.logout(function(){
+      tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+        assert(!error);
+        tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
+          assert(!error);
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(!payload.error);
+          assert(payload.meta);
+          assert(payload.meta.isFirstTapin);
+          assert(payload.meta.consumerId);
+
+          tu.logout(done);
+        });
+      });
+    })
+  });
+
 
   it('should add to the product feelings totals', function(done) {
     tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
@@ -851,7 +864,7 @@ describe('POST /v1/products/:id/feelings', function() {
             assert(res.statusCode == 200);
 
             payload = JSON.parse(payload);
-            assert(payload.data.likes == 1);
+            assert(payload.data.likes >= 1);
             assert(payload.data.wants == 1);
             assert(payload.data.tries == 1);
             assert(payload.data.userLikes == true);
@@ -872,7 +885,7 @@ describe('POST /v1/products/:id/feelings', function() {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 1);
+        assert(payload.data.likes >= 1);
         assert(payload.data.wants === 1);
         assert(payload.data.tries === 1);
         assert(payload.data.userLikes == true);
@@ -888,7 +901,7 @@ describe('POST /v1/products/:id/feelings', function() {
             assert(res.statusCode == 200);
 
             payload = JSON.parse(payload);
-            assert(payload.data.likes == 1);
+            assert(payload.data.likes >= 1);
             assert(payload.data.wants == 1);
             assert(payload.data.tries == 1);
             assert(payload.data.userLikes == true);
@@ -909,7 +922,7 @@ describe('POST /v1/products/:id/feelings', function() {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 1);
+        assert(payload.data.likes >= 1);
         assert(payload.data.wants === 1);
         assert(payload.data.tries === 1);
         assert(payload.data.userLikes == true);
@@ -925,7 +938,7 @@ describe('POST /v1/products/:id/feelings', function() {
             assert(res.statusCode == 200);
 
             payload = JSON.parse(payload);
-            assert(payload.data.likes == 1);
+            assert(payload.data.likes >= 1);
             assert(payload.data.wants == 1);
             assert(payload.data.tries == 1);
             assert(payload.data.userLikes == true);
@@ -946,7 +959,7 @@ describe('POST /v1/products/:id/feelings', function() {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 1);
+        assert(payload.data.likes >= 1);
         assert(payload.data.wants === 1);
         assert(payload.data.tries === 1);
         assert(payload.data.userLikes == true);
@@ -962,12 +975,49 @@ describe('POST /v1/products/:id/feelings', function() {
             assert(res.statusCode == 200);
 
             payload = JSON.parse(payload);
-            assert(payload.data.likes == 1);
+            assert(payload.data.likes >= 1);
             assert(payload.data.wants == 0);
             assert(payload.data.tries == 1);
             assert(payload.data.userLikes == true);
             assert(payload.data.userWants == false);
             assert(payload.data.userTried == true);
+
+            tu.logout(function() {
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('should only remove likes/wants/tries if the user had previously felt', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      tu.get('/v1/products/4', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.likes === 0);
+        assert(payload.data.wants === 0);
+        assert(payload.data.tries === 0);
+        assert(payload.data.userLikes == false);
+        assert(payload.data.userWants == false);
+        assert(payload.data.userTried == false);
+
+        tu.post('/v1/products/4/feelings', { isLiked:false }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
+
+            payload = JSON.parse(payload);
+            assert(payload.data.likes == 0);
+            assert(payload.data.wants == 0);
+            assert(payload.data.tries == 0);
+            assert(payload.data.userLikes == false);
+            assert(payload.data.userWants == false);
+            assert(payload.data.userTried == false);
 
             tu.logout(function() {
               done();
@@ -989,7 +1039,7 @@ describe('POST /v1/products/:id/feelings', function() {
           assert(res.statusCode == 200);
 
           payload = JSON.parse(payload);
-          assert(payload.data.likes == 1);
+          assert(payload.data.likes >= 1);
           assert(payload.data.wants == 1);
           assert(payload.data.tries == 2);
 
