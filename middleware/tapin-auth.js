@@ -35,12 +35,16 @@ module.exports = function(req, res, next){
   // override the res.json to restore the tapin user after the response is sent
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
-    req.session.user = tapinStationUser;
-
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
       output.meta.isFirstTapin = true;
+
+      if (req.session.user.groupIds && req.session.user.groupIds.consumer)
+        output.meta.consumerId = req.session.user.groupIds.consumer;
     }
+
+    req.session.user = tapinStationUser;
+
 
     origjsonFn.apply(res, arguments);
   };
