@@ -82,6 +82,48 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should be able to filter by likes if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products?userLikes=true', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        var results = payload.data;
+        for (var i = results.length - 1; i >= 0; i--){
+          assert(results[i].userLikes === true);
+        };
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should be able to filter by tries if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products?userTried=true', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        var results = payload.data;
+        for (var i = results.length - 1; i >= 0; i--){
+          assert(results[i].userTried === true);
+        };
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should be able to filter by wants if logged in', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products?userWants=true', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        var results = payload.data;
+        for (var i = results.length - 1; i >= 0; i--){
+          assert(results[i].userWants === true);
+        };
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should filter by lat/lon/range', function(done) {
     tu.get('/v1/products?lat=10&lon=10&range=1000', function(err, payload, res) {
       assert(res.statusCode == 200);
