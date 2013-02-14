@@ -24,6 +24,9 @@ collection:
         limit:      { type: int,     eg: 5, default: 20 }
         spotlight:  { type: bool,    eg: false }
         all:        { type: bool,    eg: false }
+        userLikes:  { type: bool,    eg: false }
+        userTried:  { type: bool,    eg: false }
+        userWants: { type: bool,    eg: false }
     post:
       desc: Add Product
       auth:

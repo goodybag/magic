@@ -176,6 +176,15 @@ module.exports.list = function(req, res){
       query.groupby.add('"productWants".id');
       query.groupby.add('"productTries".id');
       query.$('userId', req.session.user.id);
+
+      if (req.param('userLikes') != null && typeof req.param('userLikes') != 'undefined')
+        query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
+
+      if (req.param('userTried') != null && typeof req.param('userTried') != 'undefined')
+        query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
+
+      if (req.param('userWants') != null && typeof req.param('userWants') != 'undefined')
+        query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
     }
 
     // custom sorts
