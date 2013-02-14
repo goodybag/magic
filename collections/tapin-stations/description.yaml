@@ -1,0 +1,58 @@
+collection:
+  resource:
+    type: collection
+    path: /tapin-stations
+  methods:
+    get:
+      desc: List Tapin Stations
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: bob }
+    post:
+      desc: Add Tapin Station
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        email:             { type: email,  eg: a_tapin_station_XXX@thebusiness.com, required: true }
+        password:          { type: string, eg: password }
+        singlyId:          { type: string }
+        singlyAccessToken: { type: string }
+        businessId:        { type: id,     eg: 1 }
+        locationId:        { type: id,     eg: 1 }
+        loyaltyEnabled:    { type: bool,   eg: true }
+        galleryEnabled:    { type: bool,   eg: true }
+  children:
+    - /tapin-stations/:id
+
+item:
+  resource:
+    type: item
+    path: /tapin-stations/:id
+    params:
+      id: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get Tapin Station
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    put:
+      desc: Update Tapin Station
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:        { type: id,     eg: 1 }
+        locationId:        { type: id,     eg: 1 }
+        loyaltyEnabled:    { type: bool,   eg: true }
+        galleryEnabled:    { type: bool,   eg: true }
+    delete:
+      desc: Delete Tapin Station
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

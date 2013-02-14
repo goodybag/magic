@@ -59,8 +59,8 @@ module.exports.get = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
+  var TAGS = ['list-tapinStations', req.uuid];
+  logger.routes.debug(TAGS, 'fetching tapinStations ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -157,13 +157,13 @@ module.exports.create = function(req, res){
 };
 
 /**
- * Delete user
+ * Delete tapin station
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.del = function(req, res){
-  var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
+  var TAGS = ['del-tapinStation', req.uuid];
+  logger.routes.debug(TAGS, 'deleting tapinStation ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

@@ -1,0 +1,42 @@
+collection:
+  resource:
+    type: collection
+    path: /reviews
+  methods:
+    get:
+      desc: List Reviews
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:  { type: int,     eg: 5 }
+        limit:   { type: int,     eg: 5 }
+        filter:  { type: string,  eg: business }
+  children:
+    - /reviews/:id
+
+item:
+  resource:
+    type: item
+    path: /reviews/:id
+    params:
+      id: { type: int, eg: 2 }
+  methods:
+    get:
+      desc: Get Review
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    put:
+      desc: Update Review
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        userId:     { type: id,     eg: 1 }
+        businessId: { type: id,     eg: 1 }
+        locationId: { type: id,     eg: 1 }
+        toReview:   { type: bool,   eg: true }
+        isHidden:   { type: bool,   eg: false }
+        hiddenBy:   { type: string, eg: bob }
+        reviewedBy: { type: string, eg: jane }

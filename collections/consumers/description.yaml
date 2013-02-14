@@ -12,7 +12,7 @@ collection:
     post:
       desc: Add Consumer
       body:
-        email:             { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        email:             { type: email,  eg: a_consumer_XXX@home.com }
         password:          { type: string requires-email, eg: password }
         singlyId:          { type: string, eg: asdf }
         singlyAccessToken: { type: string requires-singlyid, eg: asdf }
@@ -38,7 +38,7 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        email:           { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        email:           { type: email,  eg: a_consumer_XXX@home.com }
         password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }

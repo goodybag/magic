@@ -12,11 +12,11 @@ collection:
     post:
       desc: Add User
       body:
-        email:              { type: email,    required: true, eg: goody@goodybag.com }
-        password:           { type: string,   required: true, eg: password }
-        groups:             { type: int*,     eg: [1,2] }
+        email:              { type: email,  eg: user_XXX@goodybag.com, required: true }
+        password:           { type: string, eg: password }
         singlyId:           { type: string }
         singlyAccesToken:   { type: string }
+        groups:             { type: int*,   eg: [1,2] }
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }

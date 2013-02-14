@@ -5,23 +5,18 @@
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
-var schema      = require('../../db').schemas.tapinStations;
 var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
+var desc        = require('./description')
 
 // tapinStations.list
 server.get(
   '/v1/tapin-stations'
 , middleware.profile('GET /v1/tapin-stations', ['limit'])
 , middleware.profile('query defaults')
-, middleware.defaults.query({
-    limit : 20
-  })
+, middleware.defaults.query({ limit : 20 })
 , middleware.profile('validate query')
-, middleware.validate.query({
-    offset     : { isInt:[], min:[0] },
-    limit      : { isInt:[], min:[1] }
-  })
+, middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
@@ -48,12 +43,12 @@ server.get(
 server.post(
   '/v1/tapin-stations'
 , middleware.profile('POST /v1/tapin-stations')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('create tapinStation handler')
 , routes.create
 );
@@ -62,12 +57,12 @@ server.post(
 server.put(
   '/v1/tapin-stations/:id'
 , middleware.profile('PUT /v1/tapin-stations/:id')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update tapinStation handler')
 , routes.update
 );
@@ -76,12 +71,12 @@ server.put(
 server.post(
   '/v1/tapin-stations/:id'
 , middleware.profile('POST /v1/tapin-stations/:id')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('validate body')
-, middleware.validate.body(schema)
 , middleware.profile('update tapinStation handler')
 , routes.update
 );
