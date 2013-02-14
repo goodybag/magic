@@ -328,4 +328,5 @@ loadDescription('productCategories', doChaos);
 loadDescription('products', doChaos);
 loadDescription('productTags', doChaos);
 loadDescription('redemptions', doChaos);
+loadDescription('tapin-stations', doChaos);
 loadDescription('users', doChaos);

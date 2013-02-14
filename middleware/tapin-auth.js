@@ -18,7 +18,6 @@ module.exports = function(req, res, next){
   var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
   if (!authMatch) return next();
   var cardId = authMatch[1];
-console.log("Tapin Auth", cardId);
 
   // validate the id
   if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
@@ -27,7 +26,6 @@ console.log("Tapin Auth", cardId);
   // Determines whether we should put "isFirstTapin" on meta object
   var isFirstTapin = false;
 
-console.log(req.session.user);
   // get current session
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
@@ -35,13 +33,11 @@ console.log(req.session.user);
   // override the res.json to restore the tapin user after the response is sent
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
-    console.log("isFirstTapin:", isFirstTapin);
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
 
       output.meta.isFirstTapin = true;
 
-      console.log("applying consumerId", req.session.user)
       if (req.session.user.groupIds && req.session.user.groupIds.consumer)
         output.meta.consumerId = req.session.user.groupIds.consumer;
     }
