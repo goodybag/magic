@@ -85,6 +85,24 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
         assert(payload.data.numPunches == 0);
         assert(payload.data.totalPunches == 0);
 
+        assert(payload.meta.isFirstTapin == true);
+
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should perform a flash login, get the blank loyalty stats, without the firstTapin flag', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('GET', '/v1/loyalty/businesses/' + 1, '667788-CBA', function(error, payload, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.error);
+        assert(!payload.meta || !payload.meta.isFirstTapin);
+
         tu.logout(done);
       });
     });
