@@ -5,22 +5,23 @@
 var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
-var schema     = require('../../db').schemas.oddityLive;
-var schema     = require('../../db').schemas.oddityMeta;
+var desc = require('./description')
 
 // Oddity Businesses.list
 server.get(
   '/v1/reviews'
-  , routes.list
+, middleware.validate2.query(desc.collection.methods.get.query)
+, routes.list
 );
 
 server.get(
   '/v1/reviews/:id'
-  , routes.get
+, routes.get
 );
 
 server.put(
   '/v1/reviews/:id'
-  , routes.update
+, middleware.validate2.body(desc.item.methods.put.body)
+, routes.update
 );
 module.exports = server;

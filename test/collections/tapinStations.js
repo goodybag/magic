@@ -152,7 +152,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
 
   it('should not update a tapinStation if permissions are absent', function(done) {
     var tapinStation = {
-      firstName: "Terd"
+      loyaltyEnabled: true
     };
     tu.loginAsConsumer(function() {
       tu.patch('/v1/tapin-stations/7', tapinStation, function(error, results, res) {
