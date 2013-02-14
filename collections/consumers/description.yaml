@@ -104,8 +104,18 @@ collectionsItem:
     get:
       desc: List Consumer Collection Products
       query:
-        offset:  { type: int, eg: 5 }
-        limit:   { type: int, eg: 5 }
+        lat:        { type: float,   eg: 10.123 }
+        lon:        { type: float,   eg: 10.123 }
+        range:      { type: int,     eg: 500 }
+        businessId: { type: id,      eg: 1 }
+        locationId: { type: id,      eg: 1 }
+        tag:        { type: string*, eg: [food, apparel] }
+        sort:       { type: string,  eg: -name, choices: [-name, name, -distance, distance, -random, random, -popular, popular] }
+        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, isSpotlight] }
+        offset:     { type: int,     eg: 5, default: 0 }
+        limit:      { type: int,     eg: 5, default: 20 }
+        spotlight:  { type: bool,    eg: false }
+        all:        { type: bool,    eg: false }
     post:
       desc: Add Product to Consumer Collection
       auth:
