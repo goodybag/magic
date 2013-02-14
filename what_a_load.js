@@ -77,15 +77,33 @@ resources.forEach(function(resource) {
 
 // issue requests
 // ==============
+// enable profiler
+var Profiler = require('clouseau');
+Profiler.enabled = true;
+
 var stats = {
-  codes:[]
+  codes:{},
+  requests:[],
 };
+var currentRequest;
 function issueNextRequest() {
   var request = requestQueue.shift();
-  if (request)
+  if (request) {
+
+    // start tracking request
+    currentRequest = {
+      id: 'request-'+stats.requests.length,
+      desc: request.desc
+    };
+    Profiler.enter(currentRequest.id);
+    stats.requests.push(currentRequest);
+
     dispatchRequest(request.authCreds, request.requestDoc, function(res, payload) {
       // stats
       stats.codes[res.statusCode] = ((stats.codes[res.statusCode] || 0) + 1);
+      Profiler.exit();
+      currentRequest.profile = Profiler.totals[currentRequest.id];
+
       // output
       if (res.statusCode != 200) {
         if (verbose)
@@ -97,7 +115,8 @@ function issueNextRequest() {
       // continue
       issueNextRequest();
     });
-  else
+
+  } else
     outputResults();
 }
 
@@ -108,11 +127,37 @@ issueNextRequest();
 // analyze results
 // ===============
 function outputResults() {
-  console.log('');
   console.log('Responses');
   console.log('---------');
+  
   for (var code in stats.codes)
     console.log(' * status',code,'response',stats.codes[code],'times');
+
+  console.log('');
+  console.log('Performance');
+  console.log('-----------');
+  
+  var total = 0;
+  var numRequests = stats.requests.length;
+  var bestTime = 100000, bestTimeIndex = -1;
+  var worstTime = 0, worstTimeIndex = -1;
+  var distribution = {};
+  for (var i=0; i < numRequests; i++) {
+    var elapsed = stats.requests[i].profile.elapsed;
+    total += elapsed;
+    if (worstTime < elapsed) { worstTime = elapsed, worstTimeIndex = i; }
+    if (bestTime > elapsed) { bestTime = elapsed, bestTimeIndex = i; }
+    var distRange = Math.ceil(Math.round(elapsed * 1000) / 100) * 100;
+    distribution[distRange] = (distribution[distRange] || []).concat(stats.requests[i].desc);
+  }
+  console.log(' * Total Time Elapsed:', Profiler.formatElapsedTime(total));
+  console.log(' * Total # of Requests:', numRequests);
+  console.log(' * Average Response Time:', Profiler.formatElapsedTime(total / stats.requests.length));
+  console.log(' * Best Response Time:', Profiler.formatElapsedTime(bestTime), '('+stats.requests[bestTimeIndex].desc+')');
+  console.log(' * Worst Response Time:', Profiler.formatElapsedTime(worstTime), '('+stats.requests[worstTimeIndex].desc+')');
+  console.log(' * Response distribution:');
+  for (var range in distribution)
+    console.log('   ~', range, 'ms:', distribution[range]);
 }
 
 
