@@ -88,12 +88,12 @@ require('./collections/activity');
 // ===========
 var chaos = require('./chaos');
 var doChaos = chaos.makeTestsBatch(function(resource) {
-  resource.iterateMethods(function(method) {
-    chaos.testValidRequest(method);
-    chaos.testExtradataRequest(method);
-    method.iterateAttributes(function(key) {
-      chaos.testPartialRequest(method, key);
-      chaos.testInvalidRequest(method, key);
+  resource.iterateMethods(function(methodDoc) {
+    chaos.testValidRequest(methodDoc);
+    chaos.testExtradataRequest(methodDoc);
+    methodDoc.iterateAttributes(function(key) {
+      chaos.testPartialRequest(methodDoc, key);
+      chaos.testInvalidRequest(methodDoc, key);
     });
   });
 });

@@ -40,7 +40,7 @@ function request(methodDoc, requestDoc, cb) {
   var doRequest = function() {
     tu.httpRequest(requestDoc.toOptions(), requestDoc.toPayload(), function(err, result, res) {
       if (methodDoc.needsAuth()) {
-        tu.logout(function() { cb(res, result); })
+        tu.logout(function() { cb(res, result); });
       } else {
         cb(res, result);
       }
@@ -52,7 +52,7 @@ function request(methodDoc, requestDoc, cb) {
   } else {
     doRequest();
   }
-};
+}
 
 // EXPORTED
 function testValidRequest(methodDoc) {
