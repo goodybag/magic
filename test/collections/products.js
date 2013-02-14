@@ -832,7 +832,6 @@ describe('POST /v1/products/:id/feelings', function(done) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(!payload.error);
-          console.log(payload);
           assert(payload.meta);
           assert(payload.meta.isFirstTapin);
           assert(payload.meta.consumerId);
