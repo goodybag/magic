@@ -9,6 +9,7 @@ var
 
 exports.ownerManager = function(req, cb) {
   if (!req.session.user) return cb(null);
+  if (req.session.user.groups.indexOf('manager') === -1) return cb(null);
 
   var businessId = req.param('id');
   var userId     = req.session.user.id;
@@ -16,13 +17,7 @@ exports.ownerManager = function(req, cb) {
   db.getClient('businesses ownerManager', function(error, client) {
     if (error) cb(null);
 
-    // were we given a consumer id in the request body?
-    var query;
-    if (req.session.user.groups.indexOf('manager') !== -1) {
-      query = sql.query('SELECT id FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
-    } else {
-      return cb(null);
-    }
+    var query = sql.query('SELECT id FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
     query.$('userId', userId);
     query.$('businessId', businessId);
 
