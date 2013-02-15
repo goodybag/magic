@@ -45,7 +45,7 @@
     "clouseau": "https://github.com/goodybag/clouseau/tarball/master"
   },
   "devDependencies": {
-    "better-assert": "0.1.x",
+    "better-assert": "1.0.x",
     "sinon": "1.5.x",
     "mocha": "1.7.x"
   },

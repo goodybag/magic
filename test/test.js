@@ -1,6 +1,7 @@
 process.env['GB_ENV'] = 'test';
 var tu = require('../lib/test-utils');
 var assert = require('better-assert');
+var yaml = require('js-yaml');
 
 // unit tests
 // ==========
@@ -8,7 +9,6 @@ require('./utils');
 
 // functional tests
 // ================
-
 // enable profiler
 var Profiler = require('clouseau');
 Profiler.enabled = true;
@@ -86,7 +86,50 @@ require('./collections/activity');
 
 // chaos tests
 // ===========
-require('./chaos');
+var chaos = require('./chaos');
+var doChaos = chaos.makeTestsBatch(function(resource) {
+  resource.iterateMethods(function(methodDoc) {
+    chaos.testValidRequest(methodDoc);
+    chaos.testExtradataRequest(methodDoc);
+    methodDoc.iterateAttributes(function(key) {
+      chaos.testPartialRequest(methodDoc, key);
+      chaos.testInvalidRequest(methodDoc, key);
+    });
+  });
+});
+
+var chaosBlacklist = [
+  'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
+  'consumers.cardUpdatesItem',
+  'redemptions.collection'
+];
+
+var doci = require('../lib/doci');
+function loadDescription(collection, cb) {
+  var data = require('../collections/'+collection+'/description.yaml', 'utf8');
+  for (var k in data) {
+    if (chaosBlacklist.indexOf(collection+'.'+k) !== -1) continue;
+    cb(new doci.Resource(data[k]));
+  }
+}
+loadDescription('activity', doChaos);
+loadDescription('businesses', doChaos);
+loadDescription('cashiers', doChaos);
+loadDescription('charities', doChaos);
+loadDescription('consumers', doChaos);
+loadDescription('events', doChaos);
+loadDescription('groups', doChaos);
+loadDescription('locations', doChaos);
+loadDescription('loyaltyStats', doChaos);
+loadDescription('managers', doChaos);
+loadDescription('photos', doChaos);
+loadDescription('productCategories', doChaos);
+loadDescription('products', doChaos);
+loadDescription('productTags', doChaos);
+loadDescription('redemptions', doChaos);
+loadDescription('reviews', doChaos);
+loadDescription('tapin-stations', doChaos);
+loadDescription('users', doChaos);
 
 
 describe('GET /v1/debug/profile', function() {
