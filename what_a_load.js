@@ -22,7 +22,7 @@ var getFlag = function(option, fallback){
 };
 function usage() {
   console.log('Usage:');
-  console.log('  node what_a_load.js [--host/-h localhost] [--port/-p 80] <server_description_path>');
+  console.log('  node what_a_load.js [--host/-h localhost] [--port/-p 80] [--methods/-m GET,POST,PUT] [--numrequests/-n 10] <server_description_path>');
 }
 
 // prepare
@@ -141,14 +141,19 @@ function outputResults() {
   var numRequests = stats.requests.length;
   var bestTime = 100000, bestTimeIndex = -1;
   var worstTime = 0, worstTimeIndex = -1;
-  var distribution = {};
+  var distribution = { 2000:[], 1500:[], 1250:[], 1000:[], 750:[], 500:[], 300:[], 200:[], 100:[], 60:[], 30:[], 20:[], 10:[] };
   for (var i=0; i < numRequests; i++) {
     var elapsed = stats.requests[i].profile.elapsed;
     total += elapsed;
     if (worstTime < elapsed) { worstTime = elapsed, worstTimeIndex = i; }
     if (bestTime > elapsed) { bestTime = elapsed, bestTimeIndex = i; }
-    var distRange = Math.ceil(Math.round(elapsed * 1000) / 100) * 100;
-    distribution[distRange] = (distribution[distRange] || []).concat(stats.requests[i].desc);
+    var distRange = elapsed * 1000;
+    for (var k in distribution) {
+      if (distRange < parseFloat(k,10)) {
+        distribution[k].push(stats.requests[i].desc);
+        break;
+      }
+    }
   }
   console.log(' * Total Time Elapsed:', Profiler.formatElapsedTime(total));
   console.log(' * Total # of Requests:', numRequests);
@@ -157,7 +162,8 @@ function outputResults() {
   console.log(' * Worst Response Time:', Profiler.formatElapsedTime(worstTime), '('+stats.requests[worstTimeIndex].desc+')');
   console.log(' * Response distribution:');
   for (var range in distribution)
-    console.log('   ~', range, 'ms:', distribution[range]);
+    if (distribution[range].length)
+      console.log('   <', range, 'ms:', distribution[range].length);
 }
 
 
