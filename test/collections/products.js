@@ -531,6 +531,15 @@ describe('POST /v1/products', function() {
     });
   });
 
+  it('should not allow negative prices', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:-1234 }), 'application/json', function(err, payload, res) {
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should fail to post new product because of invalid field', function (done){
     tu.loginAsAdmin(function() {
       tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:"jirjwyi" }), 'application/json', function(err, payload, res) {
