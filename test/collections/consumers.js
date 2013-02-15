@@ -340,6 +340,9 @@ describe('GET /v1/consumers/:id/collections', function() {
         assert(results.data[0].id);
         assert(results.data[0].name);
         assert(results.data[0].numProducts == 2);
+        assert(results.data[0].totalMyLikes != 'undefined');
+        assert(results.data[0].totalMyWants != 'undefined');
+        assert(results.data[0].totalMyTries != 'undefined');
         assert(results.data[1].numProducts == 3);
         tu.logout(done);
       });

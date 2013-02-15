@@ -369,6 +369,7 @@ module.exports.listCollections = function(req, res){
       'SELECT {fields} FROM collections',
         'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
         'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
+        '{feelingsJoin}',
         'WHERE "consumerId" = $consumerId',
         'GROUP BY collections.id {limit}'
     ]);
@@ -380,6 +381,19 @@ module.exports.listCollections = function(req, res){
     query.limit  = sql.limit(req.query.limit, req.query.offset);
     query.$('consumerId', consumerId);
 
+    if (req.session.user) {
+      query.feelingsJoin = [
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
+      ].join('');
+      query.fields
+      .add('COUNT("productLikes".id) as "totalMyLikes"')
+      .add('COUNT("productWants".id) as "totalMyWants"')
+      .add('COUNT("productTries".id) as "totalMyTries"');
+      query.$('userId', req.session.user.id);
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     // run data query
@@ -387,8 +401,12 @@ module.exports.listCollections = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+      var meta = { total:0 };
+      if (dataResult.rowCount) {
+        meta.total = dataResult.rows[0].metaTotal;
+      }
+
+      return res.json({ error: null, data: dataResult.rows, meta: meta });
     });
   });
 };
