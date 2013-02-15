@@ -33,16 +33,16 @@ collection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        businessId:      { type: id,      eg: 1 }
-        name:            { type: string,  eg: My Product, required: true }
-        description:     { type: string,  eg: This is the description of the product }
-        price:           { type: int,     eg: 1299 }
-        categories:      { type: int+,    eg: [2] }
-        tags:            { type: int+,    eg: [1] }
-        photoUrl:        { type: url,     eg: http://foo.com/image.png }
-        isVerified:      { type: bool,    eg: true }
-        isArchived:      { type: bool,    eg: true }
-        isEnabled:       { type: bool,    eg: true }
+        businessId:      { type: id,               eg: 1 }
+        name:            { type: string,           eg: My Product, required: true }
+        description:     { type: string,           eg: This is the description of the product }
+        price:           { type: int non-negative, eg: 1299 }
+        categories:      { type: int+,             eg: [2] }
+        tags:            { type: int+,             eg: [1] }
+        photoUrl:        { type: url,              eg: http://foo.com/image.png }
+        isVerified:      { type: bool,             eg: true }
+        isArchived:      { type: bool,             eg: true }
+        isEnabled:       { type: bool,             eg: true }
   children:
     - /products/:id
 
@@ -61,16 +61,16 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        businessId:      { type: id,      eg: 1 }
-        name:            { type: string,  eg: My Product }
-        description:     { type: string,  eg: This is the description of the product }
-        price:           { type: int,     eg: 1299 }
-        photoUrl:        { type: url,     eg: http://foo.com/image.png }
-        categories:      { type: int+,    eg: [2] }
-        tags:            { type: int+,    eg: [1] }
-        isVerified:      { type: bool,    eg: true }
-        isArchived:      { type: bool,    eg: true }
-        isEnabled:       { type: bool,    eg: true }
+        businessId:      { type: id,               eg: 1 }
+        name:            { type: string,           eg: My Product }
+        description:     { type: string,           eg: This is the description of the product }
+        price:           { type: int non-negative, eg: 1299 }
+        photoUrl:        { type: url,              eg: http://foo.com/image.png }
+        categories:      { type: int+,             eg: [2] }
+        tags:            { type: int+,             eg: [1] }
+        isVerified:      { type: bool,             eg: true }
+        isArchived:      { type: bool,             eg: true }
+        isEnabled:       { type: bool,             eg: true }
     delete:
       desc: Delete Product
       auth:
