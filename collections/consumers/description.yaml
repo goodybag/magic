@@ -42,7 +42,6 @@ item:
         password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }
-        cardId:          { type: cardid, eg: 123456-ABC }
         screenName:      { type: string, eg: jdoe }
     delete:
       desc: Delete Consumer

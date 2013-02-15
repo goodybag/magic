@@ -105,15 +105,15 @@ module.exports.create = function(req, res){
     var query = sql.query([
       'WITH',
         '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
+          '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId',
             'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
             'RETURNING id),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'manager\' RETURNING id),',
         '"manager" AS',
-          '(INSERT INTO "managers" ("userId", "cardId", "businessId", "locationId")',
-            'SELECT "user".id, $cardId, $businessId, $locationId FROM "user" RETURNING id)',
+          '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
+            'SELECT "user".id, $businessId, $locationId FROM "user" RETURNING id)',
       'SELECT "user".id as "userId", "manager".id as "managerId" FROM "user", "manager"'
     ]);
     if (req.body.email) {

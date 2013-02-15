@@ -98,12 +98,13 @@ module.exports.create = function(req, res){
     tx.begin(function() {
 
       var query = sql.query([
-        'INSERT INTO users (email, password)',
-          'SELECT $email, $password WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
+        'INSERT INTO users (email, password, "cardId")',
+          'SELECT $email, $password, $cardId WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
           'RETURNING id'
       ]);
       query.$('email', req.body.email);
       query.$('password', utils.encryptPassword(req.body.password));
+      query.$('cardId', req.body.cardId);
       client.query(query.toString(), query.$values, function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
@@ -172,6 +173,7 @@ module.exports.update = function(req, res){
 
   var email = req.body.email;
   var password = req.body.password;
+  var cardId = req.body.cardId;
   var groups = req.body.groups;
 
   db.getClient(TAGS[0], function(error, client){
@@ -225,6 +227,10 @@ module.exports.update = function(req, res){
       if (password) {
         query.updates.add('password = $password');
         query.$('password', utils.encryptPassword(password));
+      }
+      if (cardId) {
+        query.updates.add('"cardId" = $cardId');
+        query.$('cardId', cardId);
       }
 
       logger.db.debug(TAGS, query.toString());

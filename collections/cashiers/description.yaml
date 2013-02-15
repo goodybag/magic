@@ -46,7 +46,6 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        cardId:          { type: cardid, eg: 123456-ABC }
         businessId:      { type: int,    eg: 1 }
         locationId:      { type: int,    eg: 1 }
     delete:

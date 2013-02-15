@@ -69,35 +69,35 @@ INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'a
 INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11', 'consumer_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('12', 'consumer_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('16', 'consumer5@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('17', 'consumer6@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('18', 'consumer7@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('19', null, null);
-INSERT INTO "users" (id, email, password) VALUES ('20', 'not_registered@gmail.com', null);
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABC');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11', 'consumer_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '723457-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('12', 'consumer_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-YYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-YYZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-CO4');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('16', 'consumer5@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBA');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('17', 'consumer6@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBB');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('18', 'consumer7@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBC');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('19', null, null, '432123-AAA');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('20', 'not_registered@gmail.com', null, '432123-AAB');
 
-INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11112', 'manager_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11113', 'manager_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11114', 'manager_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11115', 'manager_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11116', 'manager_of_biz_without_loyalty@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXX');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11112', 'manager_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11113', 'manager_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-MA1');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11114', 'manager_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11115', 'manager_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11116', 'manager_of_biz_without_loyalty@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
 
-INSERT INTO "users" (id, email, password) VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11122', 'cashier_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11123', 'cashier_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11124', 'cashier_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11125', 'cashier_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYX');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11122', 'cashier_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', null);
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11123', 'cashier_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11124', 'cashier_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
 
 INSERT INTO "users" (id, email, password) VALUES ('11130', 'tapin_station_0@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11131', 'tapin_station_1@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -110,45 +110,45 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 -- CONSUMERS
 
 BEGIN;
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '723457-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('7', '13', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2', '123456-YYZ');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('9', '15', 'Consumer', 'Four', 'consumer4', '123456-CO4');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('10', '16', 'Consumer', 'Five', 'consumer5', '778899-CBA');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('11', '17', 'Consumer', 'Six', 'consumer6', '778899-CBB');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('12', '18', 'Consumer', 'Six', 'consumer6', '778899-CBC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('13', '19', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAA');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('14', '20', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAB');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('7', '13', 'Getting', 'Deleted', 'getting_deleted');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('9', '15', 'Consumer', 'Four', 'consumer4');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('10', '16', 'Consumer', 'Five', 'consumer5');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('11', '17', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('12', '18', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('13', '19', 'Unregistered', 'Consumer', 'unregistered_consumer');
+INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName") VALUES ('14', '20', 'Unregistered', 'Consumer', 'unregistered_consumer');
 COMMIT;
 SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
 -- MANAGERS
 
 BEGIN;
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11110', '1', '1', '123456-XXX');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11111', '1', '1', '123456-XXZ');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11112', '1', '1', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11113', '1', '1', '123456-MA1');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11114', '1', '4', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11115', '2', '2', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('7', '11116', '4', '2', '123456-XXY');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('1', '11110', '1', '1');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('2', '11111', '1', '1');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('3', '11112', '1', '1');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('4', '11113', '1', '1');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('5', '11114', '1', '4');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('6', '11115', '2', '2');
+INSERT INTO "managers" (id, "userId", "businessId", "locationId") VALUES ('7', '11116', '4', '2');
 COMMIT;
 SELECT setval('managers_id_seq', (SELECT MAX(id) from "managers")); -- advance the sequence past the IDs just used
 
 -- CASHIERS
 
 BEGIN;
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11120', '1', '1', '123456-XYX');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11121', '1', '1', '123456-XYZ');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11122', '1', '1', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11123', '1', '1', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11124', '1', '4', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11125', '2', '2', '123456-XYY');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('1', '11120', '1', '1');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('2', '11121', '1', '1');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('3', '11122', '1', '1');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('4', '11123', '1', '1');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('5', '11124', '1', '4');
+INSERT INTO "cashiers" (id, "userId", "businessId", "locationId") VALUES ('6', '11125', '2', '2');
 COMMIT;
 SELECT setval('cashiers_id_seq', (SELECT MAX(id) from "cashiers")); -- advance the sequence past the IDs just used
 

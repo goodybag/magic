@@ -34,11 +34,6 @@ define(function(require){
     , validators: { len:[1] }
     , sanitizers: { trim:[] }
     }
-  , cardId: {
-      type: 'text'
-    , validators: { len:[10, 12], is: /^\d{6,7}-\w{3}$/ }
-    , sanitizers: { trim:[] }
-    }
   };
   return consumers;
 });

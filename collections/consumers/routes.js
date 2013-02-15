@@ -110,15 +110,15 @@ module.exports.create = function(req, res){
     var query = sql.query([
       'WITH',
         '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
+          '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId',
             'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
             'RETURNING *),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
         '"consumer" AS',
-          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
-            'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
+          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName")',
+            'SELECT "user".id, $firstName, $lastName, $screenName FROM "user" RETURNING id)',
       'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
     ]);
     if (req.body.email) {
@@ -498,7 +498,7 @@ module.exports.createCardupdate = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = 'SELECT consumers.id as "consumerId", consumers."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
+    var query = 'SELECT consumers.id as "consumerId", users."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
     client.query(query, [email], function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
@@ -552,7 +552,7 @@ module.exports.updateCard = function(req, res){
       var targetConsumerId = result.rows[0].consumerId;
       var newCardId = result.rows[0].newCardId;
 
-      client.query('UPDATE consumers SET "cardId"=$1 WHERE id=$2', [newCardId, targetConsumerId], function(error, result) {
+      client.query('UPDATE users SET "cardId"=$1 WHERE id = (SELECT consumers."userId" FROM consumers WHERE consumers.id = $2)', [newCardId, targetConsumerId], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         res.json({ err:null, data:null });

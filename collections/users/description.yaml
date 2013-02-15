@@ -15,8 +15,9 @@ collection:
         email:              { type: email,  eg: user_XXX@goodybag.com, required: true }
         password:           { type: string, eg: password }
         singlyId:           { type: string }
-        singlyAccesToken:   { type: string }
+        singlyAccessToken:  { type: string }
         groups:             { type: int*,   eg: [1,2] }
+        cardId:             { type: cardid, eg: 123456-ABC }
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
@@ -41,7 +42,8 @@ item:
         password:           { type: string, eg: password }
         groups:             { type: int*,   eg: [1,2] }
         singlyId:           { type: string }
-        singlyAccesToken:   { type: string }
+        singlyAccessToken:  { type: string }
+        cardId:             { type: cardid, eg: 123456-ABC }
     delete:
       desc: Delete User
       auth:
