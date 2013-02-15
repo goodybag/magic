@@ -76,7 +76,7 @@ cardUpdatesItem:
 collectionsCollection:
   resource:
     type: collection
-    path: /consumers/:consumerId/collections
+    path: /consumers/:userId/collections
     params:
       consumerId: { type: int, eg: 1 }
   methods:
@@ -96,7 +96,7 @@ collectionsCollection:
 collectionsItem:
   resource:
     type: item
-    path: /consumers/:consumerId/collections/:collectionId
+    path: /consumers/:userId/collections/:collectionId
     params:
       consumerId:   { type: int, eg: 3 }
       collectionId: { type: int, eg: 3 }

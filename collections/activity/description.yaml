@@ -6,9 +6,9 @@ collection:
     get:
       desc: List Activity
       altpaths:
-        - /consumers/:consumerId/activity
+        - /consumers/:userId/activity
       query:
-        consumerId: { type: int, eg: 1 }
+        userId:     { type: int, eg: 1 }
         businessId: { type: int, eg: 1 }
         locationId: { type: int, eg: 1 }
   children:

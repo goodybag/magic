@@ -24,9 +24,9 @@ define(function(require){
     , meta: 'references products(id) on delete cascade'
     , validators: { isInt:[] }
     }
-  , consumerId: {
+  , userId: {
       type: 'int'
-    , meta: 'references consumers(id) on delete cascade'
+    , meta: 'references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , url: {

@@ -57,9 +57,9 @@ module.exports.list = function(req, res){
   var query = {}, options = { order: 'order by id desc' };
 
   // if (req.param('filter'))      query.type = '%' + req.param('filter') + '%';
-  if (req.param('consumerId'))  query.consumerId = req.param('consumerId');
-  if (req.param('businessId'))  query.businessId = req.param('businessId');
-  if (req.param('locationId'))  query.locationId = req.param('locationId');
+  if (req.param('userId'))     query.userId     = req.param('userId');
+  if (req.param('businessId')) query.businessId = req.param('businessId');
+  if (req.param('locationId')) query.locationId = req.param('locationId');
 
   db.api.activity.find(query, options, function(error, results, meta){
     if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

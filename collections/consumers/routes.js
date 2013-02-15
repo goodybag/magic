@@ -26,7 +26,7 @@ logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
  */
 module.exports.get = function(req, res){
   var TAGS = ['get-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.consumerId);
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId);
 
   db.getClient(TAGS[0], function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -37,16 +37,13 @@ module.exports.get = function(req, res){
         'WHERE consumers.id = $id'
     ]);
     query.fields = sql.fields().add("users.*, consumers.*");
-    query.$('id', +req.param('consumerId') || 0);
+    query.$('id', +req.param('userId') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
-        result.rows[0].consumerId = result.rows[0].id;
-        delete result.rows[0].id;
-
         return res.json({ error: null, data: result.rows[0] });
       } else {
         return res.status(404).end();
@@ -62,7 +59,7 @@ module.exports.get = function(req, res){
  */
 module.exports.list = function(req, res){
   var TAGS = ['list-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumers ' + req.params.consumerId);
+  logger.routes.debug(TAGS, 'fetching consumers ' + req.params.userId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -102,7 +99,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId);
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.userId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -119,7 +116,7 @@ module.exports.create = function(req, res){
         '"consumer" AS',
           '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
             'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
-      'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
+      'SELECT "user".id, "user".id as "userId" FROM "user", "consumer"'
     ]);
     if (req.body.email) {
       query.uidField = 'email';
@@ -150,7 +147,6 @@ module.exports.create = function(req, res){
         return res.error(errors.internal.DB_FAILURE);
       }
 
-      req.body.consumerId = result.rows[0].consumerId;
       req.body.userId = result.rows[0].userId;
 
       if (req.body.email) {
@@ -185,7 +181,7 @@ module.exports.create = function(req, res){
  */
 module.exports.del = function(req, res){
   var TAGS = ['del-consumer', req.uuid];
-  logger.routes.debug(TAGS, 'deleting consumer ' + req.params.consumerId);
+  logger.routes.debug(TAGS, 'deleting consumer ' + req.params.userId);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -193,9 +189,9 @@ module.exports.del = function(req, res){
     var query = sql.query([
       'DELETE FROM users USING consumers',
         'WHERE users.id = consumers."userId"',
-        'AND consumers.id = $id'
+        'AND consumers."userId" = $id'
     ]);
-    query.$('id', +req.params.consumerId || 0);
+    query.$('id', +req.params.userId || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -222,14 +218,14 @@ module.exports.update = function(req, res){
 
     var query = {};
 
-    // Either way, we'll need to get the userId or consumerId
+    // Either way, we'll need to get the userId
     // Depending on how they're requesting this
-    if (req.param('consumerId') && req.param('consumerId') != 'session')
-      query.id = req.param('consumerId');
+    if (req.param('userId') && req.param('userId') != 'session')
+      query.userId = req.param('userId');
     else
       query.userId = req.session.user.id;
 
-    db.api.consumers.findOne(query, { fields: ['id', '"userId"'] }, function(error, consumer){
+    db.api.consumers.findOne(query, { fields: ['"userId"'] }, function(error, consumer){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       if (!consumer || !consumer.id)
@@ -261,9 +257,9 @@ module.exports.update = function(req, res){
 
           if (!updateConsumer) return callback();
 
-          var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
+          var query = sql.query('UPDATE consumers SET {updates} WHERE userId=$id');
           query.updates = sql.fields().addUpdateMap(data, query);
-          query.$('id', consumer.id);
+          query.$('id', consumer.userId);
 
           logger.db.debug(TAGS, query.toString());
 
@@ -357,9 +353,9 @@ module.exports.update = function(req, res){
  */
 module.exports.listCollections = function(req, res){
   var TAGS = ['list-consumer-collections', req.uuid];
-  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.consumerId + ' collections');
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId + ' collections');
 
-  var consumerId = req.param('consumerId');
+  var userId = req.param('userId');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -370,7 +366,7 @@ module.exports.listCollections = function(req, res){
         'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
         'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
         '{feelingsJoin}',
-        'WHERE "consumerId" = $consumerId',
+        'WHERE "userId" = $userId',
         'GROUP BY collections.id {limit}'
     ]);
     query.fields = sql.fields()
@@ -379,7 +375,7 @@ module.exports.listCollections = function(req, res){
       .add('MIN(products."photoUrl") as "photoUrl"');
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
-    query.$('consumerId', consumerId);
+    query.$('userId', userId);
 
     if (req.session.user) {
       query.feelingsJoin = [
@@ -418,16 +414,16 @@ module.exports.listCollections = function(req, res){
  */
 module.exports.createCollection = function(req, res){
   var TAGS = ['create-consumers-collection', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId + ' collection');
+  logger.routes.debug(TAGS, 'creating consumer ' + req.params.userId + ' collection');
 
-  var consumerId = req.param('consumerId');
+  var userId = req.param('userId');
   var name = req.body.name;
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO collections ("consumerId", name) VALUES ($consumerId, $name) RETURNING id');
-    query.$('consumerId', consumerId);
+    var query = sql.query('INSERT INTO collections ("userId", name) VALUES ($userId, $name) RETURNING id');
+    query.$('userId', userId);
     query.$('name', name);
 
     client.query(query.toString(), query.$values, function(error, result) {
@@ -461,17 +457,16 @@ module.exports.deleteCollection = function(req, res){
  */
 module.exports.addCollectionProduct = function(req, res){
   var TAGS = ['create-consumers-collection', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId + ' collection');
+  logger.routes.debug(TAGS, 'adding product to consumer ' + req.params.userId + ' collection');
 
-  var consumerId = req.param('consumerId');
   var collectionId = req.param('collectionId');
   var productId = req.body.productId;
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "createdAt") VALUES ($consumerId, $productId, now()) RETURNING id');
-    query.$('consumerId', consumerId);
+    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "createdAt") VALUES ($collectionId, $productId, now()) RETURNING id');
+    query.$('collectionId', collectionId);
     query.$('productId', productId);
 
     client.query(query.toString(), query.$values, function(error, result) {
@@ -498,19 +493,20 @@ module.exports.createCardupdate = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = 'SELECT consumers.id as "consumerId", consumers."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
+    // :TODO: update this to just pull from users once the cardId move into users is merged into this branch
+    var query = 'SELECT users.id as "userId", consumers."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
     client.query(query, [email], function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      var consumerId = result.rows[0].consumerId;
+      var userId = result.rows[0].userId;
       var oldCardId  = result.rows[0].cardId;
 
       var token = require("randomstring").generate();
       var query = sql.query([
-        'INSERT INTO "consumerCardUpdates" ("consumerId", "newCardId", "oldCardId", token, expires, "createdAt")',
-          'VALUES ($consumerId, $newCardId, $oldCardId, $token, now() + \'2 weeks\'::interval, now())'
+        'INSERT INTO "consumerCardUpdates" ("userId", "newCardId", "oldCardId", token, expires, "createdAt")',
+          'VALUES ($userId, $newCardId, $oldCardId, $token, now() + \'2 weeks\'::interval, now())'
       ]);
-      query.$('consumerId', consumerId);
+      query.$('userId', userId);
       query.$('newCardId', newCardId);
       query.$('oldCardId', oldCardId);
       query.$('token', token);
@@ -544,12 +540,12 @@ module.exports.updateCard = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // get cardupdate info
-    client.query('SELECT "consumerId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
+    client.query('SELECT "userId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) {
         return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.')
       }
-      var targetConsumerId = result.rows[0].consumerId;
+      var targetConsumerId = result.rows[0].userId;
       var newCardId = result.rows[0].newCardId;
 
       client.query('UPDATE consumers SET "cardId"=$1 WHERE id=$2', [newCardId, targetConsumerId], function(error, result) {

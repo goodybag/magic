@@ -200,21 +200,11 @@ module.exports.oauthAuthenticate = function(req, res){
   , lookupUsersGroups: function(user){
       var query = sql.query([
           'SELECT'
-        , '  consumers.id            as "consumerId"'
-        , ', managers.id             as "managerId"'
-        , ', cashiers.id             as "cashierId"'
-        , ', array_agg(groups.name)  as groups'
+        , '  array_agg(groups.name)  as groups'
         , 'FROM "usersGroups"'
         , '  LEFT JOIN groups'
         , '    ON "usersGroups"."groupId" = groups.id'
-        , '  LEFT JOIN consumers'
-        , '    ON consumers."userId" = "usersGroups"."userId"'
-        , '  LEFT JOIN managers'
-        , '    ON managers."userId"  = "usersGroups"."userId"'
-        , '  LEFT JOIN cashiers'
-        , '    ON cashiers."userId"  = "usersGroups"."userId"'
         , 'WHERE "usersGroups"."userId"  = $id'
-        , 'GROUP BY consumers.id, managers.id, cashiers.id;'
         ]);
 
       query.$('id', user.id);
@@ -227,13 +217,6 @@ module.exports.oauthAuthenticate = function(req, res){
 
           var result = results.rows[0];
           user.groups = result ? result.groups : [];
-          user.groupIds = {};
-
-          if (result){
-            if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
-            if (result.managerId)   user.groupIds.manager   = result.managerId;
-            if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
-          }
 
           stage.setSessionAndSend(user);
         });
@@ -300,21 +283,11 @@ module.exports.authenticate = function(req, res){
         // Setup groups
         query = sql.query([
           'SELECT'
-        , '  consumers.id            as "consumerId"'
-        , ', managers.id             as "managerId"'
-        , ', cashiers.id             as "cashierId"'
-        , ', array_agg(groups.name)  as groups'
+        , '  array_agg(groups.name)  as groups'
         , 'FROM "usersGroups"'
         , '  LEFT JOIN groups'
         , '    ON "usersGroups"."groupId" = groups.id'
-        , '  LEFT JOIN consumers'
-        , '    ON consumers."userId" = "usersGroups"."userId"'
-        , '  LEFT JOIN managers'
-        , '    ON managers."userId"  = "usersGroups"."userId"'
-        , '  LEFT JOIN cashiers'
-        , '    ON cashiers."userId"  = "usersGroups"."userId"'
         , 'WHERE "usersGroups"."userId"  = $id'
-        , 'GROUP BY consumers.id, managers.id, cashiers.id;'
         ]);
 
         query.$('id', user.id);
@@ -324,13 +297,6 @@ module.exports.authenticate = function(req, res){
 
           var result = results.rows[0];
           user.groups = result ? result.groups : [];
-          user.groupIds = {};
-
-          if (result){
-            if (result.consumerId)  user.groupIds.consumer  = result.consumerId;
-            if (result.managerId)   user.groupIds.manager   = result.managerId;
-            if (result.cashierId)   user.groupIds.cashier   = result.cashierId;
-          }
 
           // Save user in session
           req.session.user = user;

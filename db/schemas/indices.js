@@ -33,11 +33,6 @@ define(function(require){
       table   : 'businessTags'
     , columns : '("businessId")'
     }
-  , cashiers_id_idx: {
-      table   : 'cashiers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
-    }
   , cashiers_userId_idx: {
       table   : 'cashiers'
     , type    : 'UNIQUE'
@@ -51,11 +46,6 @@ define(function(require){
   , collections_consumerId_idx: {
       table   : 'collections'
     , columns : '("consumerId")'
-    }
-  , consumers_id_idx: {
-      table   : 'consumers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
     }
   , consumers_userId_idx: {
       table   : 'consumers'
@@ -81,11 +71,6 @@ define(function(require){
       table   : 'locations'
     , using   : 'gist'
     , columns : '(ll_to_earth(lat, lon))'
-    }
-  , managers_id_idx: {
-      table   : 'managers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
     }
   , managers_userId_idx: {
       table   : 'managers'

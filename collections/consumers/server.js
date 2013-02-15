@@ -46,8 +46,8 @@ server.get(
 
 // consumers.get
 server.get(
-  '/v1/consumers/:consumerId'
-, middleware.profile('GET /v1/consumers/:consumerId')
+  '/v1/consumers/:userId'
+, middleware.profile('GET /v1/consumers/:userId')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.consumer)
@@ -58,7 +58,7 @@ server.get(
 // consumers.create
 server.post(
   '/v1/consumers'
-, middleware.profile('POST /v1/consumers/:consumerId')
+, middleware.profile('POST /v1/consumers/:userId')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collection.methods.post.body)
   // Make the requester owner so they can read their own fields after creation
@@ -71,8 +71,8 @@ server.post(
 
 // consumers.update
 server.put(
-  '/v1/consumers/:consumerId'
-, middleware.profile('PUT /v1/consumers/:consumerId')
+  '/v1/consumers/:userId'
+, middleware.profile('PUT /v1/consumers/:userId')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('apply groups consumers owner')
@@ -87,8 +87,8 @@ server.put(
 
 // consumers.update
 server.post(
-  '/v1/consumers/:consumerId'
-, middleware.profile('POST /v1/consumers/:consumerId')
+  '/v1/consumers/:userId'
+, middleware.profile('POST /v1/consumers/:userId')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('apply groups consumers owner')
@@ -103,8 +103,8 @@ server.post(
 
 // consumers.delete
 server.del(
-  '/v1/consumers/:consumerId'
-, middleware.profile('DELETE /v1/consumers/:consumerId')
+  '/v1/consumers/:userId'
+, middleware.profile('DELETE /v1/consumers/:userId')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
@@ -115,8 +115,8 @@ server.del(
 
 // consumers.listCollections
 server.get(
-  '/v1/consumers/:consumerId/collections'
-, middleware.profile('GET /v1/consumers/:consumerId/collections')
+  '/v1/consumers/:userId/collections'
+, middleware.profile('GET /v1/consumers/:userId/collections')
 , middleware.profile('validate query')
 , middleware.validate2.query(desc.collectionsCollection.methods.get.query)
 , middleware.profile('apply groups consumers owner')
@@ -129,8 +129,8 @@ server.get(
 
 // consumers.createCollections
 server.post(
-  '/v1/consumers/:consumerId/collections'
-, middleware.profile('POST /v1/consumers/:consumerId/collections')
+  '/v1/consumers/:userId/collections'
+, middleware.profile('POST /v1/consumers/:userId/collections')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collectionsCollection.methods.post.body)
 , middleware.profile('apply groups consumers owner')
@@ -143,8 +143,8 @@ server.post(
 
 // consumers.deleteCollections
 server.del(
-  '/v1/consumers/:consumerId/collections/:collectionId'
-, middleware.profile('DELETE /v1/consumers/:consumerId/collections/:collectionId')
+  '/v1/consumers/:userId/collections/:collectionId'
+, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
@@ -156,7 +156,7 @@ server.del(
 // consumers.deleteCollections
 server.del(
   '/v1/collections/:collectionId'
-, middleware.profile('DELETE /v1/consumers/:consumerId/collections/:collectionId')
+, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.collectionOwner)
 , middleware.profile('permissions')
@@ -167,8 +167,8 @@ server.del(
 
 // consumers.listCollectionProducts
 server.get(
-  '/v1/consumers/:consumerId/collections/:collectionId'
-, middleware.profile('GET /v1/consumers/:consumerId/collections/:collectionID')
+  '/v1/consumers/:userId/collections/:collectionId'
+, middleware.profile('GET /v1/consumers/:userId/collections/:collectionID')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
@@ -181,8 +181,8 @@ server.get(
 
 // consumers.addCollectionProduct
 server.post(
-  '/v1/consumers/:consumerId/collections/:collectionId'
-, middleware.profile('POST /v1/consumers/:consumerId/collections/:collectionID')
+  '/v1/consumers/:userId/collections/:collectionId'
+, middleware.profile('POST /v1/consumers/:userId/collections/:collectionID')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collectionsItem.methods.post.body)
 , middleware.profile('apply groups consumers owner')
