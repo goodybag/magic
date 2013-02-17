@@ -107,73 +107,135 @@ module.exports.create = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'WITH',
-        '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
-            'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-            'RETURNING *),',
-        '"userGroup" AS',
-          '(INSERT INTO "usersGroups" ("userId", "groupId")',
-            'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-        '"consumer" AS',
-          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
-            'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
-      'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
-    ]);
-    if (req.body.email) {
-      query.uidField = 'email';
-      query.upassField = 'password';
-      query.$('uid', req.body.email);
-      query.$('upass', utils.encryptPassword(req.body.password));
-    } else {
-      query.uidField = '"singlyId"';
-      query.upassField = '"singlyAccessToken"';
-      query.$('uid', req.body.singlyId);
-      query.$('upass', req.body.singlyAccessToken);
-    }
-    query.$('firstName', req.body.firstName);
-    query.$('lastName', req.body.lastName);
-    query.$('cardId', req.body.cardId || '');
-    query.$('screenName', req.body.screenName);
+    // First ensure there are no unique constraints violated
+    var ensureNotTaken = function(callback){
+      var query = sql.query('select {fields} from users, consumers');
 
-    client.query(query.toString(), query.$values, function(error, result) {
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      query.fields = sql.fields();
 
-      // did the insert occur?
-      if (result.rowCount === 0) {
-        // email must have already existed
-        if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
+      if (req.body.email)
+        query.fields.add(
+          'bool_or(case when users.email = \''
+        + req.body.email
+        + '\' then true else false end) as email'
+        );
 
-        // Access token already existed - for now, send back generic error
-        // Because they should have used POST /oauth to create/auth
-        return res.error(errors.internal.DB_FAILURE);
-      }
+      // If they're doing a user create, they're not intending on updating
+      // an existing oauth user
+      if (req.body.singlyId)
+        query.fields.add(
+          'bool_or(case when users."singlyId" = \''
+        + req.body.singlyId
+        + '\' then true else false end) as "singlyId"'
+        );
 
-      req.body.consumerId = result.rows[0].consumerId;
-      req.body.userId = result.rows[0].userId;
+      if (req.body.singlyAccessToken)
+        query.fields.add(
+          'bool_or(case when users."singlyAccessToken" = \''
+        + req.body.singlyAccessToken
+        + '\' then true else false end) as "singlyAccessToken"'
+        );
+
+      if (req.body.screenName)
+        query.fields.add(
+          'bool_or(case when consumers."screenName" = \''
+        + req.body.screenName
+        + '\' then true else false end) as "screenName"'
+        );
+
+      if (req.body.cardId)
+        query.fields.add(
+          'bool_or(case when consumers."cardId" = \''
+        + req.body.cardId
+        + '\' then true else false end) as "cardId"'
+        );
+
+      if (query.fields.length === 0) return callback(null, {});
+
+      client.query(query.toString(), query.$values, function(error, result){
+        if (error) return callback(error);
+
+        if (result.rows.length > 0){
+          result = result.rows[0];
+
+          if (result.email && req.body.email)
+            return callback(errors.registration.EMAIL_REGISTERED);
+          if (result.screenName && req.body.screenName)
+            return callback(errors.registration.SCREENNAME_TAKEN);
+          if (result.cardId && req.body.cardId)
+            return callback(errors.registration.CARD_ID_TAKEN);
+          if (result.singlyId && req.body.singlyId)
+            return callback(errors.registration.CARD_ID_TAKEN);
+          if (result.singlyAccessToken && req.body.singlyAccessToken)
+            return callback(errors.registration.CARD_ID_TAKEN);
+        }
+
+        return callback();
+      })
+    };
+
+    ensureNotTaken(function(error){
+      if (error) return res.error(error), logger.routes.error(TAGS, error);
+
+      var query = sql.query([
+        'WITH',
+          '"user" AS',
+            '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass RETURNING *),',
+          '"userGroup" AS',
+            '(INSERT INTO "usersGroups" ("userId", "groupId")',
+              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
+          '"consumer" AS',
+            '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
+              'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
+        'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
+      ]);
 
       if (req.body.email) {
-        var emailHtml = templates.email.complete_registration({
-          url:'http://loljk.com',
-        });
-        utils.sendMail(req.body.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
-          console.log('email cb', err, result);
-        }*/);
+        query.uidField = 'email';
+        query.upassField = 'password';
+        query.$('uid', req.body.email);
+        query.$('upass', utils.encryptPassword(req.body.password));
+      } else {
+        query.uidField = '"singlyId"';
+        query.upassField = '"singlyAccessToken"';
+        query.$('uid', req.body.singlyId);
+        query.$('upass', req.body.singlyAccessToken);
       }
 
-      // Log the user in
-      req.session.user = {
-        id: req.body.userId
-      , email: req.body.email
-      , singlyAccessToken: req.body.singlyAccessToken
-      , singlyId: req.body.singlyId
-      , groups: [5]
-      };
+      query.$('firstName', req.body.firstName);
+      query.$('lastName', req.body.lastName);
+      query.$('cardId', req.body.cardId || '');
+      query.$('screenName', req.body.screenName);
 
-      res.json({ error: null, data: result.rows[0] });
+      client.query(query.toString(), query.$values, function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      magic.emit('consumers.registered', req.body);
+        req.body.consumerId = result.rows[0].consumerId;
+        req.body.userId = result.rows[0].userId;
+
+        // Consider putting this in
+        if (req.body.email) {
+          var emailHtml = templates.email.complete_registration({
+            url:'http://loljk.com',
+          });
+          utils.sendMail(req.body.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
+            console.log('email cb', err, result);
+          }*/);
+        }
+
+        // Log the user in
+        req.session.user = {
+          id: req.body.userId
+        , email: req.body.email
+        , singlyAccessToken: req.body.singlyAccessToken
+        , singlyId: req.body.singlyId
+        , groups: [5]
+        };
+
+        res.json({ error: null, data: result.rows[0] });
+
+        magic.emit('consumers.registered', req.body);
+      });
     });
   });
 };

@@ -18,7 +18,7 @@ collection:
         singlyAccessToken: { type: string requires-singlyid, eg: asdf }
         firstName:         { type: string, eg: John }
         lastName:          { type: string, eg: Doe }
-        cardId:            { type: cardid, eg: 123456-ABC }
+        cardId:            { type: cardid, eg: 610463-URT }
         screenName:        { type: string, eg: jdoe }
   children:
     - /consumers/:id
@@ -42,7 +42,7 @@ item:
         password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }
-        cardId:          { type: cardid, eg: 123456-ABC }
+        cardId:          { type: cardid, eg: 610463-URE }
         screenName:      { type: string, eg: jdoe }
     delete:
       desc: Delete Consumer
@@ -59,7 +59,7 @@ cardUpdatesCollection:
       desc: Request Card Change
       body:
         email:  { type: email,  eg: a_consumer_XXX@home.com }
-        cardId: { type: cardid, eg: 123456-ABC }
+        cardId: { type: cardid, eg: 610463-URL }
   children:
     - /consumers/cardupdate/:token
 

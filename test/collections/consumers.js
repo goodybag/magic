@@ -109,6 +109,25 @@ describe('POST /v1/consumers', function() {
     })
   });
 
+  it('should fail if consumer screen name is in use', function(done){
+    var consumer = {
+      email:      "sljflkasdklfaklsdjf@goodybag.com"
+    , password:   "password"
+    , firstName:  "Test"
+    , lastName:   "McTesterson"
+    , screenName: "testies"
+    , cardId:     "787564-ZZZ"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode === 400);
+      results = JSON.parse(results);
+      assert(results.error.name == 'SCREENNAME_TAKEN');
+      done();
+    })
+  });
+
   it('should fail because of an invalid cardId', function(done){
     var consumer = {
       email:      "consumer1234@goodybag.com"

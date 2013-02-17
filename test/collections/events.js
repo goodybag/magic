@@ -11,8 +11,8 @@ describe('Consumers Events: ', function() {
     , password:   "password"
     , firstName:  "Test"
     , lastName:   "McTesterson"
-    , screenName: "testies"
-    , cardId:     "123456-ZZZ"
+    , screenName: "testiesfasdfs"
+    , cardId:     "231437-UZL"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results) {

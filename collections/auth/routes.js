@@ -185,7 +185,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
           // No need to log - already logged from the post
           if (result.error) return res.error(result.error);
-
+          
           consumer.id = result.data.userId;
 
           return stage.lookupUsersGroups(consumer);
