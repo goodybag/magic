@@ -29,11 +29,6 @@ define(function(require){
     , meta: 'references locations'
     , validators: { isInt:[] }
     }
-  , cardId: {
-      type: 'text'
-    , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
-    , sanitizers: { trim:[] }
-    }
   };
   return consumers;
 });

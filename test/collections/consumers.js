@@ -499,7 +499,7 @@ describe('POST /v1/consumers/cardupdate', function() {
             results = JSON.parse(results);
             assert(results.data.cardId == '999999-ZZZ');
 
-            tu.patch('/v1/consumers/1', { cardId:'123456-ABC' }, function(err, results, res) {
+            tu.patch('/v1/users/7', { cardId:'123456-ABC' }, function(err, results, res) {
               assert(res.statusCode == 200);
               tu.logout(done);
             });

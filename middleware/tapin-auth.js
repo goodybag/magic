@@ -73,12 +73,7 @@ module.exports = function(req, res, next){
             'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
             'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
             'LEFT JOIN consumers ON consumers."userId" = users.id',
-            'LEFT JOIN managers ON managers."userId" = users.id',
-            'LEFT JOIN cashiers ON cashiers."userId" = users.id',
-          'WHERE',
-            'cashiers."cardId" = $1',
-            'OR managers."cardId" = $1',
-            'OR consumers."cardId" = $1',
+          'WHERE users."cardId" = $1',
           'GROUP BY users.id, consumers.id'
       ].join(' ');
       client.query(query, [cardId], function(error, result){
@@ -96,13 +91,13 @@ module.exports = function(req, res, next){
       var query = [
         'WITH',
           '"user" AS',
-            '(INSERT INTO users (email, password) VALUES (null, null) RETURNING id),',
+            '(INSERT INTO users (email, password, "cardId") VALUES (null, null, $1) RETURNING id),',
           '"userGroup" AS',
             '(INSERT INTO "usersGroups" ("userId", "groupId")',
               'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
           '"consumer" AS',
-            '(INSERT INTO consumers ("userId", "cardId")',
-              'SELECT "user".id, $1 FROM "user" RETURNING id)', // $1=cardId
+            '(INSERT INTO consumers ("userId")',
+              'SELECT "user".id FROM "user" RETURNING id)', // $1=cardId
         'SELECT "user".id as id, "consumer".id as "consumerId" FROM "user", "consumer"'
       ].join(' ');
       client.query(query, [cardId], function(error, result) {

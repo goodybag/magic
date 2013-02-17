@@ -5,6 +5,7 @@ var all = [
 , 'singlyAccessToken'
 , 'groups'
 , 'groupIds'
+, 'cardId'
 ];
 
 module.exports = {

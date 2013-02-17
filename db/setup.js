@@ -92,6 +92,7 @@ function query(log, sql) {
     if (verbose) { console.log(log); }
     var query = client.query(sql);
     var deferred = when.defer();
+    query.on('error', function(e) { console.log(e); })
     query.on('end', deferred.resolve);
     return deferred.promise;
   }
