@@ -39,7 +39,6 @@ module.exports = {
       ]
     , update: [
         'email'
-      , 'password'
       , 'singlyId'
       , 'singlyAccessToken'
       , 'firstName'
