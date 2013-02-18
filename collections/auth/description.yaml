@@ -12,4 +12,17 @@ methods:
       password: { type: string required, eg: password }
   delete:
     desc: End Session
+
+resource:
+  type: item
+  path: /oauth
+methods:
+  get:
+    desc: Get authentication url for oauth
+  post:
+    desc: Login or register via oauth
+    body:
+      singlyId:          { type: string, required: { unless: code },      eg: asdf }
+      singlyAccessToken: { type: string, required: { unless: code },      eg: asdf }
+      code:              { type: string, required: { unless: singlyId },  eg: asdf }
 ...

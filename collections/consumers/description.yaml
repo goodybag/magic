@@ -12,14 +12,12 @@ collection:
     post:
       desc: Add Consumer
       body:
-        email:             { type: email,  eg: a_consumer_XXX@home.com }
-        password:          { type: string requires-email, eg: password }
-        singlyId:          { type: string, eg: asdf }
-        singlyAccessToken: { type: string requires-singlyid, eg: asdf }
+        email:             { type: email,  eg: a_consumer_XXX@home.com, required: true }
+        password:          { type: string, eg: password, required: true }
         firstName:         { type: string, eg: John }
         lastName:          { type: string, eg: Doe }
-        cardId:            { type: cardid, eg: 610463-URT }
-        screenName:        { type: string, eg: jdoe }
+        cardId:            { type: cardid, eg: 610XXX-URV }
+        screenName:        { type: string, eg: jdoe_XXX }
   children:
     - /consumers/:id
 
@@ -42,8 +40,8 @@ item:
         password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }
-        cardId:          { type: cardid, eg: 610463-URE }
-        screenName:      { type: string, eg: jdoe }
+        cardId:          { type: cardid, eg: 610XXX-URV }
+        screenName:      { type: string, eg: jdoe_XXX }
     delete:
       desc: Delete Consumer
       auth:
@@ -59,7 +57,7 @@ cardUpdatesCollection:
       desc: Request Card Change
       body:
         email:  { type: email,  eg: a_consumer_XXX@home.com }
-        cardId: { type: cardid, eg: 610463-URL }
+        cardId: { type: cardid, eg: 610XXX-URL }
   children:
     - /consumers/cardupdate/:token
 

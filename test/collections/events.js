@@ -19,8 +19,8 @@ describe('Consumers Events: ', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.consumerId >= 0);
-      var consumerId = results.data.consumerId;
+      assert(results.data.groupIds.consumers >= 0);
+      var consumerId = results.data.groupIds.consumers;
 
       tu.loginAsAdmin(function(error){
         // Give server time to propagate events
@@ -30,7 +30,6 @@ describe('Consumers Events: ', function() {
             results = JSON.parse(results);
             assert(!results.error);
             assert(results.data.length > 0);
-
             assert(results.data.filter(function(d){
               return d.type === "consumers.registered" && d.data.consumerId == consumerId;
             }).length === 1);
