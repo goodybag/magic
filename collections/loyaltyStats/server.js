@@ -27,8 +27,8 @@ server.get(
 
 // LoyaltyStats.list
 server.get(
-  '/v1/consumers/:consumerId/loyalty'
-, middleware.profile('GET /v1/consumers/:consumerId/loyalty')
+  '/v1/consumers/:userId/loyalty'
+, middleware.profile('GET /v1/consumers/:userId/loyalty')
 , middleware.profile('apply groups loyaltyStats employee')
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('permissions')
@@ -39,8 +39,8 @@ server.get(
 
 // LoyaltyStats.list
 server.get(
-  '/v1/consumers/:consumerId/loyalty/:businessId'
-, middleware.profile('GET /v1/consumers/:consumerId/loyalty/:businessId')
+  '/v1/consumers/:userId/loyalty/:businessId'
+, middleware.profile('GET /v1/consumers/:userId/loyalty/:businessId')
 , middleware.profile('apply groups loyaltyStats employee')
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('permissions')
@@ -93,8 +93,8 @@ server.put(
 
 // LoyaltyStats.update
 server.put(
-  '/v1/consumers/:consumerId/loyalty/:businessId'
-, middleware.profile('PUT /v1/consumers/:consumerId/loyalty/:businessId')
+  '/v1/consumers/:userId/loyalty/:businessId'
+, middleware.profile('PUT /v1/consumers/:userId/loyalty/:businessId')
 , middleware.profile('apply groups loyaltyStats employee')
 , middleware.applyGroups(applyGroups.employee)
 , middleware.profile('auth allow')

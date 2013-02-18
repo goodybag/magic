@@ -12,7 +12,7 @@ define(function(require){
   var consumers = {
     userId: {
       type: 'int'
-    , meta: 'primary key references users on delete cascade'
+    , meta: 'primary key references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {
@@ -24,11 +24,6 @@ define(function(require){
       type: 'int'
     , meta: 'references locations'
     , validators: { isInt:[] }
-    }
-  , cardId: {
-      type: 'text'
-    , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
-    , sanitizers: { trim:[] }
     }
   };
   return consumers;

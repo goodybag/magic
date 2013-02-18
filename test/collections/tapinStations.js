@@ -48,11 +48,11 @@ describe('GET /v1/tapin-stations', function() {
 describe('GET /v1/tapin-stations/:id', function() {
   it('should respond with a tapinStation', function(done) {
     tu.loginAsAdmin(function(){
-      tu.get('/v1/tapin-stations/1', function(error, results) {
+      tu.get('/v1/tapin-stations/11130', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.tapinStationId === 1);
+        assert(results.data.userId == 11130);
 
         tu.logout(done);
       });
@@ -98,7 +98,7 @@ describe('POST /v1/tapin-stations', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.tapinStationId >= 0);
+        assert(results.data.userId >= 0);
 
         tu.logout(done);
       });
@@ -132,12 +132,12 @@ describe('PATCH /v1/tapin-stations/:id', function() {
       locationId: 4
     };
     tu.loginAsAdmin(function(error){
-      tu.patch('/v1/tapin-stations/1', tapinStation, function(error, results, res) {
+      tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.get('/v1/tapin-stations/1', function(error, results) {
+        tu.get('/v1/tapin-stations/11130', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
           assert(!results.error);
@@ -170,7 +170,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
 });
 
 describe('DEL /v1/tapin-stations/:id', function() {
-  var id = 3; // Dumb tapinStation not used for anything
+  var id = 11132; // Dumb tapinStation not used for anything
   it('should delete a single tapinStation whose userId is ' + id, function(done) {
     tu.loginAsAdmin(function(error, tapinStation){
       tu.del('/v1/tapin-stations/' + id, function(error, results, res) {
@@ -204,7 +204,7 @@ describe('POST /v1/tapin-stations/:id/heartbeat', function() {
 
   it('creates a heartbeat event', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.post('/v1/tapin-stations/1/heartbeat', {}, function(err, results, res) {
+      tu.post('/v1/tapin-stations/11130/heartbeat', {}, function(err, results, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           // Give server time to handle the event
@@ -215,9 +215,8 @@ describe('POST /v1/tapin-stations/:id/heartbeat', function() {
                 results = JSON.parse(results);
                 assert(results.data.length > 0);
                 assert(results.data.filter(function(d){
-                  return d.data.tapinStationId === '1';
+                  return d.data.tapinStationId === '11130';
                 }).length !== 0);
-
                 tu.logout(done);
               });
             });

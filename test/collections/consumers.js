@@ -38,11 +38,11 @@ describe('GET /v1/consumers', function() {
 
 describe('GET /v1/consumers/:id', function() {
   it('should respond with a consumer', function(done) {
-    tu.get('/v1/consumers/1', function(error, results) {
+    tu.get('/v1/consumers/7', function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.consumerId === 1);
+      assert(results.data.userId === 7);
       done();
     });
   });
@@ -79,7 +79,7 @@ describe('POST /v1/consumers', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.consumerId >= 0);
+      assert(results.data.userId >= 0);
       tu.get('/v1/session', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
@@ -149,12 +149,12 @@ describe('PUT /v1/consumers/:id', function() {
       firstName: "Terd"
     };
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.patch('/v1/consumers/1', consumer, function(error, results, res) {
+      tu.patch('/v1/consumers/7', consumer, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.get('/v1/consumers/1', function(error, results) {
+        tu.get('/v1/consumers/7', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
           assert(!results.error);
@@ -182,12 +182,12 @@ describe('PUT /v1/consumers/:id', function() {
             assert(!error);
             assert(user);
 
-            tu.patch('/v1/consumers/1', {password: 'password'}, function(error, results, res) {
+            tu.patch('/v1/consumers/7', {password: 'password'}, function(error, results, res) {
               assert(!error);
               results = JSON.parse(results);
               assert(!results.error);
 
-              tu.get('/v1/consumers/1', function(error, results) {
+              tu.get('/v1/consumers/7', function(error, results) {
                 assert(!error);
                 results = JSON.parse(results);
                 assert(!results.error);
@@ -206,7 +206,7 @@ describe('PUT /v1/consumers/:id', function() {
       firstName: "Terd"
     };
     tu.loginAsClient(function() {
-      tu.patch('/v1/consumers/1', consumer, function(error, results, res) {
+      tu.patch('/v1/consumers/7', consumer, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -288,7 +288,7 @@ describe('PUT /v1/consumers/:id', function() {
 });
 
 describe('DEL /v1/consumers/:id', function() {
-  var id = 7; // Dumb consumer not used for anything
+  var id = 13; // Dumb consumer not used for anything
   it('should delete a single consumer whose userId is ' + id, function(done) {
     tu.loginAsAdmin(function(error, consumer){
       tu.del('/v1/consumers/' + id, function(error, results, res) {
@@ -301,7 +301,7 @@ describe('DEL /v1/consumers/:id', function() {
 
   it('should fail to delete a single consumer because of lack of permissions', function(done) {
     tu.loginAsClient(function(error, consumer){
-      tu.del('/v1/consumers/1', function(error, results, res) {
+      tu.del('/v1/consumers/7', function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -314,11 +314,11 @@ describe('DEL /v1/consumers/:id', function() {
 
   it('should perform a flash login and delete the user', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user){
-      tu.tapinAuthRequest('DELETE', '/v1/consumers/8', '123456-YYZ', function(error, results, res) {
+      tu.tapinAuthRequest('DELETE', '/v1/consumers/14', '123456-YYZ', function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
 
-        tu.get('/v1/consumers/8', function(error, result, res){
+        tu.get('/v1/consumers/14', function(error, result, res){
           assert(!error);
           assert(res.statusCode === 404);
 
@@ -332,7 +332,7 @@ describe('DEL /v1/consumers/:id', function() {
 describe('GET /v1/consumers/:id/collections', function() {
   it('should respond with a collection listing', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/1/collections', function(error, results) {
+      tu.get('/v1/consumers/7/collections', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
@@ -350,7 +350,7 @@ describe('GET /v1/consumers/:id/collections', function() {
   });
   it('should paginate', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/1/collections?offset=1&limit=1', function(err, results, res) {
+      tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
         assert(!err);
         var payload = JSON.parse(results);
         assert(!payload.error);
@@ -365,7 +365,7 @@ describe('GET /v1/consumers/:id/collections', function() {
 describe('POST /v1/consumers/:id/collections', function() {
   it('should create a new collection and respond with its ID', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/1/collections', {name:'my third collection'}, function(error, results, res) {
+      tu.post('/v1/consumers/7/collections', {name:'my third collection'}, function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.id);
@@ -375,7 +375,7 @@ describe('POST /v1/consumers/:id/collections', function() {
   });
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/1/collections', {name:null}, function(error, results, res) {
+      tu.post('/v1/consumers/7/collections', {name:null}, function(error, results, res) {
         assert(res.statusCode == 400);
         tu.logout(done);
       });
@@ -386,7 +386,7 @@ describe('POST /v1/consumers/:id/collections', function() {
 describe('GET /v1/consumers/:id/collections/:collectionId', function() {
   it('should respond with a collection product listing', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/1/collections/1', function(error, results, res) {
+      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.length > 0);
@@ -401,12 +401,12 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
 describe('POST /v1/consumers/:id/collections/:collectionId', function() {
   it('should add a product to the collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/1/collections/1', function(error, results, res) {
+      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
         assert(res.statusCode == 200);
         var oldProducts = JSON.parse(results).data;
-        tu.post('/v1/consumers/1/collections/1', { productId:4 }, function(error, results, res) {
+        tu.post('/v1/consumers/7/collections/1', { productId:4 }, function(error, results, res) {
           assert(res.statusCode == 200);
-          tu.get('/v1/consumers/1/collections/1', function(error, results, res) {
+          tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
             assert(oldProducts.length + 1 == newProducts.length);
@@ -418,7 +418,7 @@ describe('POST /v1/consumers/:id/collections/:collectionId', function() {
   });
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/1/collections/1', {productId:null}, function(error, results, res) {
+      tu.post('/v1/consumers/7/collections/1', {productId:null}, function(error, results, res) {
         assert(res.statusCode == 400);
         tu.logout(done);
       });
@@ -429,18 +429,18 @@ describe('POST /v1/consumers/:id/collections/:collectionId', function() {
 describe('DELETE /v1/collections/:collectionId', function() {
   it('should delete a users collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/1/collections', {name:'my foobar collection'}, function(error, results, res) {
+      tu.post('/v1/consumers/7/collections', {name:'my foobar collection'}, function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.id);
         var id = results.data.id;
-        tu.get('/v1/consumers/1/collections', function(error, results, res){
+        tu.get('/v1/consumers/7/collections', function(error, results, res){
           assert(res.statusCode == 200);
           results = JSON.parse(results);
           assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 1);
           tu.del('/v1/collections/' + id, function(error, results, res){
             assert(res.statusCode == 200);
-            tu.get('/v1/consumers/1/collections', function(error, results, res){
+            tu.get('/v1/consumers/7/collections', function(error, results, res){
               assert(res.statusCode == 200);
               results = JSON.parse(results);
               assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 0);
@@ -455,12 +455,12 @@ describe('DELETE /v1/collections/:collectionId', function() {
 
   it('should fail to delete a users collection because of unsufficient permissions', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/1/collections', {name:'my foobar2 collection'}, function(error, results, res) {
+      tu.post('/v1/consumers/7/collections', {name:'my foobar2 collection'}, function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.id);
         var id = results.data.id;
-        tu.get('/v1/consumers/1/collections', function(error, results, res){
+        tu.get('/v1/consumers/7/collections', function(error, results, res){
           assert(res.statusCode == 200);
           results = JSON.parse(results);
           assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'}).length === 1);
@@ -494,12 +494,12 @@ describe('POST /v1/consumers/cardupdate', function() {
         tu.post('/v1/consumers/cardupdate/'+results.data.token, {}, function(error, results, res) {
           assert(res.statusCode == 200);
 
-          tu.get('/v1/consumers/1', function(err, results, res) {
+          tu.get('/v1/consumers/7', function(err, results, res) {
             assert(res.statusCode == 200);
             results = JSON.parse(results);
             assert(results.data.cardId == '999999-ZZZ');
 
-            tu.patch('/v1/consumers/1', { cardId:'123456-ABC' }, function(err, results, res) {
+            tu.patch('/v1/users/7', { cardId:'123456-ABC' }, function(err, results, res) {
               assert(res.statusCode == 200);
               tu.logout(done);
             });

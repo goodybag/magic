@@ -43,9 +43,9 @@ define(function(require){
     , type    : 'UNIQUE'
     , columns : '(id)'
     }
-  , collections_consumerId_idx: {
+  , collections_userId_idx: {
       table   : 'collections'
-    , columns : '("consumerId")'
+    , columns : '("userId")'
     }
   , consumers_userId_idx: {
       table   : 'consumers'
@@ -181,7 +181,7 @@ define(function(require){
   , tapinStations_id_idx: {
       table   : 'tapinStations'
     , type    : 'UNIQUE'
-    , columns : '(id)'
+    , columns : '("userId")'
     }
   , users_id_idx: {
       table   : 'users'

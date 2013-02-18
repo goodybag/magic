@@ -41,9 +41,9 @@ module.exports.list = function(req, res){
       query.where.and('"productId" = $productId');
       query.$('productId', req.param('productId'));
     }
-    if (req.param('consumerId')) {
-      query.where.and('"consumerId" = $consumerId');
-      query.$('consumerId', req.param('consumerId'));
+    if (req.param('userId')) {
+      query.where.and('"userId" = $userId');
+      query.$('userId', req.param('userId'));
     }
 
     client.query(query.toString(), query.$values, function(error, dataResult){
@@ -104,8 +104,6 @@ module.exports.create = function(req, res){
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
-      if (error)
-        console.log(query.toString(), query.$values, error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       logger.db.debug(TAGS, result);

@@ -26,7 +26,7 @@ exports.owner = function(req, cb) {
     if (error) return cb(null);
 
     var query = managers.select(
-      managers.id
+      managers.userId
     ).where(
       managers.userId.equals(req.session.user.id)
     ).toQuery();
@@ -35,7 +35,7 @@ exports.owner = function(req, cb) {
       if (error) return cb(null);
 
       if (result.rows.length === 0) return cb(null);
-      if (result.rows[0].id != userId) return cb(null);
+      if (result.rows[0].userId != userId) return cb(null);
 
       cb('owner');
     });

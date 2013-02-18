@@ -34,7 +34,7 @@ item:
     type: item
     path: /tapin-stations/:id
     params:
-      id: { type: int, eg: 1 }
+      id: { type: int, eg: 11130 }
   methods:
     get:
       desc: Get Tapin Station

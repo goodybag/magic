@@ -10,14 +10,14 @@ describe('POST /v1/redemptions', function() {
 
   it('should update the consumer stats and create a redemption', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:2, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:2, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
 
-            tu.get('/v1/consumers/5/loyalty/' + 1, function(err, payload, res) {
+            tu.get('/v1/consumers/11/loyalty/' + 1, function(err, payload, res) {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
@@ -35,7 +35,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow the redemption if the consumer is only partially registered', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:2, consumerId:14, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:2, userId:20, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 412);
         payload = JSON.parse(payload);
@@ -48,14 +48,14 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow a redemption or update punches if the consumer is short on punches', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:1, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:1, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
 
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
 
-            tu.get('/v1/consumers/5/loyalty/' + 1, function(err, payload, res) {
+            tu.get('/v1/consumers/11/loyalty/' + 1, function(err, payload, res) {
               assert(res.statusCode == 200);
 
               payload = JSON.parse(payload);
@@ -79,7 +79,7 @@ describe('POST /v1/redemptions', function() {
 
         tu.logout(function() {
           tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-            tu.post('/v1/redemptions', { deltaPunches:2, consumerId:6, tapinStationId:4 }, function(err, payload, res) {
+            tu.post('/v1/redemptions', { deltaPunches:2, userId:12, tapinStationId:11133 }, function(err, payload, res) {
               assert(!err);
               assert(res.statusCode == 200);
 
@@ -107,7 +107,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should respond to an invalid payload with errors', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:'asdf', consumerId:'asdf', tapinStationId:'asdf' }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:'asdf', userId:'asdf', tapinStationId:'asdf' }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 400);
         tu.logout(done);
@@ -123,7 +123,7 @@ describe('POST /v1/redemptions', function() {
         tu.logout(function() {
 
           tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
-            tu.post('/v1/redemptions', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+            tu.post('/v1/redemptions', { deltaPunches:8, userId:11, tapinStationId:11133 }, function(err, payload, res) {
               assert(res.statusCode == 200);
               tu.logout(function() {
 
@@ -150,7 +150,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow cashiers of another business to authorize', function(done) {
     tu.login({ email:'cashier_redeem3@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:100, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:100, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
         tu.logout(done);
@@ -160,7 +160,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow cashiers of another location to authorize', function(done) {
     tu.login({ email:'cashier_redeem2@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:100, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:100, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
         tu.logout(done);
@@ -170,7 +170,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow managers of another business to authorize', function(done) {
     tu.login({ email:'manager_redeem3@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:100, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:100, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
         tu.logout(done);
@@ -180,7 +180,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should not allow managers of another location to authorize', function(done) {
     tu.login({ email:'manager_redeem2@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:100, consumerId:5, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:100, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 403);
         tu.logout(done);
@@ -190,7 +190,7 @@ describe('POST /v1/redemptions', function() {
 
   it('should allow business owners to make changes via tapin auth', function(done) {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-MA1', { deltaPunches:8, consumerId:5, tapinStationId:4 }, function(error, results, res) {
+      tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-MA1', { deltaPunches:8, userId:11, tapinStationId:11133 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(done);

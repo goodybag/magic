@@ -3,7 +3,7 @@ var all = [
 , 'businessId'
 , 'productId'
 , 'productName'
-, 'consumerId'
+, 'userId'
 , 'url'
 , 'notes'
 , 'lat'
@@ -14,7 +14,7 @@ var all = [
 
 module.exports = {
   world: {
-    read:   ['id', 'businessId', 'productId', 'productName', 'consumerId', 'url']
+    read:   ['id', 'businessId', 'productId', 'productName', 'userId', 'url']
   , create: []
   , update: []
   }
@@ -22,7 +22,7 @@ module.exports = {
 , default: {}
 
 , consumer: {
-    create: ['businessId', 'productId', 'productName', 'consumerId', 'url', 'notes', 'lat', 'lon']
+    create: ['businessId', 'productId', 'productName', 'userId', 'url', 'notes', 'lat', 'lon']
   }
 
 , owner: {

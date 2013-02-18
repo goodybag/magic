@@ -1,7 +1,7 @@
 var all = [
   'id'
 , 'businessId'
-, 'consumerId'
+, 'userId'
 , 'cashierUserId'
 , 'locationId'
 , 'tapinStationId'
@@ -26,7 +26,7 @@ module.exports = {
     read:   [
       'id'
     , 'businessId'
-    , 'consumerId'
+    , 'userId'
     , 'locationId'
     , 'isElite'
     , 'numPunches'

@@ -4,13 +4,13 @@
  *
  * @param  object   client
  * @param  object   tx            Transaction
- * @param  int      consumerId
+ * @param  int      userId
  * @param  int      businessId
  * @param  int      deltaPunches
  * @param  function cb            Called with (error, hasEarnedReward, numRewards, hasEarnedElite, dateEliteEarned)
  * @return undefined
  */
-module.exports.updateUserLoyaltyStats = function(client, tx, consumerId, businessId, deltaPunches, cb) {
+module.exports.updateUserLoyaltyStats = function(client, tx, userId, businessId, deltaPunches, cb) {
 
   // run stats upsert
   db.upsert(client,
@@ -18,15 +18,15 @@ module.exports.updateUserLoyaltyStats = function(client, tx, consumerId, busines
       'SET',
         '"numPunches"   = "numPunches"   + $3,',
         '"totalPunches" = "totalPunches" + $3',
-      'WHERE "consumerId"=$1 AND "businessId"=$2 RETURNING id, "numPunches", "totalPunches", "isElite", "numRewards"'
+      'WHERE "userId"=$1 AND "businessId"=$2 RETURNING id, "numPunches", "totalPunches", "isElite", "numRewards"'
     ].join(' '),
-    [consumerId, businessId, deltaPunches],
+    [userId, businessId, deltaPunches],
     ['INSERT INTO "userLoyaltyStats"',
-      '("consumerId", "businessId", "numPunches", "totalPunches", "numRewards", "visitCount", "lastVisit", "isElite")',
+      '("userId", "businessId", "numPunches", "totalPunches", "numRewards", "visitCount", "lastVisit", "isElite")',
       'SELECT $1, $2, $3, $3, 0, 0, now(), false WHERE NOT EXISTS',
-        '(SELECT 1 FROM "userLoyaltyStats" WHERE "consumerId"=$1 AND "businessId"=$2) RETURNING id, "numPunches", "totalPunches", "isElite", "numRewards"'
+        '(SELECT 1 FROM "userLoyaltyStats" WHERE "userId"=$1 AND "businessId"=$2) RETURNING id, "numPunches", "totalPunches", "isElite", "numRewards"'
     ].join(' '),
-    [consumerId, businessId, deltaPunches],
+    [userId, businessId, deltaPunches],
     tx, // provide a transaction
     function(error, result) {
       if (error) return cb(error);
@@ -39,11 +39,11 @@ module.exports.updateUserLoyaltyStats = function(client, tx, consumerId, busines
 
           var query = sql.query([
             'UPDATE "userLoyaltyStats" SET {updates}',
-              'WHERE "consumerId"=$consumerId AND "businessId"=$businessId',
+              'WHERE "userId"=$userId AND "businessId"=$businessId',
               'RETURNING "numRewards", "dateBecameElite"'
           ]);
           query.updates = sql.fields();
-          query.$('consumerId', consumerId);
+          query.$('userId', userId);
           query.$('businessId', businessId);
 
           var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite && !uls.isElite);
@@ -82,7 +82,7 @@ module.exports.updateUserLoyaltyStats = function(client, tx, consumerId, busines
  *
  * @param  object   client
  * @param  object   tx            Transaction
- * @param  int      consumerId
+ * @param  int      userId
  * @param  int      businessId
  * @param  int      deltaPunches
  * @param  function cb            Called with (error, hasEarnedReward, numRewards, hasEarnedElite, dateEliteEarned)
@@ -96,7 +96,7 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
       '"numPunches"   = "numPunches"   + $2,',
       '"totalPunches" = "totalPunches" + $2',
     'WHERE id=$1',
-    'RETURNING id, "consumerId", "businessId", "numPunches", "totalPunches", "isElite", "numRewards"'
+    'RETURNING id, "userId", "businessId", "numPunches", "totalPunches", "isElite", "numRewards"'
     ].join(' ');
 
   // run stats upsert
@@ -111,11 +111,11 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
 
         var query = sql.query([
           'UPDATE "userLoyaltyStats" SET {updates}',
-            'WHERE "consumerId"=$consumerId AND "businessId"=$businessId',
+            'WHERE "userId"=$userId AND "businessId"=$businessId',
             'RETURNING "numRewards", "dateBecameElite"'
         ]);
         query.updates = sql.fields();
-        query.$('consumerId', uls.consumerId);
+        query.$('userId', uls.userId);
         query.$('businessId', uls.businessId);
 
         var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite && !uls.isElite);

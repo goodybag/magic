@@ -873,11 +873,12 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 });
 
 describe('POST /v1/products/:id/feelings', function(done) {
-  it('should tapin-auth a new user and update their feelings and return firstTapin, consumerId', function(){
+  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(){
     // someone forgot to logout D:
     tu.logout(function(){
       tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
         assert(!error);
+        
         tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
           assert(!error);
           assert(res.statusCode == 200);
@@ -885,7 +886,6 @@ describe('POST /v1/products/:id/feelings', function(done) {
           assert(!payload.error);
           assert(payload.meta);
           assert(payload.meta.isFirstTapin);
-          assert(payload.meta.consumerId);
 
           tu.logout(done);
         });

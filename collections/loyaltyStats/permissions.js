@@ -1,6 +1,6 @@
 var all = [
   'id'
-, 'consumerId'
+, 'userId'
 , 'businessId'
 , 'businessName'
 , 'locationId'
@@ -32,7 +32,7 @@ module.exports = {
 , consumer: {
     read:   [
       'id'
-    , 'consumerId'
+    , 'userId'
     , 'businessId'
     , 'businessName'
     , 'numPunches'

@@ -30,26 +30,20 @@ module.exports = function(req, res, next){
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
   if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
+
   // override the res.json to restore the tapin user after the response is sent
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
-
       output.meta.isFirstTapin = true;
-
-      if (req.session.user.groupIds && req.session.user.groupIds.consumer)
-        output.meta.consumerId = req.session.user.groupIds.consumer;
     }
-
     req.session.user = tapinStationUser;
-
     origjsonFn.apply(res, arguments);
   };
 
   res.end = function(){
     req.session.user = tapinStationUser;
-
     origendFn.apply(res, arguments);
   };
 
@@ -67,19 +61,12 @@ module.exports = function(req, res, next){
   , lookupUser: function() {
       var query = [
         'SELECT users.id, users.email, users."singlyId", users."singlyAccessToken",',
-            'consumers.id as "consumerId",',
             'array_agg(groups.name) as groups',
           'FROM users',
             'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
             'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
-            'LEFT JOIN consumers ON consumers."userId" = users.id',
-            'LEFT JOIN managers ON managers."userId" = users.id',
-            'LEFT JOIN cashiers ON cashiers."userId" = users.id',
-          'WHERE',
-            'cashiers."cardId" = $1',
-            'OR managers."cardId" = $1',
-            'OR consumers."cardId" = $1',
-          'GROUP BY users.id, consumers.id'
+          'WHERE users."cardId" = $1',
+          'GROUP BY users.id'
       ].join(' ');
       client.query(query, [cardId], function(error, result){
         if (error) return stage.dbError(error);
@@ -96,14 +83,13 @@ module.exports = function(req, res, next){
       var query = [
         'WITH',
           '"user" AS',
-            '(INSERT INTO users (email, password) VALUES (null, null) RETURNING id),',
+            '(INSERT INTO users (email, password, "cardId") VALUES (null, null, $1) RETURNING id),',
           '"userGroup" AS',
             '(INSERT INTO "usersGroups" ("userId", "groupId")',
               'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
           '"consumer" AS',
-            '(INSERT INTO consumers ("userId", "cardId")',
-              'SELECT "user".id, $1 FROM "user" RETURNING id)', // $1=cardId
-        'SELECT "user".id as id, "consumer".id as "consumerId" FROM "user", "consumer"'
+            '(INSERT INTO consumers ("userId") SELECT "user".id FROM "user")',
+        'SELECT "user".id as id FROM "user"'
       ].join(' ');
       client.query(query, [cardId], function(error, result) {
         if (error) return stage.dbError(error);
@@ -118,7 +104,7 @@ module.exports = function(req, res, next){
   , insertTapin: function(user) {
       var query = [
         'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime")',
-          'SELECT $1, "tapinStations".id, $2, now() FROM "tapinStations"',
+          'SELECT $1, "tapinStations"."userId", $2, now() FROM "tapinStations"',
             'WHERE "tapinStations"."userId" = $3',
           'RETURNING id'
       ].join(' ');
@@ -131,17 +117,17 @@ module.exports = function(req, res, next){
     }
 
   , insertVisit: function(user, tapinId) {
-      if (!user.consumerId) return stage.end(user);
+      if (user.groups.indexOf('consumer') === -1) return stage.end(user);
 
       // only inserts if no visit occured in the last 3 hours
       var query = [
-        'INSERT INTO visits ("tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime")',
+        'INSERT INTO visits ("tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime")',
           'WITH "lastVisit" AS (',
             'SELECT "dateTime" FROM visits',
-              'WHERE visits."consumerId" = $2',
+              'WHERE visits."userId" = $2',
               'ORDER BY visits.id DESC',
             ')',
-          'SELECT $1, "businessId", "locationId", id, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
+          'SELECT $1, "businessId", "locationId", $3, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
             'LEFT JOIN "lastVisit" ON true',
             'WHERE "userId" = $3',
             'AND (',
@@ -150,14 +136,14 @@ module.exports = function(req, res, next){
             ')',
           'RETURNING id, "businessId", "locationId", "isFirstVisit"'
       ].join(' ');
-      client.query(query, [tapinId, user.consumerId, tapinStationUser.id], function(error, result) {
+      client.query(query, [tapinId, user.id, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
 
         // No visit
         if (result.rows.length === 0) return stage.end(user);
 
         var visit = result.rows[0];
-        magic.emit('consumers.visit', user.consumerId, visit.id, visit.businessId, visit.locationId, visit.isFirstVisit);
+        magic.emit('consumers.visit', user.id, visit.id, visit.businessId, visit.locationId, visit.isFirstVisit);
         stage.end(user);
       });
     }

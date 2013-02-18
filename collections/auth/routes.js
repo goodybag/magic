@@ -151,34 +151,34 @@ module.exports.oauthAuthenticate = function(req, res){
       });
     }
 
-  , createOrUpdateUser: function(consumer){
+  , createOrUpdateUser: function(user){
       db.getClient(TAGS[0], function(error, client){
         if (error) return stage.dbError(error);
 
         var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
-        query.$('token', consumer.singlyAccessToken);
-        query.$('id', consumer.singlyId);
+        query.$('token', user.singlyAccessToken);
+        query.$('id', user.singlyId);
 
         client.query(query.toString(), query.$values, function(error, result){
           if (error) return stage.dbError(error);
 
-          if (result.rowCount === 0) return stage.createUser(consumer);
+          if (result.rowCount === 0) return stage.createUser(user);
           return stage.setSessionAndSend({
             id: result.rows[0].id
-          , singlyId: consumer.singlyId
-          , singlyAccessToken: consumer.singlyAccessToken
+          , singlyId: user.singlyId
+          , singlyAccessToken: user.singlyAccessToken
           });
         });
       });
     }
 
-  , createUser: function(consumer){
+  , createUser: function(user){
       var url = config.baseUrl;
       if (url.indexOf(':') === -1) url += ":" + config.http.port;
 
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        utils.post(url + '/v1/consumers', consumer, function(error, response, result){
+        utils.post(url + '/v1/consumers', user, function(error, response, result){
           // Really shouldn't happen
           // TODO: send an actual error
           if (error) return stage.singlyError(error);
@@ -186,9 +186,9 @@ module.exports.oauthAuthenticate = function(req, res){
           // No need to log - already logged from the post
           if (result.error) return res.error(result.error);
 
-          consumer.id = result.data.userId;
+          user.id = result.data.userId;
 
-          return stage.lookupUsersGroups(consumer);
+          return stage.lookupUsersGroups(user);
         });
       }else{
         res.error(errors.auth.INVALID_GROUP);

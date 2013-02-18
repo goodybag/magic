@@ -48,12 +48,12 @@ describe('GET /v1/cashiers', function() {
 describe('GET /v1/cashiers/:id', function() {
   it('should respond with a cashier', function(done) {
     tu.loginAsAdmin(function(){
-      tu.get('/v1/cashiers/1', function(error, results) {
+      tu.get('/v1/cashiers/11120', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
 
         assert(!results.error);
-        assert(results.data.cashierId === 1);
+        assert(results.data.userId === 11120);
 
         tu.logout(done);
       });
@@ -100,7 +100,7 @@ describe('POST /v1/cashiers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.cashierId >= 0);
+        assert(results.data.userId >= 0);
 
         tu.logout(done);
       });
@@ -157,12 +157,12 @@ describe('PATCH /v1/cashiers/:id', function() {
       locationId: 4
     };
     tu.loginAsAdmin(function(error){
-      tu.patch('/v1/cashiers/1', cashier, function(error, results, res) {
+      tu.patch('/v1/cashiers/11120', cashier, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.get('/v1/cashiers/1', function(error, results) {
+        tu.get('/v1/cashiers/11120', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
           assert(!results.error);
@@ -180,7 +180,7 @@ describe('PATCH /v1/cashiers/:id', function() {
       firstName: "Terd"
     };
     tu.loginAsConsumer(function() {
-      tu.patch('/v1/cashiers/7', cashier, function(error, results, res) {
+      tu.patch('/v1/cashiers/11120', cashier, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -213,7 +213,7 @@ describe('PATCH /v1/cashiers/:id', function() {
 });
 
 describe('DEL /v1/cashiers/:id', function() {
-  var id = 3; // Dumb cashier not used for anything
+  var id = 11122; // Dumb cashier not used for anything
   it('should delete a single cashier whose userId is ' + id, function(done) {
     tu.loginAsAdmin(function(error, cashier){
       tu.del('/v1/cashiers/' + id, function(error, results, res) {
@@ -228,7 +228,7 @@ describe('DEL /v1/cashiers/:id', function() {
 
   it('should fail to delete a single cashier because of lack of permissions', function(done) {
     tu.loginAsConsumer(function(error, cashier){
-      tu.del('/v1/cashiers/1', function(error, results, res) {
+      tu.del('/v1/cashiers/11120', function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);

@@ -13,8 +13,8 @@ exports.owner = function(req, cb) {
   if (!req.session || !req.session.user) return cb(null);
 
   var userId = req.param('userId');
-  if (userId === 'session') return cb('owner');
-  if (userId === req.session.user.id) return cb('owner');
+  if (userId == 'session') return cb('owner');
+  if (userId == req.session.user.id) return cb('owner');
   cb(null);
 };
 

@@ -20,7 +20,7 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', 'id'] };
+          var options = { fields: ['"screenName"', '"userId"'] };
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -45,7 +45,7 @@ module.exports = {
             db.api.activity.insert({
               type:       'like'
             , date:       'now()'
-            , consumerId: results.consumer.id
+            , userId:     userId
             , businessId: results.product.businessId
 
             , data: JSON.stringify({
@@ -76,7 +76,7 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', 'id'] };
+          var options = { fields: ['"screenName"', '"userId"'] };
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -101,7 +101,7 @@ module.exports = {
             db.api.activity.insert({
               type:       'want'
             , date:       'now()'
-            , consumerId: results.consumer.id
+            , userId:     userId
             , businessId: results.product.businessId
 
             , data: JSON.stringify({
@@ -132,7 +132,7 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', 'id'] };
+          var options = { fields: ['"screenName"', '"userId"'] };
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -157,7 +157,7 @@ module.exports = {
             db.api.activity.insert({
               type:       'try'
             , date:       'now()'
-            , consumerId: results.consumer.id
+            , userId:     userId
             , businessId: results.product.businessId
 
             , data: JSON.stringify({
@@ -182,7 +182,7 @@ module.exports = {
   }
 
 , 'consumers.becameElite':
-  function (consumerId, businessId, locationId){
+  function (userId, businessId, locationId){
     var
       stage = {
         start: function(){
@@ -193,7 +193,7 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
-              db.api.consumers.findOne(consumerId, options, function(e, r, m){
+              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -216,7 +216,7 @@ module.exports = {
           var data = {
             type:       'becameElite'
           , date:       'now()'
-          , consumerId: consumerId
+          , userId:     userId
           , businessId: businessId
           , locationId: locationId
 
@@ -246,7 +246,7 @@ module.exports = {
   }
 
 , 'consumers.visit':
-  function (consumerId, visitId, businessId, locationId, isFirstVisit){
+  function (userId, visitId, businessId, locationId, isFirstVisit){
     var
       stage = {
         start: function(){
@@ -257,7 +257,7 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
-              db.api.consumers.findOne(consumerId, options, function(e, r, m){
+              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -280,7 +280,7 @@ module.exports = {
           var data = {
             type:       'donation'
           , date:       'now()'
-          , consumerId: consumerId
+          , userId:     userId
           , businessId: businessId
           , locationId: locationId
 
@@ -312,7 +312,7 @@ module.exports = {
   }
 
 , 'loyalty.punch':
-  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+  function (deltaPunches, userId, businessId, locationId, employeeId){
     var
       stage = {
         start: function(){
@@ -323,7 +323,7 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
-              db.api.consumers.findOne(consumerId, options, function(e, r, m){
+              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -346,7 +346,7 @@ module.exports = {
           var data = {
             type:       'punch'
           , date:       'now()'
-          , consumerId: consumerId
+          , userId:     userId
           , businessId: businessId
           , locationId: locationId
 
@@ -378,7 +378,7 @@ module.exports = {
   }
 
 , 'loyalty.redemption':
-  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+  function (deltaPunches, userId, businessId, locationId, employeeId){
     var
       stage = {
         start: function(){
@@ -389,7 +389,7 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
-              db.api.consumers.findOne(consumerId, options, function(e, r, m){
+              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -423,7 +423,7 @@ module.exports = {
           var data = {
             type:       'redemption'
           , date:       'now()'
-          , consumerId: consumerId
+          , userId:     userId
           , businessId: businessId
           , locationId: locationId
 

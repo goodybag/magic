@@ -62,7 +62,7 @@ module.exports.list = function(req, res){
   if (req.param('locationId')) query.locationId = req.param('locationId');
 
   db.api.activity.find(query, options, function(error, results, meta){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     results = results.map(function(r){
       try {

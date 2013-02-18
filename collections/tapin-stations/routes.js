@@ -32,11 +32,10 @@ module.exports.get = function(req, res){
     var query = sql.query([
       'SELECT {fields} FROM users',
         'LEFT JOIN "tapinStations" ON "tapinStations"."userId" = users.id',
-        'WHERE "tapinStations".id = $id'
+        'WHERE users.id = $id'
     ]);
     query.fields = sql.fields().add('users.*');
     query.fields.add('"tapinStations".*');
-    query.fields.add('"tapinStations".id as "tapinStationId"');
 
     query.$('id', +req.param('id') || 0);
 
@@ -73,7 +72,6 @@ module.exports.list = function(req, res){
     ]);
     query.fields = sql.fields().add('users.*');
     query.fields.add('"tapinStations".*');
-    query.fields.add('"tapinStations".id as "tapinStationId"');
 
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
@@ -119,8 +117,8 @@ module.exports.create = function(req, res){
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'tapin-station\' RETURNING id),',
         '"station" AS',
           '(INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
-            'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user" RETURNING id)',
-      'SELECT "user".id as "userId", "station".id as "tapinStationId" FROM "user", "station"'
+            'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user")',
+      'SELECT "user".id as "userId" FROM "user"'
     ]);
     if (req.body.email) {
       query.uidField = 'email';
@@ -168,11 +166,7 @@ module.exports.del = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'DELETE FROM users USING "tapinStations"',
-        'WHERE users.id = "tapinStations"."userId"',
-        'AND "tapinStations".id = $id'
-    ]);
+    var query = sql.query('DELETE FROM users WHERE users.id = $id');
     query.$('id', +req.params.id || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -196,7 +190,7 @@ module.exports.update = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE "tapinStations" SET {updates} WHERE id=$id');
+    var query = sql.query('UPDATE "tapinStations" SET {updates} WHERE "userId"=$id');
     query.updates = sql.fields().addUpdateMap(req.body, query);
     query.$('id', req.params.id);
 
@@ -231,9 +225,7 @@ module.exports.createHeartbeat = function(req, res){
   db.getClient(TAGS[0], function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id',
-    ]);
+    var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE "userId" = $id');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){

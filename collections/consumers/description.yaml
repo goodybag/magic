@@ -28,7 +28,7 @@ item:
     type: item
     path: /consumers/:id
     params:
-      id: { type: int, eg: 1 }
+      id: { type: int, eg: 7 }
   methods:
     get:
       desc: Get Consumer
@@ -42,7 +42,6 @@ item:
         password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }
-        cardId:          { type: cardid, eg: 123456-ABC }
         screenName:      { type: string, eg: jdoe }
     delete:
       desc: Delete Consumer
@@ -78,7 +77,7 @@ collectionsCollection:
     type: collection
     path: /consumers/:userId/collections
     params:
-      consumerId: { type: int, eg: 1 }
+      userId:     { type: int, eg: 7 }
   methods:
     get:
       desc: List Consumer Collections
@@ -98,7 +97,7 @@ collectionsItem:
     type: item
     path: /consumers/:userId/collections/:collectionId
     params:
-      consumerId:   { type: int, eg: 3 }
+      userId:       { type: int, eg: 9 }
       collectionId: { type: int, eg: 3 }
   methods:
     get:

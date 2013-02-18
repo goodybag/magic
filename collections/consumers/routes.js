@@ -34,7 +34,7 @@ module.exports.get = function(req, res){
     var query = sql.query([
       'SELECT {fields} FROM users',
         'LEFT JOIN "consumers" ON "consumers"."userId" = users.id',
-        'WHERE consumers.id = $id'
+        'WHERE users.id = $id'
     ]);
     query.fields = sql.fields().add("users.*, consumers.*");
     query.$('id', +req.param('userId') || 0);
@@ -107,16 +107,16 @@ module.exports.create = function(req, res){
     var query = sql.query([
       'WITH',
         '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
+          '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId',
             'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
             'RETURNING *),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
         '"consumer" AS',
-          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
-            'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
-      'SELECT "user".id, "user".id as "userId" FROM "user", "consumer"'
+          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName")',
+            'SELECT "user".id, $firstName, $lastName, $screenName FROM "user")',
+      'SELECT "user".id as "userId" FROM "user"'
     ]);
     if (req.body.email) {
       query.uidField = 'email';
@@ -186,11 +186,7 @@ module.exports.del = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'DELETE FROM users USING consumers',
-        'WHERE users.id = consumers."userId"',
-        'AND consumers."userId" = $id'
-    ]);
+    var query = sql.query('DELETE FROM users WHERE users.id = $id');
     query.$('id', +req.params.userId || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -212,30 +208,19 @@ module.exports.del = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-consumer', req.uuid];
 
-  var getConsumerRecord = function(callback){
-    if (!req.session || !req.session.user)
-      return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
+  if (!req.session || !req.session.user)
+    return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
 
-    var query = {};
+  var query = { userId:req.param('userId') };
+  if (req.param('userId') == 'session')
+    query.userId = req.session.user.id;
 
-    // Either way, we'll need to get the userId
-    // Depending on how they're requesting this
-    if (req.param('userId') && req.param('userId') != 'session')
-      query.userId = req.param('userId');
-    else
-      query.userId = req.session.user.id;
+  db.api.consumers.findOne(query, { fields: ['"userId"'] }, function(error, consumer){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    db.api.consumers.findOne(query, { fields: ['"userId"'] }, function(error, consumer){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (!consumer || !consumer.userId)
+      return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-      if (!consumer || !consumer.id)
-        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
-
-      return callback(consumer);
-    });
-  };
-
-  getConsumerRecord(function(consumer){
     db.getClient(TAGS[0], function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -257,7 +242,7 @@ module.exports.update = function(req, res){
 
           if (!updateConsumer) return callback();
 
-          var query = sql.query('UPDATE consumers SET {updates} WHERE userId=$id');
+          var query = sql.query('UPDATE consumers SET {updates} WHERE "userId"=$id');
           query.updates = sql.fields().addUpdateMap(data, query);
           query.$('id', consumer.userId);
 
@@ -366,7 +351,7 @@ module.exports.listCollections = function(req, res){
         'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
         'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
         '{feelingsJoin}',
-        'WHERE "userId" = $userId',
+        'WHERE collections."userId" = $userId',
         'GROUP BY collections.id {limit}'
     ]);
     query.fields = sql.fields()
@@ -493,12 +478,11 @@ module.exports.createCardupdate = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // :TODO: update this to just pull from users once the cardId move into users is merged into this branch
-    var query = 'SELECT users.id as "userId", consumers."cardId" FROM users INNER JOIN consumers ON consumers."userId" = users.id AND users.email = $1';
+    var query = 'SELECT users.id, users."cardId" FROM users WHERE users.email = $1';
     client.query(query, [email], function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      var userId = result.rows[0].userId;
+      var userId = result.rows[0].id;
       var oldCardId  = result.rows[0].cardId;
 
       var token = require("randomstring").generate();
@@ -548,7 +532,7 @@ module.exports.updateCard = function(req, res){
       var targetConsumerId = result.rows[0].userId;
       var newCardId = result.rows[0].newCardId;
 
-      client.query('UPDATE consumers SET "cardId"=$1 WHERE id=$2', [newCardId, targetConsumerId], function(error, result) {
+      client.query('UPDATE users SET "cardId"=$1 WHERE id = $2', [newCardId, targetConsumerId], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         res.json({ err:null, data:null });

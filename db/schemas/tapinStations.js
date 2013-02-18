@@ -10,13 +10,9 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function(require){
   var tapinStations = {
-    id: {
-      type: 'serial'
-    , meta: 'primary key'
-    }
-  , userId: {
+    userId: {
       type: 'int'
-    , meta: 'references users on delete cascade'
+    , meta: 'primary key references users on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {

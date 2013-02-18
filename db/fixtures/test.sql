@@ -69,35 +69,35 @@ INSERT INTO "users" (id, email, password) VALUES ('3', 'tablet@goodybag.com', 'a
 INSERT INTO "users" (id, email, password) VALUES ('4', 'client@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('5', 'consumer@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('6', 'dumb@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11', 'consumer_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('12', 'consumer_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('16', 'consumer5@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('17', 'consumer6@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('18', 'consumer7@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('19', null, null);
-INSERT INTO "users" (id, email, password) VALUES ('20', 'not_registered@gmail.com', null);
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('7', 'tferguson@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABC');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('8', 'somebody_else@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('9', 'consumer2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('10', 'consumer3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11', 'consumer_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '723457-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('12', 'consumer_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-ABD');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-YYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-YYZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('15', 'consumer4@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-CO4');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('16', 'consumer5@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBA');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('17', 'consumer6@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBB');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('18', 'consumer7@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '778899-CBC');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('19', null, null, '432123-AAA');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('20', 'not_registered@gmail.com', null, '432123-AAB');
 
-INSERT INTO "users" (id, email, password) VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11112', 'manager_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11113', 'manager_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11114', 'manager_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11115', 'manager_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11116', 'manager_of_biz_without_loyalty@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11110', 'some_manager@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXX');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11111', 'some_manager2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11112', 'manager_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11113', 'manager_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-MA1');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11114', 'manager_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11115', 'manager_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11116', 'manager_of_biz_without_loyalty@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XXY');
 
-INSERT INTO "users" (id, email, password) VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11122', 'cashier_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11123', 'cashier_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11124', 'cashier_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
-INSERT INTO "users" (id, email, password) VALUES ('11125', 'cashier_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11120', 'some_cashier@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYX');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11121', 'some_cashier2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYZ');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11122', 'cashier_getting_deleted@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', null);
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11123', 'cashier_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11124', 'cashier_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
 
 INSERT INTO "users" (id, email, password) VALUES ('11130', 'tapin_station_0@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11131', 'tapin_station_1@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -110,83 +110,79 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 -- CONSUMERS
 
 BEGIN;
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('1', '7', 'Turd', 'Ferguson', 'tferguson', '123456-ABC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('2', '8', 'Somebody', 'Else', 'some_guy', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('3', '9', 'Consumer', 'Two', 'consumer2', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('4', '10', 'Consumer', 'Three', 'consumer3', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('5', '11', 'Consumer', 'Redeem1', 'consumer_redeem1', '723457-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('6', '12', 'Consumer', 'Redeem2', 'consumer_redeem2', '123456-ABD');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('7', '13', 'Getting', 'Deleted', 'getting_deleted', '123456-YYY');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('8', '14', 'Getting', 'Deleted2', 'getting_deleted2', '123456-YYZ');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('9', '15', 'Consumer', 'Four', 'consumer4', '123456-CO4');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('10', '16', 'Consumer', 'Five', 'consumer5', '778899-CBA');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('11', '17', 'Consumer', 'Six', 'consumer6', '778899-CBB');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('12', '18', 'Consumer', 'Six', 'consumer6', '778899-CBC');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('13', '19', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAA');
-INSERT INTO "consumers" (id, "userId", "firstName", "lastName", "screenName", "cardId") VALUES ('14', '20', 'Unregistered', 'Consumer', 'unregistered_consumer', '432123-AAB');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('7', 'Turd', 'Ferguson', 'tferguson');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('8', 'Somebody', 'Else', 'some_guy');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('9', 'Consumer', 'Two', 'consumer2');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('10', 'Consumer', 'Three', 'consumer3');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('11', 'Consumer', 'Redeem1', 'consumer_redeem1');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('12', 'Consumer', 'Redeem2', 'consumer_redeem2');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('13', 'Getting', 'Deleted', 'getting_deleted');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('14', 'Getting', 'Deleted2', 'getting_deleted2');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('15', 'Consumer', 'Four', 'consumer4');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('16', 'Consumer', 'Five', 'consumer5');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('17', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('18', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('19', 'Unregistered', 'Consumer', 'unregistered_consumer');
+INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
 COMMIT;
-SELECT setval('consumers_id_seq', (SELECT MAX(id) from "consumers")); -- advance the sequence past the IDs just used
 
 -- MANAGERS
 
 BEGIN;
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11110', '1', '1', '123456-XXX');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11111', '1', '1', '123456-XXZ');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11112', '1', '1', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11113', '1', '1', '123456-MA1');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11114', '1', '4', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11115', '2', '2', '123456-XXY');
-INSERT INTO "managers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('7', '11116', '4', '2', '123456-XXY');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11110', '1', '1');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11111', '1', '1');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11112', '1', '1');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11113', '1', '1');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11114', '1', '4');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11115', '2', '2');
+INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11116', '4', '2');
 COMMIT;
-SELECT setval('managers_id_seq', (SELECT MAX(id) from "managers")); -- advance the sequence past the IDs just used
 
 -- CASHIERS
 
 BEGIN;
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('1', '11120', '1', '1', '123456-XYX');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('2', '11121', '1', '1', '123456-XYZ');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('3', '11122', '1', '1', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('4', '11123', '1', '1', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('5', '11124', '1', '4', '123456-XYY');
-INSERT INTO "cashiers" (id, "userId", "businessId", "locationId", "cardId") VALUES ('6', '11125', '2', '2', '123456-XYY');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11120', '1', '1');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11121', '1', '1');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11122', '1', '1');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11123', '1', '1');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11124', '1', '4');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11125', '2', '2');
 COMMIT;
-SELECT setval('cashiers_id_seq', (SELECT MAX(id) from "cashiers")); -- advance the sequence past the IDs just used
 
 -- TAPINSTATIONS
 
 BEGIN;
-INSERT INTO "tapinStations" (id, "userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('1', '11130', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" (id, "userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('2', '11131', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" (id, "userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('3', '11132', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" (id, "userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('4', '11133', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11130', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11131', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11132', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11133', '1', '1', 'true', 'true');
 COMMIT;
-SELECT setval('"tapinStations_id_seq"', (SELECT MAX(id) from "tapinStations")); -- advance the sequence past the IDs just used
 
 -- TAPINS
 
 BEGIN;
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('1', '1', '1', '12345-ABC', now());
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('2', '1', '1', '12345-ABC', now() - '2 days'::interval);
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('3', '1', '1', '12345-ABC', now() - '2 weeks'::interval);
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('4', '1', '1', '12345-ABC', now() - '2 months'::interval);
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('5', '2', '1', '12346-ABC', now());
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('6', '2', '1', '12346-ABC', now() - '2 days'::interval);
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('7', '2', '1', '12346-ABC', now() - '2 weeks'::interval);
-INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('8', '2', '1', '12346-ABC', now() - '2 months'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('1', '1', '11130', '12345-ABC', now());
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('2', '1', '11130', '12345-ABC', now() - '2 days'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('3', '1', '11130', '12345-ABC', now() - '2 weeks'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('4', '1', '11130', '12345-ABC', now() - '2 months'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('5', '2', '11130', '12346-ABC', now());
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('6', '2', '11130', '12346-ABC', now() - '2 days'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('7', '2', '11130', '12346-ABC', now() - '2 weeks'::interval);
+INSERT INTO "tapins" (id, "userId", "tapinStationId", "cardId", "dateTime") VALUES ('8', '2', '11130', '12346-ABC', now() - '2 months'::interval);
 COMMIT;
 SELECT setval('"tapins_id_seq"', (SELECT MAX(id) from "tapins")); -- advance the sequence past the IDs just used
 
 -- VISITS
 
 BEGIN;
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (1, 1, 1, 1, 1, 1, false, now());
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (2, 2, 1, 1, 1, 1, false, now() - '2 days'::interval);
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (3, 3, 1, 1, 1, 1, false, now() - '2 weeks'::interval);
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (4, 4, 1, 1, 1, 1, true, now() - '2 months'::interval);
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (5, 5, 1, 1, 2, 2, false, now());
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (6, 6, 1, 1, 2, 2, false, now() - '2 days'::interval);
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (7, 7, 1, 1, 2, 2, false, now() - '2 weeks'::interval);
-INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "consumerId", "isFirstVisit", "dateTime") VALUES (8, 8, 1, 1, 2, 2, true, now() - '2 months'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (1, 1, 1, 1, 11130, 7, false, now());
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (2, 2, 1, 1, 11130, 7, false, now() - '2 days'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (3, 3, 1, 1, 11130, 7, false, now() - '2 weeks'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (4, 4, 1, 1, 11130, 7, true, now() - '2 months'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (5, 5, 1, 1, 11131, 8, false, now());
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (6, 6, 1, 1, 11131, 8, false, now() - '2 days'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (7, 7, 1, 1, 11131, 8, false, now() - '2 weeks'::interval);
+INSERT INTO "visits" (id, "tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime") VALUES (8, 8, 1, 1, 11131, 8, true, now() - '2 months'::interval);
 COMMIT;
 SELECT setval('"visits_id_seq"', (SELECT MAX(id) from "visits")); -- advance the sequence past the IDs just used
 
@@ -254,13 +250,13 @@ SELECT setval('"usersGroups_id_seq"', (SELECT MAX(id) from "usersGroups")); -- a
 -- USER LOYALTY STATS
 
 BEGIN;
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (1,  3, 1, 5, 23, 40, 0, false, now(), null);
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (2,  5, 1, 2, 10, 10, 1, false, now(), null);
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (3,  6, 1, 0,  4, 20, 1,  true, now(), now());
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (4,  9, 1, 5, 23, 40, 0, false, now(), null);
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (5, 10, 1, 5, 23, 40, 0, false, now(), null);
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (6, 11, 1, 5, 23, 40, 0, false, now(), null);
-INSERT INTO "userLoyaltyStats" (id, "consumerId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (7, 13, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (1,  9, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (2, 11, 1, 2, 10, 10, 1, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (3, 12, 1, 0,  4, 20, 1,  true, now(), now());
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (4, 15, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (5, 16, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (6, 17, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (7, 19, 1, 5, 23, 40, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
@@ -389,8 +385,8 @@ SELECT setval('"productTries_id_seq"', (SELECT MAX(id) from "productTries")); --
 -- PHOTOS
 
 BEGIN;
-INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled", "createdAt") VALUES ('1', '1', '1', 9, 'http://placekitten.com/200/300', true, NOW());
-INSERT INTO "photos" (id, "businessId", "productId", "consumerId", url, "isEnabled") VALUES ('2', '1', null, 4, 'http://placekitten.com/200/300', true);
+INSERT INTO "photos" (id, "businessId", "productId", "userId", url, "isEnabled", "createdAt") VALUES ('1', '1', '1', 15, 'http://placekitten.com/200/300', true, NOW());
+INSERT INTO "photos" (id, "businessId", "productId", "userId", url, "isEnabled")              VALUES ('2', '1', null, 10, 'http://placekitten.com/200/300', true);
 INSERT INTO "photos" (id, "businessId", "productId", url, "isEnabled") VALUES ('3', '3', '3', 'http://placekitten.com/200/300', true);
 COMMIT;
 SELECT setval('photos_id_seq', (SELECT MAX(id) from "photos")); -- advance the sequence past the IDs just used
@@ -436,9 +432,9 @@ SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProd
 -- COLLECTIONS
 
 BEGIN;
-INSERT INTO collections (id, "consumerId", "name") VALUES (1, 1, 'my first collection');
-INSERT INTO collections (id, "consumerId", "name") VALUES (2, 1, 'my second collection');
-INSERT INTO collections (id, "consumerId", "name") VALUES (3, 3, 'my third collection');
+INSERT INTO collections (id, "userId", "name") VALUES (1, 7, 'my first collection');
+INSERT INTO collections (id, "userId", "name") VALUES (2, 7, 'my second collection');
+INSERT INTO collections (id, "userId", "name") VALUES (3, 9, 'my third collection');
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
@@ -456,22 +452,22 @@ SELECT setval('"productsCollections_id_seq"', (SELECT MAX(id) from "productsColl
 -- EVENTS
 
 BEGIN;
-INSERT INTO events (id, type, date, data) VALUES (1, 'loyalty.punch', NOW(), '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (2, 'loyalty.punch', NOW() - '2 days'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (3, 'loyalty.punch', NOW() - '2 weeks'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (4, 'loyalty.punch', NOW() - '2 months'::interval, '"deltaPunches"=>"3", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (5, 'loyalty.redemption', NOW(), '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (6, 'loyalty.redemption', NOW() - '2 days'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (7, 'loyalty.redemption', NOW() - '2 weeks'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (8, 'loyalty.redemption', NOW() - '2 months'::interval, '"deltaPunches"=>"1", "consumerId"=>"1", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (9, 'consumers.visit', NOW(), '"consumerId"=>"1", "visitId"=>"1", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
-INSERT INTO events (id, type, date, data) VALUES (10, 'consumers.visit', NOW() - '2 days'::interval, '"consumerId"=>"1", "visitId"=>"2", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
-INSERT INTO events (id, type, date, data) VALUES (11, 'consumers.visit', NOW() - '2 weeks'::interval, '"consumerId"=>"1", "visitId"=>"3", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
-INSERT INTO events (id, type, date, data) VALUES (12, 'consumers.visit', NOW() - '2 months'::interval, '"consumerId"=>"1", "visitId"=>"4", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"true"');
-INSERT INTO events (id, type, date, data) VALUES (13, 'consumers.tapin', NOW(), '"userId"=>"1", "tapinStationId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (14, 'consumers.tapin', NOW() - '2 days'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (15, 'consumers.tapin', NOW() - '2 weeks'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
-INSERT INTO events (id, type, date, data) VALUES (16, 'consumers.tapin', NOW() - '2 months'::interval, '"userId"=>"1", "tapinStationId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (1, 'loyalty.punch', NOW(), '"deltaPunches"=>"3", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (2, 'loyalty.punch', NOW() - '2 days'::interval, '"deltaPunches"=>"3", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (3, 'loyalty.punch', NOW() - '2 weeks'::interval, '"deltaPunches"=>"3", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (4, 'loyalty.punch', NOW() - '2 months'::interval, '"deltaPunches"=>"3", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (5, 'loyalty.redemption', NOW(), '"deltaPunches"=>"1", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (6, 'loyalty.redemption', NOW() - '2 days'::interval, '"deltaPunches"=>"1", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (7, 'loyalty.redemption', NOW() - '2 weeks'::interval, '"deltaPunches"=>"1", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (8, 'loyalty.redemption', NOW() - '2 months'::interval, '"deltaPunches"=>"1", "userId"=>"7", "businessId"=>"1", "locationId"=>"1", "employeeId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (9, 'consumers.visit', NOW(), '"userId"=>"7", "visitId"=>"1", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (10, 'consumers.visit', NOW() - '2 days'::interval, '"userId"=>"7", "visitId"=>"2", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (11, 'consumers.visit', NOW() - '2 weeks'::interval, '"userId"=>"7", "visitId"=>"3", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"false"');
+INSERT INTO events (id, type, date, data) VALUES (12, 'consumers.visit', NOW() - '2 months'::interval, '"userId"=>"7", "visitId"=>"4", "businessId"=>"1", "locationId"=>"1", "isFirstVisit"=>"true"');
+INSERT INTO events (id, type, date, data) VALUES (13, 'consumers.tapin', NOW(), '"userId"=>"1", "tapinStationId"=>"11130"');
+INSERT INTO events (id, type, date, data) VALUES (14, 'consumers.tapin', NOW() - '2 days'::interval, '"userId"=>"1", "tapinStationId"=>"11130"');
+INSERT INTO events (id, type, date, data) VALUES (15, 'consumers.tapin', NOW() - '2 weeks'::interval, '"userId"=>"1", "tapinStationId"=>"11130"');
+INSERT INTO events (id, type, date, data) VALUES (16, 'consumers.tapin', NOW() - '2 months'::interval, '"userId"=>"1", "tapinStationId"=>"11130"');
 INSERT INTO events (id, type, date, data) VALUES (17, 'consumers.becameElite', NOW(), '"userId"=>"1", "businessId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (18, 'consumers.becameElite', NOW() - '2 days'::interval, '"userId"=>"2", "businessId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (19, 'consumers.becameElite', NOW() - '2 weeks'::interval, '"userId"=>"3", "businessId"=>"1"');
@@ -482,7 +478,7 @@ SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the
 -- ACTIVITIY
 
 BEGIN;
-INSERT INTO activity (id, "consumerId", "businessId", "locationId", type, date, data) VALUES (1, 1, 1, 1, 'foobar', now(), '{"foo":"bar"}');
+INSERT INTO activity (id, "userId", "businessId", "locationId", type, date, data) VALUES (1, 7, 1, 1, 'foobar', now(), '{"foo":"bar"}');
 COMMIT;
 SELECT setval('activity_id_seq', (SELECT MAX(id) from "activity")); -- advance the sequence past the IDs just used
 

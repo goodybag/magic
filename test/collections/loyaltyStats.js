@@ -59,7 +59,7 @@ describe('GET /v1/loyalty', function() {
 
   it('should give isRegistered false if no email or singly token', function(done) {
     tu.loginAsAdmin(function() {
-      tu.get('/v1/consumers/13/loyalty', function(err, payload, res) {
+      tu.get('/v1/consumers/19/loyalty', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(payload.data[0].isRegistered === false);
@@ -86,7 +86,6 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
         assert(payload.data.totalPunches == 0);
 
         assert(payload.meta.isFirstTapin == true);
-        assert(payload.meta.consumerId);
 
         tu.logout(done);
       });
@@ -119,7 +118,7 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
         payload = JSON.parse(payload);
         assert(!payload.error);
 
-        assert(payload.data.consumerId == 10);
+        assert(payload.data.userId == 16);
         assert(payload.data.businessId == 1);
         assert(payload.data.numPunches == 5);
         assert(payload.data.totalPunches == 23);
@@ -170,10 +169,10 @@ describe('PUT /v1/loyalty/:loyaltyId', function() {
 
   it('should update the consumers stats', function(done){
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function(error, user) {
-      tu.put('/v1/loyalty/2', { deltaPunches:0, locationId:1 }, function(err, payload, res) {
+      tu.put('/v1/loyalty/8', { deltaPunches:1, locationId:1 }, function(err, payload, res) {
         payload = JSON.parse(payload);
         assert(res.statusCode == 200);
-        tu.get('/v1/loyalty/2', function(err, payload, res) {
+        tu.get('/v1/loyalty/8', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(!payload.error);
@@ -188,12 +187,12 @@ describe('PUT /v1/loyalty/:loyaltyId', function() {
 
 });
 
-describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
+describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
 
   it('should update the consumer stats and make them elite', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      var consumerId = 9, businessId = 1;
-      tu.put('/v1/consumers/' + consumerId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
+      var userId = 15, businessId = 1;
+      tu.put('/v1/consumers/' + userId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
@@ -215,9 +214,9 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   });
 
   it('should create the consumer stats if DNE', function(done) {
-    var consumerId = 4, businessId = 1;
+    var userId = 10, businessId = 1;
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.put('/v1/consumers/' + consumerId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
+      tu.put('/v1/consumers/' + userId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
@@ -237,9 +236,9 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   });
 
   it('should respond to an invalid payload with errors', function(done) {
-    var consumerId = 9, businessId = 1;
+    var userId = 15, businessId = 1;
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.put('/v1/consumers/' + consumerId + '/loyalty/' + businessId, { deltaPunches:'asdf' }, function(err, payload, res) {
+      tu.put('/v1/consumers/' + userId + '/loyalty/' + businessId, { deltaPunches:'asdf' }, function(err, payload, res) {
         assert(res.statusCode == 400);
         tu.logout(done);
       });
@@ -247,9 +246,9 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   });
 
   it('should allow business managers to make changes via tapin auth', function(done) {
-    var consumerId = 9, businessId = 1;
+    var userId = 15, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-XXX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XXX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(function() {
@@ -270,9 +269,9 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   });
 
   it('should allow business cashiers to make changes via tapin auth', function(done) {
-    var consumerId = 9, businessId = 1;
+    var userId = 15, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-XYX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XYX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 200);
         tu.logout(function() {
@@ -293,9 +292,9 @@ describe('PUT /v1/consumers/:consumerId/loyalty/:businessId', function() {
   });
 
   it('should not allow consumers to make changes via tapin auth', function(done) {
-    var consumerId = 9, businessId = 1;
+    var userId = 15, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-CO4', { deltaPunches:5, locationId:1 }, function(error, results, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-CO4', { deltaPunches:5, locationId:1 }, function(error, results, res) {
         assert(res.statusCode === 403);
         tu.logout(done);
       });
