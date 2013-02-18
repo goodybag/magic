@@ -98,6 +98,7 @@ INSERT INTO "users" (id, email, password, "cardId") VALUES ('11122', 'cashier_ge
 INSERT INTO "users" (id, email, password, "cardId") VALUES ('11123', 'cashier_redeem1@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
 INSERT INTO "users" (id, email, password, "cardId") VALUES ('11124', 'cashier_redeem2@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
 INSERT INTO "users" (id, email, password, "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
+INSERT INTO "users" (id, email, password, "cardId") VALUES ('11126', 'cashier_at_deleted_location@gmail.com', 'a960b9a5748e9207f8c0e18fdbbc5b79', '123456-XYY');
 
 INSERT INTO "users" (id, email, password) VALUES ('11130', 'tapin_station_0@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
 INSERT INTO "users" (id, email, password) VALUES ('11131', 'tapin_station_1@goodybag.com', 'a960b9a5748e9207f8c0e18fdbbc5b79');
@@ -147,6 +148,7 @@ INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11122', '
 INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11123', '1', '1');
 INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11124', '1', '4');
 INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11125', '2', '2');
+INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11126', '1', '5');
 COMMIT;
 
 -- TAPINSTATIONS

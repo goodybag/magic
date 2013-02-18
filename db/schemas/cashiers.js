@@ -17,12 +17,12 @@ define(function(require){
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
+    , meta: 'references businesses(id) on delete set null'
     , validators: { isInt:[] }
     }
   , locationId: {
       type: 'int'
-    , meta: 'references locations'
+    , meta: 'references locations(id) on delete set null'
     , validators: { isInt:[] }
     }
   };

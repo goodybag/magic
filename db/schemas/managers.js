@@ -12,17 +12,17 @@ define(function(require){
   var consumers = {
     userId: {
       type: 'int'
-    , meta: 'primary key references users on delete cascade'
+    , meta: 'primary key references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
+    , meta: 'references businesses(id) on delete set null'
     , validators: { isInt:[] }
     }
   , locationId: {
       type: 'int'
-    , meta: 'references locations'
+    , meta: 'references locations(id) on delete set null'
     , validators: { isInt:[] }
     }
   };
