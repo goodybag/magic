@@ -138,7 +138,7 @@ module.exports.list = function(req, res){
 
             // If this is a tapin-auth, we know this is actually a visit
             // Not TOTALLY accurate but mostly and will get updated eventually
-          , visitCount:       req.header('authorization').indexOf('Tapin') > -1 ? 1 : 0
+          , visitCount:       (req.header('authorization') || []).indexOf('Tapin') > -1 ? 1 : 0
 
           , lastVisit:        'now()'
           , isElite:          false

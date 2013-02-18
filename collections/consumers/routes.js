@@ -104,77 +104,14 @@ module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
   logger.routes.debug(TAGS, 'creating consumer ' + req.params.consumerId);
 
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  db.procedures.registerConsumer(req.body, function(error, consumer){
+    if (error) return res.error(error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'WITH',
-        '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
-            'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-            'RETURNING *),',
-        '"userGroup" AS',
-          '(INSERT INTO "usersGroups" ("userId", "groupId")',
-            'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-        '"consumer" AS',
-          '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "cardId", "screenName")',
-            'SELECT "user".id, $firstName, $lastName, $cardId, $screenName FROM "user" RETURNING id)',
-      'SELECT "user".id as "userId", "consumer".id as "consumerId" FROM "user", "consumer"'
-    ]);
-    if (req.body.email) {
-      query.uidField = 'email';
-      query.upassField = 'password';
-      query.$('uid', req.body.email);
-      query.$('upass', utils.encryptPassword(req.body.password));
-    } else {
-      query.uidField = '"singlyId"';
-      query.upassField = '"singlyAccessToken"';
-      query.$('uid', req.body.singlyId);
-      query.$('upass', req.body.singlyAccessToken);
-    }
-    query.$('firstName', req.body.firstName);
-    query.$('lastName', req.body.lastName);
-    query.$('cardId', req.body.cardId || '');
-    query.$('screenName', req.body.screenName);
+    // Log the user in
+    req.session.user = consumer;
+    res.json({ error: null, data: consumer });
 
-    client.query(query.toString(), query.$values, function(error, result) {
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      // did the insert occur?
-      if (result.rowCount === 0) {
-        // email must have already existed
-        if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-        // Access token already existed - for now, send back generic error
-        // Because they should have used POST /oauth to create/auth
-        return res.error(errors.internal.DB_FAILURE);
-      }
-
-      req.body.consumerId = result.rows[0].consumerId;
-      req.body.userId = result.rows[0].userId;
-
-      if (req.body.email) {
-        var emailHtml = templates.email.complete_registration({
-          url:'http://loljk.com',
-        });
-        utils.sendMail(req.body.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
-          console.log('email cb', err, result);
-        }*/);
-      }
-
-      // Log the user in
-      req.session.user = {
-        id: req.body.userId
-      , email: req.body.email
-      , singlyAccessToken: req.body.singlyAccessToken
-      , singlyId: req.body.singlyId
-      , groups: [5]
-      };
-
-      res.json({ error: null, data: result.rows[0] });
-
-      magic.emit('consumers.registered', req.body);
-    });
+    magic.emit('consumers.registered', consumer);
   });
 };
 
@@ -239,74 +176,34 @@ module.exports.update = function(req, res){
     });
   };
 
-  getConsumerRecord(function(consumer){
-    db.getClient(TAGS[0], function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  db.procedures.ensureNotTaken(req.body, function(error){
+    if (error) return res.error(error), logger.routes.error(TAGS, error);
 
-      var tx = new Transaction(client);
-
-      tx.begin(function(error){
+    getConsumerRecord(function(consumer){
+      db.getClient(TAGS[0], function(error, client){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        var updateConsumerRecord = function(callback){
-          var updateConsumer = false, data = {};
+        var tx = new Transaction(client);
 
-          // Determine if we even need to update the consumer record
-          for (var i = db.fields.consumers.plain.length - 1; i >= 0; i--){
-            if (db.fields.consumers.plain[i] in req.body){
-              updateConsumer = true;
-              data[db.fields.consumers.plain[i]] = req.body[db.fields.consumers.plain[i]];
+        tx.begin(function(error){
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+          var updateConsumerRecord = function(callback){
+            var updateConsumer = false, data = {};
+
+            // Determine if we even need to update the consumer record
+            for (var i = db.fields.consumers.plain.length - 1; i >= 0; i--){
+              if (db.fields.consumers.plain[i] in req.body){
+                updateConsumer = true;
+                data[db.fields.consumers.plain[i]] = req.body[db.fields.consumers.plain[i]];
+              }
             }
-          }
 
-          if (!updateConsumer) return callback();
+            if (!updateConsumer) return callback();
 
-          var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
-          query.updates = sql.fields().addUpdateMap(data, query);
-          query.$('id', consumer.id);
-
-          logger.db.debug(TAGS, query.toString());
-
-          // run update query
-          tx.query(query.toString(), query.$values, function(error, result){
-            if (error) return callback(error);
-            logger.db.debug(TAGS, result);
-
-            // did the update occur?
-            if (result.rowCount === 0)
-              return callback(errors.input.NOT_FOUND);
-
-            callback();
-          });
-        };
-
-        var updateUserRecord = function(callback){
-          var updateUser = false, data = {};
-
-          // Determine if we even need to update the user record
-          for (var i = db.fields.users.plain.length - 1; i >= 0; i--){
-            if (db.fields.users.plain[i] in req.body){
-              updateUser = true;
-              data[db.fields.users.plain[i]] = req.body[db.fields.users.plain[i]];
-            }
-          }
-
-          if (!updateUser) return callback();
-
-          var encryptPassword = function(cb){
-            if (!req.body.password) return cb();
-
-            utils.encryptPassword(req.body.password, function(error, encrypted){
-              data.password = encrypted;
-              cb();
-            });
-          };
-
-          encryptPassword(function(){
-            var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
-
+            var query = sql.query('UPDATE consumers SET {updates} WHERE id=$id');
             query.updates = sql.fields().addUpdateMap(data, query);
-            query.$('id', consumer.userId);
+            query.$('id', consumer.id);
 
             logger.db.debug(TAGS, query.toString());
 
@@ -319,30 +216,74 @@ module.exports.update = function(req, res){
               if (result.rowCount === 0)
                 return callback(errors.input.NOT_FOUND);
 
-              return callback();;
+              callback();
             });
-          });
-        };
+          };
 
-        utils.parallel({
-          consumer: updateConsumerRecord
-        , user:     updateUserRecord
-        }, function(error, results){
-          if (error){
-            tx.abort();
-            if (error.name === "DB_FAILURE"){
-              res.error(errors.internal.DB_FAILURE, error)
-            } else {
-              res.error(error);
+          var updateUserRecord = function(callback){
+            var updateUser = false, data = {};
+
+            // Determine if we even need to update the user record
+            for (var i = db.fields.users.plain.length - 1; i >= 0; i--){
+              if (db.fields.users.plain[i] in req.body){
+                updateUser = true;
+                data[db.fields.users.plain[i]] = req.body[db.fields.users.plain[i]];
+              }
             }
 
-            return logger.routes.error(TAGS, error);
-          }
+            if (!updateUser) return callback();
 
-          tx.commit(function(error){
-            if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+            var encryptPassword = function(cb){
+              if (!req.body.password) return cb();
 
-            res.json({ error: null, data: null });
+              utils.encryptPassword(req.body.password, function(error, encrypted){
+                data.password = encrypted;
+                cb();
+              });
+            };
+
+            encryptPassword(function(){
+              var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
+
+              query.updates = sql.fields().addUpdateMap(data, query);
+              query.$('id', consumer.userId);
+
+              logger.db.debug(TAGS, query.toString());
+
+              // run update query
+              tx.query(query.toString(), query.$values, function(error, result){
+                if (error) return callback(error);
+                logger.db.debug(TAGS, result);
+
+                // did the update occur?
+                if (result.rowCount === 0)
+                  return callback(errors.input.NOT_FOUND);
+
+                return callback();;
+              });
+            });
+          };
+
+          utils.parallel({
+            consumer: updateConsumerRecord
+          , user:     updateUserRecord
+          }, function(error, results){
+            if (error){
+              tx.abort();
+              if (error.name === "DB_FAILURE"){
+                res.error(errors.internal.DB_FAILURE, error)
+              } else {
+                res.error(error);
+              }
+
+              return logger.routes.error(TAGS, error);
+            }
+
+            tx.commit(function(error){
+              if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+              res.json({ error: null, data: null });
+            });
           });
         });
       });

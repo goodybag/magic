@@ -79,7 +79,7 @@ describe('POST /v1/consumers', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.consumerId >= 0);
+      assert(results.data.groupIds.consumers >= 0);
       tu.get('/v1/session', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
@@ -109,6 +109,25 @@ describe('POST /v1/consumers', function() {
     })
   });
 
+  it('should fail if consumer screen name is in use', function(done){
+    var consumer = {
+      email:      "sljflkasdklfaklsdjf@goodybag.com"
+    , password:   "password"
+    , firstName:  "Test"
+    , lastName:   "McTesterson"
+    , screenName: "testies"
+    , cardId:     "787564-ZZZ"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode === 400);
+      results = JSON.parse(results);
+      assert(results.error.name == 'SCREENNAME_TAKEN');
+      done();
+    })
+  });
+
   it('should fail because of an invalid cardId', function(done){
     var consumer = {
       email:      "consumer1234@goodybag.com"
@@ -132,6 +151,32 @@ describe('POST /v1/consumers', function() {
     var consumer = {
       password:   "password"
     };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(res.statusCode === 400);
+      assert(results.error.name == 'VALIDATION_FAILED');
+      done();
+    })
+  });
+
+  it('should fail if there is a required field missing', function(done){
+    var consumer = {
+      email:   "email@gmail.com"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(res.statusCode === 400);
+      assert(results.error.name == 'VALIDATION_FAILED');
+      done();
+    })
+  });
+
+  it('should fail if there is a required field missing', function(done){
+    var consumer = { firstName: "johnasdfasdfasdf" };
 
     tu.post('/v1/consumers', consumer, function(error, results, res){
       assert(!error);
@@ -227,6 +272,23 @@ describe('PUT /v1/consumers/:id', function() {
       tu.patch('/v1/consumers/500000', consumer, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 404);
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
+  });
+
+  it('should respond 400 if a unique constraint is violated', function(done){
+    var consumer = {
+      email: "tferguson@gmail.com"
+    };
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/consumers/500000', consumer, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 400);
+        results = JSON.parse(results);
+        assert(results.error.name === "EMAIL_REGISTERED");
         tu.logout(function() {
           done();
         });
@@ -483,7 +545,7 @@ describe('DELETE /v1/collections/:collectionId', function() {
 
 
 describe('POST /v1/consumers/cardupdate', function() {
-  it('should allow the user to reset their password', function(done) {
+  it('should get a token on cardUpdate and then update the cardId with the token', function(done) {
     tu.loginAsAdmin(function(error){
 
       tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
