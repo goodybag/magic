@@ -10,13 +10,9 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function(require){
   var consumers = {
-    id: {
-      type: 'serial'
-    , meta: 'primary key'
-    }
-  , userId: {
+    userId: {
       type: 'int'
-    , meta: 'references users on delete cascade'
+    , meta: 'primary key references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {
@@ -28,11 +24,6 @@ define(function(require){
       type: 'int'
     , meta: 'references locations'
     , validators: { isInt:[] }
-    }
-  , cardId: {
-      type: 'text'
-    , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
-    , sanitizers: { trim:[] }
     }
   };
   return consumers;

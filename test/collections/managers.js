@@ -48,12 +48,12 @@ describe('GET /v1/managers', function() {
 describe('GET /v1/managers/:id', function() {
   it('should respond with a manager', function(done) {
     tu.loginAsAdmin(function(){
-      tu.get('/v1/managers/1', function(error, results) {
+      tu.get('/v1/managers/11110', function(error, results) {
         assert(!error);
         results = JSON.parse(results);
 
         assert(!results.error);
-        assert(results.data.managerId === 1);
+        assert(results.data.userId === 11110);
 
         tu.logout(done);
       });
@@ -100,7 +100,7 @@ describe('POST /v1/managers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.managerId >= 0);
+        assert(results.data.userId >= 0);
 
         tu.logout(done);
       });
@@ -157,12 +157,12 @@ describe('PATCH /v1/managers/:id', function() {
       locationId: 4
     };
     tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
-      tu.patch('/v1/managers/1', manager, function(error, results, res) {
+      tu.patch('/v1/managers/11110', manager, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.get('/v1/managers/1', function(error, results) {
+        tu.get('/v1/managers/11110', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
           assert(!results.error);
@@ -180,7 +180,7 @@ describe('PATCH /v1/managers/:id', function() {
       firstName: "Terd"
     };
     tu.loginAsConsumer(function() {
-      tu.patch('/v1/managers/7', manager, function(error, results, res) {
+      tu.patch('/v1/managers/11110', manager, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -213,7 +213,7 @@ describe('PATCH /v1/managers/:id', function() {
 });
 
 describe('DEL /v1/managers/:id', function() {
-  var id = 3; // Dumb manager not used for anything
+  var id = 11112; // Dumb manager not used for anything
   it('should delete a single manager whose userId is ' + id, function(done) {
     tu.loginAsAdmin(function(error, manager){
       tu.del('/v1/managers/' + id, function(error, results, res) {

@@ -18,10 +18,7 @@ exports.owner = function(req, cb) {
     
     var query = sql.query([
       'SELECT 1 FROM photos',
-        'INNER JOIN consumers ON',
-          'consumers.id = photos."consumerId" AND',
-          'consumers."userId" = $userId',
-        'WHERE photos.id = $photoId'
+        'WHERE photos.id = $photoId AND photos."userId" = $userId'
     ]);
     query.$('photoId', req.param('photoId'));
     query.$('userId', userId);

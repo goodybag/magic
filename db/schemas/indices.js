@@ -33,11 +33,6 @@ define(function(require){
       table   : 'businessTags'
     , columns : '("businessId")'
     }
-  , cashiers_id_idx: {
-      table   : 'cashiers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
-    }
   , cashiers_userId_idx: {
       table   : 'cashiers'
     , type    : 'UNIQUE'
@@ -48,14 +43,9 @@ define(function(require){
     , type    : 'UNIQUE'
     , columns : '(id)'
     }
-  , collections_consumerId_idx: {
+  , collections_userId_idx: {
       table   : 'collections'
-    , columns : '("consumerId")'
-    }
-  , consumers_id_idx: {
-      table   : 'consumers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
+    , columns : '("userId")'
     }
   , consumers_userId_idx: {
       table   : 'consumers'
@@ -81,11 +71,6 @@ define(function(require){
       table   : 'locations'
     , using   : 'gist'
     , columns : '(ll_to_earth(lat, lon))'
-    }
-  , managers_id_idx: {
-      table   : 'managers'
-    , type    : 'UNIQUE'
-    , columns : '(id)'
     }
   , managers_userId_idx: {
       table   : 'managers'
@@ -196,7 +181,7 @@ define(function(require){
   , tapinStations_id_idx: {
       table   : 'tapinStations'
     , type    : 'UNIQUE'
-    , columns : '(id)'
+    , columns : '("userId")'
     }
   , users_id_idx: {
       table   : 'users'

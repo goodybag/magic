@@ -31,12 +31,12 @@ define(function(require){
     }
   , tapinStationId: {
       type: 'int'
-    , meta: 'references "tapinStations"(id) on delete cascade'
+    , meta: 'references "tapinStations"("userId") on delete cascade'
     , validators: { isInt:[] }
     }
-  , consumerId: {
+  , userId: {
       type: 'int'
-    , meta: 'references consumers(id) on delete set null'
+    , meta: 'references users(id) on delete set null'
     , validators: { isInt:[] }
     }
   , isFirstVisit: {

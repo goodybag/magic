@@ -20,7 +20,7 @@ describe('Consumers Activity: ', function() {
             assert(!results.error);
             assert(results.data.length > 0);
             assert(results.data.filter(function(d){
-              return d.type === "donation" && d.consumerId === 12;
+              return d.type === "donation" && d.userId === 18;
             }).length === 1);
 
             tu.logout(done);
@@ -35,7 +35,7 @@ describe('Loyalty Activity', function(){
 
   it('store an event when a user becomes elite', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.tapinAuthRequest('PUT', '/v1/consumers/' + 11 + '/loyalty/' + 1, '123456-XYX', {deltaPunches:5,locationId:1}, function(error, results, res) {
+      tu.tapinAuthRequest('PUT', '/v1/consumers/' + 17 + '/loyalty/' + 1, '123456-XYX', {deltaPunches:5,locationId:1}, function(error, results, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
@@ -54,7 +54,7 @@ describe('Loyalty Activity', function(){
                   assert(!results.error);
                   assert(results.data.length > 0);
                   assert(results.data.filter(function(d){
-                    return d.type === "becameElite" && d.consumerId === 11;
+                    return d.type === "becameElite" && d.userId === 17;
                   }).length === 1);
 
                   tu.logout(done);
@@ -69,7 +69,7 @@ describe('Loyalty Activity', function(){
 
   it('store an event when a user earns a punch', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
-      tu.put('/v1/consumers/' + 11 + '/loyalty/' + 1, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
+      tu.put('/v1/consumers/' + 17 + '/loyalty/' + 1, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 200);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
@@ -86,7 +86,7 @@ describe('Loyalty Activity', function(){
                   assert(!results.error);
                   assert(results.data.length > 0);
                   assert(results.data.filter(function(d){
-                    return d.type === "punch" && d.consumerId === 11;
+                    return d.type === "punch" && d.userId === 17;
                   }).length >= 1);
 
                   tu.logout(done);
@@ -101,7 +101,7 @@ describe('Loyalty Activity', function(){
 
   it('store an event when a user redeems a reward', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
-      tu.post('/v1/redemptions', { deltaPunches:2, consumerId:11, tapinStationId:4 }, function(err, payload, res) {
+      tu.post('/v1/redemptions', { deltaPunches:2, userId:17, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
         assert(res.statusCode == 200);
 
@@ -123,7 +123,7 @@ describe('Loyalty Activity', function(){
                   assert(!results.error);
                   assert(results.data.length > 0);
                   assert(results.data.filter(function(d){
-                    return d.type === "redemption" && d.consumerId === 11;
+                    return d.type === "redemption" && d.userId === 17;
                   }).length >= 1);
 
                   tu.logout(done);
@@ -161,7 +161,7 @@ describe('Products Activity: ', function() {
               assert(!results.error);
               assert(results.data.length > 0);
               assert(results.data.filter(function(d){
-                return d.type === "like" && d.data.productId == 2222 && d.consumerId === 11;
+                return d.type === "like" && d.data.productId == 2222 && d.userId === 17;
               }).length === 1);
 
               tu.logout(done);
@@ -194,7 +194,7 @@ describe('Products Activity: ', function() {
               assert(!results.error);
               assert(results.data.length > 0);
               assert(results.data.filter(function(d){
-                return d.type === "want" && d.data.productId == 2222 && d.consumerId === 11;
+                return d.type === "want" && d.data.productId == 2222 && d.userId === 17;
               }).length === 1);
 
               tu.logout(done);
@@ -227,7 +227,7 @@ it('store an event when a user tries a product', function(done) {
               assert(!results.error);
               assert(results.data.length > 0);
               assert(results.data.filter(function(d){
-                return d.type === "try" && d.data.productId == 2222 && d.consumerId === 11;
+                return d.type === "try" && d.data.productId == 2222 && d.userId === 17;
               }).length === 1);
 
               tu.logout(done);

@@ -6,8 +6,8 @@ collection:
     get:
       desc: List Loyalty Stats
       altpaths:
-        - /consumers/:consumerId/loyalty
-        - /consumers/:consumerId/loyalty/:businessId
+        - /consumers/:userId/loyalty
+        - /consumers/:userId/loyalty/:businessId
         - /consumers/businesses/:businessId
       auth:
         required: true
@@ -26,7 +26,7 @@ item:
     put:
       desc: Update Loyalty Stats
       altpaths:
-        - /consumers/:consumerId/loyalty/:businessId
+        - /consumers/:userId/loyalty/:businessId
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }

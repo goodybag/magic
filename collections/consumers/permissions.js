@@ -3,7 +3,7 @@ module.exports = {
     world: {
       read:   [
         'screenName'
-      , 'consumerId'
+      , 'userId'
       ]
     , create: [
         'email'
@@ -30,7 +30,6 @@ module.exports = {
       , 'lastName'
       , 'screenName'
       , 'cardId'
-      , 'consumerId'
       , 'groups'
       , 'groupIds'
       , 'email'
@@ -47,7 +46,7 @@ module.exports = {
       , 'lastName'
       , 'screenName'
       , 'cardId'
-      , 'consumerId'
+      , 'userId'
       ]
     }
 

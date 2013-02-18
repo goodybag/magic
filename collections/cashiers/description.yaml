@@ -33,7 +33,7 @@ item:
     type: item
     path: /cashiers/:id
     params:
-      id: { type: int, eg: 1 }
+      id: { type: int, eg: 11120 }
   methods:
     get:
       desc: Get Cashier
@@ -46,7 +46,6 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        cardId:          { type: cardid, eg: 123456-ABC }
         businessId:      { type: int,    eg: 1 }
         locationId:      { type: int,    eg: 1 }
     delete:

@@ -33,9 +33,9 @@ module.exports.get = function(req, res) {
     var query = sql.query([
       'SELECT {fields} FROM users',
         'LEFT JOIN "cashiers" ON "cashiers"."userId" = users.id',
-        'WHERE cashiers.id = $id'
+        'WHERE users.id = $id'
     ]);
-    query.fields = sql.fields().add('cashiers.id as "cashierId", cashiers.*');
+    query.fields = sql.fields().add('cashiers.*');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -69,7 +69,7 @@ module.exports.list = function(req, res){
         'INNER JOIN users ON cashiers."userId" = users.id',
         '{where} {limit}'
     ]);
-    query.fields = sql.fields().add('cashiers.id as "cashierId", cashiers.*');
+    query.fields = sql.fields().add('cashiers.*');
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 
@@ -106,16 +106,16 @@ module.exports.create = function(req, res){
     var query = sql.query([
       'WITH',
         '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}) SELECT $uid, $upass',
+          '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId',
             'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
             'RETURNING id),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'cashier\' RETURNING id),',
         '"cashier" AS',
-          '(INSERT INTO "cashiers" ("userId", "cardId", "businessId", "locationId")',
-            'SELECT "user".id, $cardId, $businessId, $locationId FROM "user" RETURNING id)',
-      'SELECT "user".id as "userId", "cashier".id as "cashierId" FROM "user", "cashier"'
+          '(INSERT INTO "cashiers" ("userId", "businessId", "locationId")',
+            'SELECT "user".id, $businessId, $locationId FROM "user")',
+      'SELECT "user".id as "userId" FROM "user"'
     ]);
     if (req.body.email) {
       query.uidField = 'email';
@@ -162,11 +162,7 @@ module.exports.del = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'DELETE FROM users USING cashiers',
-        'WHERE users.id = cashiers."userId"',
-        'AND cashiers.id = $id'
-    ]);
+    var query = sql.query('DELETE FROM users WHERE users.id = $id');
     query.$('id', +req.params.id || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -190,7 +186,7 @@ module.exports.update = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE cashiers SET {updates} WHERE id=$id');
+    var query = sql.query('UPDATE cashiers SET {updates} WHERE "userId"=$id');
     query.updates = sql.fields().addUpdateMap(req.body, query);
     query.$('id', req.params.id);
 

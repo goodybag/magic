@@ -18,7 +18,7 @@ exports.manager = function(req, cb) {
   db.getClient('location manager apply groups', function(error, client) {
     if (error) cb(null);
 
-    var query = sql.query('SELECT id FROM managers WHERE "userId" = $userId AND "locationId" = $locationId');
+    var query = sql.query('SELECT "userId" FROM managers WHERE "userId" = $userId AND "locationId" = $locationId');
     query.$('userId', userId);
     query.$('locationId', locationId);
 

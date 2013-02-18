@@ -126,7 +126,7 @@ module.exports.list = function(req, res){
     }
 
     // consumer collection filtering
-    if (req.param('consumerId') && req.param('collectionId')) {
+    if (req.param('collectionId')) {
       query.collectionJoin = [
         'INNER JOIN collections ON',
           'collections.id = $collectionId',

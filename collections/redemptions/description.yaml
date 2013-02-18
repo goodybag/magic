@@ -18,5 +18,5 @@ collection:
         eg: { email: some_cashier2@gmail.com, password: password }
       body:
         deltaPunches:   { type: int, eg: 20 }
-        consumerId:     { type: id,  eg: 1 }
+        userId:         { type: id,  eg: 1 }
         tapinStationId: { type: id,  eg: 2 }

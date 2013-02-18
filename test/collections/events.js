@@ -19,8 +19,8 @@ describe('Consumers Events: ', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.groupIds.consumers >= 0);
-      var consumerId = results.data.groupIds.consumers;
+      assert(results.data.id >= 0);
+      var userId = results.data.id;
 
       tu.loginAsAdmin(function(error){
         // Give server time to propagate events
@@ -31,7 +31,8 @@ describe('Consumers Events: ', function() {
             assert(!results.error);
             assert(results.data.length > 0);
             assert(results.data.filter(function(d){
-              return d.type === "consumers.registered" && d.data.consumerId == consumerId;
+              if (d.type === "consumers.registered") console.log(d)
+              return d.type === "consumers.registered" && d.data.userId == userId;
             }).length === 1);
 
             tu.logout(done);
@@ -68,7 +69,6 @@ describe('Products Events: ', function() {
                   assert(!results.error);
                   assert(results.data.length > 0);
                   assert(results.data.filter(function(d){
-                    // Also need to check the consumerId
                     return d.type === "products.like" && d.data.productId == 3 && d.data.userId == 5;
                   }).length === 1);
 
@@ -85,7 +85,7 @@ describe('Products Events: ', function() {
 
 describe('Loyalty Events: ', function() {
   it('store an event when a when a punch occurs', function(done) {
-    var punch = { deltaPunches: 5 }, businessId = 1, consumerId = 9;
+    var punch = { deltaPunches: 5 }, businessId = 1, userId = 15;
     var stage = {
       start: function(){
         stage.loginAsTapInStation();
@@ -101,7 +101,7 @@ describe('Loyalty Events: ', function() {
       }
 
     , updateLoyaltyStats: function(){
-        tu.tapinAuthRequest('PUT', '/v1/consumers/' + consumerId + '/loyalty/' + businessId, '123456-XYX', punch, function(error, results, res) {
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XYX', punch, function(error, results, res) {
           assert(!error);
           assert(res.statusCode === 200);
 
@@ -127,11 +127,11 @@ describe('Loyalty Events: ', function() {
             assert(!results.error);
             assert(results.data.length > 0);
             assert(results.data.filter(function(d){
-              // Also need to check the consumerId
+              // Also need to check the userId
               return (d.type === "loyalty.punch"
                 && d.data.deltaPunches  == punch.deltaPunches
                 && d.data.businessId    == businessId
-                && d.data.consumerId    == consumerId
+                && d.data.userId        == userId
               );
             }).length >= 1);
 

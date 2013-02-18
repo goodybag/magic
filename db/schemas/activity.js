@@ -14,7 +14,7 @@ define(function(require){
       type: 'serial'
     , meta: 'primary key'
     }
-  , consumerId: {
+  , userId: {
       type: 'int'
     }
   , businessId: {

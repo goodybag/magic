@@ -19,9 +19,9 @@ define(function(require){
     , meta: 'references businesses'
     , validators: { isInt:[] }
     }
-  , consumerId: {
+  , userId: {
       type: 'int'
-    , meta: 'references consumers'
+    , meta: 'references users'
     , validators: { isInt:[] }
     }
   , cashierUserId: {

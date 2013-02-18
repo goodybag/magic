@@ -19,8 +19,8 @@ server.get(
 
 // consumer.activity
 server.get(
-  '/v1/consumers/:consumerId/activity'
-, middleware.profile('GET /v1/consumers/:consumerId/activity')
+  '/v1/consumers/:userId/activity'
+, middleware.profile('GET /v1/consumers/:userId/activity')
 , middleware.profile('list activity handler')
 , routes.list
 );

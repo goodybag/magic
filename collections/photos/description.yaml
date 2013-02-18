@@ -13,7 +13,7 @@ collection:
         limit:      { type: int, eg: 5 }
         businessId: { type: id,  eg: 1 }
         productId:  { type: id,  eg: 1 }
-        consumerId: { type: id,  eg: 1 }
+        userId:     { type: id,  eg: 1 }
     post:
       desc: Add Photo
       auth:
@@ -22,7 +22,7 @@ collection:
       body:
         businessId: { type: id,     eg: 1 }
         productId:  { type: id,     eg: 1 }
-        consumerId: { type: id,     eg: 1 }
+        userId:     { type: id,     eg: 1 }
         url:        { type: url,    eg: http://foobar.com/pic.png }
         notes:      { type: string, eg: Notes about this picture }
         isEnabled:  { type: bool,   eg: true }
@@ -48,7 +48,7 @@ item:
       body:
         businessId: { type: id,     eg: 1 }
         productId:  { type: id,     eg: 1 }
-        consumerId: { type: id,     eg: 1 }
+        userId:     { type: id,     eg: 1 }
         url:        { type: url,    eg: http://foobar.com/pic.png }
         notes:      { type: string, eg: Notes about this picture }
         isEnabled:  { type: bool,   eg: true }

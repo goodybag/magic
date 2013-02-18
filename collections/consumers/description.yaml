@@ -26,7 +26,7 @@ item:
     type: item
     path: /consumers/:id
     params:
-      id: { type: int, eg: 1 }
+      id: { type: int, eg: 7 }
   methods:
     get:
       desc: Get Consumer
@@ -74,9 +74,9 @@ cardUpdatesItem:
 collectionsCollection:
   resource:
     type: collection
-    path: /consumers/:consumerId/collections
+    path: /consumers/:userId/collections
     params:
-      consumerId: { type: int, eg: 1 }
+      userId:     { type: int, eg: 7 }
   methods:
     get:
       desc: List Consumer Collections
@@ -94,9 +94,9 @@ collectionsCollection:
 collectionsItem:
   resource:
     type: item
-    path: /consumers/:consumerId/collections/:collectionId
+    path: /consumers/:userId/collections/:collectionId
     params:
-      consumerId:   { type: int, eg: 3 }
+      userId:       { type: int, eg: 9 }
       collectionId: { type: int, eg: 3 }
   methods:
     get:

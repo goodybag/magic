@@ -41,21 +41,21 @@ var
 module.exports = {
   'consumers.registered':
   function (consumer){
-    insert('consumers.registered', { consumerId: consumer.groupIds.consumers });
+    insert('consumers.registered', { userId: consumer.id });
   }
 
 , 'consumers.becameElite':
-  function (consumerId, businessId, date){
+  function (userId, businessId, date){
     insert('consumers.becameElite', {
-      consumerId: consumerId
+      userId:     userId
     , businessId: businessId
     , date:       date
     });
   }
 
 , 'consumers.visit':
-  function (consumerId, visitId, businessId, locationId, isFirstTime) {
-    insert('consumers.visit', { consumerId: consumerId, visitId:visitId, businessId:businessId, locationId:locationId, isFirstTime:isFirstTime });
+  function (userId, visitId, businessId, locationId, isFirstTime) {
+    insert('consumers.visit', { userId: userId, visitId:visitId, businessId:businessId, locationId:locationId, isFirstTime:isFirstTime });
   }
 
 , 'consumers.tapin':
@@ -103,10 +103,10 @@ module.exports = {
   }
 
 , 'loyalty.punch':
-  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+  function (deltaPunches, userId, businessId, locationId, employeeId){
     insert('loyalty.punch', {
       deltaPunches: deltaPunches
-    , consumerId:   consumerId
+    , userId:       userId
     , businessId:   businessId
     , locationId:   locationId
     , employeeId:   employeeId
@@ -114,10 +114,10 @@ module.exports = {
   }
 
 , 'loyalty.redemption':
-  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+  function (deltaPunches, userId, businessId, locationId, employeeId){
     insert('loyalty.redemption', {
       deltaPunches: deltaPunches
-    , consumerId:   consumerId
+    , userId:       userId
     , businessId:   businessId
     , locationId:   locationId
     , employeeId:   employeeId
@@ -125,10 +125,10 @@ module.exports = {
   }
 
 , 'loyalty.redemption':
-  function (deltaPunches, consumerId, businessId, locationId, employeeId){
+  function (deltaPunches, userId, businessId, locationId, employeeId){
     insert('loyalty.hasEarnedReward', {
       deltaPunches: deltaPunches
-    , consumerId:   consumerId
+    , userId:       userId
     , businessId:   businessId
     , locationId:   locationId
     , employeeId:   employeeId
