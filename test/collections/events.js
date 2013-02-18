@@ -31,7 +31,6 @@ describe('Consumers Events: ', function() {
             assert(!results.error);
             assert(results.data.length > 0);
             assert(results.data.filter(function(d){
-              if (d.type === "consumers.registered") console.log(d)
               return d.type === "consumers.registered" && d.data.userId == userId;
             }).length === 1);
 
