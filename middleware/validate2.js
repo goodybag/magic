@@ -17,7 +17,7 @@ var
       if (!schema[k].type)
         throw "Schema entry "+k+" is missing `type`";
 
-      var v = inputs[k];
+      var v = inputs[k], unless;
 
       // update tracking
       var kIndex = unvalidatedKeys.indexOf(k);
@@ -26,8 +26,17 @@ var
 
       // required validation
       if (typeof v == 'undefined' || v === '' || v === null) {
-        if (schema[k].required)
-          errors[k] = 'Required.';
+        if (schema[k].required){
+          if (typeof schema[k].required === "boolean")
+            errors[k] = 'Required.';
+          else if (typeof schema[k].required === "object"){
+            unless = schema[k].required.unless;
+            if (unless){
+              if (inputs[unless] == 'undefined' || inputs[unless] == '' || inputs[unless] == null)
+                errors[k] = 'Required.';
+            }
+          }
+        }
         continue;
       }
 
@@ -77,7 +86,7 @@ var
             error = 'Can not be an array.';
           else {
             for (j=0; j < v.length; j++) {
-              error = validatorFn(v[j], inputs);
+              error = validatorFn(v[j], inputs, k);
               if (error)
                 break;
             }
@@ -86,7 +95,7 @@ var
           if (mustBeArray)
             error = 'Must be an array.';
           else {
-            error = validatorFn(v, inputs);
+            error = validatorFn(v, inputs, k);
           }
         }
         if (error) {
@@ -107,7 +116,7 @@ var
   }
 , createBodyValidator = function(schema){
     return function(req, res, next){
-      
+
       var errors = validate(schema, req.body);
       if (!_.isEmpty(errors)) { return res.error(require('../lib/errors').input.VALIDATION_FAILED, errors); }
 

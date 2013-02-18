@@ -134,7 +134,6 @@ function testInvalidRequest(methodDoc, corruptKey) {
       if (/int|float|id|cardid|time/.test(type))
         return 'CORRUPTION STRING';
     })(methodDoc.getAttrType(corruptKey)));
-
     request(methodDoc, requestDoc, function(res, result) {
       if (res.statusCode !== 400)
         console.log('Failed chaos invalid-request test ('+corruptKey+')'),

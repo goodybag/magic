@@ -148,7 +148,7 @@ describe('POST /v1/oauth', function(){
       if (results.error) console.log(results.error);
       assert(!results.error);
       assert(results.data.id > 0);
-      assert(results.data.groupIds.consumer > 0);
+      assert(results.data.groupIds.consumers > 0);
       tu.logout(done);
     });
   });
