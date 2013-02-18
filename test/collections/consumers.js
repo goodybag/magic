@@ -499,15 +499,15 @@ describe('DELETE /v1/collections/:collectionId', function() {
         tu.get('/v1/consumers/7/collections', function(error, results, res){
           assert(res.statusCode == 200);
           results = JSON.parse(results);
-          assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 1);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 1);
           tu.del('/v1/collections/' + id, function(error, results, res){
             assert(res.statusCode == 200);
             tu.get('/v1/consumers/7/collections', function(error, results, res){
               assert(res.statusCode == 200);
               results = JSON.parse(results);
-              assert(results.data.filter(function(c){ return c.name === 'my foobar collection'}).length === 0);
+              assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 0);
               tu.logout(done);
-            })
+            });
           });
         });
 
@@ -525,7 +525,7 @@ describe('DELETE /v1/collections/:collectionId', function() {
         tu.get('/v1/consumers/7/collections', function(error, results, res){
           assert(res.statusCode == 200);
           results = JSON.parse(results);
-          assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'}).length === 1);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'; }).length === 1);
           tu.logout(function(){
             tu.login({ email: 'consumer4@gmail.com', password: 'password' }, function(error){
               tu.del('/v1/collections/' + id, function(error, results, res){

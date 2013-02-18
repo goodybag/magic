@@ -57,8 +57,8 @@ module.exports.get = function(req, res) {
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
+  var TAGS = ['list-cashiers', req.uuid];
+  logger.routes.debug(TAGS, 'fetching cashiers ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -106,9 +106,10 @@ module.exports.create = function(req, res){
     var query = sql.query([
       'WITH',
         '"user" AS',
-          '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId',
-            'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-            'RETURNING id),',
+          '(INSERT INTO users (email, password, "singlyId", "singlyAccessToken", "cardId")',
+            'SELECT $email, $password, $singlyId, $singlyAccessToken, $cardId',
+              'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
+              'RETURNING id),',
         '"userGroup" AS',
           '(INSERT INTO "usersGroups" ("userId", "groupId")',
             'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'cashier\' RETURNING id),',
@@ -119,15 +120,16 @@ module.exports.create = function(req, res){
     ]);
     if (req.body.email) {
       query.uidField = 'email';
-      query.upassField = 'password';
       query.$('uid', req.body.email);
-      query.$('upass', utils.encryptPassword(req.body.password));
     } else {
       query.uidField = '"singlyId"';
-      query.upassField = '"singlyAccessToken"';
       query.$('uid', req.body.singlyId);
-      query.$('upass', req.body.singlyAccessToken);
     }
+    var timestamp = +(new Date());
+    query.$('email', req.body.email || 'cashier_'+timestamp+'@goodybag.com');
+    query.$('password', (req.body.password) ? utils.encryptPassword(req.body.password) : null);
+    query.$('singlyId', req.body.singlyId);
+    query.$('singlyAccessToken', req.body.singlyAccessToken);
     query.$('cardId', req.body.cardId || '');
     query.$('businessId', req.body.businessId);
     query.$('locationId', req.body.locationId);
@@ -151,13 +153,13 @@ module.exports.create = function(req, res){
 };
 
 /**
- * Delete user
+ * Delete cashier
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.del = function(req, res){
-  var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
+  var TAGS = ['del-cashier', req.uuid];
+  logger.routes.debug(TAGS, 'deleting cashier ' + req.params.id);
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
