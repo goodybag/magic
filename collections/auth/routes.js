@@ -123,13 +123,12 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getSinglyId: function(accessToken){
-      var data = { access_token: accessToken };
       singly.get('/profiles', data, function(error, result){
         if (error) return stage.singlyError(error);
 
         var user = {
           singlyId: result.body.id
-        , singlyAccessToken: token.access_token
+        , singlyAccessToken: accessToken
         };
 
         // Get facebook data
@@ -140,13 +139,12 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getFacebookData: function(accessToken, user){
-      singly.get('/profiles/facebook', data, function(error, result){
+      singly.get('/profiles/facebook', { access_token: accessToken }, function(error, result){
         if (error) return stage.singlyError(error);
 
         // Auto fill what we can
         user.firstName = result.body.data.first_name;
         user.lastName = result.body.data.last_name;
-
         stage.createOrUpdateUser(user);
       });
     }
