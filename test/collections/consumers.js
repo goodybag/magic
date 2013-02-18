@@ -424,6 +424,36 @@ describe('GET /v1/consumers/:id/collections', function() {
   });
 });
 
+describe('GET /v1/consumers/:id/collections/:collectionId', function() {
+  it('should respond with a collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1', function(error, results) {
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id);
+        assert(results.data.name);
+        assert(results.data.numProducts == 2);
+        assert(results.data.totalMyLikes != 'undefined');
+        assert(results.data.totalMyWants != 'undefined');
+        assert(results.data.totalMyTries != 'undefined');
+        tu.logout(done);
+      });
+    });
+  });
+  it('should paginate', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length === 1);
+        assert(payload.meta.total > 1);
+        done();
+      });
+    });
+  });
+});
+
 describe('POST /v1/consumers/:id/collections', function() {
   it('should create a new collection and respond with its ID', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
@@ -445,10 +475,10 @@ describe('POST /v1/consumers/:id/collections', function() {
   });
 });
 
-describe('GET /v1/consumers/:id/collections/:collectionId', function() {
+describe('GET /v1/consumers/:id/collections/:collectionId/products', function() {
   it('should respond with a collection product listing', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.length > 0);
@@ -463,12 +493,12 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
 describe('POST /v1/consumers/:id/collections/:collectionId', function() {
   it('should add a product to the collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
         assert(res.statusCode == 200);
         var oldProducts = JSON.parse(results).data;
         tu.post('/v1/consumers/7/collections/1', { productId:4 }, function(error, results, res) {
           assert(res.statusCode == 200);
-          tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+          tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
             assert(oldProducts.length + 1 == newProducts.length);

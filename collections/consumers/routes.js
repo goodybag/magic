@@ -362,6 +362,68 @@ module.exports.createCollection = function(req, res){
 };
 
 /**
+ * Get consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getCollection = function(req, res){
+  var TAGS = ['get-consumer-collections', req.uuid];
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId + ' collection ' + req.param('collectionId'));
+
+  var userId = req.param('userId');
+  var collectionId = req.param('collectionId');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    // build data query
+    var query = sql.query([
+      'SELECT {fields} FROM collections',
+        'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
+        'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
+        '{feelingsJoin}',
+        'WHERE collections."userId" = $userId',
+          'AND collections.id = $collectionId',
+        'GROUP BY collections.id {limit}'
+    ]);
+    query.fields = sql.fields()
+      .add("collections.*")
+      .add('COUNT("productsCollections".id) as "numProducts"')
+      .add('MIN(products."photoUrl") as "photoUrl"');
+    query.where  = sql.where();
+    query.limit  = sql.limit(req.query.limit, req.query.offset);
+    query.$('userId', userId);
+    query.$('collectionId', collectionId);
+
+    if (req.session.user) {
+      query.feelingsJoin = [
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
+      ].join('');
+      query.fields
+      .add('COUNT("productLikes".id) as "totalMyLikes"')
+      .add('COUNT("productWants".id) as "totalMyWants"')
+      .add('COUNT("productTries".id) as "totalMyTries"');
+      query.$('userId', req.session.user.id);
+    }
+
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+    // run data query
+    client.query(query.toString(), query.$values, function(error, dataResult){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
+
+      if (dataResult.rowCount === 0)
+        return res.error(errors.input.NOT_FOUND);
+
+      return res.json({ error: null, data: dataResult.rows[0] });
+    });
+  });
+};
+
+/**
  * Delete consumer collection
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
@@ -469,7 +531,7 @@ module.exports.updateCard = function(req, res){
     client.query('SELECT "userId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) {
-        return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.')
+        return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.');
       }
       var targetConsumerId = result.rows[0].userId;
       var newCardId = result.rows[0].newCardId;

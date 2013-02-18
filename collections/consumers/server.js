@@ -141,6 +141,18 @@ server.post(
 , routes.createCollection
 );
 
+// consumers.getCollection
+server.get(
+  '/v1/consumers/:userId/collections/:collectionId'
+, middleware.profile('GET /v1/consumers/:userId/collections/:collectionId')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('permissions')
+, middleware.permissions(permissions.collection)
+, middleware.profile('get consumer collection handler')
+, routes.getCollection
+);
+
 // consumers.deleteCollections
 server.del(
   '/v1/consumers/:userId/collections/:collectionId'
@@ -167,14 +179,14 @@ server.del(
 
 // consumers.listCollectionProducts
 server.get(
-  '/v1/consumers/:userId/collections/:collectionId'
-, middleware.profile('GET /v1/consumers/:userId/collections/:collectionID')
+  '/v1/consumers/:userId/collections/:collectionId/products'
+, middleware.profile('GET /v1/consumers/:userId/collections/:collectionId/products')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions.collectionProducts)
 , middleware.profile('validate query')
-, middleware.validate2.query(desc.collectionsItem.methods.get.query)
+, middleware.validate2.query(desc.collectionProductsCollection.methods.get.query)
 , middleware.profile('list consumer collection products handler')
 , require('../products/routes').list
 );
