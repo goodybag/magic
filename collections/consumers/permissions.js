@@ -57,6 +57,24 @@ module.exports = {
     }
   }
 
+, consumerPassword: {
+    world: {
+      read:   []
+    , create: []
+    , update: []
+    }
+
+  , default: {}
+
+  , owner: {
+      create: true
+    }
+
+  , admin: {
+      create: true
+    }
+  }
+
 , collection: {
     world: {
       read:   []

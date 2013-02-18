@@ -37,11 +37,31 @@ item:
         eg: { email: admin@goodybag.com, password: password }
       body:
         email:           { type: email,  eg: a_consumer_XXX@home.com }
-        password:        { type: string, eg: password }
         firstName:       { type: string, eg: John }
         lastName:        { type: string, eg: Doe }
         cardId:          { type: cardid, eg: 610XXX-URV }
         screenName:      { type: string, eg: jdoe_XXX }
+    delete:
+      desc: Delete Consumer
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+
+consumerPasswordItem:
+  resource:
+    type: item
+    path: /consumers/:id/password
+    params:
+      id: { type: int, eg: 7 }
+  methods:
+    post:
+      desc: Update Consumer Password
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        oldPassword: { type: string, eg: old_password }
+        newPassword: { type: string, eg: new_password }
     delete:
       desc: Delete Consumer
       auth:
