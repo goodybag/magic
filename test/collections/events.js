@@ -11,16 +11,16 @@ describe('Consumers Events: ', function() {
     , password:   "password"
     , firstName:  "Test"
     , lastName:   "McTesterson"
-    , screenName: "testies"
-    , cardId:     "123456-ZZZ"
+    , screenName: "testiesfasdfs"
+    , cardId:     "231437-UZL"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results) {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.consumerId >= 0);
-      var consumerId = results.data.consumerId;
+      assert(results.data.groupIds.consumers >= 0);
+      var consumerId = results.data.groupIds.consumers;
 
       tu.loginAsAdmin(function(error){
         // Give server time to propagate events
@@ -30,7 +30,6 @@ describe('Consumers Events: ', function() {
             results = JSON.parse(results);
             assert(!results.error);
             assert(results.data.length > 0);
-
             assert(results.data.filter(function(d){
               return d.type === "consumers.registered" && d.data.consumerId == consumerId;
             }).length === 1);

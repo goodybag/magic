@@ -31,6 +31,12 @@ module.exports = {
       , 'screenName'
       , 'cardId'
       , 'consumerId'
+      , 'groups'
+      , 'groupIds'
+      , 'email'
+      , 'singlyAccessToken'
+      , 'singlyId'
+      , 'id'
       ]
     , update: [
         'email'

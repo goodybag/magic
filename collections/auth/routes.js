@@ -173,22 +173,14 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createUser: function(consumer){
-      var url = config.baseUrl;
-      if (url.indexOf(':') === -1) url += ":" + config.http.port;
-
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        utils.post(url + '/v1/consumers', consumer, function(error, response, result){
-          // Really shouldn't happen
-          // TODO: send an actual error
-          if (error) return stage.singlyError(error);
+        db.procedures.registerConsumer(req.body, function(error, consumer){
+          if (error) return stage.error(error);
 
-          // No need to log - already logged from the post
-          if (result.error) return res.error(result.error);
+          stage.setSessionAndSend(consumer);
 
-          consumer.id = result.data.userId;
-
-          return stage.lookupUsersGroups(consumer);
+          magic.emit('consumers.registered', consumer);
         });
       }else{
         res.error(errors.auth.INVALID_GROUP);
@@ -243,6 +235,11 @@ module.exports.oauthAuthenticate = function(req, res){
   , setSessionAndSend: function(user){
       req.session.user = user;
       res.json({ error: null, data: user });
+    }
+
+  , error: function(error){
+      res.error(error);
+      logger.routes.error(TAGS, error);
     }
 
   , singlyError: function(error){

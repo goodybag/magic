@@ -41,7 +41,7 @@ var
 module.exports = {
   'consumers.registered':
   function (consumer){
-    insert('consumers.registered', { consumerId: consumer.consumerId });
+    insert('consumers.registered', { consumerId: consumer.groupIds.consumers });
   }
 
 , 'consumers.becameElite':
