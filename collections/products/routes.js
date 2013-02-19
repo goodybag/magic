@@ -166,9 +166,9 @@ module.exports.list = function(req, res){
         'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
         'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
       ].join(' ');
-      query.fields.add('("productLikes" IS NOT NULL) AS "userLikes"');
-      query.fields.add('("productWants" IS NOT NULL) AS "userWants"');
-      query.fields.add('("productTries" IS NOT NULL) AS "userTried"');
+      query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
+      query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
+      query.fields.add('("productTries".id IS NOT NULL) AS "userTried"');
       query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
       query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
       query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
