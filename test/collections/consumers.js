@@ -500,6 +500,14 @@ describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
       });
     });
   });
+  it('should not update magical collection names', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.put('/v1/consumers/7/collections/4', { name:'Another crazy name!' }, function(error, results, res) {
+        assert(res.statusCode == 403);
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/consumers/:id/collections/:collectionId/products', function() {
@@ -531,7 +539,6 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
       });
     });
   });
-  
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {

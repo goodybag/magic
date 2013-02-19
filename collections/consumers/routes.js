@@ -485,12 +485,13 @@ module.exports.updateCollection = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id');
+    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id AND "isMagical" is not true');
     query.$('id', collectionId);
     query.$('name', name);
 
     client.query(query.toString(), query.$values, function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0) return res.error(errors.auth.INVALID_WRITE_PERMISSIONS);
 
       res.noContent();
     });
