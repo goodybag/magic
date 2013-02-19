@@ -428,12 +428,7 @@ describe('GET /v1/consumers/:id/collections', function() {
         assert(!results.error);
         assert(results.data.length > 0);
         assert(results.data[0].id);
-        assert(results.data[0].name);
-        assert(results.data[0].numProducts == 2);
-        assert(results.data[0].totalMyLikes != 'undefined');
-        assert(results.data[0].totalMyWants != 'undefined');
-        assert(results.data[0].totalMyTries != 'undefined');
-        assert(results.data[1].numProducts == 3);
+        assert(results.data[1].id);
         tu.logout(done);
       });
     });
@@ -505,6 +500,14 @@ describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
       });
     });
   });
+  it('should not update magical collection names', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.put('/v1/consumers/7/collections/4', { name:'Another crazy name!' }, function(error, results, res) {
+        assert(res.statusCode == 403);
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/consumers/:id/collections/:collectionId/products', function() {
@@ -522,6 +525,17 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
             tu.logout(done);
           });
         });
+      });
+    });
+  });
+  it('should duplicate products to the automagic collections', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      magic.once('debug.productAutomagickedToCollection', function(results) {
+        assert(results.productId == 5);
+        tu.logout(done);
+      });
+      tu.post('/v1/consumers/7/collections/1/products', { productId:5 }, function(error, results, res) {
+        assert(res.statusCode == 200);
       });
     });
   });
