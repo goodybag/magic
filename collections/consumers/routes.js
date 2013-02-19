@@ -536,6 +536,8 @@ module.exports.addCollectionProduct = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       res.json({ error: null, data: { id:result.rows[0].id }});
+
+      magic.emit('consumers.addToCollection', req.params.userId || req.session.user.id, collectionId, productId);
     });
   });
 };

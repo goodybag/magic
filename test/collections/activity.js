@@ -3,6 +3,7 @@ var sinon = require('sinon');
 
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
+var magic = require('../../lib/magic');
 
 describe('Consumers Activity: ', function() {
 
@@ -12,20 +13,19 @@ describe('Consumers Activity: ', function() {
       tu.tapinAuthRequest('POST', '/v1/products/2222/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
         assert(!error);
         assert(res.statusCode === 204);
-        // Give server time to propagate Activity
-        setTimeout(function(){
-          tu.get('/v1/activity', function(error, results) {
-            assert(!error);
-            results = JSON.parse(results);
-            assert(!results.error);
-            assert(results.data.length > 0);
-            assert(results.data.filter(function(d){
-              return d.type === "donation" && d.userId === 18;
-            }).length === 1);
+      });
+      magic.once('debug.visitActivityLogged', function() {
+        tu.get('/v1/activity', function(error, results) {
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.length > 0);
+          assert(results.data.filter(function(d){
+            return d.type === "donation" && d.userId === 18;
+          }).length === 1);
 
-            tu.logout(done);
-          });
-        }, 100);
+          tu.logout(done);
+        });
       });
     });
   });
@@ -62,7 +62,7 @@ describe('Loyalty Activity', function(){
               }, 100);
             });
           });
-        })
+        });
       });
     });
   });

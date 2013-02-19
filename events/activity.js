@@ -6,6 +6,7 @@ var
   db      = require('../db')
 , utils   = require('../lib/utils')
 , sql     = require('../lib/sql')
+, magic   = require('../lib/magic')
 
 , logger  = require('../lib/logger')({ app: 'api', component: 'activity' })
 
@@ -294,6 +295,7 @@ module.exports = {
 
           db.api.activity.insert(data, function(error){
             if (error) return stage.error(error);
+            magic.emit('debug.visitActivityLogged');
             return stage.end();
           });
         }

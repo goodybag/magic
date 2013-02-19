@@ -23,6 +23,9 @@ define(function(require){
       type: 'text'
     , sanitizers: { trim:[] }
     }
+  , isMagical: {
+      type: 'bool'
+    }
   };
   return collections;
 });

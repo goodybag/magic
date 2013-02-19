@@ -428,12 +428,7 @@ describe('GET /v1/consumers/:id/collections', function() {
         assert(!results.error);
         assert(results.data.length > 0);
         assert(results.data[0].id);
-        assert(results.data[0].name);
-        assert(results.data[0].numProducts == 2);
-        assert(results.data[0].totalMyLikes != 'undefined');
-        assert(results.data[0].totalMyWants != 'undefined');
-        assert(results.data[0].totalMyTries != 'undefined');
-        assert(results.data[1].numProducts == 3);
+        assert(results.data[1].id);
         tu.logout(done);
       });
     });
@@ -525,6 +520,18 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
       });
     });
   });
+  it('should duplicate products to the automagic collections', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      magic.once('debug.productAutomagickedToCollection', function(results) {
+        assert(results.productId == 5);
+        tu.logout(done);
+      });
+      tu.post('/v1/consumers/7/collections/1/products', { productId:5 }, function(error, results, res) {
+        assert(res.statusCode == 200);
+      });
+    });
+  });
+  
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {

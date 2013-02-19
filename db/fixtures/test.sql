@@ -437,6 +437,7 @@ BEGIN;
 INSERT INTO collections (id, "userId", "name") VALUES (1, 7, 'my first collection');
 INSERT INTO collections (id, "userId", "name") VALUES (2, 7, 'my second collection');
 INSERT INTO collections (id, "userId", "name") VALUES (3, 9, 'my third collection');
+INSERT INTO collections (id, "userId", "name", "isMagical") VALUES (4, 7, 'All', true);
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
