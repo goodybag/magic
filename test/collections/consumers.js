@@ -72,19 +72,20 @@ describe('POST /v1/consumers', function() {
     , firstName:  "Test"
     , lastName:   "McTesterson"
     , screenName: "testies"
+    , avatarUrl:  "http://loljk.com/foobar.png"
     , cardId:     "123456-ZZZ"
     };
 
-    tu.post('/v1/consumers', consumer, function(error, results) {
-      assert(!error);
+    tu.post('/v1/consumers', consumer, function(error, results, res) {
+      assert(res.statusCode == 200);
       results = JSON.parse(results);
-      assert(!results.error);
       assert(results.data.id >= 0);
-      tu.get('/v1/session', function(error, results) {
-        assert(!error);
+      tu.get('/v1/consumers/'+results.data.id, function(error, results) {
+        assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(!results.error);
-        assert(results.data.id >= 0);
+        for (var k in consumer) {
+          if (k != 'password') assert(results.data[k] == consumer[k]);
+        }
         tu.logout(done);
       });
     });
