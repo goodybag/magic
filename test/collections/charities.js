@@ -78,7 +78,7 @@ describe('DEL /v1/charities/:id', function() {
         var total = JSON.parse(results).meta.total;
         tu.del('/v1/charities/3', function(err, results, res) {
           assert(!err);
-          assert(res.statusCode == 200)
+          assert(res.statusCode == 204)
           // compare to updated count
           tu.get('/v1/charities', function(err, results, res) {
             assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
@@ -143,12 +143,9 @@ describe('POST /v1/charities/:id', function(){
     };
 
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/charities/' + 1, charity, function(error, results){
-        assert(!error);
-        assert(!JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
+      tu.post('/v1/charities/' + 1, charity, function(error, results, res){
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });
@@ -158,12 +155,9 @@ describe('POST /v1/charities/:id', function(){
       logoUrl: 123
     };
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/charities/' + 1, charity, function(error, results){
-        assert(!error);
-        assert(JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
+      tu.post('/v1/charities/' + 1, charity, function(error, results, res){
+        assert(res.statusCode == 400);
+        tu.logout(done);
       });
     });
   });
@@ -176,9 +170,7 @@ describe('POST /v1/charities/:id', function(){
       tu.post('/v1/charities/' + 1, charity, function(error, results){
         assert(!error);
         assert(JSON.parse(results).error);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -194,10 +186,8 @@ describe('PATCH /v1/charities/:id', function(){
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/charities/' + 1, charity, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
-        tu.logout(function(){
-          done();
-        });
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });
@@ -210,9 +200,7 @@ describe('PATCH /v1/charities/:id', function(){
       tu.patch('/v1/charities/' + 1, charity, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 400);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });
@@ -226,9 +214,7 @@ describe('PATCH /v1/charities/:id', function(){
      tu.post('/v1/charities/' + 1, charity, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 403);
-        tu.logout(function(){
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

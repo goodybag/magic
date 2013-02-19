@@ -56,12 +56,8 @@ describe('PATCH /v1/reviews/:id', function(){
     };
     tu.login({ email: 'sales@goodybag.com', password: 'password' }, function(error, user){
       tu.patch('/v1/reviews/' + 1, review, function(error, results, res){
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
-        tu.logout(function(){
-          done();
-        });
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });

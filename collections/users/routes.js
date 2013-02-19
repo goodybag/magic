@@ -158,7 +158,7 @@ module.exports.del = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -193,7 +193,7 @@ module.exports.update = function(req, res){
           return function(done) {
             var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
             client.query(query, [req.param('id'), groupId], done);
-          }
+          };
         }), function(err, results) {
           // did any insert fail?
           if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
@@ -204,7 +204,7 @@ module.exports.update = function(req, res){
 
           // done
           tx.commit();
-          return res.json({ error: null, data: null });
+          res.noContent();
         });
       });
     };
@@ -261,7 +261,7 @@ module.exports.update = function(req, res){
         // are we done?
         if (typeof req.body.groups == 'undefined') {
           tx.commit();
-          return res.json({ error: null, data: null });
+          return res.noContent();
         }
 
         applyGroupRelations();
@@ -310,7 +310,7 @@ module.exports.createPasswordReset = function(req, res){
         if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
           res.json({ err:null, data:{ token:token }});
         else
-          res.json({ err:null, data:null });
+          res.noContent();
       });
     });
   });
@@ -343,7 +343,7 @@ module.exports.resetPassword = function(req, res){
       client.query('UPDATE users SET password=$1 WHERE id=$2', [utils.encryptPassword(newPassword), userId], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        res.json({ err:null, data:null });
+        res.noContent();
       });
     });
   });

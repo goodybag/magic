@@ -131,10 +131,7 @@ describe('PATCH /v1/businesses/:businessId/product-tags/:tagId', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/1/product-tags/1', { tag:'clothes' }, function(err, payload, res) {
-        assert(!err);
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -162,10 +159,7 @@ describe('DELETE /v1/businesses/:businessId/product-tags/:tagId', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
       tu.del('/v1/businesses/1/product-tags/2', function(err, payload, res) {
-        assert(!err);
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });

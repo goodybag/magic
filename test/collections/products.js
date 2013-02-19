@@ -648,12 +648,7 @@ describe('PATCH /v1/products/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'fdsa' }), 'application/json', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -688,12 +683,7 @@ describe('PATCH /v1/products/:id', function() {
   it('should update the products name and categories ', function(done) {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', categories: [1] }), 'application/json', function(err, payload, res) {
-
-        assert(!err);
-        payload = JSON.parse(payload);
-        assert(res.statusCode == 200);
-
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -717,12 +707,7 @@ describe('PATCH /v1/products/:id', function() {
   it('should update the products name and tags ', function(done) {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'weeeeeeeeeee', tags: [1] }), 'application/json', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -731,9 +716,9 @@ describe('PATCH /v1/products/:id', function() {
   it('should preserve tags and categories if not included in the PATCH', function(done) {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/products/1', JSON.stringify({ name:'product 1', tags:[1], categories:[1] }), 'application/json', function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.patch('/v1/products/1', JSON.stringify({ name:'product 1' }), 'application/json', function(err, payload, res) {
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
           tu.get('/v1/products/1', function(err, payload, res) {
             assert(res.statusCode == 200);
             payload = JSON.parse(payload);
@@ -757,7 +742,7 @@ describe('DELETE /v1/products/:id', function() {
       tu.del('/v1/products/2', function(err, payload, res) {
 
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.logout(done);
       });
@@ -803,13 +788,7 @@ describe('POST /v1/products/:id/categories', function() {
   it('should respond with an ok', function(done) {
     tu.loginAsAdmin(function() {
       tu.post('/v1/products/1/categories', JSON.stringify({ id:3 }), 'application/json', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -818,13 +797,7 @@ describe('POST /v1/products/:id/categories', function() {
   it('should not duplicate existing category relations', function(done) {
     tu.loginAsAdmin(function() {
       tu.post('/v1/products/1/categories', JSON.stringify({ id:3 }), 'application/json', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/1/categories', function(err, payload, res) {
 
@@ -862,9 +835,7 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsAdmin(function() {
       tu.del('/v1/products/1/categories/3', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -880,13 +851,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
         assert(!error);
         
         tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
-          assert(!error);
-          assert(res.statusCode == 200);
-          payload = JSON.parse(payload);
-          assert(!payload.error);
-          assert(payload.meta);
-          assert(payload.meta.isFirstTapin);
-
+          assert(res.statusCode == 204);
           tu.logout(done);
         });
       });
@@ -905,9 +870,8 @@ describe('POST /v1/products/:id/feelings', function(done) {
         assert(payload.data.userWants == false);
         assert(payload.data.userTried == false);
 
-        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
-          assert(!err);
-          assert(res.statusCode == 200);
+        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {          
+          assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
             assert(!err);
@@ -944,7 +908,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
 
         tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
           assert(!err);
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
             assert(!err);
@@ -981,7 +945,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
 
         tu.post('/v1/products/3/feelings', { isLiked:'true', isWanted:'false', isTried:'true' }, function(err, payload, res) {
           assert(!err);
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
             assert(!err);
@@ -1018,7 +982,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
 
         tu.post('/v1/products/3/feelings', { isTried:false }, function(err, payload, res) {
           assert(!err);
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
             assert(!err);
@@ -1055,7 +1019,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
 
         tu.post('/v1/products/4/feelings', { isLiked:false }, function(err, payload, res) {
           assert(!err);
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.get('/v1/products/4', function(err, payload, res) {
             assert(!err);
@@ -1082,7 +1046,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
     tu.loginAsSales(function() {
       tu.post('/v1/products/3/feelings', { isLiked:false, isWanted:true, isTried:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/3', function(err, payload, res) {
           assert(!err);
@@ -1125,11 +1089,11 @@ describe('location list filtering', function() {
 
             tu.del('/v1/locations/'+idToDelete, function(err, payload, res) {
               assert(!err);
-              assert(res.statusCode == 200);
+              assert(res.statusCode == 204);
 
               tu.patch('/v1/locations/'+idToUpdate, { lat:5.002, lon:5.002 }, function(err, payload, res) {
                 assert(!err);
-                assert(res.statusCode == 200);
+                assert(res.statusCode == 204);
 
                 tu.get('/v1/products?lat=5&lon=5&range=10000', function(err, payload, res) {
                   assert(!err);

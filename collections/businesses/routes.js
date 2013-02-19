@@ -73,7 +73,7 @@ module.exports.del = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      return res.noContent();
     });
   });
 };
@@ -246,7 +246,7 @@ module.exports.update = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (typeof tags == 'undefined') {
-        res.json({ error: null, data: null });
+        res.noContent();
         magic.emit('businesses.update', req.params.id, inputs);
         if (inputs.logoUrl)
           magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
@@ -257,7 +257,7 @@ module.exports.update = function(req, res){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         if (tags.length === 0) {
-          res.json({ error: null, data: null });
+          res.noContent();
           magic.emit('businesses.update', req.params.id, inputs);
           if (inputs.logoUrl)
             magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
@@ -269,7 +269,7 @@ module.exports.update = function(req, res){
         client.query(query, [req.params.id].concat(tags), function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          res.json({ error: null, data: null });
+          res.noContent();
 
           if (tags)
             inputs.tags = tags;
@@ -345,7 +345,7 @@ module.exports.updateLoyalty = function(req, res){
 
         logger.db.debug(TAGS, result);
 
-        res.json({ error: null, data: null });
+        res.noContent();
 
         magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
       }

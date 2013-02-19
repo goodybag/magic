@@ -59,12 +59,13 @@ function testValidRequest(methodDoc) {
   it('should respond 200 on '+methodDoc.getDesc()+' with valid input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
     request(methodDoc, requestDoc, function(res, result) {
-      if (res.statusCode !== 200)
+      var is2xx = (res.statusCode >= 200 && res.statusCode < 300);
+      if (!is2xx)
         console.log('Failed chaos valid-request test'),
           console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
-      assert(res.statusCode == 200);
+      assert(is2xx);
       done();
     });
   });
@@ -105,14 +106,15 @@ function testPartialRequest(methodDoc, onlyKey) {
     if (/requires/.test(methodDoc.getAttrType(onlyKey)))
       removedRequiredField = true;
 
-    var expectedStatus = (removedRequiredField) ? 400 : 200;
+    var expectedStatusRange = (removedRequiredField) ? 4 : 2;
     request(methodDoc, requestDoc, function(res, result) {
-      if (res.statusCode !== expectedStatus)
-        console.log('Failed chaos partial-request test (expected '+expectedStatus+')'),
+      var statusRange = Math.floor(res.statusCode/100);
+      if (statusRange !== expectedStatusRange)
+        console.log('Failed chaos partial-request test (expected '+expectedStatusRange+'xx)'),
           console.log(requestDoc.toOptions(), requestDoc.toPayload()),
           console.log(res.statusCode),
           console.log(result);
-      assert(res.statusCode == expectedStatus);
+      assert(statusRange == expectedStatusRange);
       done();
     });
   });
@@ -152,7 +154,7 @@ function makeTestsBatch(cb) {
     describe(resourceDoc.makeTestDescription(), function() {
       cb(resourceDoc);
     });
-  }
+  };
 }
 
 module.exports = {

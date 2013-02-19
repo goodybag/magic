@@ -11,7 +11,7 @@ describe('Consumers Activity: ', function() {
       // Just like a product from a tablet and it will trigger a visit
       tu.tapinAuthRequest('POST', '/v1/products/2222/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         // Give server time to propagate Activity
         setTimeout(function(){
           tu.get('/v1/activity', function(error, results) {
@@ -36,7 +36,7 @@ describe('Loyalty Activity', function(){
   it('store an event when a user becomes elite', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       tu.tapinAuthRequest('PUT', '/v1/consumers/' + 17 + '/loyalty/' + 1, '123456-XYX', {deltaPunches:5,locationId:1}, function(error, results, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty', function(err, payload, res) {
@@ -70,7 +70,7 @@ describe('Loyalty Activity', function(){
   it('store an event when a user earns a punch', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       tu.put('/v1/consumers/' + 17 + '/loyalty/' + 1, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty', function(err, payload, res) {
@@ -103,7 +103,7 @@ describe('Loyalty Activity', function(){
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, userId:17, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.logout(function() {
           tu.login({ email:'consumer6@gmail.com', password:'password' }, function() {
@@ -144,7 +144,7 @@ describe('Products Activity: ', function() {
       assert(!error);
       tu.post('/v1/products/2222/feelings', { isLiked:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/2222', function(err, payload, res) {
           assert(!err);
@@ -177,7 +177,7 @@ describe('Products Activity: ', function() {
       assert(!error);
       tu.post('/v1/products/2222/feelings', { isWanted:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/2222', function(err, payload, res) {
           assert(!err);
@@ -210,7 +210,7 @@ it('store an event when a user tries a product', function(done) {
       assert(!error);
       tu.post('/v1/products/2222/feelings', { isTried:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/2222', function(err, payload, res) {
           assert(!err);

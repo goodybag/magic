@@ -146,10 +146,7 @@ describe('PATCH /v1/photos/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
-        assert(!err);
-        payload = JSON.parse(payload);
-        assert(res.statusCode == 200);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -181,7 +178,7 @@ describe('PATCH /v1/photos/:id', function() {
   it('should allow an owning consumer to update', function(done) {
     tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
       tu.patch('/v1/photos/2', { notes:'this will happen' }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -199,7 +196,7 @@ describe('PATCH /v1/photos/:id', function() {
   it('should allow an owning business manager to update', function(done) {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -217,7 +214,7 @@ describe('PATCH /v1/photos/:id', function() {
   it('should allow an owning business cashier to update', function(done) {
     tu.login({ email:'some_cashier@gmail.com', password:'password' }, function() {
       tu.patch('/v1/photos/2', { isEnabled:true }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -230,10 +227,7 @@ describe('DELETE /v1/photos/:id', function() {
   it('should respond with a 200', function(done) {
     tu.loginAsSales(function(error, user){
       tu.del('/v1/photos/2', function(err, payload, res) {
-        assert(!err);
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(!payload.error);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
