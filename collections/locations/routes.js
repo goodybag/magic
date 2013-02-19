@@ -232,7 +232,7 @@ module.exports.update = function(req, res){
 
       // do we need to update the productLocations?
       if (!isUpdatingPosition) {
-        return res.json({ error: null, data: null });
+        return res.noContent();
       }
 
       var updates = {};
@@ -248,7 +248,7 @@ module.exports.update = function(req, res){
       client.query(query.toString(), query.$values, function(error, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        return res.json({ error: null, data: null });
+        res.noContent();
       });
     });
   });
@@ -277,7 +277,7 @@ module.exports.del = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -402,7 +402,7 @@ module.exports.addProduct = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      res.json({ error: null, data: null });
+      res.noContent();
 
       if (result.rowCount !== 0)
         magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
@@ -440,7 +440,7 @@ module.exports.updateProduct = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      res.json({ error: null, data: null });
+      res.noContent();
 
       if (typeof req.body.isSpotlight != 'undefined')
         magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.isSpotlight);
@@ -471,7 +471,7 @@ module.exports.removeProduct = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      res.json({ error: null, data: null });
+      res.noContent();
 
       magic.emit('locations.productStockUpdate', req.params.locationId, req.params.productId, false);
     });
@@ -494,6 +494,6 @@ module.exports.submitKeyTagRequest = function(req, res){
 
     magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
 
-    return res.json({ error: null, data: null });
+    res.noContent();
   });
 };

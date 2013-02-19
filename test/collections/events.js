@@ -48,7 +48,7 @@ describe('Products Events: ', function() {
       assert(!error);
       tu.post('/v1/products/3/feelings', { isLiked:true }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/products/3', function(err, payload, res) {
           assert(!err);
@@ -102,7 +102,7 @@ describe('Loyalty Events: ', function() {
     , updateLoyaltyStats: function(){
         tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XYX', punch, function(error, results, res) {
           assert(!error);
-          assert(res.statusCode === 200);
+          assert(res.statusCode === 204);
 
           stage.loginAsAdmin();
         });

@@ -12,7 +12,7 @@ describe('POST /v1/redemptions', function() {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, userId:11, tapinStationId:11133 }, function(err, payload, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.logout(function() {
           tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
@@ -81,7 +81,7 @@ describe('POST /v1/redemptions', function() {
           tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
             tu.post('/v1/redemptions', { deltaPunches:2, userId:12, tapinStationId:11133 }, function(err, payload, res) {
               assert(!err);
-              assert(res.statusCode == 200);
+              assert(res.statusCode == 204);
 
               tu.logout(function() {
                 tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
@@ -124,7 +124,7 @@ describe('POST /v1/redemptions', function() {
 
           tu.login({ email:'cashier_redeem1@gmail.com', password:'password' }, function() {
             tu.post('/v1/redemptions', { deltaPunches:8, userId:11, tapinStationId:11133 }, function(err, payload, res) {
-              assert(res.statusCode == 200);
+              assert(res.statusCode == 204);
               tu.logout(function() {
 
                 tu.login({ email:'consumer_redeem1@gmail.com', password:'password' }, function() {
@@ -192,7 +192,7 @@ describe('POST /v1/redemptions', function() {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       tu.tapinAuthRequest('POST', '/v1/redemptions', '123456-MA1', { deltaPunches:8, userId:11, tapinStationId:11133 }, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(done);
       });
     });

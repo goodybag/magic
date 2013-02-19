@@ -710,13 +710,13 @@ module.exports.update = function(req, res){
       utils.parallel(inParallel, onComplete);
     }
   , end: function() {
-    res.json({ error: null, data: null });
+      res.noContent();
 
-    if (categories)
-      inputs.categories = categories;
-    if (tags)
-      inputs.tags = tags;
-    magic.emit('products.update', req.param('productId'), inputs);
+      if (categories)
+        inputs.categories = categories;
+      if (tags)
+        inputs.tags = tags;
+      magic.emit('products.update', req.param('productId'), inputs);
     }
   };
 
@@ -746,7 +746,7 @@ module.exports.del = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -815,7 +815,7 @@ module.exports.addCategory = function(req, res) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -852,7 +852,7 @@ module.exports.delCategory = function(req, res) {
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -917,7 +917,7 @@ module.exports.updateFeelings = function(req, res) {
 
         if (query.updates.fields.length === 0) {
           // no updates needed
-          return res.json({ data: null, meta: null }), tx.abort();
+          return res.noContent(), tx.abort();
         }
 
         // update the product count
@@ -946,7 +946,7 @@ module.exports.updateFeelings = function(req, res) {
             // end transaction
             tx.commit();
 
-            res.json({ error: null, data: null });
+            res.noContent();
 
             if (req.body.isLiked != null && req.body.isLiked != undefined){
               if (req.body.isLiked != currentFeelings.isLiked){

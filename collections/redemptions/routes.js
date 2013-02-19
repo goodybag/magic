@@ -110,7 +110,7 @@ module.exports.create = function(req, res){
                 tx.commit(function(error) {
                   if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
-                  res.json({ error:null, data:null });
+                  res.noContent();
 
                   magic.emit('loyalty.punch', deltaPunches, userId, businessId, locationId, req.session.user.id);
 

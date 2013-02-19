@@ -181,7 +181,7 @@ module.exports.update = function(req, res){
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
         tx.commit();
-        res.json({ error:null, data:null });
+        res.noContent();
 
         magic.emit('loyalty.punch', deltaPunches, userId, businessId, req.body.locationId, req.session.user.id);
         if (hasBecomeElite)
