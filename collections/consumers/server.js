@@ -223,10 +223,10 @@ server.get(
 
 // consumers.addCollectionProduct
 server.post(
-  '/v1/consumers/:userId/collections/:collectionId'
+  '/v1/consumers/:userId/collections/:collectionId/products'
 , middleware.profile('POST /v1/consumers/:userId/collections/:collectionID')
 , middleware.profile('validate body')
-, middleware.validate2.body(desc.collectionsItem.methods.post.body)
+, middleware.validate2.body(desc.collectionProductsCollection.methods.post.body)
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
