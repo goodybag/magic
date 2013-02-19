@@ -119,6 +119,31 @@ collectionsItem:
       collectionId: { type: int, eg: 3 }
   methods:
     get:
+      desc: Get Consumer Collection Info
+    put:
+      desc: Set Consumer Collection Info
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name:    { type: string, eg: My Collection, required: true }
+    post:
+      desc: Add Product to Consumer Collection
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
+      body:
+        productId: { type: int, eg: 1, required: true }
+
+collectionProductsCollection:
+  resource:
+    type: item
+    path: /consumers/:userId/collections/:collectionId/products
+    params:
+      userId:       { type: int, eg: 9 }
+      collectionId: { type: int, eg: 3 }
+  methods:
+    get:
       desc: List Consumer Collection Products
       query:
         lat:        { type: float,   eg: 10.123 }
@@ -136,10 +161,3 @@ collectionsItem:
         userLikes:  { type: bool,    eg: false }
         userTried:  { type: bool,    eg: false }
         userWants: { type: bool,    eg: false }
-    post:
-      desc: Add Product to Consumer Collection
-      auth:
-        required: true
-        eg: { email: consumer2@gmail.com, password: password }
-      body:
-        productId: { type: int, eg: 1, required: true }

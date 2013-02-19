@@ -456,6 +456,24 @@ describe('GET /v1/consumers/:id/collections', function() {
   });
 });
 
+describe('GET /v1/consumers/:id/collections/:collectionId', function() {
+  it('should respond with a collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1', function(error, results) {
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id);
+        assert(results.data.name);
+        assert(results.data.numProducts == 2);
+        assert(results.data.totalMyLikes != 'undefined');
+        assert(results.data.totalMyWants != 'undefined');
+        assert(results.data.totalMyTries != 'undefined');
+        tu.logout(done);
+      });
+    });
+  });
+});
+
 describe('POST /v1/consumers/:id/collections', function() {
   it('should create a new collection and respond with its ID', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
@@ -477,16 +495,17 @@ describe('POST /v1/consumers/:id/collections', function() {
   });
 });
 
-describe('GET /v1/consumers/:id/collections/:collectionId', function() {
-  it('should respond with a collection product listing', function(done) {
+describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
+  it('should update the collection name', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+      tu.put('/v1/consumers/7/collections/1', { name:'Another crazy name!' }, function(error, results, res) {
         assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(results.data.length > 0);
-        assert(results.data[0].id);
-        assert(results.data[0].name);
-        tu.logout(done);
+        tu.get('/v1/consumers/7/collections/1', function(error, results) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.name == 'Another crazy name!');
+          tu.logout(done);
+        });
       });
     });
   });
@@ -495,12 +514,12 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
 describe('POST /v1/consumers/:id/collections/:collectionId', function() {
   it('should add a product to the collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
         assert(res.statusCode == 200);
         var oldProducts = JSON.parse(results).data;
         tu.post('/v1/consumers/7/collections/1', { productId:4 }, function(error, results, res) {
           assert(res.statusCode == 200);
-          tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+          tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
             assert(oldProducts.length + 1 == newProducts.length);
