@@ -228,7 +228,8 @@ module.exports.registerConsumer = function(inputs, callback){
       var query = sql.query([
         'WITH',
           '"user" AS',
-            '(INSERT INTO users ({uidField}, {upassField}, "cardId") SELECT $uid, $upass, $cardId RETURNING *),',
+            '(INSERT INTO users (email, password, "singlyId", "singlyAccessToken", "cardId")',
+              'SELECT $email, $password, $singlyId, $singlyAccessToken, $cardId RETURNING *),',
           '"userGroup" AS',
             '(INSERT INTO "usersGroups" ("userId", "groupId")',
               'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
@@ -238,18 +239,11 @@ module.exports.registerConsumer = function(inputs, callback){
         'SELECT "user".id as "userId" FROM "user"'
       ]);
 
-      if (inputs.email) {
-        query.uidField = 'email';
-        query.upassField = 'password';
-        query.$('uid', inputs.email);
-        query.$('upass', utils.encryptPassword(inputs.password));
-      } else {
-        query.uidField = '"singlyId"';
-        query.upassField = '"singlyAccessToken"';
-        query.$('uid', inputs.singlyId);
-        query.$('upass', inputs.singlyAccessToken);
-      }
-
+      var timestamp = +(new Date());
+      query.$('email', inputs.email || 'consumer_'+timestamp+'@goodybag.com');
+      query.$('password', (inputs.password) ? utils.encryptPassword(inputs.password) : null);
+      query.$('singlyId', inputs.singlyId);
+      query.$('singlyAccessToken', inputs.singlyAccessToken);
       query.$('firstName', inputs.firstName);
       query.$('lastName', inputs.lastName);
       query.$('cardId', inputs.cardId || '');
