@@ -440,18 +440,6 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
       });
     });
   });
-  it('should paginate', function(done) {
-    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
-        assert(!err);
-        var payload = JSON.parse(results);
-        assert(!payload.error);
-        assert(payload.data.length === 1);
-        assert(payload.meta.total > 1);
-        done();
-      });
-    });
-  });
 });
 
 describe('POST /v1/consumers/:id/collections', function() {
@@ -475,16 +463,17 @@ describe('POST /v1/consumers/:id/collections', function() {
   });
 });
 
-describe('GET /v1/consumers/:id/collections/:collectionId/products', function() {
-  it('should respond with a collection product listing', function(done) {
+describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
+  it('should update the collection name', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+      tu.put('/v1/consumers/7/collections/1', { name:'Another crazy name!' }, function(error, results, res) {
         assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(results.data.length > 0);
-        assert(results.data[0].id);
-        assert(results.data[0].name);
-        tu.logout(done);
+        tu.get('/v1/consumers/7/collections/1', function(error, results) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.name == 'Another crazy name!');
+          tu.logout(done);
+        });
       });
     });
   });

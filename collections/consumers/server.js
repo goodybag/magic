@@ -153,6 +153,20 @@ server.get(
 , routes.getCollection
 );
 
+// consumers.updateCollection
+server.put(
+  '/v1/consumers/:userId/collections/:collectionId'
+, middleware.profile('PUT /v1/consumers/:userId/collections/:collectionId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collectionsItem.methods.put.body)
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('permissions')
+, middleware.permissions(permissions.collection)
+, middleware.profile('update consumer collection handler')
+, routes.updateCollection
+);
+
 // consumers.deleteCollections
 server.del(
   '/v1/consumers/:userId/collections/:collectionId'

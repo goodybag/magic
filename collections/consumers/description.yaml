@@ -101,6 +101,13 @@ collectionsItem:
   methods:
     get:
       desc: Get Consumer Collection Info
+    put:
+      desc: Set Consumer Collection Info
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        name:    { type: string, eg: My Collection, required: true }
     post:
       desc: Add Product to Consumer Collection
       auth:

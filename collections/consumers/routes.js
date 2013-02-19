@@ -424,6 +424,33 @@ module.exports.getCollection = function(req, res){
 };
 
 /**
+ * Update consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.updateCollection = function(req, res){
+  var TAGS = ['update-consumers-collection', req.uuid];
+  logger.routes.debug(TAGS, 'updating consumer ' + req.params.userId + ' collection ' + req.params.collectionId);
+
+  var collectionId = req.param('collectionId');
+  var name = req.body.name;
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id');
+    query.$('id', collectionId);
+    query.$('name', name);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.json({ error: null, data: null });
+    });
+  });
+};
+
+/**
  * Delete consumer collection
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
