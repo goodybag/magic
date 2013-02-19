@@ -212,8 +212,7 @@ describe('PUT /v1/consumers/:id', function() {
 
   it('should update a consumers user record and consumer record via the session user id', function(done) {
     var consumer = {
-      password: "password1"
-    , firstName: "Terrrrd"
+      firstName: "Terrrrd"
     };
 
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
@@ -222,26 +221,7 @@ describe('PUT /v1/consumers/:id', function() {
         results = JSON.parse(results);
         assert(!results.error);
 
-        tu.logout(function(){
-          tu.login({ email: 'tferguson@gmail.com', password: consumer.password }, function(error, user){
-            assert(!error);
-            assert(user);
-
-            tu.patch('/v1/consumers/7', {password: 'password'}, function(error, results, res) {
-              assert(!error);
-              results = JSON.parse(results);
-              assert(!results.error);
-
-              tu.get('/v1/consumers/7', function(error, results) {
-                assert(!error);
-                results = JSON.parse(results);
-                assert(!results.error);
-                assert(results.data.firstName === "Terrrrd");
-                tu.logout(done);
-              });
-            });
-          });
-        });
+        tu.logout(done);
       });
     });
   });
@@ -386,6 +366,58 @@ describe('DEL /v1/consumers/:id', function() {
 
           tu.logout(done);
         });
+      });
+    });
+  });
+});
+
+
+describe('POST /v1/consumers/:id/password', function() {
+  it('should update a consumers password', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
+      var request = {
+        method: 'POST',
+        path: '/v1/consumers/session/password',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:password')).toString('base64')
+        }
+      };
+      tu.httpRequest(request, JSON.stringify({ password:'wordpass' }), function(error, results, res) {
+        assert(res.statusCode == 200);
+        tu.logout(function(){
+          tu.login({ email: 'tferguson@gmail.com', password: 'wordpass' }, function(error, user){
+            assert(user);
+            var request = {
+              method: 'POST',
+              path: '/v1/consumers/session/password',
+              headers: {
+                'Content-type': 'application/json',
+                'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:wordpass')).toString('base64')
+              }
+            };
+            tu.httpRequest(request, JSON.stringify({ password:'password' }), function(error, results, res) {
+              assert(res.statusCode == 200);
+              tu.logout(done);
+            });
+          });
+        });
+      });
+    });
+  });
+  it('should respond 401 if the old password is incorrect', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
+      var request = {
+        method: 'POST',
+        path: '/v1/consumers/session/password',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:foobar')).toString('base64')
+        }
+      };
+      tu.httpRequest(request, JSON.stringify({ password:'wordpass' }), function(error, results, res) {
+        assert(res.statusCode == 401);
+        tu.logout(done);
       });
     });
   });

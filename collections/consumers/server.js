@@ -113,6 +113,22 @@ server.del(
 , routes.del
 );
 
+// consumers.updatePassword
+server.post(
+  '/v1/consumers/:userId/password'
+, middleware.profile('POST /v1/consumers/:userId')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.consumerPasswordItem.methods.post.body)
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'owner')
+, middleware.profile('permissions')
+, middleware.permissions(permissions.consumerPassword)
+, middleware.profile('update consumer password handler')
+, routes.updatePassword
+);
+
 // consumers.listCollections
 server.get(
   '/v1/consumers/:userId/collections'

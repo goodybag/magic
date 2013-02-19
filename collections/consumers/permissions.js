@@ -39,7 +39,6 @@ module.exports = {
       ]
     , update: [
         'email'
-      , 'password'
       , 'singlyId'
       , 'singlyAccessToken'
       , 'firstName'
@@ -54,6 +53,24 @@ module.exports = {
       read:   true
     , create: true
     , update: true
+    }
+  }
+
+, consumerPassword: {
+    world: {
+      read:   []
+    , create: []
+    , update: []
+    }
+
+  , default: {}
+
+  , owner: {
+      create: true
+    }
+
+  , admin: {
+      create: true
     }
   }
 

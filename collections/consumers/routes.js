@@ -215,34 +215,23 @@ module.exports.update = function(req, res){
 
             if (!updateUser) return callback();
 
-            var encryptPassword = function(cb){
-              if (!req.body.password) return cb();
+            var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
 
-              utils.encryptPassword(req.body.password, function(error, encrypted){
-                data.password = encrypted;
-                cb();
-              });
-            };
+            query.updates = sql.fields().addUpdateMap(data, query);
+            query.$('id', consumer.userId);
 
-            encryptPassword(function(){
-              var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
+            logger.db.debug(TAGS, query.toString());
 
-              query.updates = sql.fields().addUpdateMap(data, query);
-              query.$('id', consumer.userId);
+            // run update query
+            tx.query(query.toString(), query.$values, function(error, result){
+              if (error) return callback(error);
+              logger.db.debug(TAGS, result);
 
-              logger.db.debug(TAGS, query.toString());
+              // did the update occur?
+              if (result.rowCount === 0)
+                return callback(errors.input.NOT_FOUND);
 
-              // run update query
-              tx.query(query.toString(), query.$values, function(error, result){
-                if (error) return callback(error);
-                logger.db.debug(TAGS, result);
-
-                // did the update occur?
-                if (result.rowCount === 0)
-                  return callback(errors.input.NOT_FOUND);
-
-                return callback();;
-              });
+              return callback();
             });
           };
 
@@ -253,7 +242,7 @@ module.exports.update = function(req, res){
             if (error){
               tx.abort();
               if (error.name === "DB_FAILURE"){
-                res.error(errors.internal.DB_FAILURE, error)
+                res.error(errors.internal.DB_FAILURE, error);
               } else {
                 res.error(error);
               }
@@ -265,6 +254,64 @@ module.exports.update = function(req, res){
               if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
               res.json({ error: null, data: null });
+            });
+          });
+        });
+      });
+    });
+  });
+};
+
+/**
+ * Update consumer password
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.updatePassword = function(req, res){
+  var TAGS = ['update-consumer-password', req.uuid];
+
+  if (!req.session || !req.session.user)
+    return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
+
+  if (!req.headers.authorization || req.headers.authorization.indexOf('Basic') !== 0)
+    return res.error(errors.auth.NOT_AUTHENTICATED, 'Please include the current email and password in a basic authorization header'), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
+  var token = new Buffer(req.headers.authorization.split(/\s+/).pop() || '', 'base64').toString();
+  var oldPassword = token.split(/:/).pop();
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var tx = new Transaction(client);
+
+    tx.begin(function(error){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      var query = sql.query('SELECT * FROM users WHERE id=$id FOR UPDATE OF users');
+      query.$('id', (req.param('userId') == 'session') ? req.session.user.id : req.param('userId'));
+
+      tx.query(query.toString(), query.$values, function(error, result) {
+        if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var user = result.rows[0];
+        if (!user)
+          return tx.abort(), res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
+
+        utils.encryptPassword(oldPassword, function(error, encryptedOldPW) {
+          if (encryptedOldPW != user.password)
+            return tx.abort(), res.error(errors.auth.INVALID_PASSWORD);
+
+          utils.encryptPassword(req.body.password, function(error, encryptedNewPW) {
+            var query = sql.query('UPDATE users SET password=$password WHERE id=$id');
+            query.$('password', encryptedNewPW);
+            query.$('id', user.id);
+
+            tx.query(query.toString(), query.$values, function(error, result) {
+              if (error)
+                return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              if (result.rowCount === 0)
+                return tx.abort(), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
+              tx.commit();
+              res.json({ error:null, data:null });
             });
           });
         });
