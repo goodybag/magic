@@ -18,6 +18,7 @@ collection:
         lastName:          { type: string, eg: Doe }
         cardId:            { type: cardid, eg: 610XXX-URV }
         screenName:        { type: string, eg: jdoe_XXX }
+        avatarUrl:         { type: url,    eg: http://placekitten.com/200/300 }
   children:
     - /consumers/:id
 
@@ -41,6 +42,7 @@ item:
         lastName:        { type: string, eg: Doe }
         cardId:          { type: cardid, eg: 610XXX-URV }
         screenName:      { type: string, eg: jdoe_XXX }
+        avatarUrl:         { type: url,    eg: http://placekitten.com/200/300 }
     delete:
       desc: Delete Consumer
       auth:

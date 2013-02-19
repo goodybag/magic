@@ -4,6 +4,7 @@ module.exports = {
       read:   [
         'screenName'
       , 'userId'
+      , 'avatarUrl'
       ]
     , create: [
         'email'
@@ -13,6 +14,7 @@ module.exports = {
       , 'firstName'
       , 'lastName'
       , 'screenName'
+      , 'avatarUrl'
       , 'cardId'
       ]
     , update: []
@@ -29,6 +31,7 @@ module.exports = {
       , 'firstName'
       , 'lastName'
       , 'screenName'
+      , 'avatarUrl'
       , 'cardId'
       , 'groups'
       , 'groupIds'
@@ -44,6 +47,7 @@ module.exports = {
       , 'firstName'
       , 'lastName'
       , 'screenName'
+      , 'avatarUrl'
       , 'cardId'
       , 'userId'
       ]

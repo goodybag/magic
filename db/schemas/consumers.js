@@ -30,6 +30,10 @@ define(function(require){
     , validators: { len:[1] }
     , sanitizers: { trim:[] }
     }
+  , avatarUrl: {
+      type: 'text'
+    , validators: { isUrl:[] }
+    }
   };
   return consumers;
 });
