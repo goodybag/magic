@@ -101,6 +101,7 @@ var doChaos = chaos.makeTestsBatch(function(resource) {
 var chaosBlacklist = [
   'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
   'consumers.cardUpdatesItem',
+  'consumers.consumerPasswordItem',
   'redemptions.collection'
 ];
 
