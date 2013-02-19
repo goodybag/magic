@@ -129,13 +129,6 @@ collectionsItem:
         eg: { email: admin@goodybag.com, password: password }
       body:
         name:    { type: string, eg: My Collection, required: true }
-    post:
-      desc: Add Product to Consumer Collection
-      auth:
-        required: true
-        eg: { email: consumer2@gmail.com, password: password }
-      body:
-        productId: { type: int, eg: 1, required: true }
 
 collectionProductsCollection:
   resource:
@@ -163,3 +156,10 @@ collectionProductsCollection:
         userLikes:  { type: bool,    eg: false }
         userTried:  { type: bool,    eg: false }
         userWants:  { type: bool,    eg: false }
+    post:
+      desc: Add Product to Consumer Collection
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
+      body:
+        productId: { type: int, eg: 1, required: true }
