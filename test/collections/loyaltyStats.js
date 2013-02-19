@@ -170,8 +170,7 @@ describe('PUT /v1/loyalty/:loyaltyId', function() {
   it('should update the consumers stats', function(done){
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function(error, user) {
       tu.put('/v1/loyalty/8', { deltaPunches:1, locationId:1 }, function(err, payload, res) {
-        payload = JSON.parse(payload);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.get('/v1/loyalty/8', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
@@ -193,7 +192,7 @@ describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       var userId = 15, businessId = 1;
       tu.put('/v1/consumers/' + userId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function() {
           tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty/businesses/' + businessId, function(err, payload, res) {
@@ -208,7 +207,7 @@ describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
               tu.logout(done);
             });
           });
-        })
+        });
       });
     });
   });
@@ -217,7 +216,7 @@ describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
     var userId = 10, businessId = 1;
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function() {
       tu.put('/v1/consumers/' + userId + '/loyalty/' + businessId, { deltaPunches:5, locationId:1 }, function(err, payload, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function() {
           tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty/businesses/' + businessId, function(err, payload, res) {
@@ -249,8 +248,7 @@ describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
     var userId = 15, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XXX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(function() {
           tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty/businesses/' + businessId, function(error, results, res) {
@@ -272,8 +270,7 @@ describe('PUT /v1/consumers/:userId/loyalty/:businessId', function() {
     var userId = 15, businessId = 1;
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
       tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId + '/loyalty/' + businessId, '123456-XYX', { deltaPunches:5, locationId:1 }, function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(function() {
           tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
             tu.get('/v1/loyalty/businesses/' + businessId, function(error, results, res) {

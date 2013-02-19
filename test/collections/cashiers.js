@@ -158,9 +158,7 @@ describe('PATCH /v1/cashiers/:id', function() {
     };
     tu.loginAsAdmin(function(error){
       tu.patch('/v1/cashiers/11120', cashier, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/cashiers/11120', function(error, results) {
           assert(!error);
@@ -218,7 +216,7 @@ describe('DEL /v1/cashiers/:id', function() {
     tu.loginAsAdmin(function(error, cashier){
       tu.del('/v1/cashiers/' + id, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(function() {
           done();
         });

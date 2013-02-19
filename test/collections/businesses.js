@@ -215,7 +215,7 @@ describe('DEL /v1/businesses/:id', function() {
         var total = JSON.parse(results).meta.total;
         tu.del('/v1/businesses/3', function(err, results, res) {
           assert(!err);
-          assert(res.statusCode == 200)
+          assert(res.statusCode == 204)
           // compare to updated count
           tu.get('/v1/businesses', function(err, results, res) {
             assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
@@ -370,12 +370,8 @@ describe('PATCH /v1/businesses/:id', function(){
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(!results.error);
-        tu.logout(function(){
-          done();
-        });
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });
@@ -390,10 +386,7 @@ describe('PATCH /v1/businesses/:id', function(){
 
       tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
         assert(!error);
-        results = JSON.parse(results);
-        assert(res.statusCode == 200);
-
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
           assert(!error);
@@ -418,15 +411,11 @@ describe('PATCH /v1/businesses/:id', function(){
       , regularPunchesRequired: 10
       , elitePunchesRequired: 8
       , punchesRequiredToBecomeElite: 24
-      , photoUrl: 'http://placekitten.com/200/300'
+      , photoUrl: 'http://placekitten.com/204/300'
       };
 
       tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
-        assert(!error);
-        results = JSON.parse(results);
-        assert(res.statusCode == 200);
-
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/businesses/' + 4 + '/loyalty', function(error, results, res){
           assert(!error);
@@ -480,7 +469,7 @@ describe('PATCH /v1/businesses/:id', function(){
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function(){
           done();
         });
@@ -496,7 +485,7 @@ describe('PATCH /v1/businesses/:id', function(){
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function(){
           done();
         });
@@ -512,7 +501,7 @@ describe('PATCH /v1/businesses/:id', function(){
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/businesses/1', business, function(error, results, res){
         assert(!error);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.get('/v1/businesses/1', function(error, results, res) {
           assert(res.statusCode == 200);
           results = JSON.parse(results);

@@ -165,9 +165,7 @@ describe('PATCH /v1/users/:id', function() {
     };
     tu.login({ email: 'dumb@goodybag.com', password: 'password' }, function(error){
       tu.patch('/v1/users/6', user, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/users/6', function(error, results) {
           assert(!error);
@@ -274,7 +272,7 @@ describe('PATCH /v1/users/:id', function() {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/users/6', user, function(error, results, res){
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
 
         tu.get('/v1/users/6', function(error, results, res){
           assert(!error);
@@ -294,7 +292,7 @@ describe('DEL /v1/users/:id', function() {
       var id = 6; // Dumb user not used for anything
       tu.del('/v1/users/' + id, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(function() {
           done();
         });
@@ -328,7 +326,7 @@ describe('POST /v1/users/password-reset', function() {
         assert(results.data.token);
 
         tu.post('/v1/users/password-reset/'+results.data.token, { password:'password2' }, function(error, results, res) {
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.logout(function() {
             tu.login({ email: 'tferguson@gmail.com', password: 'password2' }, function(error){
@@ -337,7 +335,7 @@ describe('POST /v1/users/password-reset', function() {
 
                 tu.loginAsAdmin(function(error){
                   tu.patch('/v1/users/7', { password:'password' }, function(err, results, res) {
-                    assert(res.statusCode == 200);
+                    assert(res.statusCode == 204);
                     tu.logout(done);
                   });
                 });
@@ -351,9 +349,7 @@ describe('POST /v1/users/password-reset', function() {
 
   it('should not return the token if session is not with admin', function(done) {
     tu.post('/v1/users/password-reset', { email:'tferguson@gmail.com' }, function(error, results, res) {
-      assert(res.statusCode == 200);
-      results = JSON.parse(results);
-      assert(!results.data);
+      assert(res.statusCode == 204);
       done();
     });
   });

@@ -136,7 +136,7 @@ module.exports.del = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -189,7 +189,7 @@ module.exports.update = function(req, res){
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("groupId", "userId") SELECT $1, $2 FROM users WHERE users.id = $2';
               client.query(query, [req.param('id'), userId], done);
-            }
+            };
           }), function(err, results) {
             // did any insert fail?
             if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
@@ -200,7 +200,7 @@ module.exports.update = function(req, res){
 
             // done
             tx.commit();
-            return res.json({ error: null, data: null });
+            res.noContent();
           });
 
         });

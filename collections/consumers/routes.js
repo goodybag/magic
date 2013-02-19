@@ -133,7 +133,7 @@ module.exports.del = function(req, res){
 
       logger.db.debug(TAGS, result);
 
-      return res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -253,7 +253,7 @@ module.exports.update = function(req, res){
             tx.commit(function(error){
               if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-              res.json({ error: null, data: null });
+              res.noContent();
             });
           });
         });
@@ -311,7 +311,7 @@ module.exports.updatePassword = function(req, res){
               if (result.rowCount === 0)
                 return tx.abort(), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
               tx.commit();
-              res.json({ error:null, data:null });
+              res.noContent();
             });
           });
         });
@@ -492,7 +492,7 @@ module.exports.updateCollection = function(req, res){
     client.query(query.toString(), query.$values, function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      res.json({ error: null, data: null });
+      res.noContent();
     });
   });
 };
@@ -509,7 +509,7 @@ module.exports.deleteCollection = function(req, res){
   db.api.collections.remove(req.param('collectionId'), function(error){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    res.json({ error: null, data: null });
+    res.noContent();
   });
 };
 
@@ -583,7 +583,7 @@ module.exports.createCardupdate = function(req, res){
         if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
           res.json({ err:null, data:{ token:token }});
         else
-          res.json({ err:null, data:null });
+          res.noContent();
       });
     });
   });
@@ -613,7 +613,7 @@ module.exports.updateCard = function(req, res){
       client.query('UPDATE users SET "cardId"=$1 WHERE id = $2', [newCardId, targetConsumerId], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        res.json({ err:null, data:null });
+        res.noContent();
       });
     });
   });

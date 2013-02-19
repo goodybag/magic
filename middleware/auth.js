@@ -48,7 +48,7 @@ auth.allow = function(groups){
       return logger.error(TAGS, errors.auth.NOT_AUTHENTICATED), res.error(errors.auth.NOT_AUTHENTICATED);
 
     var userGroups = [].concat(req.session.user.groups).concat(req.permittedGroups);
-    if (!userGroups.length === 0 || !isUserAllowed(userGroups, groups))
+    if (userGroups.length === 0 || !isUserAllowed(userGroups, groups))
       return logger.error(TAGS, errors.auth.NOT_ALLOWED), res.error(errors.auth.NOT_ALLOWED);
     next();
   };

@@ -91,7 +91,7 @@ describe('PATCH /v1/group/:id', function() {
       };
       tu.patch('/v1/groups/6', group, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.get('/v1/groups/6', function(error, results) {
           assert(!error);
           results = JSON.parse(results);
@@ -125,7 +125,7 @@ describe('DEL /v1/groups/:id', function() {
       var id = 6; // Dumb group not used for anything
       tu.del('/v1/groups/' + id, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(done);
       });
     });

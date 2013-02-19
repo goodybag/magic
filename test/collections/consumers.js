@@ -196,9 +196,7 @@ describe('PUT /v1/consumers/:id', function() {
     };
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.patch('/v1/consumers/7', consumer, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/consumers/7', function(error, results) {
           assert(!error);
@@ -218,10 +216,7 @@ describe('PUT /v1/consumers/:id', function() {
 
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
       tu.patch('/v1/consumers/session', consumer, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
-
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -336,7 +331,7 @@ describe('DEL /v1/consumers/:id', function() {
     tu.loginAsAdmin(function(error, consumer){
       tu.del('/v1/consumers/' + id, function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(done);
       });
     });
@@ -359,7 +354,7 @@ describe('DEL /v1/consumers/:id', function() {
     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user){
       tu.tapinAuthRequest('DELETE', '/v1/consumers/14', '123456-YYZ', function(error, results, res) {
         assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
 
         tu.get('/v1/consumers/14', function(error, result, res){
           assert(!error);
@@ -385,7 +380,7 @@ describe('POST /v1/consumers/:id/password', function() {
         }
       };
       tu.httpRequest(request, JSON.stringify({ password:'wordpass' }), function(error, results, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(function(){
           tu.login({ email: 'tferguson@gmail.com', password: 'wordpass' }, function(error, user){
             assert(user);
@@ -398,7 +393,7 @@ describe('POST /v1/consumers/:id/password', function() {
               }
             };
             tu.httpRequest(request, JSON.stringify({ password:'password' }), function(error, results, res) {
-              assert(res.statusCode == 200);
+              assert(res.statusCode == 204);
               tu.logout(done);
             });
           });
@@ -500,8 +495,8 @@ describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
   it('should update the collection name', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.put('/v1/consumers/7/collections/1', { name:'Another crazy name!' }, function(error, results, res) {
-        assert(res.statusCode == 200);
-        tu.get('/v1/consumers/7/collections/1', function(error, results) {
+        assert(res.statusCode == 204);
+        tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
           assert(res.statusCode == 200);
           results = JSON.parse(results);
           assert(results.data.name == 'Another crazy name!');
@@ -553,7 +548,7 @@ describe('DELETE /v1/collections/:collectionId', function() {
           results = JSON.parse(results);
           assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 1);
           tu.del('/v1/collections/' + id, function(error, results, res){
-            assert(res.statusCode == 200);
+            assert(res.statusCode == 204);
             tu.get('/v1/consumers/7/collections', function(error, results, res){
               assert(res.statusCode == 200);
               results = JSON.parse(results);
@@ -606,7 +601,7 @@ describe('POST /v1/consumers/cardupdate', function() {
         assert(results.data.token);
 
         tu.post('/v1/consumers/cardupdate/'+results.data.token, {}, function(error, results, res) {
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
           tu.get('/v1/consumers/7', function(err, results, res) {
             assert(res.statusCode == 200);
@@ -614,7 +609,7 @@ describe('POST /v1/consumers/cardupdate', function() {
             assert(results.data.cardId == '999999-ZZZ');
 
             tu.patch('/v1/users/7', { cardId:'123456-ABC' }, function(err, results, res) {
-              assert(res.statusCode == 200);
+              assert(res.statusCode == 204);
               tu.logout(done);
             });
           });
@@ -625,9 +620,7 @@ describe('POST /v1/consumers/cardupdate', function() {
 
   it('should not return the token if session is not with admin', function(done) {
     tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
-      assert(res.statusCode == 200);
-      results = JSON.parse(results);
-      assert(!results.data);
+      assert(res.statusCode == 204);
       done();
     });
   });

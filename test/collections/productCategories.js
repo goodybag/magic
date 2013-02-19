@@ -74,10 +74,8 @@ describe('PATCH /v1/product-categories/:id', function() {
         isFeatured: false
       , description: 'Just a category'
       };
-      tu.patch('/v1/product-categories/1', category, function(error, results) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+      tu.patch('/v1/product-categories/1', category, function(error, results, res) {
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -91,10 +89,8 @@ describe('PATCH /v1/product-categories/:id', function() {
         id: 99999999999
       , isFeatured: false
       };
-      tu.patch(baseUrl + '/v1/product-categories/' + category.id, category, function(error, results) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(results.error);
+      tu.patch('/v1/product-categories/' + category.id, category, function(error, results, res) {
+        assert(res.statusCode == 400);
         tu.logout(done);
       });
     });
@@ -106,13 +102,8 @@ describe('DEL /v1/product-categories/:id', function() {
     tu.loginAsSales(function(error, user){
       var id = 4; // Dumb category not used for anything
 
-      tu.del('/v1/product-categories/' + id, function(error, results) {
-        assert(!error);
-        results = JSON.parse(results);
-
-        assert(!results.error);
-
-        // Logout
+      tu.del('/v1/product-categories/' + id, function(error, results, res) {
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });

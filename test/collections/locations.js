@@ -484,11 +484,11 @@ describe('POST /v1/locations', function() {
 
 describe('PATCH /v1/locations/:id', function() {
 
-  it('should respond with a 200', function(done) {
+  it('should respond with a 204', function(done) {
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -498,7 +498,7 @@ describe('PATCH /v1/locations/:id', function() {
     tu.loginAsSales(function(error, user){
       tu.patch('/v1/locations/2', { keyTagRequestPending: false }, function(err, results, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/locations/2', function(error, results){
           results = JSON.parse(results);
@@ -526,11 +526,11 @@ describe('PATCH /v1/locations/:id', function() {
 
 
 describe('DELETE /v1/locations/:id', function() {
-  it('should respond with a 200', function(done) {
+  it('should respond with a 204', function(done) {
     tu.loginAsSales(function(error, user){
       tu.del('/v1/locations/5', function(err, results, res) {
         assert(!err);
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -621,7 +621,7 @@ describe('/v1/locations/:id/products', function() {
   it('should add and remove products from a location', function(done) {
     tu.loginAsAdmin(function(error, user){
       tu.del('/v1/locations/1/products/1', function(err, results, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/locations/1/products', function(err, results, res) {
           assert(res.statusCode == 200);
@@ -631,7 +631,7 @@ describe('/v1/locations/:id/products', function() {
           }).length === 0);
 
           tu.post('/v1/locations/1/products', { productId:1, isSpotlight:false }, function(err, results, res) {
-            assert(res.statusCode == 200);
+            assert(res.statusCode == 204);
             tu.logout(done);
           });
         });
@@ -642,7 +642,7 @@ describe('/v1/locations/:id/products', function() {
   it('should update the product location', function(done) {
     tu.loginAsAdmin(function(error, user){
       tu.put('/v1/locations/1/products/1', {isSpotlight:true}, function(err, results, res) {
-        assert(res.statusCode == 200);
+        assert(res.statusCode == 204);
         tu.logout(done);
       });
     });
@@ -655,13 +655,7 @@ describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
       assert(!error);
       var current = new Date();
       tu.post('/v1/locations/2/key-tag-requests', {}, function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/locations/2', function(err, payload, res){
           assert(!err);
@@ -672,9 +666,9 @@ describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
           assert(!payload.error);
           assert(new Date(payload.data.lastKeyTagRequest) >= current);
           assert(payload.data.keyTagRequestPending === true);
-        });
 
-        tu.logout(done);
+          tu.logout(done);
+        });
       });
     });
   });

@@ -158,9 +158,7 @@ describe('PATCH /v1/managers/:id', function() {
     };
     tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
       tu.patch('/v1/managers/11110', manager, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/managers/11110', function(error, results) {
           assert(!error);
@@ -217,8 +215,7 @@ describe('DEL /v1/managers/:id', function() {
   it('should delete a single manager whose userId is ' + id, function(done) {
     tu.loginAsAdmin(function(error, manager){
       tu.del('/v1/managers/' + id, function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode === 200);
+        assert(res.statusCode === 204);
         tu.logout(function() {
           done();
         });
