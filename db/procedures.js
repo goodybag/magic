@@ -234,8 +234,8 @@ module.exports.registerConsumer = function(inputs, callback){
             '(INSERT INTO "usersGroups" ("userId", "groupId")',
               'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
           '"consumer" AS',
-            '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName")',
-              'SELECT "user".id, $firstName, $lastName, $screenName FROM "user")',
+            '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
+              'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")',
         'SELECT "user".id as "userId" FROM "user"'
       ]);
 
@@ -248,6 +248,7 @@ module.exports.registerConsumer = function(inputs, callback){
       query.$('lastName', inputs.lastName);
       query.$('cardId', inputs.cardId || '');
       query.$('screenName', inputs.screenName);
+      query.$('avatarUrl', inputs.avatarUrl);
 
       client.query(query.toString(), query.$values, function(error, result) {
         if (error) return callback(errors.internal.DB_FAILURE, error);
