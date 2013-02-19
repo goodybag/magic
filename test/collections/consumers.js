@@ -375,12 +375,28 @@ describe('DEL /v1/consumers/:id', function() {
 describe('POST /v1/consumers/:id/password', function() {
   it('should update a consumers password', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
-      tu.post('/v1/consumers/session/password', { oldPassword:'password', newPassword:'wordpass' }, function(error, results, res) {
+      var request = {
+        method: 'POST',
+        path: '/v1/consumers/session/password',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:password')).toString('base64')
+        }
+      };
+      tu.httpRequest(request, JSON.stringify({ password:'wordpass' }), function(error, results, res) {
         assert(res.statusCode == 200);
         tu.logout(function(){
           tu.login({ email: 'tferguson@gmail.com', password: 'wordpass' }, function(error, user){
             assert(user);
-            tu.post('/v1/consumers/7/password', { oldPassword: 'wordpass', newPassword:'password' }, function(error, results, res) {
+            var request = {
+              method: 'POST',
+              path: '/v1/consumers/session/password',
+              headers: {
+                'Content-type': 'application/json',
+                'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:wordpass')).toString('base64')
+              }
+            };
+            tu.httpRequest(request, JSON.stringify({ password:'password' }), function(error, results, res) {
               assert(res.statusCode == 200);
               tu.logout(done);
             });
@@ -389,10 +405,18 @@ describe('POST /v1/consumers/:id/password', function() {
       });
     });
   });
-  it('should respond 400 if the old password is incorrect', function(done) {
+  it('should respond 401 if the old password is incorrect', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error, user){
-      tu.post('/v1/consumers/session/password', { oldPassword:'foobar', newPassword:'wordpass' }, function(error, results, res) {
-        assert(res.statusCode == 400);
+      var request = {
+        method: 'POST',
+        path: '/v1/consumers/session/password',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Basic '+(new Buffer('tferguson@gmail.com:foobar')).toString('base64')
+        }
+      };
+      tu.httpRequest(request, JSON.stringify({ password:'wordpass' }), function(error, results, res) {
+        assert(res.statusCode == 401);
         tu.logout(done);
       });
     });

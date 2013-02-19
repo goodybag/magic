@@ -60,8 +60,7 @@ consumerPasswordItem:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        oldPassword: { type: string, eg: old_password }
-        newPassword: { type: string, eg: new_password }
+        password: { type: string, eg: new_password }
     delete:
       desc: Delete Consumer
       auth:

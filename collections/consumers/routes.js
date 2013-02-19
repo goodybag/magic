@@ -273,6 +273,11 @@ module.exports.updatePassword = function(req, res){
   if (!req.session || !req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
 
+  if (!req.headers.authorization || req.headers.authorization.indexOf('Basic') !== 0)
+    return res.error(errors.auth.NOT_AUTHENTICATED, 'Please include the current email and password in a basic authorization header'), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
+  var token = new Buffer(req.headers.authorization.split(/\s+/).pop() || '', 'base64').toString();
+  var oldPassword = token.split(/:/).pop();
+
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -291,11 +296,11 @@ module.exports.updatePassword = function(req, res){
         if (!user)
           return tx.abort(), res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-        utils.encryptPassword(req.body.oldPassword, function(error, encryptedOldPW) {
+        utils.encryptPassword(oldPassword, function(error, encryptedOldPW) {
           if (encryptedOldPW != user.password)
-            return tx.abort(), res.error(errors.input.VALIDATION_FAILED, { oldPassword:'Does not match the current password.' });
+            return tx.abort(), res.error(errors.auth.INVALID_PASSWORD);
 
-          utils.encryptPassword(req.body.newPassword, function(error, encryptedNewPW) {
+          utils.encryptPassword(req.body.password, function(error, encryptedNewPW) {
             var query = sql.query('UPDATE users SET password=$password WHERE id=$id');
             query.$('password', encryptedNewPW);
             query.$('id', user.id);
