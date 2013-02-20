@@ -4,6 +4,8 @@ var all = [
 , 'singlyUserId'
 , 'singlyAccessToken'
 , 'groups'
+, 'groups.id'
+, 'groups.name'
 , 'groupIds'
 , 'cardId'
 ];
