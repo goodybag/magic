@@ -63,7 +63,16 @@ module.exports.list = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
+    var query = sql.query([
+      'SELECT users.*',
+        ', COUNT(users.id) OVER() as "metaTotal"',
+        ', array_agg(groups.id) AS "groupIds"',
+        ', array_agg(groups.name) AS "groupNames"',
+      'FROM users LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
+      'FROM users LEFT JOIN groups ON groups.id = "usersGroups"."groupId"',
+      '{where}',
+      'GROUP BY users.id'
+    ]);
     query.where = sql.where();
     query.limit = sql.limit(req.query.limit, req.query.offset);
 
