@@ -83,8 +83,8 @@ module.exports.list = function(req, res){
     if (req.param('locationId')){
       var joinType = "inner";
 
-      if (req.param('spotlight') || includes.indexOf('isSpotlight') > -1 || includes.indexOf('inSpotlight') > -1)
-        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+      if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
+        query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
 
       if (!query.prodLocJoin) {
         query.prodLocJoin = [
@@ -164,7 +164,7 @@ module.exports.list = function(req, res){
       query.feelingsJoins = [
         'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
         'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
-        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
+        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId'
       ].join(' ');
       query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
       query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
@@ -369,8 +369,8 @@ module.exports.create = function(req, res){
 
       if (!inputs.isEnabled) inputs.isEnabled = true;
 
-      if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
-        inputs.isSpotlight = true;
+      if (typeof inputs.inSpotlight == null || typeof inputs.inSpotlight == undefined)
+        inputs.inSpotlight = true;
 
       inputs.likes = 0;
       inputs.wants = 0;

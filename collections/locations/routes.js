@@ -364,7 +364,7 @@ module.exports.getAnalytics = function(req, res){
         day   : utils.extend(results[0].rows[0], results[1].rows[0], results[2].rows[0]),
         week  : utils.extend(results[3].rows[0], results[4].rows[0], results[5].rows[0]),
         month : utils.extend(results[6].rows[0], results[7].rows[0], results[8].rows[0]),
-        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0]),
+        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0])
       };
       // console.log(stats);
 
@@ -388,15 +388,15 @@ module.exports.addProduct = function(req, res){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var query = sql.query([
-      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "isSpotlight")',
-        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $isSpotlight',
+      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $inSpotlight',
           'FROM locations',
           'WHERE locations.id = $locationId',
             'AND NOT EXISTS (SELECT 1 FROM "productLocations" WHERE "productId" = $productId AND "locationId" = $locationId)'
     ]);
     query.$('productId', inputs.productId);
     query.$('locationId', req.params.locationId);
-    query.$('isSpotlight', !!inputs.isSpotlight);
+    query.$('inSpotlight', !!inputs.inSpotlight);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -406,7 +406,7 @@ module.exports.addProduct = function(req, res){
 
       if (result.rowCount !== 0)
         magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
-      if (inputs.isSpotlight)
+      if (inputs.inSpotlight)
         magic.emit('locations.productSpotlightUpdate', req.params.locationId, inputs.productId, true);
     });
   });
@@ -420,7 +420,7 @@ module.exports.addProduct = function(req, res){
 module.exports.updateProduct = function(req, res){
   var TAGS = ['location-update-product', req.uuid];
 
-  if (typeof req.body.isSpotlight == 'undefined') {
+  if (typeof req.body.inSpotlight == 'undefined') {
     return res.error(errors.input.VALIDATION_FAILED, 'No valid values supplied for update')
   }
 
@@ -442,8 +442,8 @@ module.exports.updateProduct = function(req, res){
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
       res.noContent();
 
-      if (typeof req.body.isSpotlight != 'undefined')
-        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.isSpotlight);
+      if (typeof req.body.inSpotlight != 'undefined')
+        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.inSpotlight);
     });
   });
 };

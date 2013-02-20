@@ -285,7 +285,7 @@ describe('GET /v1/locations/:locationId/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].isSpotlight == undefined);
+      assert(payload.data[0].inSpotlight == undefined);
       assert(payload.meta.total > 1);
       done();
     });
@@ -305,7 +305,7 @@ describe('GET /v1/locations/:locationId/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].isSpotlight == true);
+      assert(payload.data[0].inSpotlight == true);
       assert(payload.meta.total > 1);
       done();
     });
