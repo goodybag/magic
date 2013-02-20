@@ -87,12 +87,13 @@ module.exports = {
 
   , default: {}
 
-  , consumer: {
+  , consumers: {
       create: ['name']
     }
 
   , owner: {
       read:   true
+    , create: ['name']
     , update: ['name']
     }
 
