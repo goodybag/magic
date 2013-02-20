@@ -48,7 +48,8 @@
   "devDependencies": {
     "better-assert": "1.0.x",
     "sinon": "1.5.x",
-    "mocha": "1.7.x"
+    "mocha": "1.7.x",
+    "mongode": "latest"
   },
   "scripts": {
     "test": "mocha test/test.js"

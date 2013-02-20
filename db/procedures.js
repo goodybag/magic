@@ -1,3 +1,9 @@
+var db = require('./index');
+var sql = require('../lib/sql');
+var errors = require('../lib/errors');
+var utils = require('../lib/utils');
+var templates = require('../templates');
+var config = require('../config');
 
 /**
  * Consumer punch logic
@@ -153,42 +159,42 @@ module.exports.ensureNotTaken = function(inputs, callback){
 
   query.fields = sql.fields();
 
-  if (inputs.email)
+  if (inputs.email) {
     query.fields.add(
-      'bool_or(case when users.email = \''
-    + inputs.email
-    + '\' then true else false end) as email'
+      'bool_or(case when users.email = $email then true else false end) as email'
     );
+    query.$('email', inputs.email);
+  }
 
   // If they're doing a user create, they're not intending on updating
   // an existing oauth user
-  if (inputs.singlyId)
+  if (inputs.singlyId) {
     query.fields.add(
-      'bool_or(case when users."singlyId" = \''
-    + inputs.singlyId
-    + '\' then true else false end) as "singlyId"'
+      'bool_or(case when users."singlyId" = $singlyId then true else false end) as "singlyId"'
     );
+    query.$('singlyId', inputs.singlyId);
+  }
 
-  if (inputs.singlyAccessToken)
+  if (inputs.singlyAccessToken) {
     query.fields.add(
-      'bool_or(case when users."singlyAccessToken" = \''
-    + inputs.singlyAccessToken
-    + '\' then true else false end) as "singlyAccessToken"'
+      'bool_or(case when users."singlyAccessToken" = $singlyAccessToken then true else false end) as "singlyAccessToken"'
     );
+    query.$('singlyAccessToken', inputs.singlyAccessToken);
+  }
 
-  if (inputs.screenName)
+  if (inputs.screenName) {
     query.fields.add(
-      'bool_or(case when consumers."screenName" = \''
-    + inputs.screenName
-    + '\' then true else false end) as "screenName"'
+      'bool_or(case when consumers."screenName" = $screenName then true else false end) as "screenName"'
     );
+    query.$('screenName', inputs.screenName);
+  }
 
-  if (inputs.cardId)
+  if (inputs.cardId) {
     query.fields.add(
-      'bool_or(case when users."cardId" = \''
-    + inputs.cardId
-    + '\' then true else false end) as "cardId"'
+      'bool_or(case when users."cardId" = $cardId then true else false end) as "cardId"'
     );
+    query.$('cardId', inputs.cardId);
+  }
 
   if (query.fields.fields.length === 0) return callback();
 
@@ -268,14 +274,6 @@ module.exports.registerConsumer = function(inputs, callback){
           };
 
           callback(null, user);
-
-          // Consider putting this in events
-          if (inputs.email) {
-            var emailHtml = templates.email.complete_registration({ url:'http://loljk.com' });
-            utils.sendMail(inputs.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
-              console.log('email cb', err, result);
-            }*/);
-          }
         });
       });
     });

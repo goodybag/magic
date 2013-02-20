@@ -8,16 +8,19 @@
 var
   mongo       = require('mongode')
 , pg          = require('pg')
+, db          = require('./index')
 , config      = require('./config')
 
-, db          = mongo.connect(config.mongoConnStr)
+, mongoDB     = mongo.connect(config.mongoConnStr)
 
-, onError = function(error){
+, onError = function(error, more){
     // Just throw for now
+    console.log(error, more);
     throw error;
   }
 
 , onComplete = function(){
+    console.log('Finished');
     process.exit(0);
   }
 
@@ -30,59 +33,58 @@ var
   }
 
 , run = {
-    businesses: function(client, callback){
-      console.log("Businesses");
-      businesses.find({}, function(error, businesses){
+    consumers: function(client, callback){
+      console.log("Consumers");
+      mongoDB.consumers.find().toArray(function(error, consumers) {
         if (error) return onError(error);
 
-        if (businesses.length === 0) return console.log("0 businesses");
+        var next = function() {
+          var consumer = consumers.pop();
+          if (!consumer) return callback();
 
-        for (var i = businesses.length - 1, business, locations; i >= 0; i--){
-          business = businesses[i];
-          locations = business.locations;
-
-          client.query({
-            name: 'insert-business'
-          , text: 'INSERT INTO businesses (' + fields.businesses.join(', ') + ')'
-          })
-
-          for (var i = locations.length - 1, location; i >= 0; i--){
-            location = locations[i];
-
-            client.query
+          var newConsumer = {
+            email: consumer.email,
+            password: consumer.password,
+            firstName: consumer.firstName,
+            lastName: consumer.lastName,
+            cardId: consumer.barcodeId,
+            screenName: consumer.screenName,
+            createdAt: consumer.createdAt
           };
-        }
+          console.log('.', newConsumer);
 
-        client.query('insert into businesses')
+          db.procedures.registerConsumer(newConsumer, function(error, result) {
+            if (error) return onError(error);
+
+            if (consumer.gbAdmin) {
+              // add to admin groups
+              db.api.usersGroups.insert({ groupId:1, userId:result.id }, next);
+            } else {
+              next();
+            }
+          });
+        };
+        next();
       });
     }
   }
 ;
 
-// Collections
-db.businesses = db.collection('businesses');
-
-// Setup queries
-client.query({
-  name: 'insert-business'
-, text: 'INSERT INTO businesses ('
-        + fields.businesses.join(', ')
-        + ') + ('
-        + fields.businesses.map(function(a){ return "$" + i++; }).join(', ')
-        + ')'
-});
+// Mongo Collections
+mongoDB.consumers = mongoDB.collection('consumers');
 
 module.exports = function(callback){
   console.log("Connecting to postgres database");
   pg.connect(config.postgresConnStr, function(error, client){
+    console.log('...connected', error);
     if (error) return onError(error);
 
     // Setup batch
     var
       batch = []
-    , cb = function(){
+    , cb = function() {
         if (batch.length === 0) onComplete();
-        else batch.pop().call({}, client);
+        else batch.pop().call(undefined, client, cb);
       }
     ;
 
@@ -91,6 +93,12 @@ module.exports = function(callback){
     }
 
     // Kick off!
-    batch.pop().call({}, client);
+    batch.pop().call(undefined, client, cb);
   });
 };
+
+// Application behavior
+// (when run from the command-line, exec)
+if (require.main === module) {
+  module.exports  ();
+}

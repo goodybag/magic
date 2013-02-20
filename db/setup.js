@@ -33,7 +33,7 @@ function loadFile(log, file) {
       }
     });
     return sql.promise;
-  }
+  };
 }
 
 function buildCreateTableSql(log, name) {
@@ -64,7 +64,7 @@ function buildDropIndexSql(log, schemaFile) {
     }
     return sql.join(' ');
   };
-};
+}
 
 function buildCreateIndexSql(log, schemaFile) {
   return function() {
@@ -82,7 +82,7 @@ function buildCreateIndexSql(log, schemaFile) {
     }
     return sql.join('; ');
   };
-};
+}
 
 function query(log, sql) {
   return function(paramSql) {
@@ -92,10 +92,10 @@ function query(log, sql) {
     if (verbose) { console.log(log); }
     var query = client.query(sql);
     var deferred = when.defer();
-    query.on('error', function(e) { console.log(e); })
+    query.on('error', function(e) { console.log(e); });
     query.on('end', deferred.resolve);
     return deferred.promise;
-  }
+  };
 }
 
 function loadTableSchema(name) {

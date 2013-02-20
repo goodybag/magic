@@ -108,6 +108,13 @@ module.exports.create = function(req, res){
     req.session.user = consumer;
     res.json({ error: null, data: consumer });
 
+    if (req.body.email) {
+        var emailHtml = templates.email.complete_registration({ url:'http://loljk.com' });
+        utils.sendMail(inputs.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
+          console.log('email cb', err, result);
+        }*/);
+      }
+
     magic.emit('consumers.registered', consumer);
   });
 };
