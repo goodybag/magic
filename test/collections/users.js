@@ -6,13 +6,16 @@ var utils = require('../../lib/utils');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
-    tu.get('/v1/users', function(error, results) {
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      assert(results.data.length > 0);
-      done();
-    });
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/users', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.length > 0);
+        assert(results.data[0].groups);
+        tu.logout(done);
+      });
+    })
   });
   it('should filter', function(done) {
     tu.get('/v1/users?filter=admin', function(err, results, res) {

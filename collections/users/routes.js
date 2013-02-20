@@ -63,7 +63,18 @@ module.exports.list = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
+    var query = sql.query([
+      'SELECT users.*',
+        ', COUNT(users.id) OVER() AS "metaTotal"',
+        ', array_agg(groups.id)   AS "groupIds"',
+        ', array_agg(groups.name) AS "groupNames"',
+      'FROM users',
+      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+      '{where}',
+      'GROUP BY users.id {limit}'
+    ]);
+
     query.where = sql.where();
     query.limit = sql.limit(req.query.limit, req.query.offset);
 
@@ -76,8 +87,26 @@ module.exports.list = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, dataResult);
 
+      var rows = dataResult.rows;
+
+      rows = rows.map(function(r){
+        r.groups = [];
+
+        if (r.groupIds && r.groupIds[0] != null){
+          for (var i = 0; i < r.groupIds.length; i++){
+            r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
+          }
+        }
+
+        delete r.groupIds;
+        delete r.groupNames;
+
+        return r;
+      });
+
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+
+      return res.json({ error: null, data: rows, meta: { total:total } });
     });
   });
 };
