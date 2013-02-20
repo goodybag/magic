@@ -20,6 +20,9 @@ define(function(require){
   , password: {
       type: 'text'
     }
+  , passwordSalt: {
+      type: 'text'
+    }
   , singlyAccessToken: {
       type: 'text'
     }
