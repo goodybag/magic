@@ -529,7 +529,8 @@ module.exports.addCollectionProduct = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "createdAt") VALUES ($collectionId, $productId, now()) RETURNING id');
+    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "userId", "createdAt") VALUES ($collectionId, $productId, $userId, now()) RETURNING id');
+    query.$('userId', req.params.userId);
     query.$('collectionId', collectionId);
     query.$('productId', productId);
 

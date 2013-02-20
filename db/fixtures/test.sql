@@ -444,11 +444,11 @@ SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- a
 -- PRODUCTS COLLECTIONS
 
 BEGIN;
-INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (1, 1, 1, now());
-INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (2, 2, 1, now());
-INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (3, 2, 2, now());
-INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (4, 3, 2, now());
-INSERT INTO "productsCollections" (id, "productId", "collectionId", "createdAt") VALUES (5, 4, 2, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (1, 7, 1, 1, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (2, 7, 2, 1, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (3, 7, 2, 2, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (4, 7, 3, 2, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (5, 7, 4, 2, now());
 COMMIT;
 SELECT setval('"productsCollections_id_seq"', (SELECT MAX(id) from "productsCollections")); -- advance the sequence past the IDs just used
 

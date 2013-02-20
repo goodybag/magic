@@ -66,6 +66,17 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should include inCollection if requested', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products?include=inCollection', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.filter(function(p) { return p.inCollection; }).length === 5);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should include likes/wants/tried if logged in', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/products', function(err, payload, res) {

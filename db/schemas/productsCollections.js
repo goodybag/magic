@@ -14,6 +14,11 @@ define(function(require){
       type: 'serial'
     , meta: 'primary key'
     }
+  , userId: {
+      type: 'int'
+    , meta: 'references users(id) on delete cascade'
+    , validators: { isInt:[] }
+    }
   , productId: {
       type: 'int'
     , meta: 'references products(id) on delete cascade'
