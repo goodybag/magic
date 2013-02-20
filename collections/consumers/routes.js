@@ -296,13 +296,14 @@ module.exports.updatePassword = function(req, res){
         if (!user)
           return tx.abort(), res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-        utils.encryptPassword(oldPassword, function(error, encryptedOldPW) {
-          if (encryptedOldPW != user.password)
+        utils.comparePasswords(oldPassword, user.password, function(error, isValidPassword) {
+          if (!isValidPassword)
             return tx.abort(), res.error(errors.auth.INVALID_PASSWORD);
 
-          utils.encryptPassword(req.body.password, function(error, encryptedNewPW) {
-            var query = sql.query('UPDATE users SET password=$password WHERE id=$id');
+          utils.encryptPassword(req.body.password, function(error, encryptedNewPW, newSalt) {
+            var query = sql.query('UPDATE users SET password=$password, "passwordSalt"=$salt WHERE id=$id');
             query.$('password', encryptedNewPW);
+            query.$('salt', newSalt);
             query.$('id', user.id);
 
             tx.query(query.toString(), query.$values, function(error, result) {

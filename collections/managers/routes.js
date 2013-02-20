@@ -99,54 +99,58 @@ module.exports.create = function(req, res){
   var TAGS = ['create-managers', req.uuid];
   logger.routes.debug(TAGS, 'creating manager ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    var query = sql.query([
-      'WITH',
-        '"user" AS',
-          '(INSERT INTO users (email, password, "singlyId", "singlyAccessToken", "cardId")',
-            'SELECT $email, $password, $singlyId, $singlyAccessToken, $cardId',
-              'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-              'RETURNING id),',
-        '"userGroup" AS',
-          '(INSERT INTO "usersGroups" ("userId", "groupId")',
-            'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'manager\' RETURNING id),',
-        '"manager" AS',
-          '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
-            'SELECT "user".id, $businessId, $locationId FROM "user")',
-      'SELECT "user".id as "userId" FROM "user"'
-    ]);
-    if (req.body.email) {
-      query.uidField = 'email';
-      query.$('uid', req.body.email);
-    } else {
-      query.uidField = '"singlyId"';
-      query.$('uid', req.body.singlyId);
-    }
-    var timestamp = +(new Date());
-    query.$('email', req.body.email || 'manager_'+timestamp+'@goodybag.com');
-    query.$('password', (req.body.password) ? utils.encryptPassword(req.body.password) : null);
-    query.$('singlyId', req.body.singlyId);
-    query.$('singlyAccessToken', req.body.singlyAccessToken);
-    query.$('cardId', req.body.cardId || '');
-    query.$('businessId', req.body.businessId);
-    query.$('locationId', req.body.locationId);
-
-    client.query(query.toString(), query.$values, function(error, result) {
+    db.getClient(TAGS[0], function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      // did the insert occur?
-      if (result.rowCount === 0) {
-        // email must have already existed
-        if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-        // Access token already existed - for now, send back generic error
-        // Because they should have used POST /oauth to create/auth
-        return res.error(errors.internal.DB_FAILURE);
+      var query = sql.query([
+        'WITH',
+          '"user" AS',
+            '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
+              'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId',
+                'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
+                'RETURNING id),',
+          '"userGroup" AS',
+            '(INSERT INTO "usersGroups" ("userId", "groupId")',
+              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'manager\' RETURNING id),',
+          '"manager" AS',
+            '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
+              'SELECT "user".id, $businessId, $locationId FROM "user")',
+        'SELECT "user".id as "userId" FROM "user"'
+      ]);
+      if (req.body.email) {
+        query.uidField = 'email';
+        query.$('uid', req.body.email);
+      } else {
+        query.uidField = '"singlyId"';
+        query.$('uid', req.body.singlyId);
       }
+      var timestamp = +(new Date());
+      query.$('email', req.body.email || 'manager_'+timestamp+'@goodybag.com');
+      query.$('password', encryptedPassword);
+      query.$('salt', passwordSalt);
+      query.$('singlyId', req.body.singlyId);
+      query.$('singlyAccessToken', req.body.singlyAccessToken);
+      query.$('cardId', req.body.cardId || '');
+      query.$('businessId', req.body.businessId);
+      query.$('locationId', req.body.locationId);
 
-      return res.json({ error: null, data: result.rows[0] });
+      client.query(query.toString(), query.$values, function(error, result) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        // did the insert occur?
+        if (result.rowCount === 0) {
+          // email must have already existed
+          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
+
+          // Access token already existed - for now, send back generic error
+          // Because they should have used POST /oauth to create/auth
+          return res.error(errors.internal.DB_FAILURE);
+        }
+
+        return res.json({ error: null, data: result.rows[0] });
+      });
     });
   });
 };

@@ -77,7 +77,6 @@ describe('DEL /v1/charities/:id', function() {
       tu.get('/v1/charities', function(err, results, res) {
         var total = JSON.parse(results).meta.total;
         tu.del('/v1/charities/3', function(err, results, res) {
-          assert(!err);
           assert(res.statusCode == 204)
           // compare to updated count
           tu.get('/v1/charities', function(err, results, res) {
