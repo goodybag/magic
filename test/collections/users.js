@@ -11,6 +11,7 @@ describe('GET /v1/users', function() {
       results = JSON.parse(results);
       assert(!results.error);
       assert(results.data.length > 0);
+      assert(results.data.groups);
       done();
     });
   });
