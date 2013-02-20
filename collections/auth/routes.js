@@ -123,14 +123,13 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getSinglyId: function(accessToken){
-      singly.get('/profiles', data, function(error, result){
+      singly.get('/profiles', { access_token: accessToken }, function(error, result){
         if (error) return stage.singlyError(error);
 
         var user = {
           singlyId: result.body.id
         , singlyAccessToken: accessToken
         };
-
         // Get facebook data
         if (result.body.facebook) return stage.getFacebookData(accessToken, user);
 
