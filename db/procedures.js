@@ -225,56 +225,58 @@ module.exports.registerConsumer = function(inputs, callback){
     module.exports.ensureNotTaken(inputs, function(error){
       if (error) return callback(error);
 
-      var query = sql.query([
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "singlyId", "singlyAccessToken", "cardId")',
-              'SELECT $email, $password, $singlyId, $singlyAccessToken, $cardId RETURNING *),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-          '"consumer" AS',
-            '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
-              'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")',
-        'SELECT "user".id as "userId" FROM "user"'
-      ]);
+      utils.encryptPassword(inputs.password, function(err, encryptedPassword, passwordSalt) {
 
-      var timestamp = +(new Date());
-      query.$('email', inputs.email || 'consumer_'+timestamp+'@goodybag.com');
-      query.$('password', (inputs.password) ? utils.encryptPassword(inputs.password) : null);
-      query.$('singlyId', inputs.singlyId);
-      query.$('singlyAccessToken', inputs.singlyAccessToken);
-      query.$('firstName', inputs.firstName);
-      query.$('lastName', inputs.lastName);
-      query.$('cardId', inputs.cardId || '');
-      query.$('screenName', inputs.screenName);
-      query.$('avatarUrl', inputs.avatarUrl);
+        var query = sql.query([
+          'WITH',
+            '"user" AS',
+              '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
+                'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId RETURNING *),',
+            '"userGroup" AS',
+              '(INSERT INTO "usersGroups" ("userId", "groupId")',
+                'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
+            '"consumer" AS',
+              '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
+                'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")',
+          'SELECT "user".id as "userId" FROM "user"'
+        ]);
 
-      client.query(query.toString(), query.$values, function(error, result) {
-        if (error) return callback(errors.internal.DB_FAILURE, error);
+        var timestamp = +(new Date());
+        query.$('email', inputs.email || 'consumer_'+timestamp+'@goodybag.com');
+        query.$('password', encryptedPassword);
+        query.$('salt', passwordSalt);
+        query.$('singlyId', inputs.singlyId);
+        query.$('singlyAccessToken', inputs.singlyAccessToken);
+        query.$('firstName', inputs.firstName);
+        query.$('lastName', inputs.lastName);
+        query.$('cardId', inputs.cardId || '');
+        query.$('screenName', inputs.screenName);
+        query.$('avatarUrl', inputs.avatarUrl);
 
-        inputs.userId = result.rows[0].userId;
+        client.query(query.toString(), query.$values, function(error, result) {
+          if (error) return callback(errors.internal.DB_FAILURE, error);
 
-        // Return session object
-        var user = {
-          id: inputs.userId
-        , email: inputs.email
-        , singlyAccessToken: inputs.singlyAccessToken
-        , singlyId: inputs.singlyId
-        , groups: ['consumers']
-        };
+          inputs.userId = result.rows[0].userId;
 
-        callback(null, user);
+          // Return session object
+          var user = {
+            id: inputs.userId
+          , email: inputs.email
+          , singlyAccessToken: inputs.singlyAccessToken
+          , singlyId: inputs.singlyId
+          , groups: ['consumers']
+          };
 
-        // Consider putting this in events
-        if (inputs.email) {
-          var emailHtml = templates.email.complete_registration({
-            url:'http://loljk.com',
-          });
-          utils.sendMail(inputs.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
-            console.log('email cb', err, result);
-          }*/);
-        }
+          callback(null, user);
+
+          // Consider putting this in events
+          if (inputs.email) {
+            var emailHtml = templates.email.complete_registration({ url:'http://loljk.com' });
+            utils.sendMail(inputs.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
+              console.log('email cb', err, result);
+            }*/);
+          }
+        });
       });
     });
   });

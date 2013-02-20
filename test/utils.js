@@ -59,19 +59,3 @@ describe('validate', function() {
 
 });
 
-describe('encryptPasswords, comparePasswords', function() {
-
-  it('should accurately compare a plaintext password with its encrypted form', function() {
-    var plainPass = '1234567890!@#$%^&*()qwertyuiopASDFGHJKLzxcVBNM<>?;';
-    var encryptedPass = utils.encryptPassword(plainPass);
-    assert(utils.comparePasswords(plainPass, encryptedPass));
-  });
-
-});
-
-describe('interceptFunctions', function() {
-
-  it('...? Todo');
-
-});
-

@@ -91,47 +91,51 @@ module.exports.create = function(req, res){
   var TAGS = ['create-users', req.uuid];
   logger.routes.debug(TAGS, 'creating user ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    var tx = new Transaction(client);
-    tx.begin(function() {
+    db.getClient(TAGS[0], function(error, client){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      var query = sql.query([
-        'INSERT INTO users (email, password, "cardId")',
-          'SELECT $email, $password, $cardId WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
-          'RETURNING id'
-      ]);
-      query.$('email', req.body.email);
-      query.$('password', utils.encryptPassword(req.body.password));
-      query.$('cardId', req.body.cardId);
-      client.query(query.toString(), query.$values, function(error, result) {
-        if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+      var tx = new Transaction(client);
+      tx.begin(function() {
 
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          tx.abort();
-          return res.error(errors.registration.EMAIL_REGISTERED);
-        }
-        var newUser = result.rows[0];
+        var query = sql.query([
+          'INSERT INTO users (email, password, "passwordSalt", "cardId")',
+            'SELECT $email, $password, $salt, $cardId WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
+            'RETURNING id'
+        ]);
+        query.$('email', req.body.email);
+        query.$('password', encryptedPassword);
+        query.$('salt', passwordSalt);
+        query.$('cardId', req.body.cardId);
+        client.query(query.toString(), query.$values, function(error, result) {
+          if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        // add groups
-        async.series((req.body.groups || []).map(function(groupId) {
-          return function(done) {
-            var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-            client.query(query, [newUser.id, groupId], done);
-          }
-        }), function(err, results) {
-          // did any insert fail?
-          if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
-            // the target group must not have existed
+          // did the insert occur?
+          if (result.rowCount === 0) {
+            // email must have already existed
             tx.abort();
-            return res.error(errors.input.INVALID_GROUPS);
+            return res.error(errors.registration.EMAIL_REGISTERED);
           }
+          var newUser = result.rows[0];
 
-          tx.commit();
-          return res.json({ error: null, data: newUser });
+          // add groups
+          async.series((req.body.groups || []).map(function(groupId) {
+            return function(done) {
+              var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
+              client.query(query, [newUser.id, groupId], done);
+            };
+          }), function(err, results) {
+            // did any insert fail?
+            if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
+              // the target group must not have existed
+              tx.abort();
+              return res.error(errors.input.INVALID_GROUPS);
+            }
+
+            tx.commit();
+            return res.json({ error: null, data: newUser });
+          });
         });
       });
     });
@@ -176,95 +180,100 @@ module.exports.update = function(req, res){
   var cardId = req.body.cardId;
   var groups = req.body.groups;
 
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  utils.encryptPassword(password, function(err, encryptedPassword, passwordSalt) {
 
-    var tx = new Transaction(client);
+    db.getClient(TAGS[0], function(error, client){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var applyGroupRelations = function(){
-      // delete all group relations
-      var query = usersGroups.delete()
-        .where(usersGroups.userId.equals(req.param('id')));
-      client.query(query.toQuery(), function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+      var tx = new Transaction(client);
 
-        // add new group relations
-        async.series((groups || []).map(function(groupId) {
-          return function(done) {
-            var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-            client.query(query, [req.param('id'), groupId], done);
-          };
-        }), function(err, results) {
-          // did any insert fail?
-          if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
-            // the target group must not have existed
+      var applyGroupRelations = function(){
+        // delete all group relations
+        var query = usersGroups.delete()
+          .where(usersGroups.userId.equals(req.param('id')));
+        client.query(query.toQuery(), function(error, result) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+
+          // add new group relations
+          async.series((groups || []).map(function(groupId) {
+            return function(done) {
+              var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
+              client.query(query, [req.param('id'), groupId], done);
+            };
+          }), function(err, results) {
+            // did any insert fail?
+            if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
+              // the target group must not have existed
+              tx.abort();
+              return res.error(errors.input.INVALID_GROUPS);
+            }
+
+            // done
+            tx.commit();
+            res.noContent();
+          });
+        });
+      };
+
+      // start transaction
+      tx.begin(function() {
+
+        // build update query
+        var query = sql.query([
+          'UPDATE users SET {updates}',
+            'WHERE users.id = $id {emailClause}'
+        ]);
+        query.updates = sql.fields();
+        query.$('id', req.params.id);
+        if (email) {
+          query.updates.add('email = $email');
+          query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id AND email IS NOT NULL)'; // this makes sure the user doesn't take an email in use
+          query.$('email', email);
+        }
+        if (password) {
+          query.updates.add('password = $password');
+          query.$('password', encryptedPassword);
+          query.updates.add('"passwordSalt" = $salt');
+          query.$('salt', passwordSalt);
+        }
+        if (cardId) {
+          query.updates.add('"cardId" = $cardId');
+          query.$('cardId', cardId);
+        }
+
+        logger.db.debug(TAGS, query.toString());
+
+        if (query.updates.fields.length === 0) return applyGroupRelations();
+
+        // run update query
+        client.query(query.toString(), query.$values, function(error, result){
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          logger.db.debug(TAGS, result);
+
+          // did the update occur?
+          if (result.rowCount === 0) {
             tx.abort();
-            return res.error(errors.input.INVALID_GROUPS);
+            // figure out what the problem was
+            client.query('SELECT id FROM users WHERE id=$1', [+req.param('id') || 0], function(error, results) {
+              if (results.rowCount === 0) {
+                // id didnt exist
+                return res.status(404).end();
+              } else {
+                // email must have already existed
+                return res.error(errors.registration.EMAIL_REGISTERED);
+              }
+            });
+            return;
           }
 
-          // done
-          tx.commit();
-          res.noContent();
+          // are we done?
+          if (typeof req.body.groups == 'undefined') {
+            tx.commit();
+            return res.noContent();
+          }
+
+          applyGroupRelations();
         });
-      });
-    };
-
-    // start transaction
-    tx.begin(function() {
-
-      // build update query
-      var query = sql.query([
-        'UPDATE users SET {updates}',
-          'WHERE users.id = $id {emailClause}'
-      ]);
-      query.updates = sql.fields();
-      query.$('id', req.params.id)
-      if (email) {
-        query.updates.add('email = $email');
-        query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id AND email IS NOT NULL)'; // this makes sure the user doesn't take an email in use
-        query.$('email', email);
-      }
-      if (password) {
-        query.updates.add('password = $password');
-        query.$('password', utils.encryptPassword(password));
-      }
-      if (cardId) {
-        query.updates.add('"cardId" = $cardId');
-        query.$('cardId', cardId);
-      }
-
-      logger.db.debug(TAGS, query.toString());
-
-      if (query.updates.fields.length === 0) return applyGroupRelations();
-
-      // run update query
-      client.query(query.toString(), query.$values, function(error, result){
-        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-        logger.db.debug(TAGS, result);
-
-        // did the update occur?
-        if (result.rowCount === 0) {
-          tx.abort();
-          // figure out what the problem was
-          client.query('SELECT id FROM users WHERE id=$1', [+req.param('id') || 0], function(error, results) {
-            if (results.rowCount == 0) {
-              // id didnt exist
-              return res.status(404).end();
-            } else {
-              // email must have already existed
-              return res.error(errors.registration.EMAIL_REGISTERED);
-            }
-          });
-          return;
-        }
-
-        // are we done?
-        if (typeof req.body.groups == 'undefined') {
-          tx.commit();
-          return res.noContent();
-        }
-
-        applyGroupRelations();
       });
     });
   });
@@ -280,9 +289,8 @@ module.exports.createPasswordReset = function(req, res){
   logger.routes.debug(TAGS, 'creating user ' + req.params.id + ' password reset');
 
   var email = req.body.email;
-  if (!email) {
-    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.')
-  }
+  if (!email)
+    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -325,25 +333,22 @@ module.exports.resetPassword = function(req, res){
   var TAGS = ['reset-user-password', req.uuid];
   logger.routes.debug(TAGS, 'resetting user ' + req.params.id + ' password');
 
-  var newPassword = req.body.password;
-  if (!newPassword) {
-    return res.error(errors.input.VALIDATION_FAILED, '`password` is required.')
-  }
+  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    db.getClient(TAGS[0], function(error, client){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (result.rowCount === 0) {
-        return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.')
-      }
-      var userId = result.rows[0].userId;
-
-      client.query('UPDATE users SET password=$1 WHERE id=$2', [utils.encryptPassword(newPassword), userId], function(error, result) {
+      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        if (result.rowCount === 0)
+          return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.');
+        var userId = result.rows[0].userId;
 
-        res.noContent();
+        client.query('UPDATE users SET password=$1, "passwordSalt"=$2 WHERE id=$3', [encryptedPassword, passwordSalt, userId], function(error, result) {
+          if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+          res.noContent();
+        });
       });
     });
   });
