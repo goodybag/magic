@@ -42,11 +42,12 @@ module.exports.list = function(req, res){
     var includes = [].concat(req.query.include);
     var includeTags = includes.indexOf('tags') !== -1;
     var includeCats = includes.indexOf('categories') !== -1;
+    var includeInColl = includes.indexOf('inCollection') !== -1;
 
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins}',
+        '{prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY {groupby}',
@@ -69,7 +70,7 @@ module.exports.list = function(req, res){
       query.prodLocJoin = [
         'INNER JOIN "productLocations" ON',
           '"productLocations"."productId" = products.id'
-      ].join(' ')
+      ].join(' ');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
       query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance')
@@ -164,7 +165,7 @@ module.exports.list = function(req, res){
       query.feelingsJoins = [
         'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
         'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
-        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId',
+        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId'
       ].join(' ');
       query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
       query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
@@ -185,6 +186,17 @@ module.exports.list = function(req, res){
 
       if (req.param('userWants') != null && typeof req.param('userWants') != 'undefined')
         query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
+    }
+
+    // is in collection join
+    if (includeInColl && req.session.user) {
+     query.fields.add([
+        'EXISTS(SELECT id FROM "productsCollections"',
+          'WHERE "productsCollections"."productId" = products.id',
+            'AND "productsCollections"."userId" = $userId',
+        ') AS "inCollection"'
+      ].join(' '));
+      query.$('userId', req.session.user.id);
     }
 
     // custom sorts
