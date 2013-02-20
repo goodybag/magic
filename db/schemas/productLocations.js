@@ -40,7 +40,7 @@ define(function(require){
   , position: {
       type: 'earth'
     }
-  , isSpotlight: {
+  , inSpotlight: {
       type: 'boolean'
     }
   , createdAt: {

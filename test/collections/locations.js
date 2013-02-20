@@ -630,7 +630,7 @@ describe('/v1/locations/:id/products', function() {
             return product.id === 1;
           }).length === 0);
 
-          tu.post('/v1/locations/1/products', { productId:1, isSpotlight:false }, function(err, results, res) {
+          tu.post('/v1/locations/1/products', { productId:1, inSpotlight:false }, function(err, results, res) {
             assert(res.statusCode == 204);
             tu.logout(done);
           });
@@ -641,7 +641,7 @@ describe('/v1/locations/:id/products', function() {
 
   it('should update the product location', function(done) {
     tu.loginAsAdmin(function(error, user){
-      tu.put('/v1/locations/1/products/1', {isSpotlight:true}, function(err, results, res) {
+      tu.put('/v1/locations/1/products/1', {inSpotlight:true}, function(err, results, res) {
         assert(res.statusCode == 204);
         tu.logout(done);
       });

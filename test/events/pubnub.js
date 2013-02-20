@@ -219,7 +219,7 @@ describe('Location Product Spotlight Updates: ', function() {
         channel:'location-1.productSpotlightUpdate',
         connect:function() {
           tu.loginAsAdmin(function(error, user) {
-            tu.put('/v1/locations/1/products/1', { isSpotlight:false }, function(err, results, res) {
+            tu.put('/v1/locations/1/products/1', { inSpotlight:false }, function(err, results, res) {
               assert(res.statusCode == 200);
               tu.logout();
             });
@@ -227,7 +227,7 @@ describe('Location Product Spotlight Updates: ', function() {
         },
         callback:function (message) {
           assert(message.productId === 1);
-          assert(message.isSpotlight === false);
+          assert(message.inSpotlight === false);
           pubnub.unsubscribe({ channel:'location-1.productSpotlightUpdate' });
           done();
         }

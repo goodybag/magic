@@ -137,7 +137,7 @@ productsCollection:
         eg: { email: admin@goodybag.com, password: password }
       body:
         productId:   { type: int, eg: 1 }
-        isSpotlight: { type: bool, eg: true }
+        inSpotlight: { type: bool, eg: true }
   children:
     - /locations/:locationId/products/:productId
 
@@ -155,7 +155,7 @@ productsItem:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        isSpotlight: { type: bool, eg: true }
+        inSpotlight: { type: bool, eg: true }
     delete:
       desc: Remove Product from Location
       auth:

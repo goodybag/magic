@@ -84,8 +84,8 @@ module.exports.list = function(req, res){
     if (req.param('locationId')){
       var joinType = "inner";
 
-      if (req.param('spotlight') || includes.indexOf('isSpotlight') > -1 || includes.indexOf('inSpotlight') > -1)
-        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+      if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
+        query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
 
       if (!query.prodLocJoin) {
         query.prodLocJoin = [
@@ -381,8 +381,8 @@ module.exports.create = function(req, res){
 
       if (!inputs.isEnabled) inputs.isEnabled = true;
 
-      if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
-        inputs.isSpotlight = true;
+      if (typeof inputs.inSpotlight == null || typeof inputs.inSpotlight == undefined)
+        inputs.inSpotlight = true;
 
       inputs.likes = 0;
       inputs.wants = 0;

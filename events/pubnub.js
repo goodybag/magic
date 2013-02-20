@@ -114,10 +114,10 @@ module.exports = {
   }
 
 , 'locations.productSpotlightUpdate':
-  function (locationId, productId, isSpotlight){
+  function (locationId, productId, inSpotlight){
     pubnub.publish({
         channel:'location-' + locationId + '.productSpotlightUpdate',
-        message:{ productId:+productId, isSpotlight:!!isSpotlight },
+        message:{ productId:+productId, inSpotlight:!!inSpotlight },
         callback:logErrors
     });
   }
