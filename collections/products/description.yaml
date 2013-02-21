@@ -19,7 +19,7 @@ collection:
         locationId: { type: id,      eg: 1 }
         tag:        { type: string*, eg: [food, apparel] }
         sort:       { type: string,  eg: -name, choices: [-name, name, -distance, distance, -random, random, -popular, popular] }
-        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, inCollection] }
+        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, collections] }
         offset:     { type: int,     eg: 5, default: 0 }
         limit:      { type: int,     eg: 5, default: 20 }
         spotlight:  { type: bool,    eg: false }
