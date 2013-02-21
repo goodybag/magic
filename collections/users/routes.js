@@ -162,8 +162,7 @@ module.exports.create = function(req, res){
               return res.error(errors.input.INVALID_GROUPS);
             }
 
-            tx.commit();
-            return res.json({ error: null, data: newUser });
+            tx.commit(function() { res.json({ error: null, data: newUser }); });
           });
         });
       });
@@ -238,8 +237,7 @@ module.exports.update = function(req, res){
             }
 
             // done
-            tx.commit();
-            res.noContent();
+            tx.commit(function() { res.noContent(); });
           });
         });
       };
@@ -297,8 +295,8 @@ module.exports.update = function(req, res){
 
           // are we done?
           if (typeof req.body.groups == 'undefined') {
-            tx.commit();
-            return res.noContent();
+            tx.commit(function(){ res.noContent(); });
+            return;
           }
 
           applyGroupRelations();
