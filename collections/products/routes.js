@@ -42,7 +42,7 @@ module.exports.list = function(req, res){
     var includes = [].concat(req.query.include);
     var includeTags = includes.indexOf('tags') !== -1;
     var includeCats = includes.indexOf('categories') !== -1;
-    var includeInColl = includes.indexOf('inCollection') !== -1;
+    var includeColl = includes.indexOf('collections') !== -1;
 
     // build data query
     var query = sql.query([
@@ -189,12 +189,12 @@ module.exports.list = function(req, res){
     }
 
     // is in collection join
-    if (includeInColl && req.session.user) {
-     query.fields.add([
-        'EXISTS(SELECT id FROM "productsCollections"',
+    if (includeColl && req.session.user) {
+      query.fields.add([
+        'array(SELECT "collectionId" FROM "productsCollections"',
           'WHERE "productsCollections"."productId" = products.id',
             'AND "productsCollections"."userId" = $userId',
-        ') AS "inCollection"'
+        ') AS "collections"'
       ].join(' '));
       query.$('userId', req.session.user.id);
     }
