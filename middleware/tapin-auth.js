@@ -31,7 +31,9 @@ module.exports = function(req, res, next){
   if (!tapinStationUser) return next();
   if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
 
-  // override the res.json to restore the tapin user after the response is sent
+  // override the response functions
+  // - to restore the tapin user after the response is sent
+  // - to only send noContent if we're not sending back meta data
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
     if (isFirstTapin){
@@ -41,10 +43,15 @@ module.exports = function(req, res, next){
     req.session.user = tapinStationUser;
     origjsonFn.apply(res, arguments);
   };
-
   res.end = function(){
     req.session.user = tapinStationUser;
     origendFn.apply(res, arguments);
+  };
+  res.noContent = function() {
+    if (isFirstTapin)
+      this.json({});
+    else
+      this.status(204).end();
   };
 
   var tx, client;
@@ -154,13 +161,13 @@ module.exports = function(req, res, next){
     }
 
   , end: function(user) {
-      tx.commit(function() {;
+      tx.commit(function() {
         // First groupIds
         if (!user.groupIds){
           user.groupIds = {};
           for (var i = user.groups.length - 1; i >= 0; i--){
             if (user[user.groups[i] + 'Id'])
-              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id']
+              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id'];
           }
         }
         req.session.user = user;

@@ -863,7 +863,9 @@ describe('POST /v1/products/:id/feelings', function(done) {
         assert(!error);
         
         tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
-          assert(res.statusCode == 204);
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.meta.isFirstTapin);
           tu.logout(done);
         });
       });
