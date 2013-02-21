@@ -264,7 +264,7 @@ module.exports.registerConsumer = function(inputs, callback){
           , email: inputs.email
           , singlyAccessToken: inputs.singlyAccessToken
           , singlyId: inputs.singlyId
-          , groups: ['consumers']
+          , groups: ['consumer']
           };
 
           callback(null, user);
