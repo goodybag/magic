@@ -199,8 +199,7 @@ module.exports.update = function(req, res){
             }
 
             // done
-            tx.commit();
-            res.noContent();
+            tx.commit(function() { res.noContent(); });
           });
 
         });

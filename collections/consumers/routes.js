@@ -311,8 +311,7 @@ module.exports.updatePassword = function(req, res){
                 return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
               if (result.rowCount === 0)
                 return tx.abort(), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
-              tx.commit();
-              res.noContent();
+              tx.commit(function() { res.noContent(); });
             });
           });
         });
