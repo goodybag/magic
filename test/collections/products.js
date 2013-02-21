@@ -66,12 +66,13 @@ describe('GET /v1/products', function() {
     });
   });
 
-  it('should include inCollection if requested', function(done) {
+  it('should include collections if requested', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/products?include=inCollection', function(err, payload, res) {
+      tu.get('/v1/products?include=collections', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.filter(function(p) { return p.inCollection; }).length === 5);
+        assert(payload.data.filter(function(p) { return p.collections[0] == 1 && p.id == 1; }).length === 1);
+        assert(payload.data.filter(function(p) { return p.collections.length > 0; }).length === 5);
         tu.logout(done);
       });
     });
