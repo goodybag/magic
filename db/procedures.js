@@ -247,8 +247,7 @@ module.exports.registerConsumer = function(inputs, callback){
           'SELECT "user".id as "userId" FROM "user"'
         ]);
 
-        var timestamp = +(new Date());
-        query.$('email', inputs.email || 'consumer_'+timestamp+'@goodybag.com');
+        query.$('email', inputs.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
         query.$('singlyId', inputs.singlyId);
