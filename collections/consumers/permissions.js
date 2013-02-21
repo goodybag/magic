@@ -87,7 +87,7 @@ module.exports = {
 
   , default: {}
 
-  , consumers: {
+  , consumer: {
       create: ['name']
     }
 
