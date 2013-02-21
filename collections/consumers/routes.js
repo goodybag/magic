@@ -521,7 +521,7 @@ module.exports.deleteCollection = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.addCollectionProduct = function(req, res){
-  var TAGS = ['create-consumers-collection', req.uuid];
+  var TAGS = ['add-consumers-collection-product', req.uuid];
   logger.routes.debug(TAGS, 'adding product to consumer ' + req.params.userId + ' collection');
 
   var collectionId = req.param('collectionId');
@@ -545,6 +545,34 @@ module.exports.addCollectionProduct = function(req, res){
   });
 };
 
+/**
+ * Remove product from consumer collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.removeCollectionProduct = function(req, res){
+  var TAGS = ['remove-consumers-collection-product', req.uuid];
+  logger.routes.debug(TAGS, 'removing product ' + req.params.productId + ' from consumer ' + req.params.userId + ' collection');
+
+  var collectionId = req.param('collectionId');
+  var productId = req.param('productId');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var query = sql.query('DELETE FROM "productsCollections" WHERE "collectionId"=$collectionId AND "productId"=$productId');
+    query.$('collectionId', collectionId);
+    query.$('productId', productId);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.noContent();
+
+      magic.emit('consumers.removeFromCollection', req.params.userId || req.session.user.id, collectionId, productId);
+    });
+  });
+};
 
 /**
  * Create consumer cardupdate

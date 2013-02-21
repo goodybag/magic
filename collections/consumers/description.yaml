@@ -117,8 +117,8 @@ collectionsItem:
     type: item
     path: /consumers/:userId/collections/:collectionId
     params:
-      userId:       { type: int, eg: 9 }
-      collectionId: { type: int, eg: 3 }
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
   methods:
     get:
       desc: Get Consumer Collection Info
@@ -132,11 +132,11 @@ collectionsItem:
 
 collectionProductsCollection:
   resource:
-    type: item
+    type: collection
     path: /consumers/:userId/collections/:collectionId/products
     params:
-      userId:       { type: int, eg: 9 }
-      collectionId: { type: int, eg: 3 }
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
   methods:
     get:
       desc: List Consumer Collection Products
@@ -162,4 +162,20 @@ collectionProductsCollection:
         required: true
         eg: { email: consumer2@gmail.com, password: password }
       body:
-        productId: { type: int, eg: 1, required: true }
+        productId: { type: id, eg: 1, required: true }
+
+
+collectionsProductItem:
+  resource:
+    type: item
+    path: /consumers/:userId/collections/:collectionId/products/:productId
+    params:
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
+      productId:    { type: id, eg: 1 }
+  methods:
+    delete:
+      desc: Remove Product From Consumer Collection
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

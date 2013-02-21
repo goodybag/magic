@@ -549,6 +549,45 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
   });
 });
 
+describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId', function() {
+  it('should remove a product from the collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var oldProducts = JSON.parse(results).data;
+        tu.del('/v1/consumers/7/collections/1/products/4', function(error, results, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+            assert(res.statusCode == 200);
+            var newProducts = JSON.parse(results).data;
+            assert(oldProducts.length - 1 == newProducts.length);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+  it('should duplicate products to the automagic collections', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      magic.once('debug.productAutomagickedToCollection', function(results) {
+        assert(results.productId == 5);
+        tu.logout(done);
+      });
+      tu.post('/v1/consumers/7/collections/1/products', { productId:5 }, function(error, results, res) {
+        assert(res.statusCode == 200);
+      });
+    });
+  });
+  it('should fail validation if bad input is given', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
+});
+
 describe('DELETE /v1/collections/:collectionId', function() {
   it('should delete a users collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
