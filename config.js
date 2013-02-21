@@ -29,7 +29,7 @@ var config = {
   , outputActivePoolIds: false
 
   , emailEnabled: false
-  , emailFromAddress: 'team@goodybag.com'
+  , emailFromAddress: 'info@goodybag.com'
 
   , cookieSecret: "g00dybagr0ck$!"
   , passwordSalt: "$G00DYBAGR0CK$!"
