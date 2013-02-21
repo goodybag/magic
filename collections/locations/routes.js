@@ -8,6 +8,7 @@ var
 , utils   = require('../../lib/utils')
 , sql     = require('../../lib/sql')
 , errors  = require('../../lib/errors')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 

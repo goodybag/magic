@@ -1,5 +1,6 @@
 var assert = require('better-assert');
 var sinon = require('sinon');
+var magic = require('../../lib/magic');
 
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
