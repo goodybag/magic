@@ -201,7 +201,7 @@ server.del(
 , middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId')
 , middleware.profile('apply groups consumers owner')
 , middleware.applyGroups(applyGroups.collectionOwner)
-, middleware.profile('permissions')
+, middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'owner')
 , middleware.profile('delete consumer collection handler')
 , routes.deleteCollection
@@ -224,7 +224,7 @@ server.get(
 // consumers.addCollectionProduct
 server.post(
   '/v1/consumers/:userId/collections/:collectionId/products'
-, middleware.profile('POST /v1/consumers/:userId/collections/:collectionID')
+, middleware.profile('POST /v1/consumers/:userId/collections/:collectionId/products')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collectionProductsCollection.methods.post.body)
 , middleware.profile('apply groups consumers owner')
@@ -233,6 +233,18 @@ server.post(
 , middleware.permissions(permissions.collectionProducts)
 , middleware.profile('add product to consumer collection handler')
 , routes.addCollectionProduct
+);
+
+// consumers.removeCollectionProduct
+server.delete(
+  '/v1/consumers/:userId/collections/:collectionId/products/:productId'
+, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId/products/:productId')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'owner')
+, middleware.profile('remove product from consumer collection handler')
+, routes.removeCollectionProduct
 );
 
 module.exports = server;
