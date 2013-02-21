@@ -10,6 +10,8 @@ var
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
 
+, magic   = require('../../lib/magic')
+
 , logger  = {}
 ;
 

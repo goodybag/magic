@@ -5,6 +5,7 @@
 var
   db      = require('../db')
 , utils   = require('../lib/utils')
+, magic   = require('../lib/magic')
 
 , logger  = require('../lib/logger')({ app: 'api', component: 'activity' })
 
