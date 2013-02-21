@@ -133,7 +133,7 @@ function testInvalidRequest(methodDoc, corruptKey) {
     requestDoc.setInput(corruptKey, (function(type) {
       if (/string|url|email|bool/.test(type))
         return 123456789;
-      if (/int|float|id|cardid|time/.test(type))
+      if (/int|float|id|cardid|time|group/.test(type))
         return 'CORRUPTION STRING';
     })(methodDoc.getAttrType(corruptKey)));
     request(methodDoc, requestDoc, function(res, result) {
