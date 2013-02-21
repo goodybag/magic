@@ -1,3 +1,9 @@
+var db = require('./index');
+var sql = require('../lib/sql');
+var errors = require('../lib/errors');
+var utils = require('../lib/utils');
+var templates = require('../templates');
+var config = require('../config');
 
 /**
  * Consumer punch logic

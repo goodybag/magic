@@ -3,14 +3,15 @@
  */
 
 var
-  db         = require('../../db')
-, sql        = require('../../lib/sql')
-, utils      = require('../../lib/utils')
-, errors     = require('../../lib/errors')
+  db      = require('../../db')
+, sql     = require('../../lib/sql')
+, utils   = require('../../lib/utils')
+, errors  = require('../../lib/errors')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 
-, schemas    = db.schemas
+, schemas = db.schemas
 ;
 
 // Setup loggers
