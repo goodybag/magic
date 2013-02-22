@@ -1,7 +1,7 @@
 var all = [
   'id'
 , 'email'
-, 'singlyUserId'
+, 'singlyId'
 , 'singlyAccessToken'
 , 'groups'
 , 'groups.id'
