@@ -53,6 +53,7 @@ collection:
         endFriday:            { type: time,    eg: 12:15pm }
         endSaturday:          { type: time,    eg: 12:15pm }
         keyTagRequestPending: { type: bool,    eg: false }
+        isEnabled:            { type: bool,    eg: true }
   children:
     - /locations/:id
 
@@ -98,6 +99,7 @@ item:
         endFriday:            { type: time,    eg: 12:15pm }
         endSaturday:          { type: time,    eg: 12:15pm }
         keyTagRequestPending: { type: bool,    eg: false }
+        isEnabled:            { type: bool,    eg: true }
     delete:
       desc: Delete Location
       auth:

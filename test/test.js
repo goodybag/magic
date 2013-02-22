@@ -64,7 +64,7 @@ before(function(done) {
 
 require('./collections/charities');
 require('./collections/businesses');
-// require('./collections/locations');
+require('./collections/locations');
 // require('./collections/users');
 // require('./collections/consumers');
 // require('./collections/managers');
