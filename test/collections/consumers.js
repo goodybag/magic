@@ -511,6 +511,28 @@ describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
   });
 });
 
+describe('GET /v1/consumers/:id/collections/:collectionId/products', function() {
+  it('should get the products in the collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        assert(JSON.parse(results).data.length == 2);
+        tu.logout(done);
+      });
+    });
+  });
+  it('should include collections data on request', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1/products?include=collections', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var products = JSON.parse(results).data;
+        assert(products.filter(function(p) { return p.collections.length > 0; }).length == 2);
+        tu.logout(done);
+      });
+    });
+  });
+});
+
 describe('POST /v1/consumers/:id/collections/:collectionId/products', function() {
   it('should add a product to the collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){

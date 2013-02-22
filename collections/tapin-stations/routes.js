@@ -132,8 +132,7 @@ module.exports.create = function(req, res){
         query.uidField = '"singlyId"';
         query.$('uid', req.body.singlyId);
       }
-      var timestamp = +(new Date());
-      query.$('email', req.body.email || 'tapin_station_'+timestamp+'@goodybag.com');
+      query.$('email', req.body.email);
       query.$('password', encryptedPassword);
       query.$('salt', passwordSalt);
       query.$('singlyId', req.body.singlyId);
