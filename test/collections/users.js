@@ -168,7 +168,7 @@ describe('POST /v1/users', function() {
 
   it('should fail if included group does not exist', function(done){
     var user = {
-      email:'foobar'
+      email:'foobar@foobar.com'
     , password:'foobar'
     , groups:[10000]
     };
@@ -327,7 +327,7 @@ describe('PATCH /v1/users/:id', function() {
 
   it('should fail if included group does not exist', function(done){
     var user = {
-      email: "foobar"
+      email: "foobar@foobar.com"
     , groups: [40000]
     };
     tu.loginAsAdmin(function() {
