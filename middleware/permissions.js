@@ -94,8 +94,9 @@ module.exports = function(allPerms){
        * @param  {Object} doc         The document to be filtered
        */
     , filterDoc = function(permissions, doc, subKeyPrepend){
-        subKeyPrepend = subKeyPrepend || "";
+        if (typeof doc !== "object") return;
 
+        subKeyPrepend = subKeyPrepend || "";
         for (var key in doc){
           if (permissions.indexOf(subKeyPrepend + key) === -1){
             filtered.push(key);
