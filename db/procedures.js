@@ -154,8 +154,18 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
   );
 };
 
-module.exports.ensureNotTaken = function(inputs, callback){
-  var query = sql.query('select {fields} from users, consumers');
+module.exports.ensureNotTaken = function(inputs, id, callback){
+  var query = sql.query('select {fields} from users, consumers {where}');
+
+  if (typeof id === "function"){
+    callback = id;
+    id = null;
+  }
+
+  if (id){
+    query.where = sql.where().and('id != $id');
+    query.$('id', id);
+  }
 
   query.fields = sql.fields();
 
