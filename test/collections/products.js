@@ -827,6 +827,7 @@ describe('POST /v1/products/:id/categories', function() {
   });
 
   it('should respond to an invalid payload with errors', function(done) {
+
     tu.loginAsAdmin(function() {
       tu.post('/v1/products/1/categories', JSON.stringify({ id:'foobar' }), 'application/json', function(err, payload, res) {
         assert(!err);
@@ -855,17 +856,14 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 
 });
 
-describe('POST /v1/products/:id/feelings', function(done) {
-  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(){
-    // someone forgot to logout D:
-    tu.logout(function(){
-      tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-        assert(!error);
-        
-        tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
-          assert(res.statusCode == 204);
-          tu.logout(done);
-        });
+describe('POST /v1/products/:id/feelings', function() {
+  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(done){
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+      
+      tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });
@@ -875,14 +873,14 @@ describe('POST /v1/products/:id/feelings', function(done) {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 0);
+        assert(payload.data.likes === 1);
         assert(payload.data.wants === 0);
         assert(payload.data.tries === 0);
         assert(payload.data.userLikes == false);
         assert(payload.data.userWants == false);
         assert(payload.data.userTried == false);
 
-        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {          
+        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
           assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
@@ -897,9 +895,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
             assert(payload.data.userWants == true);
             assert(payload.data.userTried == true);
 
-            tu.logout(function() {
-              done();
-            });
+            tu.logout(done);
           });
         });
       });
