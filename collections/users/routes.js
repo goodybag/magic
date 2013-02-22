@@ -31,11 +31,16 @@ module.exports.get = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT users.*, array_agg("usersGroups"."groupId") AS groups',
-        'FROM users LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-        'WHERE users.id = $id',
-        'GROUP BY users.id'
+      'SELECT users.*',
+        ', array_agg(groups.id)   AS "groupIds"',
+        ', array_agg(groups.name) AS "groupNames"',
+      'FROM users',
+      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+      'WHERE users.id = $id',
+      'GROUP BY users.id'
     ]);
+
     //query.fields = sql.fields().addSelectMap(req.fields);
     query.$('id', +req.param('id') || 0);
 
@@ -44,7 +49,19 @@ module.exports.get = function(req, res){
       logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
-        return res.json({ error: null, data: result.rows[0] });
+        var row = result.rows[0];
+        row.groups = [];
+
+        if (row.groupIds && row.groupIds[0] != null){
+          for (var i = 0; i < row.groupIds.length; i++){
+            row.groups.push({ id: row.groupIds[i], name: row.groupNames[i] });
+          }
+        }
+
+        delete row.groupIds;
+        delete row.groupNames;
+
+        return res.json({ error: null, data: row });
       } else {
         return res.status(404).end();
       }
@@ -153,7 +170,7 @@ module.exports.create = function(req, res){
           async.series((req.body.groups || []).map(function(groupId) {
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [newUser.id, groupId], done);
+              client.query(query, [newUser.id, typeof groupId === "object" ? groupId.id : groupId], done);
             };
           }), function(err, results) {
             // did any insert fail?
@@ -227,7 +244,7 @@ module.exports.update = function(req, res){
           async.series((groups || []).map(function(groupId) {
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [req.param('id'), groupId], done);
+              client.query(query, [req.param('id'), typeof groupId === "object" ? groupId.id : groupId], done);
             };
           }), function(err, results) {
             // did any insert fail?
