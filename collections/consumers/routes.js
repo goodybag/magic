@@ -149,7 +149,7 @@ module.exports.update = function(req, res){
   if (!req.session || !req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
 
-  db.procedures.ensureNotTaken(req.body, function(error){
+  db.procedures.ensureNotTaken(req.body, req.param('userId'), function(error){
     if (error) return res.error(error), logger.routes.error(TAGS, error);
 
     var query = { userId:req.param('userId') };
