@@ -8,12 +8,14 @@ var config = require('../../config');
 
 describe('GET /v1/consumers', function() {
   it('should respond with a consumer listing', function(done) {
-    tu.get('/v1/consumers', function(error, results) {
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      assert(results.data.length > 0);
-      done();
+    tu.populate('consumers', [{email:'test@test.com', password:'password'}], function(err, ids) {
+      tu.get('/v1/consumers', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.length > 0);
+        tu.depopulate('consumers', ids, done);
+      });
     });
   });
   it('should filter', function(done) {
