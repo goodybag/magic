@@ -887,8 +887,6 @@ module.exports.updateFeelings = function(req, res) {
       isWanted  : req.body.isWanted,
       isTried   : req.body.isTried
     };
-    var error = utils.validate(inputs, db.schemas.productsUsersFeelings);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // start the transaction
     var tx = new Transaction(client);
@@ -910,21 +908,21 @@ module.exports.updateFeelings = function(req, res) {
         if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
         if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
 
-        // fallback inputs to current feelings and ensure it's a boolean
-        var currentFeelings = result.rows[0];
-        if (typeof inputs.isLiked == 'undefined') { inputs.isLiked = !!currentFeelings.isLiked; }
-        else { inputs.isLiked = toBool(inputs.isLiked); }
-        if (typeof inputs.isWanted == 'undefined') { inputs.isWanted = !!currentFeelings.isWanted; }
-        else { inputs.isWanted = toBool(inputs.isWanted); }
-        if (typeof inputs.isTried == 'undefined') { inputs.isTried = !!currentFeelings.isTried; }
-        else { inputs.isTried = toBool(inputs.isTried); }
-
+        // fallback undefined inputs to current feelings and ensure defined inputs are boolean
+        var currentFeelings = {
+          isLiked:  result.rows[0].isLiked ? true : false,
+          isWanted: result.rows[0].isWanted ? true : false,
+          isTried:  result.rows[0].isTried ? true : false
+        };
+        inputs.isLiked  = (typeof inputs.isLiked == 'undefined') ? currentFeelings.isLiked : !!inputs.isLiked;
+        inputs.isWanted = (typeof inputs.isWanted == 'undefined') ? currentFeelings.isWanted : !!inputs.isWanted;
+        inputs.isTried  = (typeof inputs.isTried == 'undefined') ? currentFeelings.isTried : !!inputs.isTried;
 
         var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
         query.updates = sql.fields();
-        if (inputs.isLiked  != !!currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
-        if (inputs.isWanted != !!currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
-        if (inputs.isTried  != !!currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
+        if (inputs.isLiked  != currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
+        if (inputs.isWanted != currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
+        if (inputs.isTried  != currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
         query.$('id', +req.param('productId') || 0);
 
         if (query.updates.fields.length === 0) {
@@ -948,9 +946,9 @@ module.exports.updateFeelings = function(req, res) {
 
           // create/delete feelings
           var queries = [];
-          if (inputs.isLiked  != !!currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
-          if (inputs.isWanted != !!currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
-          if (inputs.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
+          if (inputs.isLiked  != currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
+          if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
+          if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
             logger.db.debug(TAGS, result);
@@ -990,7 +988,3 @@ module.exports.updateFeelings = function(req, res) {
     });
   });
 };
-
-function toBool(v) {
-  return (typeof v == 'boolean') ? v : /1|true/.test(v);
-}

@@ -25,7 +25,7 @@ describe('Consumers Events: ', function() {
       tu.loginAsAdmin(function(error){
         // Give server time to propagate events
         setTimeout(function(){
-          tu.get('/v1/events?limit=100', function(error, results) {
+          tu.get('/v1/events?limit=200', function(error, results) {
             assert(!error);
             results = JSON.parse(results);
             assert(!results.error);
@@ -62,7 +62,7 @@ describe('Products Events: ', function() {
               assert(!error);
               // Give server time to propagate events
               setTimeout(function(){
-                tu.get('/v1/events?limit=100', function(error, results) {
+                tu.get('/v1/events?limit=200', function(error, results) {
                   assert(!error);
                   results = JSON.parse(results);
                   assert(!results.error);

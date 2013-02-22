@@ -855,8 +855,8 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 
 });
 
-describe('POST /v1/products/:id/feelings', function(done) {
-  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(){
+describe('POST /v1/products/:id/feelings', function() {
+  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(done){
     // someone forgot to logout D:
     tu.logout(function(){
       tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
@@ -877,7 +877,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 0);
+        assert(payload.data.likes === 1);
         assert(payload.data.wants === 0);
         assert(payload.data.tries === 0);
         assert(payload.data.userLikes == false);
@@ -1076,6 +1076,72 @@ describe('POST /v1/products/:id/feelings', function(done) {
           });
         });
       });
+    });
+  });
+
+  it('should keep the tallies on track during high volumes of requests', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      var counter = 0;
+      var iterate = function() {
+        tu.post('/v1/products/4/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(payload.data.likes === 1);
+            assert(payload.data.wants === 1);
+            assert(payload.data.tries === 1);
+            tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+              assert(res.statusCode == 204);
+              tu.get('/v1/products/4', function(err, payload, res) {
+                assert(res.statusCode == 200);
+                payload = JSON.parse(payload);
+                assert(payload.data.likes === 0);
+                assert(payload.data.wants === 0);
+                assert(payload.data.tries === 0);
+                if (counter++ >= 10)
+                  tu.logout(done);
+                else
+                  iterate();
+              });
+            });
+          });
+        });
+      };
+      iterate();
+    });
+  });
+
+  it('should keep the tallies on track during high volumes of requests', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      var counter = 0;
+      var iterate = function() {
+        tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(payload.data.likes === 0);
+            assert(payload.data.wants === 0);
+            assert(payload.data.tries === 0);
+            tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+              assert(res.statusCode == 204);
+              tu.get('/v1/products/4', function(err, payload, res) {
+                assert(res.statusCode == 200);
+                payload = JSON.parse(payload);
+                assert(payload.data.likes === 0);
+                assert(payload.data.wants === 0);
+                assert(payload.data.tries === 0);
+                if (counter++ >= 10)
+                  tu.logout(done);
+                else
+                  iterate();
+              });
+            });
+          });
+        });
+      };
+      iterate();
     });
   });
 
