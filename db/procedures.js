@@ -163,7 +163,9 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
   }
 
   if (id){
-    query.where = sql.where().and('id != $id');
+    query.where = sql.where();
+    query.where.and('users.id != $id');
+    query.where.and('consumers."userId" != $id');
     query.$('id', id);
   }
 
