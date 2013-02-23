@@ -23,7 +23,7 @@ define(function(require){
       type: 'text'
     , sanitizers: { trim:[] }
     }
-  , isMagical: {
+  , isHidden: {
       type: 'bool'
     }
   };
