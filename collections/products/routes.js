@@ -128,14 +128,25 @@ module.exports.list = function(req, res){
 
     // consumer collection filtering
     if (req.param('collectionId')) {
-      query.collectionJoin = [
-        'INNER JOIN collections ON',
-          'collections.id = $collectionId',
-        'INNER JOIN "productsCollections" ON',
-          '"productsCollections"."productId" = products.id AND',
-          '"productsCollections"."collectionId" = collections.id'
-      ].join(' ');
-      query.$('collectionId', req.param('collectionId'));
+      if (req.param('collectionId') == 'all') {
+        query.collectionJoin = [
+          'INNER JOIN collections ON',
+            'collections."userId" = $userId',
+          'INNER JOIN "productsCollections" ON',
+            '"productsCollections"."productId" = products.id AND',
+            '"productsCollections"."collectionId" = collections.id'
+        ].join(' ');
+        query.$('userId', req.param('userId'));
+      } else {
+        query.collectionJoin = [
+          'INNER JOIN collections ON',
+            'collections.id = $collectionId',
+          'INNER JOIN "productsCollections" ON',
+            '"productsCollections"."productId" = products.id AND',
+            '"productsCollections"."collectionId" = collections.id'
+        ].join(' ');
+        query.$('collectionId', req.param('collectionId'));
+      }
     }
 
     // tag include

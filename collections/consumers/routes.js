@@ -485,7 +485,7 @@ module.exports.updateCollection = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id AND "isMagical" is not true');
+    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id AND "isHidden" is not true');
     query.$('id', collectionId);
     query.$('name', name);
 

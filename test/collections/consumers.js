@@ -565,6 +565,15 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
       });
     });
   });
+  it('should get the products in all collections on id==all', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/all/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        assert(JSON.parse(results).data.length == 4);
+        tu.logout(done);
+      });
+    });
+  });
   it('should include collections data on request', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/consumers/7/collections/1/products?include=collections', function(error, results, res) {
@@ -595,17 +604,6 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
       });
     });
   });
-  it('should duplicate products to the automagic collections', function(done) {
-    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      magic.once('debug.productAutomagickedToCollection', function(results) {
-        assert(results.productId == 5);
-        tu.logout(done);
-      });
-      tu.post('/v1/consumers/7/collections/1/products', { productId:5 }, function(error, results, res) {
-        assert(res.statusCode == 200);
-      });
-    });
-  });
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {
@@ -631,17 +629,6 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
             tu.logout(done);
           });
         });
-      });
-    });
-  });
-  it('should duplicate products to the automagic collections', function(done) {
-    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      magic.once('debug.productAutomagickedToCollection', function(results) {
-        assert(results.productId == 5);
-        tu.logout(done);
-      });
-      tu.post('/v1/consumers/7/collections/1/products', { productId:5 }, function(error, results, res) {
-        assert(res.statusCode == 200);
       });
     });
   });
