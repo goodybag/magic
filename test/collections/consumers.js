@@ -295,6 +295,29 @@ describe('PUT /v1/consumers/:id', function() {
     });
   });
 
+  it('should update a users record even though they sent a screenName with put that already belongs to them', function(done){
+    var consumer = {
+      email: "tferguson@gmail.com"
+    , screenName: 'tferguson'
+    , firstName: 'ablkajsldkjlk'
+    };
+    tu.login({email: consumer.email, password: 'password'}, function() {
+      tu.patch('/v1/consumers/7', consumer, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 204);
+        tu.get('/v1/consumers/7', function(error, results, res){
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.firstName == consumer.firstName);
+
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
   it('should update a users record as an admin even though they sent an email with put that already belongs to them', function(done){
     var consumer = {
       email: "tferguson@gmail.com"
