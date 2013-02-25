@@ -865,6 +865,7 @@ describe('POST /v1/products/:id/feelings', function() {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(payload.meta.isFirstTapin);
+        assert(payload.meta.userId > 0);
         tu.logout(done);
       });
     });
