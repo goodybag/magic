@@ -618,13 +618,12 @@ module.exports.updateCollection = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE collections SET name=$name WHERE id=$id AND "isHidden" is not true');
+    var query = sql.query('UPDATE collections SET name=$name WHERE id::text=$id OR "pseudoKey"=$id');
     query.$('id', collectionId);
     query.$('name', name);
 
     client.query(query.toString(), query.$values, function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (result.rowCount === 0) return res.error(errors.auth.INVALID_WRITE_PERMISSIONS);
 
       res.noContent();
     });
@@ -640,10 +639,19 @@ module.exports.deleteCollection = function(req, res){
   var TAGS = ['delete-consumers-collection', req.uuid];
   logger.routes.debug(TAGS, 'deleting collection ' + req.params.collectionId);
 
-  db.api.collections.remove(req.param('collectionId'), function(error){
+  var collectionId = req.param('collectionId');
+
+  db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    res.noContent();
+    var query = sql.query('DELETE FROM collections WHERE id::text=$id OR "pseudoKey"=$id');
+    query.$('id', collectionId);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.noContent();
+    });
   });
 };
 
@@ -662,7 +670,12 @@ module.exports.addCollectionProduct = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO "productsCollections" ("collectionId", "productId", "userId", "createdAt") VALUES ($collectionId, $productId, $userId, now()) RETURNING id');
+    var query = sql.query([
+      'INSERT INTO "productsCollections" ("collectionId", "productId", "userId", "createdAt")',
+      'VALUES (',
+        '(SELECT collections.id FROM collections WHERE collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId),',
+        '$productId, $userId, now()) RETURNING id'
+    ]);
     query.$('userId', req.params.userId);
     query.$('collectionId', collectionId);
     query.$('productId', productId);
@@ -695,7 +708,7 @@ module.exports.removeCollectionProduct = function(req, res){
 
     var query;
 
-    if (collectionId == 'all') {
+    if (collectionId == 'all') { // delete from all collections
       query = sql.query([
         'DELETE FROM "productsCollections" USING collections',
           'WHERE "productId"=$productId',
@@ -703,7 +716,15 @@ module.exports.removeCollectionProduct = function(req, res){
             'AND "productsCollections"."userId" = $userId'
       ]);
       query.$('userId', userId);
-    } else {
+    } else if (parseInt(collectionId,10) != collectionId) { // at least partly alpha, must be the pseudokey
+      query = sql.query([
+        'DELETE FROM "productsCollections" USING collections',
+          'WHERE "productsCollections"."collectionId" = collections.id',
+            'AND collections."pseudoKey" = $collectionId',
+            'AND "productsCollections"."productId" = $productId'
+      ]);
+      query.$('collectionId', collectionId);
+    } else { // fully numeric, must be the id
       query = sql.query('DELETE FROM "productsCollections" WHERE "collectionId"=$collectionId AND "productId"=$productId');
       query.$('collectionId', collectionId);
     }

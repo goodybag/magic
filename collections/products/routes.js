@@ -73,7 +73,7 @@ module.exports.list = function(req, res){
       ].join(' ');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance')
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
       if (req.query.range) {
         query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
@@ -89,7 +89,7 @@ module.exports.list = function(req, res){
 
       if (!query.prodLocJoin) {
         query.prodLocJoin = [
-        , '{joinType} join "productLocations"'
+          '{joinType} join "productLocations"'
           , 'ON products."id" = "productLocations"."productId"'
           , 'and "productLocations"."locationId" = $locationId'
         ].join(' ');
@@ -140,7 +140,7 @@ module.exports.list = function(req, res){
       } else {
         query.collectionJoin = [
           'INNER JOIN collections ON',
-            'collections.id = $collectionId',
+            '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId)',
           'INNER JOIN "productsCollections" ON',
             '"productsCollections"."productId" = products.id AND',
             '"productsCollections"."collectionId" = collections.id'
@@ -189,13 +189,13 @@ module.exports.list = function(req, res){
       query.groupby.add('"productTries".id');
       query.$('userId', req.session.user.id);
 
-      if (req.param('userLikes') != null && typeof req.param('userLikes') != 'undefined')
+      if (req.param('userLikes') !== null && typeof req.param('userLikes') != 'undefined')
         query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
 
-      if (req.param('userTried') != null && typeof req.param('userTried') != 'undefined')
+      if (req.param('userTried') !== null && typeof req.param('userTried') != 'undefined')
         query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
 
-      if (req.param('userWants') != null && typeof req.param('userWants') != 'undefined')
+      if (req.param('userWants') !== null && typeof req.param('userWants') != 'undefined')
         query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
     }
 
