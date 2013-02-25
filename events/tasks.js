@@ -16,8 +16,8 @@ module.exports = {
   'consumers.registered':
   function (consumer){
     db.api.collections.insert({ userId:consumer.id, name:'Uncategorized', isHidden:true });
-    db.api.collections.insert({ userId:consumer.id, name:'Fashion' });
-    db.api.collections.insert({ userId:consumer.id, name:'Food' });
+    db.api.collections.insert({ userId:consumer.id, name:'Fashion', isHidden:false });
+    db.api.collections.insert({ userId:consumer.id, name:'Food', isHidden:false });
     magic.emit('debug.newConsumerCollectionsCreated', consumer);
   }
 };
