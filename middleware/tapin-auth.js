@@ -39,6 +39,7 @@ module.exports = function(req, res, next){
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
       output.meta.isFirstTapin = true;
+      output.meta.userId = req.session.user.id;
     }
     req.session.user = tapinStationUser;
     origjsonFn.apply(res, arguments);
