@@ -157,6 +157,18 @@ server.post(
 , routes.createCollection
 );
 
+// consumers.getAllCollection
+server.get(
+  '/v1/consumers/:userId/collections/all'
+, middleware.profile('GET /v1/consumers/:userId/collections/all')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('permissions')
+, middleware.permissions(permissions.collection)
+, middleware.profile('get consumer all collection handler')
+, routes.getAllCollection
+);
+
 // consumers.getCollection
 server.get(
   '/v1/consumers/:userId/collections/:collectionId'
@@ -207,7 +219,7 @@ server.del(
 , routes.deleteCollection
 );
 
-// consumers.listCollectionProducts
+// require('../products/routes').list
 server.get(
   '/v1/consumers/:userId/collections/:collectionId/products'
 , middleware.profile('GET /v1/consumers/:userId/collections/:collectionId/products')
