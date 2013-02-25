@@ -396,7 +396,7 @@ module.exports.createCollection = function(req, res){
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO collections ("userId", name) VALUES ($userId, $name) RETURNING id');
+    var query = sql.query('INSERT INTO collections ("userId", name, "isHidden") VALUES ($userId, $name, false) RETURNING id');
     query.$('userId', userId);
     query.$('name', name);
 
