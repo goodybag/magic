@@ -330,6 +330,16 @@ module.exports.listCollections = function(req, res){
   logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId + ' collections');
 
   var userId = req.param('userId');
+  var showHidden = req.param('showHidden') || false;
+  var limit = req.param('limit');
+  var offset = req.param('offset');
+
+  // update the limit and offset to counter for the injected "All" collection
+  var shouldInjectAll = (typeof offset == "undefined" || offset === 0);
+  if (shouldInjectAll) {
+    offset--; // don't need to skip "all" in the DB query
+    limit--; // need to make room for "all"
+  }
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -340,28 +350,33 @@ module.exports.listCollections = function(req, res){
         'LEFT JOIN "productsCollections" ON "productsCollections"."collectionId" = collections.id',
         'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
         '{feelingsJoin}',
-        'WHERE collections."userId" = $userId',
+        '{where}',
         'GROUP BY collections.id {limit}'
     ]);
     query.fields = sql.fields()
-      .add("collections.*")
+      .add('(CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END) AS id')
+      .add('collections."userId"')
+      .add('collections.name')
+      .add('collections."isHidden"')
       .add('COUNT("productsCollections".id) as "numProducts"')
       .add('MIN(products."photoUrl") as "photoUrl"');
-    query.where  = sql.where();
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
+    query.limit = sql.limit(limit, offset);
+    query.where = sql.where('collections."userId" = $userId');
     query.$('userId', userId);
 
-    if (req.session.user) {
+    if (!showHidden)
+      query.where.and('collections."isHidden" is false');
+
+    if (req.session.user && userId == req.session.user.id) {
       query.feelingsJoin = [
         'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
         'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
         'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
-      ].join('');
+      ].join(' ');
       query.fields
-      .add('COUNT("productLikes".id) as "totalMyLikes"')
-      .add('COUNT("productWants".id) as "totalMyWants"')
-      .add('COUNT("productTries".id) as "totalMyTries"');
-      query.$('userId', req.session.user.id);
+        .add('COUNT("productLikes".id) as "totalMyLikes"')
+        .add('COUNT("productWants".id) as "totalMyWants"')
+        .add('COUNT("productTries".id) as "totalMyTries"');
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
@@ -372,11 +387,61 @@ module.exports.listCollections = function(req, res){
       logger.db.debug(TAGS, dataResult);
 
       var meta = { total:0 };
-      if (dataResult.rowCount) {
-        meta.total = dataResult.rows[0].metaTotal;
+      if (dataResult.rows[0]) {
+        meta.total = dataResult.rows[0].metaTotal + 1; // +1 for the "all" psuedo-collection that we add
       }
 
-      return res.json({ error: null, data: dataResult.rows, meta: meta });
+      if (!shouldInjectAll)
+        return res.json({ error: null, data: dataResult.rows, meta: meta });
+
+      // build aggregate query
+      var query = sql.query([
+        'WITH agg AS',
+          '(SELECT DISTINCT ON ("productsCollections"."productId") {selfields}',
+            'FROM "productsCollections" INNER JOIN collections ON collections."userId" = $userId',
+            '{feelingsJoin})',
+        'SELECT {aggfields} FROM "agg"'
+      ]);
+      query.selfields = sql.fields().add('"productsCollections".*');
+      query.aggfields = sql.fields().add('COUNT("agg".id) AS "numProducts"');
+      query.$('userId', userId);
+
+      if (req.session.user && userId == req.session.user.id) {
+        query.feelingsJoin = [
+          'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
+          'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
+          'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
+        ].join(' ');
+        query.selfields
+          .add('"productLikes".id as "productLikesId"')
+          .add('"productWants".id as "productWantsId"')
+          .add('"productTries".id as "productTriesId"');
+        query.aggfields
+          .add('COUNT("agg"."productLikesId") as "totalMyLikes"')
+          .add('COUNT("agg"."productWantsId") as "totalMyWants"')
+          .add('COUNT("agg"."productTriesId") as "totalMyTries"');
+      }
+
+      client.query(query.toString(), query.$values, function(error, aggResult){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        logger.db.debug(TAGS, aggResult);
+
+        // add "all" psuedo-collection
+        var all = {
+          id           : 'all',
+          userId       : userId,
+          name         : 'All',
+          isHidden     : false,
+          numProducts  : (aggResult.rows[0]) ? aggResult.rows[0].numProducts : 0,
+          photoUrl     : '', // :TODO:
+          totalMyLikes : (aggResult.rows[0]) ? aggResult.rows[0].totalMyLikes : 0,
+          totalMyWants : (aggResult.rows[0]) ? aggResult.rows[0].totalMyWants : 0,
+          totalMyTries : (aggResult.rows[0]) ? aggResult.rows[0].totalMyTries : 0
+        };
+        dataResult.rows = [all].concat(dataResult.rows);
+
+        return res.json({ error: null, data: dataResult.rows, meta: meta });
+      });
     });
   });
 };
@@ -414,7 +479,7 @@ module.exports.createCollection = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.getCollection = function(req, res){
-  var TAGS = ['get-consumer-collections', req.uuid];
+  var TAGS = ['get-consumer-collection', req.uuid];
   logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId + ' collection ' + req.param('collectionId'));
 
   var userId = req.param('userId');
@@ -430,11 +495,14 @@ module.exports.getCollection = function(req, res){
         'LEFT JOIN products ON products.id = "productsCollections"."productId" AND "photoUrl" IS NOT NULL',
         '{feelingsJoin}',
         'WHERE collections."userId" = $userId',
-          'AND collections.id = $collectionId',
+          'AND (collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId)',
         'GROUP BY collections.id {limit}'
     ]);
     query.fields = sql.fields()
-      .add("collections.*")
+      .add('(CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END) AS id')
+      .add('collections."userId"')
+      .add('collections.name')
+      .add('collections."isHidden"')
       .add('COUNT("productsCollections".id) as "numProducts"')
       .add('MIN(products."photoUrl") as "photoUrl"');
     query.where  = sql.where();
@@ -442,7 +510,7 @@ module.exports.getCollection = function(req, res){
     query.$('userId', userId);
     query.$('collectionId', collectionId);
 
-    if (req.session.user) {
+    if (req.session.user && userId == req.session.user.id) {
       query.feelingsJoin = [
         'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
         'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
@@ -455,8 +523,6 @@ module.exports.getCollection = function(req, res){
       query.$('userId', req.session.user.id);
     }
 
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -466,6 +532,73 @@ module.exports.getCollection = function(req, res){
         return res.error(errors.input.NOT_FOUND);
 
       return res.json({ error: null, data: dataResult.rows[0] });
+    });
+  });
+};
+
+/**
+ * Get consumer "All" collection
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getAllCollection = function(req, res){
+  var TAGS = ['get-consumer-all-collection', req.uuid];
+  logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId + ' collection "all"');
+
+  var userId = req.param('userId');
+
+  db.getClient(TAGS[0], function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    // build data query
+    var query = sql.query([
+      'WITH agg AS',
+        '(SELECT DISTINCT ON ("productsCollections"."productId") {selfields}',
+          'FROM "productsCollections" INNER JOIN collections ON collections."userId" = $userId',
+          '{feelingsJoin})',
+      'SELECT {aggfields} FROM "agg"'
+    ]);
+    query.selfields = sql.fields().add('"productsCollections".*');
+    query.aggfields = sql.fields().add('COUNT("agg".id) AS "numProducts"');
+    query.$('userId', userId);
+
+    if (req.session.user && userId == req.session.user.id) {
+      query.feelingsJoin = [
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
+      ].join(' ');
+      query.selfields
+        .add('"productLikes".id as "productLikesId"')
+        .add('"productWants".id as "productWantsId"')
+        .add('"productTries".id as "productTriesId"');
+      query.aggfields
+        .add('COUNT("agg"."productLikesId") as "totalMyLikes"')
+        .add('COUNT("agg"."productWantsId") as "totalMyWants"')
+        .add('COUNT("agg"."productTriesId") as "totalMyTries"');
+    }
+
+    // run data query
+    client.query(query.toString(), query.$values, function(error, dataResult){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      logger.db.debug(TAGS, dataResult);
+
+      if (dataResult.rowCount === 0)
+        return res.error(errors.input.NOT_FOUND);
+
+      var all = {
+        id           : 'all',
+        userId       : userId,
+        name         : 'All',
+        isHidden     : false,
+        numProducts  : (dataResult.rows[0]) ? dataResult.rows[0].numProducts : 0,
+        photoUrl     : '', // :TODO:
+        totalMyLikes : (dataResult.rows[0]) ? dataResult.rows[0].totalMyLikes : 0,
+        totalMyWants : (dataResult.rows[0]) ? dataResult.rows[0].totalMyWants : 0,
+        totalMyTries : (dataResult.rows[0]) ? dataResult.rows[0].totalMyTries : 0
+      };
+
+      return res.json({ error: null, data: all });
     });
   });
 };
@@ -553,14 +686,27 @@ module.exports.removeCollectionProduct = function(req, res){
   var TAGS = ['remove-consumers-collection-product', req.uuid];
   logger.routes.debug(TAGS, 'removing product ' + req.params.productId + ' from consumer ' + req.params.userId + ' collection');
 
+  var userId = req.param('userId');
   var collectionId = req.param('collectionId');
   var productId = req.param('productId');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('DELETE FROM "productsCollections" WHERE "collectionId"=$collectionId AND "productId"=$productId');
-    query.$('collectionId', collectionId);
+    var query;
+
+    if (collectionId == 'all') {
+      query = sql.query([
+        'DELETE FROM "productsCollections" USING collections',
+          'WHERE "productId"=$productId',
+            'AND "productsCollections"."collectionId" = collections.id',
+            'AND "productsCollections"."userId" = $userId'
+      ]);
+      query.$('userId', userId);
+    } else {
+      query = sql.query('DELETE FROM "productsCollections" WHERE "collectionId"=$collectionId AND "productId"=$productId');
+      query.$('collectionId', collectionId);
+    }
     query.$('productId', productId);
 
     client.query(query.toString(), query.$values, function(error, result) {

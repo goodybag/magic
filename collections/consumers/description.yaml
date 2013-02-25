@@ -102,8 +102,9 @@ collectionsCollection:
     get:
       desc: List Consumer Collections
       query:
-        offset:  { type: int, eg: 5 }
-        limit:   { type: int, eg: 5 }
+        showHidden: { type: bool, eg: true }
+        offset:     { type: int, eg: 5 }
+        limit:      { type: int, eg: 5 }
     post:
       desc: Create Consumer Collection
       auth:

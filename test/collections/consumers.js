@@ -501,6 +501,20 @@ describe('GET /v1/consumers/:id/collections', function() {
       });
     });
   });
+  it('should correctly populate the all collection with aggregate data', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections?limit=1000', function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        var allCollection = results.data.filter(function(c) { return c.id == 'all'; })[0];
+        assert(allCollection.numProducts === 4); // # of distinct products
+        assert(allCollection.totalMyLikes === 3); // # of distinct likes
+        assert(allCollection.totalMyWants === 1); // etc
+        assert(allCollection.totalMyTries === 1);
+        tu.logout(done);
+      });
+    });
+  });
   it('should include All, Food, and Fashion', function(done) {
     // gotta make a new consumer through the API first-- that's how these collections get made
     tu.post('/v1/consumers', { email:'allfoodfashion@consumers.com', password:'password' });
@@ -538,13 +552,16 @@ describe('GET /v1/consumers/:id/collections', function() {
   });
   it('should paginate', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
-        assert(!err);
-        var payload = JSON.parse(results);
-        assert(!payload.error);
-        assert(payload.data.length === 1);
-        assert(payload.meta.total > 1);
-        done();
+      tu.get('/v1/consumers/7/collections?limit=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        assert(JSON.parse(results).data[0].id == 'all');
+        tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
+          assert(res.statusCode == 200);
+          var payload = JSON.parse(results);
+          assert(payload.data.length === 1);
+          assert(payload.meta.total > 1);
+          tu.logout(done);
+        });
       });
     });
   });
@@ -553,15 +570,36 @@ describe('GET /v1/consumers/:id/collections', function() {
 describe('GET /v1/consumers/:id/collections/:collectionId', function() {
   it('should respond with a collection', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/consumers/7/collections/1', function(error, results) {
+      tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+        assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(!results.error);
-        assert(results.data.id);
+        assert(results.data.id == '1');
         assert(results.data.name);
         assert(results.data.numProducts == 2);
-        assert(results.data.totalMyLikes != 'undefined');
-        assert(results.data.totalMyWants != 'undefined');
-        assert(results.data.totalMyTries != 'undefined');
+        assert(typeof results.data.totalMyLikes != 'undefined');
+        assert(typeof results.data.totalMyWants != 'undefined');
+        assert(typeof results.data.totalMyTries != 'undefined');
+        tu.logout(done);
+      });
+    });
+  });
+  it('should provide the All collection at /all', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/all', function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id == 'all');
+        assert(results.data.numProducts === 4);
+        tu.logout(done);
+      });
+    });
+  });
+  it('should provide collections by their pseudoKeys', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/uncategorized', function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id == 'uncategorized');
         tu.logout(done);
       });
     });
@@ -685,6 +723,30 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
             var newProducts = JSON.parse(results).data;
             assert(oldProducts.length - 1 == newProducts.length);
             tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+  it('should remove a product from all collections if the "All" collection is targeted', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var oldCollectionOneSize = JSON.parse(results).data.length;
+        tu.get('/v1/consumers/7/collections/2/products', function(error, results, res) {
+          assert(res.statusCode == 200);
+          var oldCollectionTwoSize = JSON.parse(results).data.length;
+          tu.del('/v1/consumers/7/collections/all/products/2', function(error, results, res) {
+            assert(res.statusCode == 204);
+            tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+              assert(res.statusCode == 200);
+              assert(oldCollectionOneSize - 1 == JSON.parse(results).data.length);
+              tu.get('/v1/consumers/7/collections/2/products', function(error, results, res) {
+                assert(res.statusCode == 200);
+                assert(oldCollectionTwoSize - 1 == JSON.parse(results).data.length);
+                tu.logout(done);
+              });
+            });
           });
         });
       });
