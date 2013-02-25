@@ -18,5 +18,6 @@ module.exports = {
     db.api.collections.insert({ userId:consumer.id, name:'Uncategories', isHidden:true });
     db.api.collections.insert({ userId:consumer.id, name:'Fashion' });
     db.api.collections.insert({ userId:consumer.id, name:'Food' });
+    magic.emit('debug.newConsumerCollectionsCreated', consumer);
   }
 };

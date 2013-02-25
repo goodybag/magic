@@ -501,6 +501,41 @@ describe('GET /v1/consumers/:id/collections', function() {
       });
     });
   });
+  it('should include All, Food, and Fashion', function(done) {
+    // gotta make a new consumer through the API first-- that's how these collections get made
+    tu.post('/v1/consumers', { email:'allfoodfashion@consumers.com', password:'password' });
+    magic.once('debug.newConsumerCollectionsCreated', function() {
+      tu.login({ email: 'allfoodfashion@consumers.com', password: 'password' }, function(error, user){
+        assert(user.id);
+        tu.get('/v1/consumers/'+user.id+'/collections', function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c) { return c.id == 'all'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'food'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 1);
+          tu.logout(done);
+        });
+      });
+    });
+  });
+  it('should include hidden collections when ?showHidden=true', function(done) {
+    // gotta make a new consumer through the API first-- that's how the hidden uncategorized collection gets made
+    tu.post('/v1/consumers', { email:'hiddencollections@consumers.com', password:'password' });
+    magic.once('debug.newConsumerCollectionsCreated', function() {
+      tu.login({ email: 'hiddencollections@consumers.com', password: 'password' }, function(error, user){
+        assert(user.id);
+        tu.get('/v1/consumers/'+user.id+'/collections?showHidden=true', function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c) { return c.id == 'all'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'food'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'uncategorized'; }).length === 1);
+          tu.logout(done);
+        });
+      });
+    });
+  });
   it('should paginate', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/consumers/7/collections?offset=1&limit=1', function(err, results, res) {
