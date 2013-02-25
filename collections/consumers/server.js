@@ -207,18 +207,6 @@ server.del(
 , routes.deleteCollection
 );
 
-// consumers.deleteCollections
-server.del(
-  '/v1/collections/:collectionId'
-, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId')
-, middleware.profile('apply groups consumers owner')
-, middleware.applyGroups(applyGroups.collectionOwner)
-, middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'owner')
-, middleware.profile('delete consumer collection handler')
-, routes.deleteCollection
-);
-
 // require('../products/routes').list
 server.get(
   '/v1/consumers/:userId/collections/:collectionId/products'

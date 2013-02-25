@@ -573,7 +573,7 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
       tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(results.data.id == '1');
+        assert(results.data.id == 'mypseudo');
         assert(results.data.name);
         assert(results.data.numProducts == 2);
         assert(typeof results.data.totalMyLikes != 'undefined');
@@ -641,11 +641,88 @@ describe('PUT /v1/consumers/:id/collections/:collectionId', function() {
       });
     });
   });
-  it('should not update magical collection names', function(done) {
+  it('should work with pseudo-keys', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.put('/v1/consumers/7/collections/4', { name:'Another crazy name!' }, function(error, results, res) {
-        assert(res.statusCode == 403);
-        tu.logout(done);
+      tu.put('/v1/consumers/7/collections/mypseudo', { name:'Some other crazy name!' }, function(error, results, res) {
+        assert(res.statusCode == 204);
+        tu.get('/v1/consumers/7/collections/mypseudo', function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.name == 'Some other crazy name!');
+          tu.logout(done);
+        });
+      });
+    });
+  });
+});
+
+describe('DELETE /v1/consumers/:consumerId/collections/:collectionId', function() {
+  it('should delete a users collection', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/7/collections', {name:'my foobar collection'}, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id);
+        var id = results.data.id;
+        tu.get('/v1/consumers/7/collections', function(error, results, res){
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 1);
+          tu.del('/v1/consumers/7/collections/' + id, function(error, results, res){
+            assert(res.statusCode == 204);
+            tu.get('/v1/consumers/7/collections', function(error, results, res){
+              assert(res.statusCode == 200);
+              results = JSON.parse(results);
+              assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 0);
+              tu.logout(done);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  it('should delete a users collection via the pseudo-key', function(done) {
+    // gotta make a new consumer through the API first-- that's how these collections get made
+    tu.post('/v1/consumers', { email:'pseudokeydelete@consumers.com', password:'password' });
+    magic.once('debug.newConsumerCollectionsCreated', function() {
+      tu.login({ email: 'pseudokeydelete@consumers.com', password: 'password' }, function(error, user){
+        tu.del('/v1/consumers/'+user.id+'/collections/fashion', function(error, results, res){
+          assert(res.statusCode == 204);
+          tu.get('/v1/consumers/'+user.id+'/collections', function(error, results, res){
+            assert(res.statusCode == 200);
+            results = JSON.parse(results);
+            assert(results.data.filter(function(c){ return c.name === 'Fashion'; }).length === 0);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
+  it('should fail to delete a users collection because of insufficient permissions', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.post('/v1/consumers/7/collections', {name:'my foobar2 collection'}, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id);
+        var id = results.data.id;
+        tu.get('/v1/consumers/7/collections', function(error, results, res){
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'; }).length === 1);
+          tu.logout(function(){
+            tu.login({ email: 'consumer4@gmail.com', password: 'password' }, function(error){
+              tu.del('/v1/consumers/7/collections/' + id, function(error, results, res){
+                assert(res.statusCode == 403);
+                results = JSON.parse(results);
+                assert(results.error);
+                assert(results.error.name === "NOT_ALLOWED");
+                tu.logout(done);
+              });
+            });
+          });
+        });
       });
     });
   });
@@ -666,6 +743,14 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
       tu.get('/v1/consumers/7/collections/all/products', function(error, results, res) {
         assert(res.statusCode == 200);
         assert(JSON.parse(results).data.length == 4);
+        tu.logout(done);
+      });
+    });
+  });
+  it('should get the products using pseudo-keys', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
+        assert(res.statusCode == 200);
         tu.logout(done);
       });
     });
@@ -700,6 +785,23 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
       });
     });
   });
+  it('should add a product to the collection with pseudo-keys', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var oldProducts = JSON.parse(results).data;
+        tu.post('/v1/consumers/7/collections/mypseudo/products', { productId:5 }, function(error, results, res) {
+          assert(res.statusCode == 200);
+          tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
+            assert(res.statusCode == 200);
+            var newProducts = JSON.parse(results).data;
+            assert(oldProducts.length + 1 == newProducts.length);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {
@@ -719,6 +821,23 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
         tu.del('/v1/consumers/7/collections/1/products/4', function(error, results, res) {
           assert(res.statusCode == 204);
           tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
+            assert(res.statusCode == 200);
+            var newProducts = JSON.parse(results).data;
+            assert(oldProducts.length - 1 == newProducts.length);
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+  it('should remove a product from the collection using pseudokeys', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var oldProducts = JSON.parse(results).data;
+        tu.del('/v1/consumers/7/collections/mypseudo/products/5', function(error, results, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
             assert(oldProducts.length - 1 == newProducts.length);
@@ -761,62 +880,6 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
     });
   });
 });
-
-describe('DELETE /v1/collections/:collectionId', function() {
-  it('should delete a users collection', function(done) {
-    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/7/collections', {name:'my foobar collection'}, function(error, results, res) {
-        assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(results.data.id);
-        var id = results.data.id;
-        tu.get('/v1/consumers/7/collections', function(error, results, res){
-          assert(res.statusCode == 200);
-          results = JSON.parse(results);
-          assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 1);
-          tu.del('/v1/collections/' + id, function(error, results, res){
-            assert(res.statusCode == 204);
-            tu.get('/v1/consumers/7/collections', function(error, results, res){
-              assert(res.statusCode == 200);
-              results = JSON.parse(results);
-              assert(results.data.filter(function(c){ return c.name === 'my foobar collection'; }).length === 0);
-              tu.logout(done);
-            });
-          });
-        });
-
-      });
-    });
-  });
-
-  it('should fail to delete a users collection because of unsufficient permissions', function(done) {
-    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.post('/v1/consumers/7/collections', {name:'my foobar2 collection'}, function(error, results, res) {
-        assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(results.data.id);
-        var id = results.data.id;
-        tu.get('/v1/consumers/7/collections', function(error, results, res){
-          assert(res.statusCode == 200);
-          results = JSON.parse(results);
-          assert(results.data.filter(function(c){ return c.name === 'my foobar2 collection'; }).length === 1);
-          tu.logout(function(){
-            tu.login({ email: 'consumer4@gmail.com', password: 'password' }, function(error){
-              tu.del('/v1/collections/' + id, function(error, results, res){
-                assert(res.statusCode == 403);
-                results = JSON.parse(results);
-                assert(results.error);
-                assert(results.error.name === "NOT_ALLOWED");
-                tu.logout(done);
-              });
-            });
-          });
-        });
-      });
-    });
-  });
-});
-
 
 describe('POST /v1/consumers/cardupdate', function() {
   it('should get a token on cardUpdate and then update the cardId with the token', function(done) {
