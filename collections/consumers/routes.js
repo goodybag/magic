@@ -673,7 +673,9 @@ module.exports.addCollectionProduct = function(req, res){
     var query = sql.query([
       'INSERT INTO "productsCollections" ("collectionId", "productId", "userId", "createdAt")',
       'VALUES (',
-        '(SELECT collections.id FROM collections WHERE collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId),',
+        '(SELECT collections.id FROM collections',
+          'WHERE (collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId)',
+            'AND collections."userId" = $userId),',
         '$productId, $userId, now()) RETURNING id'
     ]);
     query.$('userId', req.params.userId);
