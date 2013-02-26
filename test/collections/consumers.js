@@ -802,6 +802,18 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
       });
     });
   });
+  it('should work on consumers uncategorized', function(done) {
+    // gotta make a new consumer through the API first-- that's how these collections get made
+    tu.post('/v1/consumers', { email:'pseudokeypost@consumers.com', password:'password' });
+    magic.once('debug.newConsumerCollectionsCreated', function() {
+      tu.login({ email: 'pseudokeypost@consumers.com', password: 'password' }, function(error, user){
+        tu.post('/v1/consumers/'+user.id+'/collections/uncategorized/products', { productId:1 }, function(error, results, res){
+          assert(res.statusCode == 200);
+          tu.logout(done);
+        });
+      });
+    });
+  });
   it('should fail validation if bad input is given', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.post('/v1/consumers/7/collections/1/products', {productId:null}, function(error, results, res) {
