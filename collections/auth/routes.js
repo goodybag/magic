@@ -160,7 +160,7 @@ module.exports.oauthAuthenticate = function(req, res){
           if (error) return stage.dbError(error);
 
           if (result.rowCount === 0) return stage.createUser(user);
-          return stage.setSessionAndSend({
+          return stage.lookupUsersGroups({
             id: result.rows[0].id
           , singlyId: user.singlyId
           , singlyAccessToken: user.singlyAccessToken
@@ -169,10 +169,10 @@ module.exports.oauthAuthenticate = function(req, res){
       });
     }
 
-  , createUser: function(consumer){
+  , createUser: function(user){
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        db.procedures.registerConsumer(req.body, function(error, consumer){
+        db.procedures.registerConsumer(user, function(error, consumer){
           if (error) return stage.error(error);
 
           stage.setSessionAndSend(consumer);
