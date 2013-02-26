@@ -138,6 +138,11 @@ module.exports.list = function(req, res){
       query.$('nameFilter', '%'+req.param('filter')+'%');
     }
 
+    // is verified filter
+    if (typeof req.param('isVerified') != "undefined") {
+      query.where.and('businesses."isVerified" is ' + ((/1|true/.test(req.param('isVerified'))) ? 'true' : 'false'));
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, dataResult){
