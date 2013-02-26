@@ -48,6 +48,18 @@ describe('GET /v1/consumers/:id', function() {
     });
   });
 
+  it('should never respond with the password or salt', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/consumers/7', function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(!results.data.password);
+        assert(!results.data.passwordSalt);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should respond 404 if the id is not in the database', function(done){
     tu.get('/v1/consumers/500', function(error, results, res){
       assert(!error);
