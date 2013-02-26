@@ -8,42 +8,36 @@ var
 
 describe('GET /v1/charities', function() {
   it('should respond with a charity listing', function(done) {
-    tu.populate('charities', [{ name:'Charity 1' }, { name:'Charity 2' }], function(err, ids) {
+    tu.populate('charities', [{ name:'Charity X' }, { name:'Charity Y' }], function(err, ids) {
       tu.get('/v1/charities', function(err, results, res) {
         assert(res.statusCode == 200);
         var payload = JSON.parse(results);
-        assert(payload.data.length === 2);
-        assert(payload.data[0].id);
-        assert(payload.data[0].name == 'Charity 1');
-        assert(payload.data[1].name == 'Charity 2');
-        assert(payload.meta.total === 2);
+        assert(tu.arrHas(payload.data, 'name', 'Charity X'));
+        assert(tu.arrHas(payload.data, 'name', 'Charity Y'));
         tu.depopulate('charities', ids, done);
       });
     });
   });
   it('should filter', function(done) {
-    tu.populate('charities', [{ name:'Charity 1' }, { name:'Charity 2' }], function(err, ids) {
-      tu.get('/v1/charities?filter=2', function(err, results, res) {
+    tu.populate('charities', [{ name:'Charity X' }, { name:'Charity Y' }], function(err, ids) {
+      tu.get('/v1/charities?filter=X', function(err, results, res) {
         assert(!err);
         var payload = JSON.parse(results);
         assert(!payload.error);
         assert(payload.data.length === 1);
-        assert(payload.data[0].name == 'Charity 2');
+        assert(payload.data[0].name == 'Charity X');
         tu.depopulate('charities', ids, done);
       });
     });
   });
   it('should paginate', function(done) {
-    tu.populate('charities', [{ name:'Charity 1' }, { name:'Charity 2' }], function(err, ids) {
-      tu.get('/v1/charities?offset=1&limit=1', function(err, results, res) {
-        assert(!err);
-        var payload = JSON.parse(results);
-        assert(!payload.error);
-        assert(payload.data.length === 1);
-        assert(payload.data[0].name == 'Charity 2');
-        assert(payload.meta.total === 2);
-        tu.depopulate('charities', ids, done);
-      });
+    tu.get('/v1/charities?offset=1&limit=1', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length === 1);
+      assert(payload.meta.total > 1);
+      done();
     });
   });
 });

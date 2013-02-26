@@ -14,41 +14,39 @@ describe('GET /v1/businesses', function() {
         assert(!err);
         var payload = JSON.parse(results);
         assert(!payload.error);
-        assert(payload.data.length === ids.length);
         assert(payload.data[0].id);
         assert(payload.data[0].name.length > 0);
-        assert(payload.meta.total === ids.length);
         tu.depopulate('businesses', ids, done);
       });
     });
   });
   it('should filter', function(done) {
-    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
-      tu.get('/v1/businesses?filter=2', function(err, results, res) {
+    tu.populate('businesses', [{ name:'Business X' }], function(err, ids) {
+      tu.get('/v1/businesses?filter=X', function(err, results, res) {
         assert(!err);
         var payload = JSON.parse(results);
         assert(!payload.error);
         assert(payload.data.length === 1);
-        assert(payload.data[0].name == 'Business 2');
+        assert(payload.data[0].name == 'Business X');
         tu.depopulate('businesses', ids, done);
       });
     });
   });
   it('should filter', function(done) {
-    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
+    tu.populate('businesses', [{ name:'Business X' }, { name:'Business Y' }], function(err, ids) {
       tu.get('/v1/businesses?filter=bus', function(err, results, res) {
-        assert(!err);
+        assert(res.statusCode === 200);
         var payload = JSON.parse(results);
-        assert(!payload.error);
-        assert(payload.data.length === 2);
+        assert(tu.arrHas(payload.data, 'name', 'Business X'));
+        assert(tu.arrHas(payload.data, 'name', 'Business Y'));
         tu.depopulate('businesses', ids, done);
       });
     });
   });
 
   it('should filter by a single tag', function(done) {
-    tu.populate('businesses', [{ name:'Business 1', tags:['uniquetag', 'foobar'] }, { name:'Business 2', tags:['foobar'] }], function(err, ids) {
-      tu.get('/v1/businesses?tag=uniquetag', function(err, payload, res) {
+    tu.populate('businesses', [{ name:'Business 1', tags:['myuniquetag', 'foobar'] }, { name:'Business 2', tags:['foobar'] }], function(err, ids) {
+      tu.get('/v1/businesses?tag=myuniquetag', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(payload.data.length == 1);
@@ -58,11 +56,12 @@ describe('GET /v1/businesses', function() {
   });
 
   it('should filter by mutliple tags', function(done) {
-    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }, { name:'Business 2', tags:['apparel'] }], function(err, ids) {
+    tu.populate('businesses', [{ name:'Business X', tags:['food'] }, { name:'Business Y', tags:['apparel'] }], function(err, ids) {
       tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.length === 2);
+        assert(tu.arrHas(payload.data, 'name', 'Business X'));
+        assert(tu.arrHas(payload.data, 'name', 'Business Y'));
         tu.depopulate('businesses', ids, done);
       });
     });
@@ -81,9 +80,9 @@ describe('GET /v1/businesses', function() {
     });
   });
   it('should include locations on include=locations', function(done) {
-    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, bids) {
+    tu.populate('businesses', [{ name:'Locinclude 1' }, { name:'Locinclude 2' }], function(err, bids) {
       tu.populate('locations', [{ name:'Location 1', businessId:bids[0] }, { name:'Location 2', businessId:bids[1] }], function(err, lids) {
-        tu.get('/v1/businesses?include=locations', function(err, results, res) {
+        tu.get('/v1/businesses?filter=locinclude&include=locations', function(err, results, res) {
           assert(res.statusCode == 200);
           results = JSON.parse(results);
           assert(results.data[0].locations[0].name == 'Location 1');
@@ -430,8 +429,8 @@ describe('PATCH /v1/businesses/:id', function(){
 
   it('should login as a businesses manager and update the loyalty settings', function(done){
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
-      tu.populate('managers', [{ email:'some_manager@gmail.com', password:'password', businessId:bids[0] }], function() {
-        tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error, user){
+      tu.populate('managers', [{ email:'loyalty@manager.com', password:'password', businessId:bids[0] }], function() {
+        tu.login({ email: 'loyalty@manager.com', password: 'password' }, function(error, user){
           assert(!error);
           var loyalty = {
             requiredItem: 'Coffee'
@@ -493,8 +492,8 @@ describe('PATCH /v1/businesses/:id', function(){
 
   it('should fail to update the loyalty settings because of invalid permissions', function(done){
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
-      tu.populate('managers', [{ email:'manager_redeem3@gmail.com', password:'password' }], function() {
-        tu.login({ email: 'manager_redeem3@gmail.com', password: 'password' }, function(error, user){
+      tu.populate('managers', [{ email:'noloyaltyperms@manager.com', password:'password' }], function() {
+        tu.login({ email: 'noloyaltyperms@manager.com', password: 'password' }, function(error, user){
           assert(!error);
 
           var loyalty = {

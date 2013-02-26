@@ -14,10 +14,8 @@ describe('GET /v1/locations', function() {
         tu.get('/v1/locations', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
-          assert(payload.data.length === 1);
-          assert(payload.data[0].id);
-          assert(payload.data.filter(function(location){ return location.isEnabled == false; }).length === 0);
-          assert(payload.meta.total > 0);
+          assert(payload.meta.total > 1);
+          assert(tu.arrHas(payload.data, 'isEnabled', false) === false);
           done();
         });
       });
@@ -26,13 +24,13 @@ describe('GET /v1/locations', function() {
 
   it('should respond with a location listing regardless of enabled state', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
-      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:false }], function() {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Disabled', businessId:bids[0], isEnabled:false }], function() {
         tu.loginAsAdmin(function(error){
           assert(!error);
           tu.get('/v1/locations?all=true', function(err, payload, res) {
             assert(res.statusCode == 200);
             payload = JSON.parse(payload);
-            assert(payload.data.filter(function(location){ return location.name == 'Location 2'; }).length > 0);
+            assert(tu.arrHas(payload.data, 'name', 'Disabled'));
             assert(payload.meta.total > 1);
             tu.logout(done);
           });
@@ -63,8 +61,8 @@ describe('GET /v1/locations', function() {
 
   it('should filter by lat/lon/range', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
-      tu.populate('locations', [{ name:'First', businessId:bids[0], lat:10, lon:10, isEnabled:true }, { name:'Second', businessId:bids[0], lat:10.001, lon:10.001, isEnabled:true }], function() {
-        tu.get('/v1/locations?lat=10&lon=10&range=1000', function(err, payload, res) {
+      tu.populate('locations', [{ name:'First', businessId:bids[0], lat:8, lon:8, isEnabled:true }, { name:'Second', businessId:bids[0], lat:8.001, lon:8.001, isEnabled:true }], function() {
+        tu.get('/v1/locations?lat=8&lon=8&range=1000', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(payload.data.length === 2);
@@ -72,7 +70,7 @@ describe('GET /v1/locations', function() {
           assert(payload.data[1].name == 'Second');
           assert(payload.meta.total > 1);
 
-          tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
+          tu.get('/v1/locations?lat=8&lon=8&range=100', function(err, payload, res) {
             assert(res.statusCode == 200);
             payload = JSON.parse(payload);
             assert(payload.data.length === 1);

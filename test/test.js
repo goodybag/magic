@@ -54,7 +54,7 @@ before(function(done) {
     self.httpServer = require('http').createServer(app);
     self.httpServer.listen(8986, function(err){
       if (err) throw err;
-      require('./populate')(done);
+      done();
     });
     self.httpServer.on('connection', function(socket) {
       socket.on('error', function(e) { console.log("SOCKET ERROR", e); });
@@ -65,22 +65,22 @@ before(function(done) {
 require('./collections/charities');
 require('./collections/businesses');
 require('./collections/locations');
-// require('./collections/users');
-// require('./collections/consumers');
-// require('./collections/managers');
-// require('./collections/tapinStations');
-// require('./collections/cashiers');
-// require('./collections/groups');
-// require('./collections/loyaltyStats');
-// require('./collections/auth');
-// require('./collections/products');
-// require('./collections/productCategories');
-// require('./collections/photos');
-// require('./collections/productTags');
-// require('./collections/reviews');
-// require('./collections/redemptions');
-// require('./collections/events');
-// require('./collections/activity');
+require('./collections/users');
+require('./collections/consumers');
+require('./collections/managers');
+require('./collections/tapinStations');
+require('./collections/cashiers');
+require('./collections/groups');
+require('./collections/loyaltyStats');
+require('./collections/auth');
+require('./collections/products');
+require('./collections/productCategories');
+require('./collections/photos');
+require('./collections/productTags');
+require('./collections/reviews');
+require('./collections/redemptions');
+require('./collections/events');
+require('./collections/activity');
 
 // require('./events/pubnub');
 
@@ -113,24 +113,24 @@ function loadDescription(collection, cb) {
     cb(new doci.Resource(data[k]));
   }
 }
-// loadDescription('activity', doChaos);
-// loadDescription('businesses', doChaos);
-// loadDescription('cashiers', doChaos);
-// loadDescription('charities', doChaos);
-// loadDescription('consumers', doChaos);
-// loadDescription('events', doChaos);
-// loadDescription('groups', doChaos);
-// loadDescription('locations', doChaos);
-// loadDescription('loyaltyStats', doChaos);
-// loadDescription('managers', doChaos);
-// loadDescription('photos', doChaos);
-// loadDescription('productCategories', doChaos);
-// loadDescription('products', doChaos);
-// loadDescription('productTags', doChaos);
-// loadDescription('redemptions', doChaos);
-// loadDescription('reviews', doChaos);
-// loadDescription('tapin-stations', doChaos);
-// loadDescription('users', doChaos);
+loadDescription('activity', doChaos);
+loadDescription('businesses', doChaos);
+loadDescription('cashiers', doChaos);
+loadDescription('charities', doChaos);
+loadDescription('consumers', doChaos);
+loadDescription('events', doChaos);
+loadDescription('groups', doChaos);
+loadDescription('locations', doChaos);
+loadDescription('loyaltyStats', doChaos);
+loadDescription('managers', doChaos);
+loadDescription('photos', doChaos);
+loadDescription('productCategories', doChaos);
+loadDescription('products', doChaos);
+loadDescription('productTags', doChaos);
+loadDescription('redemptions', doChaos);
+loadDescription('reviews', doChaos);
+loadDescription('tapin-stations', doChaos);
+loadDescription('users', doChaos);
 
 
 describe('GET /v1/debug/profile', function() {
