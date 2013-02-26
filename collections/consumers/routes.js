@@ -398,7 +398,9 @@ module.exports.listCollections = function(req, res){
       var query = sql.query([
         'WITH agg AS',
           '(SELECT DISTINCT ON ("productsCollections"."productId") {selfields}',
-            'FROM "productsCollections" INNER JOIN collections ON collections."userId" = $userId',
+            'FROM "productsCollections" INNER JOIN collections',
+              'ON "productsCollections"."collectionId" = collections.id',
+              'AND collections."userId" = $userId',
             '{feelingsJoin})',
         'SELECT {aggfields} FROM "agg"'
       ]);
@@ -554,7 +556,9 @@ module.exports.getAllCollection = function(req, res){
     var query = sql.query([
       'WITH agg AS',
         '(SELECT DISTINCT ON ("productsCollections"."productId") {selfields}',
-          'FROM "productsCollections" INNER JOIN collections ON collections."userId" = $userId',
+          'FROM "productsCollections" INNER JOIN collections',
+              'ON "productsCollections"."collectionId" = collections.id',
+              'AND collections."userId" = $userId',
           '{feelingsJoin})',
       'SELECT {aggfields} FROM "agg"'
     ]);
