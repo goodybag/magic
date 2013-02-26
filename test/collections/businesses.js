@@ -57,6 +57,21 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+
+  it('should filter by isVerified', function(done) {
+    tu.get('/v1/businesses?isVerified=true', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 5);
+      tu.get('/v1/businesses?isVerified=false', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length == 1);
+        done();
+      });
+    });
+  });
+
   it('should paginate', function(done) {
     tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
       assert(!err);
@@ -68,6 +83,7 @@ describe('GET /v1/businesses', function() {
       done();
     });
   });
+
   it('should include locations on include=locations', function(done) {
     tu.get('/v1/businesses?include=locations', function(err, results, res) {
       assert(!err);
@@ -75,8 +91,8 @@ describe('GET /v1/businesses', function() {
       assert(!payload.error);
       for (var i = payload.data.length - 1; i >= 0; i--){
         for (var ii = payload.data[i].locations.length - 1; ii >= 0; ii--){
-          assert(payload.data[i].locations[ii].lat != null && payload.data[i].locations[ii].lat != undefined);
-          assert(payload.data[i].locations[ii].lon != null && payload.data[i].locations[ii].lon != undefined);
+          assert(payload.data[i].locations[ii].lat !== null && payload.data[i].locations[ii].lat !== undefined);
+          assert(payload.data[i].locations[ii].lon !== null && payload.data[i].locations[ii].lon !== undefined);
         }
       }
       done();
