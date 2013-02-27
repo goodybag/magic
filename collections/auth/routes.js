@@ -255,8 +255,6 @@ module.exports.authenticate = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
-
       if (result.rows.length === 0)
         return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
 
