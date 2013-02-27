@@ -51,7 +51,7 @@ var pool = pooler.Pool({
         if (client.assignedPoolId) {
           delete activePoolIds[client.assignedPoolId];
         }
-        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds))
+        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds));
         pool.release(client);
       });
 
@@ -66,11 +66,16 @@ var pool = pooler.Pool({
 , reapIntervalMillis: 1000
 });
 
+var unnamedPoolidCounter = 0;
 exports.getClient = function(id, callback){
   if (typeof id == 'function') {
     callback = id;
     id = null;
-  } else {
+  }
+
+  if (config.outputActivePoolIds) {
+    if (!id)
+      id = 'unnamed'+(unnamedPoolidCounter++);
     activePoolIds[id] = true;
   }
 
