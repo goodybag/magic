@@ -38,6 +38,7 @@ INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('5', '4', 'apparel');
+INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('6', '39', 'food');
 COMMIT;
 SELECT setval('"businessTags_id_seq"', (SELECT MAX(id) from "businessTags")); -- advance the sequence past the IDs just used
 

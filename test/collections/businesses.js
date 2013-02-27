@@ -53,7 +53,7 @@ describe('GET /v1/businesses', function() {
     tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
-      assert(payload.data.length == 4);
+      assert(payload.data.length == 5);
       done();
     });
   });
