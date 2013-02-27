@@ -167,6 +167,8 @@ var config = {
       enabled: true
     , transports: {
         console: true
+      , papertrail: true
+      , loggly: true
       }
     }
   , http: {
