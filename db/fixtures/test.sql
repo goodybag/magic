@@ -291,6 +291,36 @@ INSERT INTO products VALUES (46186, 39, 'Strawberry', 'Sweet Cream blended with 
 INSERT INTO products VALUES (46181, 39, 'Coffee Toffee', 'Sweet cream blended with espresso and Amys own homemade toffee', NULL, 'https://www.filepicker.io/api/file/jml0U62JTsGso8xb2LMF', 0, 0, 0, NULL, NULL, true);
 INSERT INTO products VALUES (46176, 39, 'Milk Shakes', 'A blended Combination of milk and ice cream of your choice topped with complimentary whipped cream.  Additionally for a small charge feel free to have any of our crush’ns blended into your shake.', NULL, 'https://www.filepicker.io/api/file/vkwJeAMkQFCABPLOfpus', 0, 0, 0, NULL, NULL, true);
 
+INSERT INTO products VALUES (46187, 39, 'Cop Stop 2', 'Sweet Cream blended with espresso and mini sour cream donuts', NULL, 'https://www.filepicker.io/api/file/2Lig6wrwQzyN1w9OGIDS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46188, 39, 'Anchors Away 2', 'Sweet Cream blended with Mexican vanilla, Dr. Pepper, Sailor Jerry’s Run, and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/ZUlI4IzSSgxkCXIPMwsg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46189, 39, 'Butter Pecan 2', 'Sweet Cream infused with butter and brown sugar, blended with whole pecan and pecan pieces', NULL, 'https://www.filepicker.io/api/file/RkZ4ZzvGQMKltCuJwKbg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46190, 39, 'Pumpkin 2', 'Sweet cream blended with pumpkin custard mix, pumpkin, cinnamon, nutmeg, clove, and ginger', NULL, 'https://www.filepicker.io/api/file/oDnBUQewQ3yCKPOCCMLw', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46191, 39, 'Lemon Ginger 2', 'Sweet cream blended with pumpkin, cream cheese, clove, allspice, nutmeg, ground cinnamon and ginger, pasteurized egg yolks, and lemon juice.  ', NULL, 'https://www.filepicker.io/api/file/pWY6ORTlQDScxuAjy6af', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46192, 39, 'Shiner Ice Cream 2', 'Sweet cream bended with shiner bock beer and corn syrup', NULL, 'https://www.filepicker.io/api/file/O4jhkdktT3OUwlesxKJv', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46193, 39, 'Mexican Vanilla 2', 'Amy''s most popular flavor, made from a hybrid of vanilla bean that offers a richer, sweeter vanilla flavor', NULL, 'https://www.filepicker.io/api/file/y4fbBh3TVUlxCeG3KC0A', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46194, 39, 'Oreo 2', 'Sweet cream infused with Mexican vanilla blended with oreo cookies', NULL, 'https://www.filepicker.io/api/file/EjnEsxIuQ0W3JhYtTRA6', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46195, 39, 'Guinness 2', 'Sweet Cream blended with Guinness Beer and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/BHA51Fv0RQO2rHvFoszj', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46196, 39, 'Raspberry Ice 2', 'This is a tasty ice flavor', NULL, 'https://www.filepicker.io/api/file/wde2vjbYRtCq7vV9kcxZ', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46197, 39, 'Black Metal Stout 2', 'When Jeffery Stuffing moved to Austin to start a new brewery, Jester King, the first Austin Business he felt a connection to was amys ice creams.  Visiting the 6th street store with his brother Michael they both imagined "how cool it would be to have a Jester King Brewery ice cream flavor".', NULL, 'https://www.filepicker.io/api/file/R8FNWxejRECrxT5lIBJS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46198, 39, 'Strawberry 2', 'Sweet Cream blended with corn syrup and sugared strawberries', NULL, 'https://www.filepicker.io/api/file/OT5yTqOTRw27wfehnr2k', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46199, 39, 'Coffee Toffee 2', 'Sweet cream blended with espresso and Amys own homemade toffee', NULL, 'https://www.filepicker.io/api/file/jml0U62JTsGso8xb2LMF', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46200, 39, 'Milk Shakes 2', 'A blended Combination of milk and ice cream of your choice topped with complimentary whipped cream.  Additionally for a small charge feel free to have any of our crush’ns blended into your shake.', NULL, 'https://www.filepicker.io/api/file/vkwJeAMkQFCABPLOfpus', 0, 0, 0, NULL, NULL, true);
+
+INSERT INTO products VALUES (46201, 39, 'Cop Stop 3', 'Sweet Cream blended with espresso and mini sour cream donuts', NULL, 'https://www.filepicker.io/api/file/2Lig6wrwQzyN1w9OGIDS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46202, 39, 'Anchors Away 3', 'Sweet Cream blended with Mexican vanilla, Dr. Pepper, Sailor Jerry’s Run, and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/ZUlI4IzSSgxkCXIPMwsg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46203, 39, 'Butter Pecan 3', 'Sweet Cream infused with butter and brown sugar, blended with whole pecan and pecan pieces', NULL, 'https://www.filepicker.io/api/file/RkZ4ZzvGQMKltCuJwKbg', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46204, 39, 'Pumpkin 3', 'Sweet cream blended with pumpkin custard mix, pumpkin, cinnamon, nutmeg, clove, and ginger', NULL, 'https://www.filepicker.io/api/file/oDnBUQewQ3yCKPOCCMLw', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46205, 39, 'Lemon Ginger 3', 'Sweet cream blended with pumpkin, cream cheese, clove, allspice, nutmeg, ground cinnamon and ginger, pasteurized egg yolks, and lemon juice.  ', NULL, 'https://www.filepicker.io/api/file/pWY6ORTlQDScxuAjy6af', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46206, 39, 'Shiner Ice Cream 3', 'Sweet cream bended with shiner bock beer and corn syrup', NULL, 'https://www.filepicker.io/api/file/O4jhkdktT3OUwlesxKJv', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46207, 39, 'Mexican Vanilla 3', 'Amy''s most popular flavor, made from a hybrid of vanilla bean that offers a richer, sweeter vanilla flavor', NULL, 'https://www.filepicker.io/api/file/y4fbBh3TVUlxCeG3KC0A', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46208, 39, 'Oreo 3', 'Sweet cream infused with Mexican vanilla blended with oreo cookies', NULL, 'https://www.filepicker.io/api/file/EjnEsxIuQ0W3JhYtTRA6', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46209, 39, 'Guinness 3', 'Sweet Cream blended with Guinness Beer and Corn Syrup', NULL, 'https://www.filepicker.io/api/file/BHA51Fv0RQO2rHvFoszj', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46210, 39, 'Raspberry Ice 3', 'This is a tasty ice flavor', NULL, 'https://www.filepicker.io/api/file/wde2vjbYRtCq7vV9kcxZ', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46211, 39, 'Black Metal Stout 3', 'When Jeffery Stuffing moved to Austin to start a new brewery, Jester King, the first Austin Business he felt a connection to was amys ice creams.  Visiting the 6th street store with his brother Michael they both imagined "how cool it would be to have a Jester King Brewery ice cream flavor".', NULL, 'https://www.filepicker.io/api/file/R8FNWxejRECrxT5lIBJS', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46212, 39, 'Strawberry 3', 'Sweet Cream blended with corn syrup and sugared strawberries', NULL, 'https://www.filepicker.io/api/file/OT5yTqOTRw27wfehnr2k', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46213, 39, 'Coffee Toffee 3', 'Sweet cream blended with espresso and Amys own homemade toffee', NULL, 'https://www.filepicker.io/api/file/jml0U62JTsGso8xb2LMF', 0, 0, 0, NULL, NULL, true);
+INSERT INTO products VALUES (46214, 39, 'Milk Shakes 3', 'A blended Combination of milk and ice cream of your choice topped with complimentary whipped cream.  Additionally for a small charge feel free to have any of our crush’ns blended into your shake.', NULL, 'https://www.filepicker.io/api/file/vkwJeAMkQFCABPLOfpus', 0, 0, 0, NULL, NULL, true);
+
 COMMIT;
 SELECT setval('products_id_seq', (SELECT MAX(id) from "products")); -- advance the sequence past the IDs just used
 
@@ -343,11 +373,50 @@ INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES ('9', '5', '1', '5', 0, 0, ll_to_earth(0, 0), false);
 
 -- amys
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (10, 46175, 39, 51, 10, 10, ll_to_earth(10, 10), false);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (11, 46183, 39, 51, 10, 10, ll_to_earth(10, 10), false);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (12, 46172, 39, 51, 10, 10, ll_to_earth(10, 10), true);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (13, 46173, 39, 51, 10, 10, ll_to_earth(10, 10), false);
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (14, 46174, 39, 51, 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (12, 46172, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (13, 46173, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (14, 46174, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (15, 46175, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (16, 46176, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (17, 46177, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (18, 46178, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (19, 46179, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (20, 46180, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (21, 46181, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (23, 46183, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (24, 46184, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (25, 46185, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (26, 46186, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (27, 46187, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (28, 46188, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (29, 46189, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (30, 46190, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (31, 46191, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (32, 46192, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (33, 46193, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (34, 46194, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (35, 46195, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (36, 46196, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (37, 46197, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (38, 46198, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (39, 46199, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (40, 46200, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (41, 46201, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (42, 46202, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (43, 46203, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (44, 46204, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (45, 46205, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (46, 46206, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (47, 46207, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (48, 46208, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (49, 46209, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (50, 46210, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (51, 46211, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (52, 46212, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (53, 46213, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES (54, 46214, 39, 51, 30.3012559999999986, -97.7391460000000052, ll_to_earth(30.3012559999999986, -97.7391460000000052), false);
+
+
 
 COMMIT;
 SELECT setval('"productLocations_id_seq"', (SELECT MAX(id) from "productLocations")); -- advance the sequence past the IDs just used
@@ -409,6 +478,7 @@ INSERT INTO "productTags" ("id","businessId", "tag") VALUES (8, 39, 'Tag3');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (9, 39, 'Tag4');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (10, 39, 'Tag5');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (11, 39, 'Tag6');
+INSERT INTO "productTags" ("id","businessId", "tag") VALUES (12, 39, 'food');
 COMMIT;
 SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used
 
@@ -428,6 +498,49 @@ INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (8,
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (9, 9, 46183);
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (10, 10, 46183);
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (11, 11, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (12, 12, 46183);
+
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (13, 12, 46173);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (14, 12, 46174);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (15, 12, 46175);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (16, 12, 46176);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (17, 12, 46177);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (18, 12, 46178);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (19, 12, 46179);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (20, 12, 46180);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (21, 12, 46181);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (23, 12, 46183);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (24, 12, 46184);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (25, 12, 46185);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (26, 12, 46186);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (27, 12, 46187);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (28, 12, 46188);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (29, 12, 46189);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (30, 12, 46190);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (31, 12, 46191);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (32, 12, 46192);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (33, 12, 46193);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (34, 12, 46194);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (35, 12, 46195);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (36, 12, 46196);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (37, 12, 46197);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (38, 12, 46198);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (39, 12, 46199);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (40, 12, 46200);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (41, 12, 46201);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (42, 12, 46202);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (43, 12, 46203);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (44, 12, 46204);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (45, 12, 46205);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (46, 12, 46206);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (47, 12, 46207);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (48, 12, 46208);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (49, 12, 46209);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (50, 12, 46210);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (51, 12, 46211);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (52, 12, 46212);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (53, 12, 46213);
+INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (54, 12, 46214);
 
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used

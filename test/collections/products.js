@@ -68,7 +68,7 @@ describe('GET /v1/products', function() {
 
   it('should include collections if requested', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/products?include=collections', function(err, payload, res) {
+      tu.get('/v1/products?include=collections&limit=1000', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(payload.data.filter(function(p) { return p.collections[0] == 1 && p.id == 1; }).length === 1);
@@ -234,7 +234,9 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data[0].name == 'Strawberry');
+      assert(payload.data[0].name > payload.data[1].name);
+      assert(payload.data[1].name > payload.data[2].name);
+      assert(payload.data[2].name > payload.data[3].name);
       assert(payload.meta.total > 1);
       done();
     });
