@@ -15,6 +15,7 @@ var config = {
     , transports: {
         console: false
       , fileRotate: true
+      , papertrail: true
       }
     }
   , http: {
@@ -70,6 +71,10 @@ var config = {
         username: 'pfraze'
       , password: 'imlikeabeaverbuildingadam!'
       }
+    }
+  , papertrail: {
+      host: 'logs.papertrailapp.com'
+    , port: 24616
     }
   }
 
