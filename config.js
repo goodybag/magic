@@ -67,6 +67,7 @@ var config = {
     }
   , loggly: {
       subdomain:'goodybagpaul'
+    , inputToken: '073b990f-2045-4f46-9290-84e9fc79ff61'
     , auth: {
         username: 'pfraze'
       , password: 'imlikeabeaverbuildingadam!'

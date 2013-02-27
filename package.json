@@ -19,10 +19,10 @@
     "winston": "0.6.x",
     "express-winston": "0.1.x",
     "winston-papertrail": "0.0.6",
+    "winston-loggly": "0.6.x",
     
     "nodemailer": "0.3.x",
     "pubnub": "https://github.com/pfraze/pubnub-nodejs/tarball/master",
-    "loggly": "0.3.x",
 
     "validator": "0.4.x",
     
