@@ -64,6 +64,13 @@ var config = {
         ;
       }
     }
+  , loggly: {
+      subdomain:'goodybagpaul'
+    , auth: {
+        username: 'pfraze'
+      , password: 'imlikeabeaverbuildingadam!'
+      }
+    }
   }
 
 , dev: {

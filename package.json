@@ -21,6 +21,7 @@
     
     "nodemailer": "0.3.x",
     "pubnub": "https://github.com/pfraze/pubnub-nodejs/tarball/master",
+    "loggly": "0.3.x",
 
     "validator": "0.4.x",
     
