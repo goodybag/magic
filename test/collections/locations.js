@@ -105,7 +105,7 @@ describe('GET /v1/locations', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data.length == 3);
+      assert(payload.data.length == 6);
       done();
     });
   });
