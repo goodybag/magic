@@ -9,163 +9,148 @@ var
 describe('GET /v1/locations', function() {
 
   it('should respond with a location listing of all enabled locations', function(done) {
-    tu.get('/v1/locations', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length > 1);
-      assert(payload.data[0].id);
-      assert(payload.data[0].businessId);
-      assert(payload.data[0].name);
-      assert(payload.data[0].isEnabled == null || payload.data[0].isEnabled == undefined);
-      assert(payload.meta.total > 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:false }], function() {
+        tu.get('/v1/locations', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.meta.total > 1);
+          assert(tu.arrHas(payload.data, 'isEnabled', false) === false);
+          done();
+        });
+      });
     });
   });
 
   it('should respond with a location listing regardless of enabled state', function(done) {
-    tu.loginAsAdmin(function(error){
-      assert(!error);
-      tu.get('/v1/locations?all=true', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
-
-        assert(payload.data[0].isEnabled != null && payload.data[0].isEnabled != undefined);
-
-        assert(payload.meta.total > 1);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Disabled', businessId:bids[0], isEnabled:false }], function() {
+        tu.loginAsAdmin(function(error){
+          assert(!error);
+          tu.get('/v1/locations?all=true', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(tu.arrHas(payload.data, 'name', 'Disabled'));
+            assert(payload.meta.total > 1);
+            tu.logout(done);
+          });
+        });
       });
     });
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/locations?offset=1&limit=1', function(err, payload, res) {
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/locations?offset=1&limit=1', function(err, payload, res) {
 
-      assert(!err);
-      assert(res.statusCode == 200);
+          assert(!err);
+          assert(res.statusCode == 200);
 
-      payload = JSON.parse(payload);
+          payload = JSON.parse(payload);
 
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name);
-      assert(payload.meta.total > 1);
-      done();
+          assert(!payload.error);
+          assert(payload.data.length === 1);
+          assert(payload.data[0].name);
+          assert(payload.meta.total > 1);
+          done();
+        });
+      });
     });
   });
 
   it('should filter by lat/lon/range', function(done) {
-    tu.get('/v1/locations?lat=10&lon=10&range=1000', function(err, payload, res) {
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length === 2);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.data[1].name == 'Location 2');
-      assert(payload.meta.total > 1);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'First', businessId:bids[0], lat:8, lon:8, isEnabled:true }, { name:'Second', businessId:bids[0], lat:8.001, lon:8.001, isEnabled:true }], function() {
+        tu.get('/v1/locations?lat=8&lon=8&range=1000', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length === 2);
+          assert(payload.data[0].name == 'First');
+          assert(payload.data[1].name == 'Second');
+          assert(payload.meta.total > 1);
 
-      tu.get('/v1/locations?lat=10&lon=10&range=100', function(err, payload, res) {
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(payload.data.length === 1);
-        assert(payload.data[0].name == 'Location 1');
-        done();
+          tu.get('/v1/locations?lat=8&lon=8&range=100', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(payload.data.length === 1);
+            assert(payload.data[0].name == 'First');
+            done();
+          });
+        });
       });
     });
   });
 
   it('should filter by a single tag', function(done) {
-    tu.get('/v1/locations?tag=uniquetag', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length == 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['uniqueloctag'] }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/locations?tag=uniqueloctag', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length == 2);
+          done();
+        });
+      });
     });
   });
 
   it('should filter by mutliple tags', function(done) {
-    tu.get('/v1/locations?tag[]=food&tag[]=apparel', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length == 6);
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['uniqueloctag1'] }, { name:'Business 2', tags:['uniqueloctag2'] }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[1], isEnabled:true }], function() {
+        tu.get('/v1/locations?tag[]=uniqueloctag1&tag[]=uniqueloctag2', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length == 2);
+          done();
+        });
+      });
     });
   });
 
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/locations?sort=name', function(err, payload, res) {
-
-      assert(!err);
       assert(res.statusCode == 200);
-
       payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data[0].name == 'Loc 1');
-      assert(payload.data[1].name == 'Loc 2');
+      for (var i=0; i < payload.data.length - 1; i++)
+        assert(payload.data[i].name <= payload.data[i+1].name);
       done();
     });
   });
 
   it('should sort DESC if a - prefix is given', function(done) {
     tu.get('/v1/locations?sort=-name', function(err, payload, res) {
-
-      assert(!err);
       assert(res.statusCode == 200);
-
       payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data[0].name == 'Location 6');
+      for (var i=0; i < payload.data.length - 1; i++)
+        assert(payload.data[i].name >= payload.data[i+1].name);
       done();
     });
   });
 
   it('should sort by random', function(done) {
     tu.get('/v1/locations?sort=random', function(err, payload, res) {
-      assert(!err);
       assert(res.statusCode == 200);
       done();
     });
   });
 
   it('should sort by distance if also given a location', function(done) {
-    tu.get('/v1/locations?lat=10&lon=10&sort=distance', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.data[1].name == 'Location 2');
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'First', businessId:bids[0], lat:5, lon:5, isEnabled:true }, { name:'Second', businessId:bids[0], lat:5.001, lon:5.001, isEnabled:true }], function() {
+        tu.get('/v1/locations?lat=5&lon=5&sort=distance', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data[0].name == 'First');
+          assert(payload.data[1].name == 'Second');
+          done();
+        });
+      });
     });
   });
 
   it('should return 400 if asked to sort by distance and not given a location', function(done) {
     tu.get('/v1/locations?sort=distance', function(err, payload, res) {
-
-      assert(!err);
       assert(res.statusCode == 400);
       done();
     });
@@ -173,8 +158,6 @@ describe('GET /v1/locations', function() {
 
   it('should return 400 if the sort parameter is not recognized', function(done) {
     tu.get('/v1/locations?sort=foobar', function(err, payload, res) {
-
-      assert(!err);
       assert(res.statusCode == 400);
       done();
     });
@@ -186,69 +169,69 @@ describe('GET /v1/locations', function() {
 describe('GET /v1/businesses/:id/locations', function() {
 
   it('should respond with a location listing', function(done) {
-    tu.get('/v1/businesses/1/locations', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length > 0);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Location 1');
-      assert(payload.meta.total > 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/businesses/'+bids[0]+'/locations', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length  == 2);
+          assert(payload.meta.total > 1);
+          done();
+        });
+      });
     });
   });
 
   it('should respond nothing to invalid business id', function(done) {
     tu.get('/v1/businesses/100/locations', function(error, results, res) {
-      assert(!error);
       results = JSON.parse(results);
       assert(results.data.length === 0);
       done();
     });
   });
 
-  it('should respond nothing to invalid business id type', function(done) {
+  it('should respond 400 to invalid business id type', function(done) {
     tu.get('/v1/businesses/abcd/locations', function(error, results, res) {
-      assert(!error);
       assert(res.statusCode == 400);
       done();
     });
   });
 
   it('should paginate', function(done) {
-    tu.get('/v1/businesses/1/locations?offset=1&limit=1', function(err, payload, res) {
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/businesses/'+bids[0]+'/locations?offset=1&limit=1', function(err, payload, res) {
 
-      assert(!err);
-      assert(res.statusCode == 200);
+          assert(!err);
+          assert(res.statusCode == 200);
 
-      payload = JSON.parse(payload);
+          payload = JSON.parse(payload);
 
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name);
-      assert(payload.meta.total > 1);
-      done();
+          assert(!payload.error);
+          assert(payload.data.length === 1);
+          assert(payload.data[0].name);
+          assert(payload.meta.total > 1);
+          done();
+        });
+      });
     });
   });
 });
 
 describe('GET /v1/locations/food', function() {
   it('should respond with food items', function(done) {
-    tu.get('/v1/locations/food?include=tags', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') === -1);
-      }).length === 0); // make sure all rows have the 'food' tag
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/locations/food?include=tags', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length > 0);
+          assert(payload.data.filter(function(p) {
+            return (p.tags.indexOf('food') === -1);
+          }).length === 0); // make sure all rows have the 'food' tag
+          done();
+        });
+      });
     });
   });
 
@@ -263,32 +246,38 @@ describe('GET /v1/locations/food', function() {
 
 describe('GET /v1/locations/fashion', function() {
   it('should respond with fashion items', function(done) {
-    tu.get('/v1/locations/fashion?include=tags', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('apparel') === -1);
-      }).length === 0); // make sure all rows have the 'apparel' tag
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['apparel'] }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/locations/fashion?include=tags', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length > 0);
+          assert(payload.data.filter(function(p) {
+            return (p.tags.indexOf('apparel') === -1);
+          }).length === 0); // make sure all rows have the 'apparel' tag
+          done();
+        });
+      });
     });
   });
 });
 
 describe('GET /v1/locations/other', function() {
   it('should respond with non-food and non-fashion items', function(done) {
-    tu.get('/v1/locations/other?include=tags', function(err, payload, res) {
+    tu.populate('businesses', [{ name:'Business 1', tags:['foobar'] }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.get('/v1/locations/other?include=tags', function(err, payload, res) {
 
-      assert(!err);
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
-      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
-      done();
+          assert(!err);
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length > 0);
+          assert(payload.data.filter(function(p) {
+            return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+          }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
+          done();
+        });
+      });
     });
   });
 });
@@ -296,18 +285,17 @@ describe('GET /v1/locations/other', function() {
 describe('GET /v1/locations/:id', function() {
 
   it('should respond with a location', function(done) {
-    tu.get('/v1/locations/1', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.id == 1);
-      assert(payload.data.businessId == 1);
-      assert(payload.data.name == 'Location 1');
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.get('/v1/locations/'+lids[0], function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.id == lids[0]);
+          assert(payload.data.businessId == bids[0]);
+          assert(payload.data.name == 'Location 1');
+          done();
+        });
+      });
     });
   });
 
@@ -328,57 +316,74 @@ describe('GET /v1/locations/:id', function() {
   });
 
   it('should let sales see keytag info', function(done) {
-    tu.loginAsSales(function(){
-      tu.get('/v1/locations/1', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
-        assert(payload.data.lastKeyTagRequest);
-        assert(payload.data.keyTagRequestPending);
-
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsAdmin(function() {
+          tu.post('/v1/locations/'+lids[0]+'/key-tag-requests', {}, function(err, results, res) {
+            assert(res.statusCode == 204);
+            tu.logout(function() {
+              tu.loginAsSales(function(){
+                tu.get('/v1/locations/'+lids[0], function(err, payload, res) {
+                  assert(res.statusCode == 200);
+                  payload = JSON.parse(payload);
+                  assert(payload.data.lastKeyTagRequest);
+                  assert(payload.data.keyTagRequestPending);
+                  tu.logout(done);
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
 
   it('should let managers see keytag info', function(done) {
-    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
-      assert(!error);
-      tu.get('/v1/locations/1', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
-        assert(payload.data.lastKeyTagRequest);
-        assert(payload.data.keyTagRequestPending);
-
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('managers', [{ email:'managerkeytags@gmail.com', password:'password', businessId:bids[0], locationId:lids[0] }], function() {
+          tu.loginAsAdmin(function() {
+            tu.post('/v1/locations/'+lids[0]+'/key-tag-requests', {}, function(err, results, res) {
+              assert(res.statusCode == 204);
+              tu.logout(function() {
+                tu.login({email: 'managerkeytags@gmail.com', password: 'password'}, function(error, user){
+                  assert(!error);
+                  tu.get('/v1/locations/'+lids[0], function(err, payload, res) {
+                    assert(res.statusCode == 200);
+                    payload = JSON.parse(payload);
+                    assert(payload.data.lastKeyTagRequest);
+                    assert(payload.data.keyTagRequestPending);
+                    tu.logout(done);
+                  });
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
 
   it('should not let consumers see keytag info', function(done) {
-    tu.login({email: 'some_manager@gmail.com', password: 'password'}, function(error, user){
-      assert(!error);
-      tu.get('/v1/locations/1', function(err, payload, res) {
-
-        assert(!err);
-        assert(res.statusCode == 200);
-
-        payload = JSON.parse(payload);
-
-        assert(!payload.error);
-        assert(payload.data.lastKeyTagRequest);
-        assert(payload.data.keyTagRequestPending);
-
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsAdmin(function() {
+          tu.post('/v1/locations/'+lids[0]+'/key-tag-requests', {}, function(err, results, res) {
+            assert(res.statusCode == 204);
+            tu.logout(function() {
+              tu.login({email: 'tferguson@gmail.com', password: 'password'}, function(error, user){
+                assert(!error);
+                tu.get('/v1/locations/'+lids[0], function(err, payload, res) {
+                  assert(res.statusCode == 200);
+                  payload = JSON.parse(payload);
+                  assert(typeof payload.data.lastKeyTagRequest == 'undefined');
+                  assert(typeof payload.data.keyTagRequestPending == 'undefined');
+                  tu.logout(done);
+                });
+              });
+            });
+          });
+        });
       });
     });
   });
@@ -485,28 +490,41 @@ describe('POST /v1/locations', function() {
 describe('PATCH /v1/locations/:id', function() {
 
   it('should respond with a 204', function(done) {
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
-        assert(!err);
-        assert(res.statusCode == 204);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsSales(function(error, user){
+          tu.patch('/v1/locations/'+lids[0], { businessId:2, name:'Barhouse2', lat:10.0015, lon:10.0015 }, function(err, results, res) {
+            assert(res.statusCode == 204);
+            tu.logout(done);
+          });
+        });
       });
     });
   });
 
   it('should respond to a locations key tag request', function(done) {
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/locations/2', { keyTagRequestPending: false }, function(err, results, res) {
-        assert(!err);
-        assert(res.statusCode == 204);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsAdmin(function() {
+          tu.post('/v1/locations/'+lids[0]+'/key-tag-requests', {}, function(err, results, res) {
+            assert(res.statusCode == 204);
+            tu.logout(function() {
+              tu.loginAsSales(function(error, user){
+                tu.patch('/v1/locations/'+lids[0], { keyTagRequestPending: false }, function(err, results, res) {
+                  assert(!err);
+                  assert(res.statusCode == 204);
 
-        tu.get('/v1/locations/2', function(error, results){
-          results = JSON.parse(results);
-          assert(!results.error);
-          assert(results.data.keyTagRequestPending === false);
-          tu.logout(done);
+                  tu.get('/v1/locations/'+lids[0], function(error, results, res){
+                    assert(res.statusCode == 200);
+                    results = JSON.parse(results);
+                    assert(results.data.keyTagRequestPending === false);
+                    tu.logout(done);
+                  });
+                });
+              });
+            });
+          });
         });
-
       });
     });
   });
@@ -527,11 +545,14 @@ describe('PATCH /v1/locations/:id', function() {
 
 describe('DELETE /v1/locations/:id', function() {
   it('should respond with a 204', function(done) {
-    tu.loginAsSales(function(error, user){
-      tu.del('/v1/locations/5', function(err, results, res) {
-        assert(!err);
-        assert(res.statusCode == 204);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsSales(function(error, user){
+          tu.del('/v1/locations/'+lids[0], function(err, results, res) {
+            assert(res.statusCode == 204);
+            tu.logout(done);
+          });
+        });
       });
     });
   });
@@ -541,75 +562,71 @@ describe('DELETE /v1/locations/:id', function() {
 describe('GET /v1/locations/:id/analytics', function() {
 
   it('should respond with a locations stats', function(done) {
-    tu.loginAsAdmin(function() {
-      tu.get('/v1/locations/1/analytics', function(err, payload, res) {
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(!payload.error);
-        assert(payload.data.day.likes == 1);
-        assert(payload.data.day.wants == 1);
-        assert(payload.data.day.tries == 1);
-        assert(payload.data.day.tapins == 1);
-        assert(payload.data.day.punches == 4);
-        assert(payload.data.day.redemptions == 1);
-        assert(payload.data.day.visits == 1);
-        assert(payload.data.day.firstVisits == 0);
-        assert(payload.data.day.returnVisits == 1);
-        assert(payload.data.day.becameElites == 1);
-        assert(payload.data.day.photos == 1);
-        assert(payload.data.week.likes == 2);
-        assert(payload.data.week.wants == 2);
-        assert(payload.data.week.tries == 2);
-        assert(payload.data.week.tapins == 2);
-        assert(payload.data.week.punches == 8);
-        assert(payload.data.week.redemptions == 2);
-        assert(payload.data.week.visits == 2);
-        assert(payload.data.week.firstVisits == 0);
-        assert(payload.data.week.returnVisits == 2);
-        assert(payload.data.week.becameElites == 2);
-        assert(payload.data.week.photos == 1);
-        assert(payload.data.month.likes == 3);
-        assert(payload.data.month.wants == 3);
-        assert(payload.data.month.tries == 3);
-        assert(payload.data.month.tapins == 3);
-        assert(payload.data.month.punches == 12);
-        assert(payload.data.month.redemptions == 3);
-        assert(payload.data.month.visits == 3);
-        assert(payload.data.month.firstVisits == 0);
-        assert(payload.data.month.returnVisits == 3);
-        assert(payload.data.month.becameElites == 3);
-        assert(payload.data.month.photos == 1);
-        assert(payload.data.all.likes == 4);
-        assert(payload.data.all.wants == 4);
-        assert(payload.data.all.tries == 4);
-        assert(payload.data.all.tapins == 4);
-        assert(payload.data.all.punches == 16);
-        assert(payload.data.all.redemptions == 4);
-        assert(payload.data.all.visits == 4);
-        assert(payload.data.all.firstVisits == 1);
-        assert(payload.data.all.returnVisits == 3);
-        assert(payload.data.all.becameElites == 4);
-        assert(payload.data.all.photos == 1);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.loginAsAdmin(function() {
+          tu.get('/v1/locations/'+lids[0]+'/analytics', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(!payload.error);
+            assert(typeof payload.data.day.likes != 'undefined');
+            assert(typeof payload.data.day.wants != 'undefined');
+            assert(typeof payload.data.day.tries != 'undefined');
+            assert(typeof payload.data.day.tapins != 'undefined');
+            assert(typeof payload.data.day.punches != 'undefined');
+            assert(typeof payload.data.day.redemptions != 'undefined');
+            assert(typeof payload.data.day.visits != 'undefined');
+            assert(typeof payload.data.day.firstVisits != 'undefined');
+            assert(typeof payload.data.day.returnVisits != 'undefined');
+            assert(typeof payload.data.day.becameElites != 'undefined');
+            assert(typeof payload.data.day.photos != 'undefined');
+            assert(typeof payload.data.week.likes != 'undefined');
+            assert(typeof payload.data.week.wants != 'undefined');
+            assert(typeof payload.data.week.tries != 'undefined');
+            assert(typeof payload.data.week.tapins != 'undefined');
+            assert(typeof payload.data.week.punches != 'undefined');
+            assert(typeof payload.data.week.redemptions != 'undefined');
+            assert(typeof payload.data.week.visits != 'undefined');
+            assert(typeof payload.data.week.firstVisits != 'undefined');
+            assert(typeof payload.data.week.returnVisits != 'undefined');
+            assert(typeof payload.data.week.becameElites != 'undefined');
+            assert(typeof payload.data.week.photos != 'undefined');
+            assert(typeof payload.data.month.likes != 'undefined');
+            assert(typeof payload.data.month.wants != 'undefined');
+            assert(typeof payload.data.month.tries != 'undefined');
+            assert(typeof payload.data.month.tapins != 'undefined');
+            assert(typeof payload.data.month.punches != 'undefined');
+            assert(typeof payload.data.month.redemptions != 'undefined');
+            assert(typeof payload.data.month.visits != 'undefined');
+            assert(typeof payload.data.month.firstVisits != 'undefined');
+            assert(typeof payload.data.month.returnVisits != 'undefined');
+            assert(typeof payload.data.month.becameElites != 'undefined');
+            assert(typeof payload.data.month.photos != 'undefined');
+            assert(typeof payload.data.all.likes != 'undefined');
+            assert(typeof payload.data.all.wants != 'undefined');
+            assert(typeof payload.data.all.tries != 'undefined');
+            assert(typeof payload.data.all.tapins != 'undefined');
+            assert(typeof payload.data.all.punches != 'undefined');
+            assert(typeof payload.data.all.redemptions != 'undefined');
+            assert(typeof payload.data.all.visits != 'undefined');
+            assert(typeof payload.data.all.firstVisits != 'undefined');
+            assert(typeof payload.data.all.returnVisits != 'undefined');
+            assert(typeof payload.data.all.becameElites != 'undefined');
+            assert(typeof payload.data.all.photos != 'undefined');
+            tu.logout(done);
+          });
+        });
       });
     });
   });
 
-  it('should respond 404 with invalid location id', function(done) {
+  it('should respond with empty data on invalid location id', function(done) {
     tu.loginAsAdmin(function() {
       tu.get('/v1/locations/100/analytics', function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode == 404);
-        tu.logout(done);
-      });
-    });
-  });
-
-  it('should respond 404 with invalid location id type', function(done) {
-    tu.loginAsAdmin(function() {
-      tu.get('/v1/locations/abcd/analytics', function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode == 404);
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.day);
+        assert(!results.data.day.likes);
         tu.logout(done);
       });
     });
@@ -619,20 +636,26 @@ describe('GET /v1/locations/:id/analytics', function() {
 describe('/v1/locations/:id/products', function() {
 
   it('should add and remove products from a location', function(done) {
-    tu.loginAsAdmin(function(error, user){
-      tu.del('/v1/locations/1/products/1', function(err, results, res) {
-        assert(res.statusCode == 204);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('products', [{ name:'Product 1', businessId:bids[0], isEnabled:true }], function(err, pids) {
+          tu.loginAsAdmin(function(error, user){
+            tu.post('/v1/locations/'+lids[0]+'/products', { productId:pids[0], inSpotlight:false }, function(err, results, res) {
+              assert(res.statusCode == 204);
 
-        tu.get('/v1/locations/1/products', function(err, results, res) {
-          assert(res.statusCode == 200);
-          results = JSON.parse(results);
-          assert(results.data.filter(function(product) {
-            return product.id === 1;
-          }).length === 0);
+              tu.get('/v1/locations/'+lids[0]+'/products', function(err, results, res) {
+                assert(res.statusCode == 200);
+                results = JSON.parse(results);
+                assert(results.data.filter(function(product) {
+                  return product.id === pids[0];
+                }).length === 1);
 
-          tu.post('/v1/locations/1/products', { productId:1, inSpotlight:false }, function(err, results, res) {
-            assert(res.statusCode == 204);
-            tu.logout(done);
+                tu.del('/v1/locations/'+lids[0]+'/products/'+pids[0], function(err, results, res) {
+                  assert(res.statusCode == 204);
+                  tu.logout(done);
+                });
+              });
+            });
           });
         });
       });
@@ -640,10 +663,19 @@ describe('/v1/locations/:id/products', function() {
   });
 
   it('should update the product location', function(done) {
-    tu.loginAsAdmin(function(error, user){
-      tu.put('/v1/locations/1/products/1', {inSpotlight:true}, function(err, results, res) {
-        assert(res.statusCode == 204);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('products', [{ name:'Product 1', businessId:bids[0], isEnabled:true }], function(err, pids) {
+          tu.loginAsAdmin(function(error, user){
+            tu.post('/v1/locations/'+lids[0]+'/products', { productId:pids[0], inSpotlight:false }, function(err, results, res) {
+              assert(res.statusCode == 204);
+              tu.put('/v1/locations/'+lids[0]+'/products/'+pids[0], {inSpotlight:true}, function(err, results, res) {
+                assert(res.statusCode == 204);
+                tu.logout(done);
+              });
+            });
+          });
+        });
       });
     });
   });
@@ -651,23 +683,29 @@ describe('/v1/locations/:id/products', function() {
 
 describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
   it('should put in a request for key tags', function(done){
-    tu.login({email: 'manager_redeem3@gmail.com', password: 'password'}, function(error, user){
-      assert(!error);
-      var current = new Date();
-      tu.post('/v1/locations/2/key-tag-requests', {}, function(err, payload, res) {
-        assert(res.statusCode == 204);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('managers', [{ email:'managerkeytags2@gmail.com', password:'password', businessId:bids[0], locationId:lids[0] }], function() {
+          tu.login({email: 'managerkeytags2@gmail.com', password: 'password'}, function(error, user){
+            assert(!error);
+            var current = new Date();
+            tu.post('/v1/locations/'+lids[0]+'/key-tag-requests', {}, function(err, payload, res) {
+              assert(res.statusCode == 204);
 
-        tu.get('/v1/locations/2', function(err, payload, res){
-          assert(!err);
-          assert(res.statusCode == 200);
+              tu.get('/v1/locations/'+lids[0], function(err, payload, res){
+                assert(!err);
+                assert(res.statusCode == 200);
 
-          payload = JSON.parse(payload);
+                payload = JSON.parse(payload);
 
-          assert(!payload.error);
-          assert(new Date(payload.data.lastKeyTagRequest) >= current);
-          assert(payload.data.keyTagRequestPending === true);
+                assert(!payload.error);
+                assert(new Date(payload.data.lastKeyTagRequest) >= current);
+                assert(payload.data.keyTagRequestPending === true);
 
-          tu.logout(done);
+                tu.logout(done);
+              });
+            });
+          });
         });
       });
     });

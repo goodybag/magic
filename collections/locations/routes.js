@@ -66,7 +66,7 @@ module.exports.list = function(req, res){
 
     // location filtering
     if (req.query.lat && req.query.lon) {
-      query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance')
+      query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
       if (req.query.range) {
@@ -357,15 +357,21 @@ module.exports.getAnalytics = function(req, res){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       logger.db.debug(TAGS, results);
 
-      if (results[0].rowCount === 0) {
-        return res.status(404).end();
-      }
+      // if (results[0].rowCount === 0) {
+      //   return res.status(404).end();
+      // }
 
+      var baseStats = {
+        likes:0, wants:0, tries:0,
+        tapins:0, punches:0, redemptions:0,
+        visits:0, firstVisits:0, returnVisits:0,
+        becameElites:0, photos:0
+      };
       var stats = {
-        day   : utils.extend(results[0].rows[0], results[1].rows[0], results[2].rows[0]),
-        week  : utils.extend(results[3].rows[0], results[4].rows[0], results[5].rows[0]),
-        month : utils.extend(results[6].rows[0], results[7].rows[0], results[8].rows[0]),
-        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0])
+        day   : utils.extend(results[0].rows[0] || {}, results[1].rows[0] || {}, results[2].rows[0] || {}, baseStats),
+        week  : utils.extend(results[3].rows[0] || {}, results[4].rows[0] || {}, results[5].rows[0] || {}, baseStats),
+        month : utils.extend(results[6].rows[0] || {}, results[7].rows[0] || {}, results[8].rows[0] || {}, baseStats),
+        all   : utils.extend(results[9].rows[0] || {}, results[10].rows[0] || {}, results[11].rows[0] || {}, baseStats)
       };
       // console.log(stats);
 
@@ -400,7 +406,10 @@ module.exports.addProduct = function(req, res){
     query.$('inSpotlight', !!inputs.inSpotlight);
 
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) {
+        if (/productId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { productId:'Id provided does not exist in products table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
       logger.db.debug(TAGS, result);
 
       res.noContent();

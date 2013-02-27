@@ -44,36 +44,40 @@ describe('Consumers Events: ', function() {
 
 describe('Products Events: ', function() {
   it('store an event when a user likes a product', function(done) {
-    tu.loginAsConsumer(function(error, user){
-      assert(!error);
-      tu.post('/v1/products/3/feelings', { isLiked:true }, function(err, payload, res) {
-        assert(!err);
-        assert(res.statusCode == 204);
-
-        tu.get('/v1/products/3', function(err, payload, res) {
+    var consumer = { email:'likeevent@consumer.com', password:'password' };
+    tu.populate('consumers', [consumer], function(uids) {
+      tu.login(consumer, function(error, user){
+        var userId = user.id;
+        assert(!error);
+        tu.post('/v1/products/3/feelings', { isLiked:true }, function(err, payload, res) {
           assert(!err);
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
 
-          payload = JSON.parse(payload);
-          assert(payload.data.likes >= 1);
+          tu.get('/v1/products/3', function(err, payload, res) {
+            assert(!err);
+            assert(res.statusCode == 200);
 
-          tu.logout(function(){
-            tu.loginAsAdmin(function(error){
-              assert(!error);
-              // Give server time to propagate events
-              setTimeout(function(){
-                tu.get('/v1/events?limit=200', function(error, results) {
-                  assert(!error);
-                  results = JSON.parse(results);
-                  assert(!results.error);
-                  assert(results.data.length > 0);
-                  assert(results.data.filter(function(d){
-                    return d.type === "products.like" && d.data.productId == 3 && d.data.userId == 5;
-                  }).length === 1);
+            payload = JSON.parse(payload);
+            assert(payload.data.likes >= 1);
 
-                  tu.logout(done);
-                });
-              }, 100);
+            tu.logout(function(){
+              tu.loginAsAdmin(function(error){
+                assert(!error);
+                // Give server time to propagate events
+                setTimeout(function(){
+                  tu.get('/v1/events?limit=500', function(error, results) {
+                    assert(!error);
+                    results = JSON.parse(results);
+                    assert(!results.error);
+                    assert(results.data.length > 0);
+                    assert(results.data.filter(function(d){
+                      return d.type === "products.like" && d.data.productId == 3 && d.data.userId == userId;
+                    }).length === 1);
+
+                    tu.logout(done);
+                  });
+                }, 100);
+              });
             });
           });
         });

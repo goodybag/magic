@@ -203,7 +203,10 @@ module.exports.create = function(req, res){
     logger.db.debug(TAGS, query.toString());
 
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) {
+        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
       logger.db.debug(TAGS, result);
 
       var business = result.rows[0];
@@ -248,7 +251,10 @@ module.exports.update = function(req, res){
 
     logger.db.debug(TAGS, query.toString());
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) {
+        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
       logger.db.debug(TAGS, result);
 
       if (typeof tags == 'undefined') {
