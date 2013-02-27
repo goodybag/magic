@@ -16,6 +16,7 @@ var config = {
         console: false
       , fileRotate: true
       , papertrail: true
+      , loggly: true
       }
     }
   , http: {
