@@ -223,7 +223,6 @@ module.exports.list = function(req, res){
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, dataResult);
       var total = 0, userLikes = 0, userWants = 0, userTries = 0;
       if (dataResult.rowCount !== 0) {
         total = dataResult.rows[0].metaTotal;
@@ -295,7 +294,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       var product = result.rows[0];
       if (!product) return res.status(404).end();
@@ -405,7 +403,6 @@ module.exports.create = function(req, res){
       var query = sql.query('INSERT INTO products ({fields}) VALUES ({values}) RETURNING id');
       query.fields = sql.fields().addObjectKeys(inputs);
       query.values = sql.fields().addObjectValues(inputs, query);
-      logger.db.debug(TAGS, query.toString());
 
       // run query
       client.query(query.toString(), query.$values, function(error, results){
@@ -606,8 +603,6 @@ module.exports.update = function(req, res){
       query.updates = sql.fields().addUpdateMap(inputs, query);
       query.$('productId', +req.param('productId') || 0);
 
-      logger.db.debug(TAGS, query.toString());
-
       client.query(query.toString(), query.$values, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -762,13 +757,8 @@ module.exports.del = function(req, res){
     var query = sql.query('DELETE FROM products WHERE id=$productId');
     query.$('productId', +req.param('productId') || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -797,8 +787,6 @@ module.exports.listCategories = function(req, res) {
     // run query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: result.rows });
     });
@@ -832,12 +820,8 @@ module.exports.addCategory = function(req, res) {
     query.$('productId', inputs.productId);
     query.$('productCategoryId', inputs.productCategoryId);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -868,13 +852,8 @@ module.exports.delCategory = function(req, res) {
     query.$('productId', inputs.productId);
     query.$('productCategoryId', inputs.productCategoryId);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -962,8 +941,7 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
-            logger.db.debug(TAGS, result);
-
+            
             // end transaction
             tx.commit(function() {
 

@@ -122,12 +122,8 @@ module.exports.update = function(req, res){
     query.updates.add('"lastUpdated" = now()');
     query.$('id', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });

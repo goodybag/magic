@@ -43,7 +43,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) {
         return res.status(404).end();
@@ -71,8 +70,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       return res.noContent();
     });
@@ -148,8 +145,6 @@ module.exports.list = function(req, res){
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, dataResult);
-
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
 
       if (includeLocations) {
@@ -200,11 +195,8 @@ module.exports.create = function(req, res){
       query.values.add(false);
     }
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       var business = result.rows[0];
       if (!tags) return res.json({ error: null, data: business });
@@ -246,10 +238,8 @@ module.exports.update = function(req, res){
     query.updates.add('"updatedAt" = now()');
     query.$('id', req.params.id);
 
-    logger.db.debug(TAGS, query.toString());
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (typeof tags == 'undefined') {
         res.noContent();
@@ -308,7 +298,6 @@ module.exports.getLoyalty = function(req, res){
     query.$('id', +req.params.id || 0);
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0)
         return res.json({ error: null, data: null });
@@ -348,11 +337,7 @@ module.exports.updateLoyalty = function(req, res){
     , insertQuery.$values
     , function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
         res.noContent();
-
         magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
       }
     );

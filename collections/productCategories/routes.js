@@ -36,9 +36,6 @@ module.exports.get = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       return res.json({ error: null, data: result.rows[0] || null});
     });
   });
@@ -68,8 +65,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
@@ -107,8 +102,6 @@ module.exports.create = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
-
       return res.json({ error: null, data: result.rows[0] });
     });
   });
@@ -131,8 +124,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -161,12 +152,8 @@ module.exports.update = function(req, res){
     query.updates = sql.fields().addUpdateMap(inputs, query);
     query.$('prodCatId', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });

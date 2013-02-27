@@ -41,7 +41,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
         return res.json({ error: null, data: result.rows[0] });
@@ -84,7 +83,6 @@ module.exports.list = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
@@ -130,8 +128,6 @@ module.exports.del = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.status(404).end();
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -187,12 +183,9 @@ module.exports.update = function(req, res){
             query.updates = sql.fields().addUpdateMap(data, query);
             query.$('id', consumer.userId);
 
-            logger.db.debug(TAGS, query.toString());
-
             // run update query
             tx.query(query.toString(), query.$values, function(error, result){
               if (error) return callback(error);
-              logger.db.debug(TAGS, result);
 
               // did the update occur?
               if (result.rowCount === 0)
@@ -220,12 +213,9 @@ module.exports.update = function(req, res){
             query.updates = sql.fields().addUpdateMap(data, query);
             query.$('id', consumer.userId);
 
-            logger.db.debug(TAGS, query.toString());
-
             // run update query
             tx.query(query.toString(), query.$values, function(error, result){
               if (error) return callback(error);
-              logger.db.debug(TAGS, result);
 
               // did the update occur?
               if (result.rowCount === 0)
@@ -384,7 +374,6 @@ module.exports.listCollections = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var meta = { total:0 };
       if (dataResult.rows[0]) {
@@ -426,7 +415,6 @@ module.exports.listCollections = function(req, res){
 
       client.query(query.toString(), query.$values, function(error, aggResult){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        logger.db.debug(TAGS, aggResult);
 
         // add "all" psuedo-collection
         var all = {
@@ -528,7 +516,6 @@ module.exports.getCollection = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       if (dataResult.rowCount === 0)
         return res.error(errors.input.NOT_FOUND);
@@ -585,7 +572,6 @@ module.exports.getAllCollection = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       if (dataResult.rowCount === 0)
         return res.error(errors.input.NOT_FOUND);

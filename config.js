@@ -15,6 +15,8 @@ var config = {
     , transports: {
         console: false
       , fileRotate: true
+      , papertrail: true
+      , loggly: true
       }
     }
   , http: {
@@ -63,6 +65,18 @@ var config = {
         + "&token="         + token
         ;
       }
+    }
+  , loggly: {
+      subdomain:'goodybagpaul'
+    , inputToken: '073b990f-2045-4f46-9290-84e9fc79ff61'
+    , auth: {
+        username: 'pfraze'
+      , password: 'imlikeabeaverbuildingadam!'
+      }
+    }
+  , papertrail: {
+      host: 'logs.papertrailapp.com'
+    , port: 24616
     }
   }
 
@@ -153,6 +167,8 @@ var config = {
       enabled: true
     , transports: {
         console: true
+      , papertrail: true
+      , loggly: true
       }
     }
   , http: {
