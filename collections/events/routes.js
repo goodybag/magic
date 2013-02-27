@@ -33,7 +33,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
         result.rows[0].data = JSON.parse(result.rows[0].data);
@@ -68,7 +67,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
 

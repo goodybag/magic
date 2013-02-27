@@ -109,9 +109,7 @@ module.exports.list = function(req, res){
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, dataResult);
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
@@ -135,7 +133,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) {
         return res.status(404).end();
@@ -175,12 +172,9 @@ module.exports.create = function(req, res){
       query.values.add('(ll_to_earth('+inputs.lat+','+inputs.lon+'))');
     }
 
-    logger.db.debug(TAGS, query.toString());
-
     // run create query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
       var newLocation = result.rows[0];
 
       // create productLocations for all products related to the business
@@ -225,11 +219,9 @@ module.exports.update = function(req, res){
       query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
     }
 
-    logger.db.debug(TAGS, query.toString());
     // run update query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       // do we need to update the productLocations?
       if (!isUpdatingPosition) {
@@ -272,11 +264,8 @@ module.exports.del = function(req, res){
     var query = sql.query('DELETE FROM locations WHERE id=$id');
     query.$('id', req.param('locationId'));
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -350,12 +339,9 @@ module.exports.getAnalytics = function(req, res){
     addQueryset("'1-1-1969'::date"); // all time
 
     require('async').map(queries, function(item, next) {
-      // console.log(item);
       client.query(item.q, item.v, next);
     }, function(error, results) {
-      // console.log(error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, results);
 
       // if (results[0].rowCount === 0) {
       //   return res.status(404).end();
@@ -373,7 +359,6 @@ module.exports.getAnalytics = function(req, res){
         month : utils.extend(results[6].rows[0] || {}, results[7].rows[0] || {}, results[8].rows[0] || {}, baseStats),
         all   : utils.extend(results[9].rows[0] || {}, results[10].rows[0] || {}, results[11].rows[0] || {}, baseStats)
       };
-      // console.log(stats);
 
       return res.json({ error: null, data: stats });
     });
@@ -410,7 +395,6 @@ module.exports.addProduct = function(req, res){
         if (/productId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { productId:'Id provided does not exist in products table.' }), logger.routes.error(TAGS, error);
         return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       }
-      logger.db.debug(TAGS, result);
 
       res.noContent();
 
@@ -447,7 +431,6 @@ module.exports.updateProduct = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
       res.noContent();
@@ -478,7 +461,6 @@ module.exports.removeProduct = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
       res.noContent();

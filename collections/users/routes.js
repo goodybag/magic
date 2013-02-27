@@ -46,7 +46,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
         var row = result.rows[0];
@@ -103,7 +102,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var rows = dataResult.rows;
 
@@ -206,8 +204,6 @@ module.exports.del = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -286,14 +282,11 @@ module.exports.update = function(req, res){
           query.$('cardId', cardId);
         }
 
-        logger.db.debug(TAGS, query.toString());
-
         if (query.updates.fields.length === 0) return applyGroupRelations();
 
         // run update query
         client.query(query.toString(), query.$values, function(error, result){
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
 
           // did the update occur?
           if (result.rowCount === 0) {
