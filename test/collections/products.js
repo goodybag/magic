@@ -17,6 +17,7 @@ describe('GET /v1/products', function() {
       assert(payload.data.length > 1);
       assert(payload.data[0].id);
       assert(payload.data[0].businessId);
+      assert(typeof payload.data[0].businessIsGB != 'undefined');
       assert(payload.data[0].name);
       assert(payload.meta.total > 1);
       done();
@@ -130,7 +131,7 @@ describe('GET /v1/products', function() {
         var results = payload.data;
         for (var i = results.length - 1; i >= 0; i--){
           assert(results[i].userWants === true);
-        };
+        }
         tu.logout(done);
       });
     });
@@ -480,6 +481,7 @@ describe('GET /v1/products/:id', function() {
       assert(payload.data.id == 1);
       assert(payload.data.businessId == 1);
       assert(payload.data.name == 'Product 1');
+      assert(typeof payload.data.businessIsGB != 'undefined');
       assert(payload.data.categories.length > 1);
       assert(payload.data.tags.length > 1);
       done();
