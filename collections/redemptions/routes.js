@@ -67,7 +67,7 @@ module.exports.create = function(req, res){
       if (result.rows.length === 0)
         return res.error(errors.input.INVALID_USERS), logger.routes.error(TAGS, errors.input.INVALID_USERS);
 
-      if (!(result.rows[0].email && result.rows[0].password) && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
+      if (!result.rows[0].email && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
         return res.error(errors.registration.NOT_REGISTERED), logger.routes.error(TAGS, errors.registration.NOT_REGISTERED);
 
       // start transaction

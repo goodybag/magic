@@ -83,7 +83,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('16'
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('17', 'consumer6@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '778899-CBB');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('18', 'consumer7@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '778899-CBC');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('19', null, null, null, '432123-AAA');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', 'not_registered@gmail.com', null, null, '432123-AAB');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', null, null, null, '432123-AAB');
 
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '123456-XXX');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '123456-XXZ');
