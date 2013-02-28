@@ -64,6 +64,26 @@ module.exports.list = function(req, res){
       query.where.and('products."businessId" = $businessId');
       query.$('businessId', req.param('businessId'));
     }
+    // business tag filter
+    else if (req.param('businessType')) {
+      if (req.param('businessType') == 'other') {
+        query.where.and([
+          'NOT EXISTS',
+            '(SELECT "businessTags".id FROM "businessTags"',
+              'WHERE "businessTags"."businessId" = businesses.id',
+                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', ['food', 'apparel']),
+            ')'
+        ].join(' '));
+      } else {
+        query.where.and([
+          'EXISTS',
+            '(SELECT "businessTags".id FROM "businessTags"',
+              'WHERE "businessTags"."businessId" = businesses.id',
+                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', req.param('businessType')),
+            ')'
+        ].join(' '));
+      }
+    }
 
     // location filtering
     if (req.query.lat && req.query.lon) {

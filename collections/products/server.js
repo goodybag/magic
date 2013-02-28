@@ -60,9 +60,9 @@ server.get(
 , middleware.profile('GET /v1/products/food', ['include','limit','sort'])
 , middleware.profile('query defaults')
 , middleware.defaults.query({ limit : 20 })
-, function(req, res, next) { req.query.tag = 'food'; next(); }
 , middleware.profile('validate query')
 , middleware.validate2.query(desc.collection.methods.get.query)
+, function(req, res, next) { req.query.businessType = 'food'; next(); }
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -75,9 +75,9 @@ server.get(
 , middleware.profile('GET /v1/products/fashion', ['include','limit','sort'])
 , middleware.profile('query defaults')
 , middleware.defaults.query({ limit : 20 })
-, function(req, res, next) { req.query.tag = 'apparel'; next(); }
 , middleware.profile('validate query')
 , middleware.validate2.query(desc.collection.methods.get.query)
+, function(req, res, next) { req.query.businessType = 'apparel'; next(); }
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
@@ -90,9 +90,9 @@ server.get(
 , middleware.profile('GET /v1/products/other', ['include','limit','sort'])
 , middleware.profile('query defaults')
 , middleware.defaults.query({ limit : 20 })
-, function(req, res, next) { req.query.tag = '!food,!apparel'; next(); }
 , middleware.profile('validate query')
 , middleware.validate2.query(desc.collection.methods.get.query)
+, function(req, res, next) { req.query.businessType = 'other'; next(); }
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('list products handler')
