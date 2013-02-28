@@ -36,7 +36,7 @@ BEGIN;
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('1', '2', 'uniquetag');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('2', '1', 'apparel');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('3', '2', 'food');
-INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
+-- INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('4', '3', 'food');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('5', '4', 'apparel');
 INSERT INTO "businessTags" (id, "businessId", tag) VALUES ('6', '39', 'food');
 COMMIT;
@@ -478,7 +478,6 @@ INSERT INTO "productTags" ("id","businessId", "tag") VALUES (8, 39, 'Tag3');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (9, 39, 'Tag4');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (10, 39, 'Tag5');
 INSERT INTO "productTags" ("id","businessId", "tag") VALUES (11, 39, 'Tag6');
-INSERT INTO "productTags" ("id","businessId", "tag") VALUES (12, 39, 'food');
 COMMIT;
 SELECT setval('"productTags_id_seq"', (SELECT MAX(id) from "productTags")); -- advance the sequence past the IDs just used
 
@@ -498,49 +497,6 @@ INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (8,
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (9, 9, 46183);
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (10, 10, 46183);
 INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (11, 11, 46183);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (12, 12, 46183);
-
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (13, 12, 46173);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (14, 12, 46174);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (15, 12, 46175);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (16, 12, 46176);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (17, 12, 46177);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (18, 12, 46178);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (19, 12, 46179);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (20, 12, 46180);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (21, 12, 46181);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (23, 12, 46183);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (24, 12, 46184);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (25, 12, 46185);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (26, 12, 46186);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (27, 12, 46187);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (28, 12, 46188);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (29, 12, 46189);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (30, 12, 46190);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (31, 12, 46191);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (32, 12, 46192);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (33, 12, 46193);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (34, 12, 46194);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (35, 12, 46195);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (36, 12, 46196);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (37, 12, 46197);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (38, 12, 46198);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (39, 12, 46199);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (40, 12, 46200);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (41, 12, 46201);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (42, 12, 46202);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (43, 12, 46203);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (44, 12, 46204);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (45, 12, 46205);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (46, 12, 46206);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (47, 12, 46207);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (48, 12, 46208);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (49, 12, 46209);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (50, 12, 46210);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (51, 12, 46211);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (52, 12, 46212);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (53, 12, 46213);
-INSERT INTO "productsProductTags" ("id", "productTagId", "productId") VALUES (54, 12, 46214);
 
 COMMIT;
 SELECT setval('"productsProductTags_id_seq"', (SELECT MAX(id) from "productsProductTags")); -- advance the sequence past the IDs just used

@@ -418,16 +418,14 @@ describe('GET /v1/businesses/:id/products', function() {
 });
 
 describe('GET /v1/products/food', function() {
-  it('should respond with food items', function(done) {
-    tu.get('/v1/products/food?include=tags', function(err, payload, res) {
+  it('should respond with products from food businesses', function(done) {
+    tu.get('/v1/products/food', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag == 'food'; })).length == 0;
-      }).length === 0); // make sure all rows have the 'food' tag
+      assert(payload.data.filter(function(p) { return [2,39].indexOf(+p.businessId) === -1; }).length === 0); // 2 and 39 are the businesses tagged 'food'
       done();
     });
   });
@@ -441,32 +439,28 @@ describe('GET /v1/products/food', function() {
 });
 
 describe('GET /v1/products/fashion', function() {
-  it('should respond with fashion items', function(done) {
-    tu.get('/v1/products/fashion?include=tags', function(err, payload, res) {
+  it('should respond with products from fashion businesses', function(done) {
+    tu.get('/v1/products/fashion', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag == 'apparel'; })).length == 0;
-      }).length === 0); // make sure all rows have the 'apparel' tag
+      assert(payload.data.filter(function(p) { return [1,4].indexOf(+p.businessId) === -1; }).length === 0); // 1 and 4 are the businesses tagged 'apparel'
       done();
     });
   });
 });
 
 describe('GET /v1/products/other', function() {
-  it('should respond with non-food and non-fashion items', function(done) {
-    tu.get('/v1/products/other?include=tags', function(err, payload, res) {
+  it('should respond with products from non-food and non-fashion businesses', function(done) {
+    tu.get('/v1/products/other', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag != 'food' && t.tag != 'apparel'; })).length == 0;
-      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
+      assert(payload.data.filter(function(p) { return [1,2,4,39].indexOf(+p.businessId) !== -1; }).length === 0); // none of the guys tested above
       done();
     });
   });
