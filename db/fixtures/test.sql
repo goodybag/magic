@@ -507,6 +507,7 @@ INSERT INTO collections (id, "userId", "name", "isHidden", "pseudoKey") VALUES (
 INSERT INTO collections (id, "userId", "name", "isHidden") VALUES (2, 7, 'my second collection', false);
 INSERT INTO collections (id, "userId", "name", "isHidden") VALUES (3, 9, 'my third collection', false);
 INSERT INTO collections (id, "userId", "name", "isHidden", "pseudoKey") VALUES (4, 7, 'Uncategorized', true, 'uncategorized');
+INSERT INTO collections (id, "userId", "name", "isHidden", "pseudoKey") VALUES (5, 3, 'my pseudo collection', false, 'mypseudo');
 COMMIT;
 SELECT setval('"collections_id_seq"', (SELECT MAX(id) from "collections")); -- advance the sequence past the IDs just used
 
@@ -518,6 +519,7 @@ INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "c
 INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (3, 7, 2, 2, now());
 INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (4, 7, 3, 2, now());
 INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (5, 7, 4, 2, now());
+INSERT INTO "productsCollections" (id, "userId", "productId", "collectionId", "createdAt") VALUES (6, 3, 4, 5, now());
 COMMIT;
 SELECT setval('"productsCollections_id_seq"', (SELECT MAX(id) from "productsCollections")); -- advance the sequence past the IDs just used
 
