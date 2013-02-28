@@ -53,7 +53,10 @@ module.exports.list = function(req, res){
         'GROUP BY {groupby}',
         '{sort} {limit}'
     ]);
-    query.fields  = sql.fields().add('products.*').add('businesses.name as "businessName"');
+    query.fields  = sql.fields()
+      .add('products.*')
+      .add('businesses.name as "businessName"')
+      .add('businesses."isGB" as "businessIsGB"');
     query.where   = sql.where();
     query.sort    = sql.sort(req.query.sort || '+name');
     query.limit   = sql.limit(req.query.limit, req.query.offset);
@@ -303,6 +306,7 @@ module.exports.get = function(req, res){
 
     query.fields.add('products.*');
     query.fields.add('businesses.name as "businessName"');
+    query.fields.add('businesses."isGB" as "businessIsGB"');
 
     // user feelings join
     if (req.session.user) {
