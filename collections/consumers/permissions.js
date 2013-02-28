@@ -114,5 +114,10 @@ module.exports = {
       read: true
     , create: ['productId']
     }
+  , admin: {
+      read: true
+    , create: true
+    , update: true
+    }
   }
 };
