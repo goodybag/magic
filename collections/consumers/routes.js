@@ -103,7 +103,8 @@ module.exports.create = function(req, res){
     if (error) return res.error(error), logger.routes.error(TAGS, error);
 
     // Log the user in
-    req.session.user = consumer;
+    if (!req.session || !req.session.user)
+      req.session.user = consumer;
     res.json({ error: null, data: consumer });
 
     magic.emit('consumers.registered', consumer);
