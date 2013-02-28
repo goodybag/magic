@@ -163,12 +163,13 @@ module.exports.list = function(req, res){
       } else {
         query.collectionJoin = [
           'INNER JOIN collections ON',
-            '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId)',
+            '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId) AND collections."userId" = $userId',
           'INNER JOIN "productsCollections" ON',
             '"productsCollections"."productId" = products.id AND',
             '"productsCollections"."collectionId" = collections.id'
         ].join(' ');
         query.$('collectionId', req.param('collectionId'));
+        query.$('userId', req.param('userId'));
       }
     }
 
@@ -242,6 +243,7 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);

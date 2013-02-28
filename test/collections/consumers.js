@@ -765,6 +765,8 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
         assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.length == 2);
         tu.logout(done);
       });
     });
@@ -788,7 +790,7 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
         assert(res.statusCode == 200);
         var oldProducts = JSON.parse(results).data;
         tu.post('/v1/consumers/7/collections/1/products', { productId:4 }, function(error, results, res) {
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
           tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
@@ -805,7 +807,7 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
         assert(res.statusCode == 200);
         var oldProducts = JSON.parse(results).data;
         tu.post('/v1/consumers/7/collections/mypseudo/products', { productId:5 }, function(error, results, res) {
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
           tu.get('/v1/consumers/7/collections/mypseudo/products', function(error, results, res) {
             assert(res.statusCode == 200);
             var newProducts = JSON.parse(results).data;
@@ -822,7 +824,7 @@ describe('POST /v1/consumers/:id/collections/:collectionId/products', function()
     magic.once('debug.newConsumerCollectionsCreated', function() {
       tu.login({ email: 'pseudokeypost@consumers.com', password: 'password' }, function(error, user){
         tu.post('/v1/consumers/'+user.id+'/collections/uncategorized/products', { productId:1 }, function(error, results, res){
-          assert(res.statusCode == 200);
+          assert(res.statusCode == 204);
           tu.logout(done);
         });
       });

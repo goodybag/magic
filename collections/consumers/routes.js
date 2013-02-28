@@ -661,12 +661,10 @@ module.exports.addCollectionProduct = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'INSERT INTO "productsCollections" ("collectionId", "productId", "userId", "createdAt")',
-      'VALUES (',
-        '(SELECT collections.id FROM collections',
-          'WHERE (collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId)',
-            'AND collections."userId" = $userId),',
-        '$productId, $userId, now()) RETURNING id'
+      'WITH "collection" AS (SELECT collections.id FROM collections WHERE (collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId) AND collections."userId" = $userId)',
+      'INSERT INTO "productsCollections" ("productId", "userId", "createdAt", "collectionId")',
+        'SELECT $productId, $userId, now(), "collection".id FROM "collection"',
+          'WHERE NOT EXISTS (SELECT 1 FROM "productsCollections" WHERE "productId"=$productId AND "collectionId"="collection".id) RETURNING id'
     ]);
     query.$('userId', req.params.userId);
     query.$('collectionId', collectionId);
@@ -674,8 +672,7 @@ module.exports.addCollectionProduct = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.json({ error: null, data: { id:result.rows[0].id }});
+      res.noContent();
 
       magic.emit('consumers.addToCollection', req.params.userId || req.session.user.id, collectionId, productId);
     });
