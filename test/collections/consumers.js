@@ -618,6 +618,12 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
       });
     });
   });
+  it('should respond 403 on invalid perms', function(done) {
+    tu.get('/v1/consumers/7/collections/1', function(error, results, res) {
+      assert(res.statusCode == 403);
+      done();
+    });
+  });
 });
 
 describe('POST /v1/consumers/:id/collections', function() {

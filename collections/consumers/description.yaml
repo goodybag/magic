@@ -97,10 +97,13 @@ collectionsCollection:
     type: collection
     path: /consumers/:userId/collections
     params:
-      userId:     { type: int, eg: 7 }
+      userId:     { type: int, eg: 9 }
   methods:
     get:
       desc: List Consumer Collections
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
       query:
         showHidden: { type: bool, eg: true }
         offset:     { type: int, eg: 5 }
@@ -109,7 +112,7 @@ collectionsCollection:
       desc: Create Consumer Collection
       auth:
         required: true
-        eg: { email: consumer@goodybag.com, password: password }
+        eg: { email: consumer2@gmail.com, password: password }
       body:
         name:    { type: string, eg: My Collection, required: true }
 
@@ -123,11 +126,14 @@ collectionsItem:
   methods:
     get:
       desc: Get Consumer Collection Info
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
     put:
       desc: Set Consumer Collection Info
       auth:
         required: true
-        eg: { email: admin@goodybag.com, password: password }
+        eg: { email: consumer2@gmail.com, password: password }
       body:
         name:    { type: string, eg: My Collection, required: true }
 
@@ -141,6 +147,9 @@ collectionProductsCollection:
   methods:
     get:
       desc: List Consumer Collection Products
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
       query:
         lat:        { type: float,   eg: 10.123 }
         lon:        { type: float,   eg: 10.123 }

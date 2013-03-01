@@ -108,6 +108,14 @@ module.exports.list = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (dataResult.rowCount === 0 && req.param('businessId')) {
+        return client.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, bizResult) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (bizResult.rowCount === 0)
+            return res.error(errors.input.NOT_FOUND);
+          return res.json({ error: null, data: [], meta: { total:0 } });
+        });
+      }
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
