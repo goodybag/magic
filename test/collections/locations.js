@@ -182,10 +182,9 @@ describe('GET /v1/businesses/:id/locations', function() {
     });
   });
 
-  it('should respond nothing to invalid business id', function(done) {
+  it('should respond 404 to invalid business id', function(done) {
     tu.get('/v1/businesses/100/locations', function(error, results, res) {
-      results = JSON.parse(results);
-      assert(results.data.length === 0);
+      assert(res.statusCode == 404);
       done();
     });
   });
