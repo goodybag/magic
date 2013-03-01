@@ -98,59 +98,61 @@ module.exports.create = function(req, res){
   var TAGS = ['create-cashiers', req.uuid];
   logger.routes.debug(TAGS, 'creating cashier ' + req.params.id);
 
-  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
+  db.procedures.ensureNotTaken(req.body, function(error, result){
+    utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var query = sql.query([
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
-              'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId',
-                'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-                'RETURNING id),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'cashier\' RETURNING id),',
-          '"cashier" AS',
-            '(INSERT INTO "cashiers" ("userId", "businessId", "locationId")',
-              'SELECT "user".id, $businessId, $locationId FROM "user")',
-        'SELECT "user".id as "userId" FROM "user"'
-      ]);
-      if (req.body.email) {
-        query.uidField = 'email';
-        query.$('uid', req.body.email);
-      } else {
-        query.uidField = '"singlyId"';
-        query.$('uid', req.body.singlyId);
-      }
-      query.$('email', req.body.email);
-      query.$('password', encryptedPassword);
-      query.$('salt', passwordSalt);
-      query.$('singlyId', req.body.singlyId);
-      query.$('singlyAccessToken', req.body.singlyAccessToken);
-      query.$('cardId', req.body.cardId || '');
-      query.$('businessId', req.body.businessId);
-      query.$('locationId', req.body.locationId);
-
-      client.query(query.toString(), query.$values, function(error, result) {
+      db.getClient(TAGS[0], function(error, client){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-          // Access token already existed - for now, send back generic error
-          // Because they should have used POST /oauth to create/auth
-          return res.error(errors.internal.DB_FAILURE);
+        var query = sql.query([
+          'WITH',
+            '"user" AS',
+              '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
+                'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId',
+                  'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
+                  'RETURNING id),',
+            '"userGroup" AS',
+              '(INSERT INTO "usersGroups" ("userId", "groupId")',
+                'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'cashier\' RETURNING id),',
+            '"cashier" AS',
+              '(INSERT INTO "cashiers" ("userId", "businessId", "locationId")',
+                'SELECT "user".id, $businessId, $locationId FROM "user")',
+          'SELECT "user".id as "userId" FROM "user"'
+        ]);
+        if (req.body.email) {
+          query.uidField = 'email';
+          query.$('uid', req.body.email);
+        } else {
+          query.uidField = '"singlyId"';
+          query.$('uid', req.body.singlyId);
         }
+        query.$('email', req.body.email);
+        query.$('password', encryptedPassword);
+        query.$('salt', passwordSalt);
+        query.$('singlyId', req.body.singlyId);
+        query.$('singlyAccessToken', req.body.singlyAccessToken);
+        query.$('cardId', req.body.cardId || '');
+        query.$('businessId', req.body.businessId);
+        query.$('locationId', req.body.locationId);
 
-        return res.json({ error: null, data: result.rows[0] });
+        client.query(query.toString(), query.$values, function(error, result) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+          // did the insert occur?
+          if (result.rowCount === 0) {
+            // email must have already existed
+            if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
+
+            // Access token already existed - for now, send back generic error
+            // Because they should have used POST /oauth to create/auth
+            return res.error(errors.internal.DB_FAILURE);
+          }
+
+          return res.json({ error: null, data: result.rows[0] });
+        });
       });
     });
-  });
+  }, 'cashiers');
 };
 
 /**
@@ -184,24 +186,28 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-cashier', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE cashiers SET {updates} WHERE "userId"=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
-
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
+  db.procedures.ensureNotTaken(req.body, req.param('id'), function(error, result){
+    db.getClient(TAGS[0], function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      // did the update occur?
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
+      var query = sql.query('UPDATE cashiers SET {updates} WHERE "userId"=$id');
+      query.updates = sql.fields().addUpdateMap(req.body, query);
+      query.$('id', req.params.id);
 
-      // done
-      res.noContent();
+      // run update query
+      client.query(query.toString(), query.$values, function(error, result){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        // did the update occur?
+        if (result.rowCount === 0) {
+          return res.status(404).end();
+        }
+
+        // done
+        res.noContent();
+      });
     });
-  });
+  }, 'cashiers');
+
 };

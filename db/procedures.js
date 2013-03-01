@@ -154,18 +154,21 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
   );
 };
 
-module.exports.ensureNotTaken = function(inputs, id, callback){
-  var query = sql.query('select {fields} from users, consumers {where}');
-
+module.exports.ensureNotTaken = function(inputs, id, callback, extension){
   if (typeof id === "function"){
+    extension = callback;
     callback = id;
     id = null;
   }
 
+  extension = extension || 'consumers';
+
+  var query = sql.query('select {fields} from users, "' + extension + '" {where}');
+
   if (id){
     query.where = sql.where();
     query.where.and('users.id != $id');
-    query.where.and('consumers."userId" != $id');
+    query.where.and('"' + extension + '"."userId" != $id');
     query.$('id', id);
   }
 
@@ -196,7 +199,7 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
 
   if (inputs.screenName)
     query.fields.add(
-      'bool_or(case when consumers."screenName" = \''
+      'bool_or(case when "' + extension + '"."screenName" = \''
     + inputs.screenName
     + '\' then true else false end) as "screenName"'
     );
@@ -215,7 +218,6 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return callback(error);
-
       if (result.rows.length > 0){
         result = result.rows[0];
 
