@@ -41,18 +41,14 @@ module.exports.getOauthUrl = function(req, res){
     'facebook'
   ];
 
-  logger.routes.debug(TAGS, 'validing redirect_uri');
   if (!req.param('redirect_uri'))
     return res.error(errors.auth.INVALID_URI), logger.routes.error(TAGS, errors.auth.INVALID_URI);
 
-  logger.routes.debug(TAGS, 'determining if service is valid');
   if (!req.param('service'))
     return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
 
   if (validServices.indexOf(req.param('service')) === -1)
     return res.error(errors.auth.INVALID_SERVICE), logger.routes.error(TAGS, errors.auth.INVALID_SERVICE);
-
-  logger.routes.debug(TAGS, 'Sending back redirect url');
 
   return res.json({
     error: null
@@ -172,7 +168,7 @@ module.exports.oauthAuthenticate = function(req, res){
   , createUser: function(user){
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        db.procedures.registerConsumer(user, function(error, consumer){
+        db.procedures.registerUser('consumer', user, function(error, consumer){
           if (error) return stage.error(error);
 
           stage.setSessionAndSend(consumer);
@@ -243,7 +239,6 @@ module.exports.oauthAuthenticate = function(req, res){
  */
 module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
-  logger.routes.debug(TAGS, 'attempting to authenticate');
 
   db.getClient(TAGS[0], function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -260,8 +255,6 @@ module.exports.authenticate = function(req, res){
 
       var user = result.rows[0];
 
-      logger.db.debug(TAGS, "Comparing passwords");
-
       // Compare passwords
       utils.comparePasswords(req.body.password, user.password, function(error, success){
         if (!success)
@@ -269,8 +262,6 @@ module.exports.authenticate = function(req, res){
 
         // Remove password
         delete user.password;
-
-        logger.db.debug(TAGS, "Getting groups and setting on user");
 
         // Setup groups
         query = sql.query([
