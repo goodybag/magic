@@ -142,26 +142,16 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-tapinStation', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  logger.routes.debug(TAGS, 'updating tapin-station ' + req.params.userId);
 
-    var query = sql.query('UPDATE "tapinStations" SET {updates} WHERE "userId"=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
+  var userId = req.param('id');
+  if (userId == 'session')
+    userId = req.session.user.id;
 
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      // did the update occur?
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      // done
-      res.json({ error: null, data: null });
-      magic.emit('tapinstations.update', req.params.id, req.body);
-    });
+  db.procedures.updateUser('tapin-station', userId, req.body, function(error, result) {
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+    res.noContent();
+    magic.emit('tapinstations.update', userId, req.body);
   });
 };
 

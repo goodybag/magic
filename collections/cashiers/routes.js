@@ -137,28 +137,14 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-cashier', req.uuid];
+  logger.routes.debug(TAGS, 'updating cashier ' + req.params.id);
 
-  db.procedures.ensureNotTaken(req.body, req.param('id'), function(error, result){
-    db.getClient(TAGS[0], function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  var userId = req.param('id');
+  if (req.param('id') == 'session')
+    userId = req.session.user.id;
 
-      var query = sql.query('UPDATE cashiers SET {updates} WHERE "userId"=$id');
-      query.updates = sql.fields().addUpdateMap(req.body, query);
-      query.$('id', req.params.id);
-
-      // run update query
-      client.query(query.toString(), query.$values, function(error, result){
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        // did the update occur?
-        if (result.rowCount === 0) {
-          return res.status(404).end();
-        }
-
-        // done
-        res.noContent();
-      });
-    });
-  }, 'cashiers');
-
+  db.procedures.updateUser('cashier', userId, req.body, function(error, result) {
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+    res.noContent();
+  });
 };

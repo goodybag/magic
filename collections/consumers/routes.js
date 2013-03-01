@@ -142,114 +142,15 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-consumer', req.uuid];
+  logger.routes.debug(TAGS, 'updating consumer ' + req.params.userId);
 
-  if (!req.session || !req.session.user)
-    return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);
+  var userId = req.param('userId');
+  if (req.param('userId') == 'session')
+    userId = req.session.user.id;
 
-  db.procedures.ensureNotTaken(req.body, req.param('userId'), function(error){
-    if (error) return res.error(error), logger.routes.error(TAGS, error);
-
-    var query = { userId:req.param('userId') };
-    if (req.param('userId') == 'session')
-      query.userId = req.session.user.id;
-
-    db.api.consumers.findOne(query, { fields: ['"userId"'] }, function(error, consumer){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (!consumer)
-        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
-
-      db.getClient(TAGS[0], function(error, client){
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        var tx = new Transaction(client);
-
-        tx.begin(function(error){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-          var updateConsumerRecord = function(callback){
-            var updateConsumer = false, data = {};
-
-            // Determine if we even need to update the consumer record
-            for (var i = db.fields.consumers.plain.length - 1; i >= 0; i--){
-              if (db.fields.consumers.plain[i] in req.body){
-                updateConsumer = true;
-                data[db.fields.consumers.plain[i]] = req.body[db.fields.consumers.plain[i]];
-              }
-            }
-
-            if (!updateConsumer) return callback();
-
-            var query = sql.query('UPDATE consumers SET {updates} WHERE "userId"=$id');
-            query.updates = sql.fields().addUpdateMap(data, query);
-            query.$('id', consumer.userId);
-
-            // run update query
-            tx.query(query.toString(), query.$values, function(error, result){
-              if (error) return callback(error);
-
-              // did the update occur?
-              if (result.rowCount === 0)
-                return callback(errors.input.NOT_FOUND);
-
-              callback();
-            });
-          };
-
-          var updateUserRecord = function(callback){
-            var updateUser = false, data = {};
-
-            // Determine if we even need to update the user record
-            for (var i = db.fields.users.plain.length - 1; i >= 0; i--){
-              if (db.fields.users.plain[i] in req.body){
-                updateUser = true;
-                data[db.fields.users.plain[i]] = req.body[db.fields.users.plain[i]];
-              }
-            }
-
-            if (!updateUser) return callback();
-
-            var query = sql.query('UPDATE users SET {updates} WHERE id=$id');
-
-            query.updates = sql.fields().addUpdateMap(data, query);
-            query.$('id', consumer.userId);
-
-            // run update query
-            tx.query(query.toString(), query.$values, function(error, result){
-              if (error) return callback(error);
-
-              // did the update occur?
-              if (result.rowCount === 0)
-                return callback(errors.input.NOT_FOUND);
-
-              return callback();
-            });
-          };
-
-          utils.parallel({
-            consumer: updateConsumerRecord
-          , user:     updateUserRecord
-          }, function(error, results){
-            if (error){
-              tx.abort();
-              if (error.name === "DB_FAILURE"){
-                res.error(errors.internal.DB_FAILURE, error);
-              } else {
-                res.error(error);
-              }
-
-              return logger.routes.error(TAGS, error);
-            }
-
-            tx.commit(function(error){
-              if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-              res.noContent();
-            });
-          });
-        });
-      });
-    });
+  db.procedures.updateUser('consumer', userId, req.body, function(error, result) {
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+    res.noContent();
   });
 };
 
@@ -260,6 +161,7 @@ module.exports.update = function(req, res){
  */
 module.exports.updatePassword = function(req, res){
   var TAGS = ['update-consumer-password', req.uuid];
+  logger.routes.debug(TAGS, 'updating password for consumer ' + req.params.userId);
 
   if (!req.session || !req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED), logger.routes.error(TAGS, errors.auth.NOT_AUTHENTICATED);

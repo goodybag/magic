@@ -337,3 +337,55 @@ module.exports.registerUser = function(group, inputs, callback){
     }, extension);
   });
 };
+
+module.exports.updateUser = function(group, userId, inputs, callback) {
+  if (inputs.password)
+    delete inputs.password; // for now, no password updates
+
+  db.getClient('update-user', function(error, client){
+    if (error) return callback(errors.internal.DB_FAILURE, error);
+
+    var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
+    module.exports.ensureNotTaken(inputs, userId, function(error, result){
+      if (error) return callback(error, result);
+
+      var tx = new Transaction(client);
+      tx.begin(function(error){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var updateRecord = function(table, callback) {
+          var needsUpdate = false, data = {};
+          // Determine if we even need to update the consumer record
+          for (var i = db.fields[table].plain.length - 1; i >= 0; i--){
+            if (db.fields[table].plain[i] in inputs){
+              needsUpdate = true;
+              data[db.fields[table].plain[i]] = inputs[db.fields[table].plain[i]];
+            }
+          }
+          if (!needsUpdate) return callback();
+
+          var query = sql.query('UPDATE "{table}" SET {updates} WHERE {idField}=$id');
+          query.table = table;
+          query.updates = sql.fields().addUpdateMap(data, query);
+          query.idField = (table == 'users') ? 'id' : '"userId"';
+          query.$('id', userId);
+
+          tx.query(query.toString(), query.$values, function(error, result){
+            if (error) return callback(errors.internal.DB_FAILURE, error);
+            if (result.rowCount === 0)
+              return callback(errors.input.NOT_FOUND);
+            callback();
+          });
+        };
+
+        updateRecord('users', function(err, result) {
+          if (err) return tx.abort(), callback(err, result);
+          updateRecord(extension, function(err, result) {
+            if (err) return tx.abort(), callback(err, result);
+            tx.commit(callback);
+          });
+        });
+      });
+    });
+  });
+};

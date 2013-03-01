@@ -135,25 +135,15 @@ module.exports.del = function(req, res){
  * @param  {Object} res [description]
  */
 module.exports.update = function(req, res){
-  var TAGS = ['update-manager', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+var TAGS = ['update-manager', req.uuid];
+  logger.routes.debug(TAGS, 'updating manager ' + req.params.id);
 
-    var query = sql.query('UPDATE managers SET {updates} WHERE "userId"=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
+  var userId = req.param('id');
+  if (req.param('id') == 'session')
+    userId = req.session.user.id;
 
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      // did the update occur?
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      // done
-      res.noContent();
-    });
+  db.procedures.updateUser('manager', userId, req.body, function(error, result) {
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+    res.noContent();
   });
 };
