@@ -165,8 +165,34 @@ module.exports = function(allPerms){
     }
 
     res.json = function(result){
-      // If there's an error or they have access to all, don't filter
-      if (result.error || perms.read === true) return json.apply(res, arguments);
+      // If there's an error, don't filter
+      if (result.error) return json.apply(res, arguments);
+
+      // If they have full read access, just filter out meta fields
+      if (perms.read === true) {
+        if (result.data) {
+          if (utils.isArray(result.data)) {
+            for (var i=result.data.length - 1; i >= 0; i--) {
+              var noDeletions = true;
+
+              for (var k in result.data[i]) {
+                if (k.indexOf('meta') === 0) {
+                  delete result.data[i][k];
+                  noDeletions = false;
+                }
+              }
+              if (noDeletions)
+                break; // save ourself from needless iterations
+            }
+          } else {
+            for (var k in result.data) {
+              if (k.indexOf('meta') === 0)
+                delete result.data[k];
+            }
+          }
+        }
+        return json.apply(res, arguments);
+      }
 
       // Filter all docs
       var wasEmpty;
