@@ -91,7 +91,7 @@ describe('POST /v1/managers', function() {
       var manager = {
         email:      "manager_dude_99@test.com"
       , password:   "password"
-      , cardId:     "123456-XXZ"
+      , cardId:     "123555-XXZ"
       , businessId: 1
       , locationId: 1
       };

@@ -22,7 +22,7 @@ collection:
         password:          { type: string requires-email, eg: password }
         singlyId:          { type: string, eg: foobar_XXX }
         singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyz }
-        cardId:            { type: cardid, eg: 123456-ABC }
+        cardId:            { type: cardid, eg: 601XXX-ABC }
         businessId:        { type: int,    eg: 1 }
         locationId:        { type: int,    eg: 1 }
   children:
@@ -46,8 +46,12 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        businessId:      { type: int,    eg: 1 }
-        locationId:      { type: int,    eg: 1 }
+        email:             { type: email,  eg: a_cashier_XXX@thebusiness.com }
+        singlyId:          { type: string, eg: foobar_XXX }
+        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyzXXX }
+        cardId:            { type: cardid, eg: 601XXX-ABC }
+        businessId:        { type: int,    eg: 1 }
+        locationId:        { type: int,    eg: 1 }
     delete:
       desc: Delete Cashier
       auth:

@@ -133,9 +133,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
     };
     tu.loginAsAdmin(function(error){
       tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/tapin-stations/11130', function(error, results) {
           assert(!error);

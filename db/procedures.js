@@ -154,18 +154,21 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
   );
 };
 
-module.exports.ensureNotTaken = function(inputs, id, callback){
-  var query = sql.query('select {fields} from users, consumers {where}');
-
+module.exports.ensureNotTaken = function(inputs, id, callback, extension){
   if (typeof id === "function"){
+    extension = callback;
     callback = id;
     id = null;
   }
 
+  extension = extension || 'consumers';
+
+  var query = sql.query('select {fields} from users, "' + extension + '" {where}');
+
   if (id){
     query.where = sql.where();
     query.where.and('users.id != $id');
-    query.where.and('consumers."userId" != $id');
+    query.where.and('"' + extension + '"."userId" != $id');
     query.$('id', id);
   }
 
@@ -196,7 +199,7 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
 
   if (inputs.screenName)
     query.fields.add(
-      'bool_or(case when consumers."screenName" = \''
+      'bool_or(case when "' + extension + '"."screenName" = \''
     + inputs.screenName
     + '\' then true else false end) as "screenName"'
     );
@@ -211,11 +214,10 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
   if (query.fields.fields.length === 0) return callback();
 
   db.getClient(function(error, client){
-    if (error) return callback(error);
+    if (error) return callback(errors.internal.DB_FAILURE, error);
 
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return callback(error);
-
+      if (error) return callback(errors.internal.DB_FAILURE, error);
       if (result.rows.length > 0){
         result = result.rows[0];
 
@@ -226,9 +228,9 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
         if (result.cardId && inputs.cardId)
           return callback(errors.registration.CARD_ID_TAKEN);
         if (result.singlyId && inputs.singlyId)
-          return callback(errors.registration.CARD_ID_TAKEN);
+          return callback(errors.registration.SINGLY_ID_TAKEN);
         if (result.singlyAccessToken && inputs.singlyAccessToken)
-          return callback(errors.registration.CARD_ID_TAKEN);
+          return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
       }
 
       return callback();
@@ -236,12 +238,14 @@ module.exports.ensureNotTaken = function(inputs, id, callback){
   });
 };
 
-module.exports.registerConsumer = function(inputs, callback){
-  db.getClient('register-consumer', function(error, client){
+module.exports.registerUser = function(group, inputs, callback){
+  db.getClient('register-user', function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
 
-    module.exports.ensureNotTaken(inputs, function(error){
-      if (error) return callback(error);
+    var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
+
+    module.exports.ensureNotTaken(inputs, function(error, result){
+      if (error) return callback(error, result);
 
       utils.encryptPassword(inputs.password, function(err, encryptedPassword, passwordSalt) {
 
@@ -252,23 +256,65 @@ module.exports.registerConsumer = function(inputs, callback){
                 'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId RETURNING *),',
             '"userGroup" AS',
               '(INSERT INTO "usersGroups" ("userId", "groupId")',
-                'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-            '"consumer" AS',
-              '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
-                'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")',
+                'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = $group RETURNING id),',
+            '{extension}',
           'SELECT "user".id as "userId" FROM "user"'
         ]);
-
         query.$('email', inputs.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
         query.$('singlyId', inputs.singlyId);
         query.$('singlyAccessToken', inputs.singlyAccessToken);
-        query.$('firstName', inputs.firstName);
-        query.$('lastName', inputs.lastName);
         query.$('cardId', inputs.cardId || '');
-        query.$('screenName', inputs.screenName);
-        query.$('avatarUrl', inputs.avatarUrl);
+
+        switch (group) {
+          case 'consumer':
+            query.extension = [
+            '"consumer" AS',
+              '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
+                'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")'
+            ].join(' ');
+            query.$('group', 'consumer');
+            query.$('firstName', inputs.firstName);
+            query.$('lastName', inputs.lastName);
+            query.$('screenName', inputs.screenName);
+            query.$('avatarUrl', inputs.avatarUrl);
+            break;
+          case 'cashier':
+            query.extension = [
+            '"cashier" AS',
+              '(INSERT INTO "cashiers" ("userId", "businessId", "locationId")',
+                'SELECT "user".id, $businessId, $locationId FROM "user")'
+            ].join(' ');
+            query.$('group', 'cashier');
+            query.$('businessId', inputs.businessId);
+            query.$('locationId', inputs.locationId);
+            break;
+          case 'manager':
+            query.extension = [
+            '"manager" AS',
+              '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
+                'SELECT "user".id, $businessId, $locationId FROM "user")'
+            ].join(' ');
+            query.$('group', 'manager');
+            query.$('businessId', inputs.businessId);
+            query.$('locationId', inputs.locationId);
+            break;
+          case 'tapin-station':
+            query.extension = [
+            '"station" AS',
+              '(INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
+                'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user")'
+            ].join(' ');
+            query.$('group', 'tapin-station');
+            query.$('businessId', inputs.businessId);
+            query.$('locationId', inputs.locationId);
+            query.$('loyaltyEnabled', !!inputs.loyaltyEnabled);
+            query.$('galleryEnabled', !!inputs.galleryEnabled);
+            break;
+          default:
+            throw "Invalid group: "+group;
+        }
 
         client.query(query.toString(), query.$values, function(error, result) {
           if (error) return callback(errors.internal.DB_FAILURE, error);
@@ -278,21 +324,66 @@ module.exports.registerConsumer = function(inputs, callback){
           // Return session object
           var user = {
             id: inputs.userId
+          , userId: inputs.userId
           , email: inputs.email
           , singlyAccessToken: inputs.singlyAccessToken
           , singlyId: inputs.singlyId
-          , groups: ['consumer']
+          , groups: [group]
           };
 
           callback(null, user);
+        });
+      });
+    }, extension);
+  });
+};
 
-          // Consider putting this in events
-          if (inputs.email) {
-            var emailHtml = templates.email.complete_registration({ url:'http://loljk.com' });
-            utils.sendMail(inputs.email, config.emailFromAddress, 'Welcome to Goodybag!', emailHtml/*, function(err, result) {
-              console.log('email cb', err, result);
-            }*/);
+module.exports.updateUser = function(group, userId, inputs, callback) {
+  if (inputs.password)
+    delete inputs.password; // for now, no password updates
+
+  db.getClient('update-user', function(error, client){
+    if (error) return callback(errors.internal.DB_FAILURE, error);
+
+    var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
+    module.exports.ensureNotTaken(inputs, userId, function(error, result){
+      if (error) return callback(error, result);
+
+      var tx = new Transaction(client);
+      tx.begin(function(error){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var updateRecord = function(table, callback) {
+          var needsUpdate = false, data = {};
+          // Determine if we even need to update the consumer record
+          for (var i = db.fields[table].plain.length - 1; i >= 0; i--){
+            if (db.fields[table].plain[i] in inputs){
+              needsUpdate = true;
+              data[db.fields[table].plain[i]] = inputs[db.fields[table].plain[i]];
+            }
           }
+          if (!needsUpdate) return callback();
+
+          var query = sql.query('UPDATE "{table}" SET {updates} WHERE {idField}=$id');
+          query.table = table;
+          query.updates = sql.fields().addUpdateMap(data, query);
+          query.idField = (table == 'users') ? 'id' : '"userId"';
+          query.$('id', userId);
+
+          tx.query(query.toString(), query.$values, function(error, result){
+            if (error) return callback(errors.internal.DB_FAILURE, error);
+            if (result.rowCount === 0)
+              return callback(errors.input.NOT_FOUND);
+            callback();
+          });
+        };
+
+        updateRecord('users', function(err, result) {
+          if (err) return tx.abort(), callback(err, result);
+          updateRecord(extension, function(err, result) {
+            if (err) return tx.abort(), callback(err, result);
+            tx.commit(callback);
+          });
         });
       });
     });

@@ -20,8 +20,6 @@ collection:
       body:
         email:             { type: email,  eg: a_tapin_station_XXX@thebusiness.com, required: true }
         password:          { type: string, eg: password }
-        singlyId:          { type: string }
-        singlyAccessToken: { type: string }
         businessId:        { type: id,     eg: 1 }
         locationId:        { type: id,     eg: 1 }
         loyaltyEnabled:    { type: bool,   eg: true }
@@ -47,6 +45,7 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
+        email:             { type: email,  eg: a_tapin_station_XXX@thebusiness.com }
         businessId:        { type: id,     eg: 1 }
         locationId:        { type: id,     eg: 1 }
         loyaltyEnabled:    { type: bool,   eg: true }
