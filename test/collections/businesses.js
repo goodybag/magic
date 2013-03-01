@@ -445,7 +445,7 @@ describe('PATCH /v1/businesses/:id', function(){
 
   it('should login as a businesses manager and update the loyalty settings', function(done){
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
-      tu.populate('managers', [{ email:'loyalty@manager.com', password:'password', businessId:bids[0] }], function() {
+      tu.populate('managers', [{ email:'loyalty@manager.com', password:'password', businessId:bids[0] }], function(err, uids) {
         tu.login({ email: 'loyalty@manager.com', password: 'password' }, function(error, user){
           assert(!error);
           var loyalty = {

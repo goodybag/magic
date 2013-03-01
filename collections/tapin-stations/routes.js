@@ -101,61 +101,13 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-tapinStations', req.uuid];
-  logger.routes.debug(TAGS, 'creating tapinStation ' + req.params.id);
+  logger.routes.debug(TAGS, 'creating tapinStation');
 
-  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
+  db.procedures.registerUser('tapin-station', req.body, function(error, result){
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
-    db.getClient(TAGS[0], function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var query = sql.query([
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken")',
-              'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken',
-                'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-                'RETURNING id),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'tapin-station\' RETURNING id),',
-          '"station" AS',
-            '(INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
-              'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user")',
-        'SELECT "user".id as "userId" FROM "user"'
-      ]);
-      if (req.body.email) {
-        query.uidField = 'email';
-        query.$('uid', req.body.email);
-      } else {
-        query.uidField = '"singlyId"';
-        query.$('uid', req.body.singlyId);
-      }
-      query.$('email', req.body.email);
-      query.$('password', encryptedPassword);
-      query.$('salt', passwordSalt);
-      query.$('singlyId', req.body.singlyId);
-      query.$('singlyAccessToken', req.body.singlyAccessToken);
-      query.$('businessId', req.body.businessId);
-      query.$('locationId', req.body.locationId);
-      query.$('loyaltyEnabled', !!req.body.loyaltyEnabled);
-      query.$('galleryEnabled', !!req.body.galleryEnabled);
-
-      client.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-          // Access token already existed - for now, send back generic error
-          // Because they should have used POST /oauth to create/auth
-          return res.error(errors.internal.DB_FAILURE);
-        }
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
-    });
+    res.json({ error: null, data: result });
+    magic.emit('tapin-stations.registered', result);
   });
 };
 

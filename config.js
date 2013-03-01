@@ -94,6 +94,8 @@ var config = {
 , test: {
     logging: {
       enabled: false
+    //   enabled: true
+    // , transports: { console: true }
     }
   , http: {
       port: 8986

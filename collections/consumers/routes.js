@@ -97,17 +97,17 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer ' + req.params.userId);
+  logger.routes.debug(TAGS, 'creating consumer');
 
-  db.procedures.registerConsumer(req.body, function(error, consumer){
-    if (error) return res.error(error), logger.routes.error(TAGS, error);
+  db.procedures.registerUser('consumer', req.body, function(error, result){
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
     // Log the user in
     if (!req.session || !req.session.user)
-      req.session.user = consumer;
-    res.json({ error: null, data: consumer });
+      req.session.user = result;
+    res.json({ error: null, data: result });
 
-    magic.emit('consumers.registered', consumer);
+    magic.emit('consumers.registered', result);
   });
 };
 

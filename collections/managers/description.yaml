@@ -21,8 +21,8 @@ collection:
         email:             { type: email,  eg: a_manager_XXX@thebusiness.com }
         password:          { type: string requires-email, eg: password }
         singlyId:          { type: string, eg: foobar_XXX }
-        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyz }
-        cardId:            { type: cardid, eg: 123456-ABC }
+        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyzXXX }
+        cardId:            { type: cardid, eg: 602XXX-ZZZ }
         businessId:        { type: int,    eg: 1 }
         locationId:        { type: int,    eg: 1 }
   children:
