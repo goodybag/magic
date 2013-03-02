@@ -105,7 +105,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11131', 'tapi
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11132', 'tapin_station_2@goodybag.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11133', 'ts_redeem1@goodybag.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'consumer_mutated@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin_station_amyloc1@goodybag.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$WjI6PB/.0RGw/pZ0wOKhe.nTbULMotpQTEajOL1GsDDMGoUMTizn.', '$2a$10$WjI6PB/.0RGw/pZ0wOKhe.');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
