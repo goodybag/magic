@@ -9,7 +9,7 @@ var
 
 exports.manager = function(req, cb) {
   if (!req.session.user) return cb(null);
-  if (req.session.user.group && req.session.user.groups.indexOf('manager') !== -1) return cb(null);
+  if (req.session.user.groups && req.session.user.groups.indexOf('manager') !== -1) return cb(null);
 
   var locationId = req.param('locationId');
   var userId     = req.session.user.id;
