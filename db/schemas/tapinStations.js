@@ -17,7 +17,7 @@ define(function(require){
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
+    , meta: 'references businesses on delete set null'
     , validators: { isInt:[] }
     }
   , locationId: {
