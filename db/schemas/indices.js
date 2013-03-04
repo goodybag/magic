@@ -105,6 +105,11 @@ define(function(require){
       table   : 'productLocations'
     , columns : '("productId")'
     }
+  , productLocations_productId_idx: {
+      table   : 'productLocations'
+    , using   : 'gist'
+    , columns : '(ll_to_earth(lat, lon))'
+    }
   , products_id_idx: {
       table   : 'products'
     , type    : 'UNIQUE'
