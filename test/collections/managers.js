@@ -18,7 +18,7 @@ describe('GET /v1/managers', function() {
       });
     });
   });
-  it('should filter', function(done) {
+  it('should filter by email', function(done) {
     tu.loginAsAdmin(function(){
       tu.get('/v1/managers?filter=some_manager', function(err, results, res) {
         assert(!err);
@@ -26,6 +26,28 @@ describe('GET /v1/managers', function() {
         assert(!payload.error);
         assert(payload.data.length >= 1);
 
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by business', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/managers?businessId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'businessId', 1));
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by location', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/managers?locationId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'locationId', 1));
         tu.logout(done);
       });
     });
