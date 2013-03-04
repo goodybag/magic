@@ -16,6 +16,7 @@ var
 
 module.exports = function(req, res, next){
   // pull out the tapin authorization
+  var TAGS = ['middleware-tapin-auth', req.uuid];
   var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
   if (!authMatch) return next();
   var cardId = authMatch[1];
@@ -59,7 +60,7 @@ module.exports = function(req, res, next){
   var tx, client;
   var stage = {
     start: function() {
-      db.getClient(function(error, client_){
+      db.getClient(TAGS, function(error, client_){
         if (error) return stage.dbError(error);
         client = client_;
         tx = new Transaction(client);
@@ -89,23 +90,12 @@ module.exports = function(req, res, next){
       // Flag response to send meta.isFirstTapin = true;
       isFirstTapin = true;
 
-      var query = [
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "cardId") VALUES (null, null, $1) RETURNING id),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-          '"consumer" AS',
-            '(INSERT INTO consumers (id) SELECT "user".id FROM "user")',
-        'SELECT "user".id as id FROM "user"'
-      ].join(' ');
-      client.query(query, [cardId], function(error, result) {
-        if (error) return stage.dbError(error);
+      db.procedures.setLogTags(TAGS);
+      db.procedures.registerUser('consumer', { cardId:cardId }, function(error, result) {
+        if (error) return stage.dbError(result); // registerUser gives error details in result
 
-        var user = result.rows[0];
+        var user = result;
         if (!user) return stage.dbError('Unable to create new user');
-        user.groups = ['consumer'];
         return stage.insertTapin(user);
       });
     }
