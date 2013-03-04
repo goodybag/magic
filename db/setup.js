@@ -75,7 +75,7 @@ function buildCreateIndexSql(log, schemaFile) {
     for (var name in schema) {
       var index = schema[name];
       sql.push([
-        'CREATE', (index.type) ? index.type : '', 'INDEX', name, 'ON', '"'+index.table+'"',
+        'CREATE', (index.type) ? index.type : '', 'INDEX', '"'+name+'"', 'ON', '"'+index.table+'"',
           (index.using) ? 'USING '+index.using : '',
           index.columns
       ].join(' '));
