@@ -9,9 +9,11 @@ collection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       query:
-        offset:  { type: int,     eg: 5 }
-        limit:   { type: int,     eg: 5 }
-        filter:  { type: string,  eg: bob }
+        offset:     { type: int,     eg: 5 }
+        limit:      { type: int,     eg: 5 }
+        filter:     { type: string,  eg: bob }
+        businessId: { type: id,      eg: 1 }
+        locationId: { type: id,      eg: 1 }
     post:
       desc: Add Tapin Station
       auth:
