@@ -173,6 +173,27 @@ describe('PATCH /v1/cashiers/:id', function() {
     });
   });
 
+  it('should accept a null locationId', function(done) {
+    var cashier = {
+      locationId: null
+    };
+    tu.loginAsAdmin(function(error){
+      tu.patch('/v1/cashiers/11120', cashier, function(error, results, res) {
+        assert(res.statusCode == 204);
+
+        tu.get('/v1/cashiers/11120', function(error, results) {
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.locationId === null);
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
   it('should not update a cashier if permissions are absent', function(done) {
     var cashier = {
       firstName: "Terd"

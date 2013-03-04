@@ -136,10 +136,12 @@ var
           // run sanitization
           if (Array.isArray(req.body[k])) {
             for (var j=0; j < req.body[k].length; j++) {
-              req.body[k][j] = sanitizerFn(req.body[k][j]);
+              if (req.body[k][j] !== null)
+                req.body[k][j] = sanitizerFn(req.body[k][j]);
             }
           } else {
-            req.body[k] = sanitizerFn(req.body[k]);
+            if (req.body[k] !== null)
+              req.body[k] = sanitizerFn(req.body[k]);
           }
         }
       }
