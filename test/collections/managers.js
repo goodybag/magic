@@ -173,6 +173,27 @@ describe('PATCH /v1/managers/:id', function() {
     });
   });
 
+  it('should accept a null locationId', function(done) {
+    var manager = {
+      locationId: null
+    };
+    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
+      tu.patch('/v1/managers/11110', manager, function(error, results, res) {
+        assert(res.statusCode == 204);
+
+        tu.get('/v1/managers/11110', function(error, results) {
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.locationId === null);
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
   it('should not update a manager if permissions are absent', function(done) {
     var manager = {
       firstName: "Terd"
