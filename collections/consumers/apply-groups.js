@@ -27,6 +27,7 @@ exports.collectionOwner = function(req, callback){
   , options = { fields: ['id'] }
   ;
 
+  db.api.activity.setLogTags(['consumers-apply-groups-collectionOwner', req.uuid]);
   db.api.collections.findOne($query, options, function(error, collection){
     return callback(!error && collection ? 'owner' : null);
   });

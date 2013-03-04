@@ -3,10 +3,12 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
 , logger  = {}
 ;
@@ -25,7 +27,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-groups', req.uuid];
   logger.routes.debug(TAGS, 'fetching groups ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -60,7 +62,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-groups', req.uuid];
   logger.routes.debug(TAGS, 'fetching groups');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM groups {limit}');
@@ -87,7 +89,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-groups', req.uuid];
   logger.routes.debug(TAGS, 'creating group');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -123,7 +125,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-group', req.uuid];
   logger.routes.debug(TAGS, 'deleting group ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM groups WHERE id = $id');
@@ -144,7 +146,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-group', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction

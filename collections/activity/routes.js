@@ -25,7 +25,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-activity', req.uuid];
   logger.routes.debug(TAGS, 'fetching activity ' + req.params.id);
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('select id, type, date, to_json(data) as data from activity where id = $id {limit}');
@@ -60,6 +60,7 @@ module.exports.list = function(req, res){
   if (req.param('businessId')) query.businessId = req.param('businessId');
   if (req.param('locationId')) query.locationId = req.param('locationId');
 
+  db.api.activity.setLogTags(TAGS);
   db.api.activity.find(query, options, function(error, results, meta){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

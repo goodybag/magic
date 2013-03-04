@@ -4,11 +4,13 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
-, magic   = require('../../lib/magic')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, magic       = require('../../lib/magic')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
 , logger  = {}
 
@@ -30,7 +32,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of products');
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // if sort=distance, validate that we got lat/lon
@@ -282,7 +284,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-product', req.uuid];
   logger.routes.debug(TAGS, 'fetching product');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -450,7 +452,7 @@ module.exports.create = function(req, res){
 
       var
         isCatObj  = (categories.length > 0) ? !!categories[0].id : false
-      , isTagObj  = (tags.length > 0) ? !!tags[0].id : false
+      , isTagObj  = (tags.length > 0) ? !!tags.id : false
 
         // Array of functions to execute in parallel
       , queries = []
@@ -533,7 +535,7 @@ module.exports.create = function(req, res){
   };
 
   // Kick it off
-  db.getClient(TAGS[0], stage.clientReceived);
+  db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
@@ -713,7 +715,7 @@ module.exports.update = function(req, res){
             if (tags.length === 0) return done();
 
             var
-              isObj = !!tags[0].id
+              isObj = !!tags.id
 
               // Array of functions to execute in parallel
             , queries = []
@@ -765,7 +767,7 @@ module.exports.update = function(req, res){
   };
 
   // Kick it off
-  db.getClient(TAGS[0], stage.clientReceived);
+  db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
@@ -777,7 +779,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-product', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM products WHERE id=$productId');
@@ -799,7 +801,7 @@ module.exports.listCategories = function(req, res) {
   var TAGS = ['list-product-productcategory-relations', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of product\'s categories');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
@@ -830,7 +832,7 @@ module.exports.addCategory = function(req, res) {
 
   var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
@@ -861,7 +863,7 @@ module.exports.addCategory = function(req, res) {
 module.exports.delCategory = function(req, res) {
   var TAGS = ['delete-product-productcategory-relation', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
@@ -893,7 +895,7 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var inputs = {
