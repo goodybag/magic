@@ -180,7 +180,7 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
   if (id){
     query.where = sql.where();
     query.where.and('users.id != $id');
-    query.where.and('"' + extension + '"."userId" != $id');
+    query.where.and('"' + extension + '".id != $id');
     query.$('id', id);
   }
 
@@ -284,7 +284,7 @@ module.exports.registerUser = function(group, inputs, callback){
           case 'consumer':
             query.extension = [
             '"consumer" AS',
-              '(INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName", "avatarUrl")',
+              '(INSERT INTO "consumers" ("id", "firstName", "lastName", "screenName", "avatarUrl")',
                 'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")'
             ].join(' ');
             query.$('group', 'consumer');
@@ -296,7 +296,7 @@ module.exports.registerUser = function(group, inputs, callback){
           case 'cashier':
             query.extension = [
             '"cashier" AS',
-              '(INSERT INTO "cashiers" ("userId", "businessId", "locationId")',
+              '(INSERT INTO "cashiers" ("id", "businessId", "locationId")',
                 'SELECT "user".id, $businessId, $locationId FROM "user")'
             ].join(' ');
             query.$('group', 'cashier');
@@ -306,7 +306,7 @@ module.exports.registerUser = function(group, inputs, callback){
           case 'manager':
             query.extension = [
             '"manager" AS',
-              '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
+              '(INSERT INTO "managers" ("id", "businessId", "locationId")',
                 'SELECT "user".id, $businessId, $locationId FROM "user")'
             ].join(' ');
             query.$('group', 'manager');
@@ -316,7 +316,7 @@ module.exports.registerUser = function(group, inputs, callback){
           case 'tapin-station':
             query.extension = [
             '"station" AS',
-              '(INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
+              '(INSERT INTO "tapinStations" ("id", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
                 'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user")'
             ].join(' ');
             query.$('group', 'tapin-station');
@@ -337,7 +337,6 @@ module.exports.registerUser = function(group, inputs, callback){
           // Return session object
           var user = {
             id: inputs.userId
-          , userId: inputs.userId
           , email: inputs.email
           , singlyAccessToken: inputs.singlyAccessToken
           , singlyId: inputs.singlyId
@@ -378,10 +377,9 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
           }
           if (!needsUpdate) return callback();
 
-          var query = sql.query('UPDATE "{table}" SET {updates} WHERE {idField}=$id');
+          var query = sql.query('UPDATE "{table}" SET {updates} WHERE id=$id');
           query.table = table;
           query.updates = sql.fields().addUpdateMap(data, query);
-          query.idField = (table == 'users') ? 'id' : '"userId"';
           query.$('id', userId);
 
           tx.query(query.toString(), query.$values, function(error, result){

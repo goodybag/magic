@@ -44,7 +44,7 @@ exports.businessOwner = function(req, cb) {
       'SELECT 1, {userTable}."businessId" FROM photos',
         'INNER JOIN {userTable} ON',
           '{userTable}."businessId" = photos."businessId" AND',
-          '{userTable}."userId" = $userId',
+          '{userTable}.id = $userId',
         'WHERE photos.id = $photoId'
     ]);
     query.userTable = (isManager) ? 'managers' : 'cashiers';

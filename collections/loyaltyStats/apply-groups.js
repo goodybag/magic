@@ -24,14 +24,14 @@ exports.employee = function(req, cb) {
     var query;
     if (req.session.user.groups.indexOf('manager') !== -1) {
       if (req.param('loyaltyId'))
-        query = sql.query('select managers."userId" from managers, "userLoyaltyStats" where managers."userId" = $userId and managers."businessId" = "userLoyaltyStats"."businessId" and "userLoyaltyStats".id = $loyaltyId');
+        query = sql.query('select managers.id from managers, "userLoyaltyStats" where managers.id = $userId and managers."businessId" = "userLoyaltyStats"."businessId" and "userLoyaltyStats".id = $loyaltyId');
       else
-        query = sql.query('SELECT "userId" FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
+        query = sql.query('SELECT id FROM managers WHERE id = $userId AND "businessId" = $businessId');
     } else if (req.session.user.groups.indexOf('cashier') !== -1) {
       if (req.param('loyaltyId'))
-        query = sql.query('select cashiers."userId" from cashiers, "userLoyaltyStats" where cashiers."userId" = $userId and cashiers."businessId" = "userLoyaltyStats"."businessId" and "userLoyaltyStats".id = $loyaltyId');
+        query = sql.query('select cashiers.id from cashiers, "userLoyaltyStats" where cashiers.id = $userId and cashiers."businessId" = "userLoyaltyStats"."businessId" and "userLoyaltyStats".id = $loyaltyId');
       else
-        query = sql.query('SELECT "userId" FROM cashiers WHERE "userId" = $userId AND "businessId" = $businessId');
+        query = sql.query('SELECT id FROM cashiers WHERE id = $userId AND "businessId" = $businessId');
     }
     query.$('userId', userId);
     if (businessId) query.$('businessId', businessId);

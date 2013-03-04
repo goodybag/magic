@@ -45,7 +45,7 @@ describe('GET /v1/consumers/:id', function() {
       assert(!error);
       results = JSON.parse(results);
       assert(!results.error);
-      assert(results.data.userId === 7);
+      assert(results.data.id === 7);
       done();
     });
   });

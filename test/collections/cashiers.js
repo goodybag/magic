@@ -75,7 +75,7 @@ describe('GET /v1/cashiers/:id', function() {
         results = JSON.parse(results);
 
         assert(!results.error);
-        assert(results.data.userId === 11120);
+        assert(results.data.id === 11120);
 
         tu.logout(done);
       });
@@ -122,7 +122,7 @@ describe('POST /v1/cashiers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId >= 0);
+        assert(results.data.id >= 0);
 
         tu.logout(done);
       });

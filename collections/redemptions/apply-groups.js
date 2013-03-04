@@ -19,11 +19,11 @@ exports.locationEmployee = function(req, cb) {
     if (error) return cb(null), console.log('DB ERROR from redemptions/apply-groups:', error);
 
     var query = [
-      'SELECT "tapinStations"."userId" FROM "tapinStations"',
+      'SELECT "tapinStations".id FROM "tapinStations"',
         'INNER JOIN {c} ON',
-          '{c}."userId" = $2 AND',
+          '{c}.id = $2 AND',
           '{c}."locationId" = "tapinStations"."locationId"',
-        'WHERE "tapinStations"."userId" = $1'
+        'WHERE "tapinStations".id = $1'
     ] .join(' ')
       .replace(RegExp('{c}','g'), authedUserTable)
 

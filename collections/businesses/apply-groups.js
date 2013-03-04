@@ -17,8 +17,8 @@ exports.ownerManager = function(req, cb) {
   db.getClient(['businesses-ownerManager', req.uuid], function(error, client) {
     if (error) cb(null);
 
-    var query = sql.query('SELECT "userId" FROM managers WHERE "userId" = $userId AND "businessId" = $businessId');
-    query.$('userId', userId);
+    var query = sql.query('SELECT id FROM managers WHERE id = $id AND "businessId" = $businessId');
+    query.$('id', userId);
     query.$('businessId', businessId);
 
     client.query(query.toString(), query.$values, function(error, result) {

@@ -34,7 +34,7 @@ module.exports.get = function(req, res){
 
     var query = sql.query([
       'SELECT {fields} FROM users',
-        'LEFT JOIN "consumers" ON "consumers"."userId" = users.id',
+        'LEFT JOIN "consumers" ON "consumers".id = users.id',
         'WHERE users.id = $id'
     ]);
     query.fields = sql.fields().add("users.*, consumers.*");
@@ -67,7 +67,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM consumers',
-        'INNER JOIN users ON consumers."userId" = users.id',
+        'INNER JOIN users ON consumers.id = users.id',
         '{where} {limit}'
     ]);
     query.fields = sql.fields().add("users.*, consumers.*");

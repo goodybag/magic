@@ -26,9 +26,9 @@ exports.owner = function(req, cb) {
     if (error) return cb(null);
 
     var query = cashiers.select(
-      cashiers.userId
+      cashiers.id
     ).where(
-      cashiers.userId.equals(req.session.user.id)
+      cashiers.id.equals(req.session.user.id)
     ).toQuery();
 
     client.query(query, function(error, result){

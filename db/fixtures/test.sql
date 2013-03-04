@@ -112,53 +112,53 @@ SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the seq
 -- CONSUMERS
 
 BEGIN;
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('7', 'Turd', 'Ferguson', 'tferguson');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('8', 'Somebody', 'Else', 'some_guy');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('9', 'Consumer', 'Two', 'consumer2');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('10', 'Consumer', 'Three', 'consumer3');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('11', 'Consumer', 'Redeem1', 'consumer_redeem1');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('12', 'Consumer', 'Redeem2', 'consumer_redeem2');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('13', 'Getting', 'Deleted', 'getting_deleted');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('14', 'Getting', 'Deleted2', 'getting_deleted2');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('15', 'Consumer', 'Four', 'consumer4');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('16', 'Consumer', 'Five', 'consumer5');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('17', 'Consumer', 'Six', 'consumer6');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('18', 'Consumer', 'Six', 'consumer6');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('19', 'Unregistered', 'Consumer', 'unregistered_consumer');
-INSERT INTO "consumers" ("userId", "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('7', 'Turd', 'Ferguson', 'tferguson');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('8', 'Somebody', 'Else', 'some_guy');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('9', 'Consumer', 'Two', 'consumer2');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('10', 'Consumer', 'Three', 'consumer3');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('11', 'Consumer', 'Redeem1', 'consumer_redeem1');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('12', 'Consumer', 'Redeem2', 'consumer_redeem2');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('13', 'Getting', 'Deleted', 'getting_deleted');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('14', 'Getting', 'Deleted2', 'getting_deleted2');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('15', 'Consumer', 'Four', 'consumer4');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('16', 'Consumer', 'Five', 'consumer5');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('17', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('18', 'Consumer', 'Six', 'consumer6');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('19', 'Unregistered', 'Consumer', 'unregistered_consumer');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
 COMMIT;
 
 -- MANAGERS
 
 BEGIN;
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11110', '1', '1');
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11111', '1', '1');
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11112', '1', '1');
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11113', '1', '1');
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11114', '1', '4');
-INSERT INTO "managers" ("userId", "businessId", "locationId") VALUES ('11115', '2', '2');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11110', '1', '1');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11111', '1', '1');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11112', '1', '1');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11113', '1', '1');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11114', '1', '4');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11115', '2', '2');
 COMMIT;
 
 -- CASHIERS
 
 BEGIN;
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11120', '1', '1');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11121', '1', '1');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11122', '1', '1');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11123', '1', '1');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11124', '1', '4');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11125', '2', '2');
-INSERT INTO "cashiers" ("userId", "businessId", "locationId") VALUES ('11126', '1', '5');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11120', '1', '1');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11121', '1', '1');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11122', '1', '1');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11123', '1', '1');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11124', '1', '4');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11125', '2', '2');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11126', '1', '5');
 COMMIT;
 
 -- TAPINSTATIONS
 
 BEGIN;
-INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11130', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11131', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11132', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11133', '1', '1', 'true', 'true');
-INSERT INTO "tapinStations" ("userId", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11135', '39', '51', 'true', 'true');
+INSERT INTO "tapinStations" (id, "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11130', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" (id, "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11131', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" (id, "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11132', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" (id, "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11133', '1', '1', 'true', 'true');
+INSERT INTO "tapinStations" (id, "businessId", "locationId", "loyaltyEnabled", "galleryEnabled") VALUES ('11135', '39', '51', 'true', 'true');
 COMMIT;
 
 -- TAPINS

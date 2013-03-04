@@ -33,7 +33,7 @@ module.exports.get = function(req, res){
 
     var query = sql.query([
       'SELECT {fields} FROM users',
-        'LEFT JOIN "tapinStations" ON "tapinStations"."userId" = users.id',
+        'LEFT JOIN "tapinStations" ON "tapinStations".id = users.id',
         'WHERE users.id = $id'
     ]);
     query.fields = sql.fields().add('users.*');
@@ -68,7 +68,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM "tapinStations"',
-        'INNER JOIN users ON "tapinStations"."userId" = users.id',
+        'INNER JOIN users ON "tapinStations".id = users.id',
         '{where} {limit}'
     ]);
     query.fields = sql.fields().add('users.*');
@@ -179,7 +179,7 @@ module.exports.createHeartbeat = function(req, res){
   db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE "userId" = $id');
+    var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){

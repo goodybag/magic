@@ -97,7 +97,7 @@ module.exports = function(req, res, next){
             '(INSERT INTO "usersGroups" ("userId", "groupId")',
               'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
           '"consumer" AS',
-            '(INSERT INTO consumers ("userId") SELECT "user".id FROM "user")',
+            '(INSERT INTO consumers (id) SELECT "user".id FROM "user")',
         'SELECT "user".id as id FROM "user"'
       ].join(' ');
       client.query(query, [cardId], function(error, result) {
@@ -113,8 +113,8 @@ module.exports = function(req, res, next){
   , insertTapin: function(user) {
       var query = [
         'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime")',
-          'SELECT $1, "tapinStations"."userId", $2, now() FROM "tapinStations"',
-            'WHERE "tapinStations"."userId" = $3',
+          'SELECT $1, "tapinStations".id, $2, now() FROM "tapinStations"',
+            'WHERE "tapinStations".id = $3',
           'RETURNING id'
       ].join(' ');
       client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
@@ -138,7 +138,7 @@ module.exports = function(req, res, next){
             ')',
           'SELECT $1, "businessId", "locationId", $3, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
             'LEFT JOIN "lastVisit" ON true',
-            'WHERE "userId" = $3',
+            'WHERE id = $3',
             'AND (',
               '"lastVisit"."dateTime" <= now() - \'3 hours\'::interval',
               'OR "lastVisit"."dateTime" IS NULL',

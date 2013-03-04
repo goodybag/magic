@@ -76,7 +76,7 @@ module.exports.create = function(req, res){
         if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
         // get business
-        client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE "userId"=$1', [tapinStationId], function(error, result) {
+        client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
           businessId = result.rows[0].businessId;
           locationId = result.rows[0].locationId;

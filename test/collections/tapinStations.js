@@ -74,7 +74,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId == 11130);
+        assert(results.data.id == 11130);
 
         tu.logout(done);
       });
@@ -120,7 +120,7 @@ describe('POST /v1/tapin-stations', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId >= 0);
+        assert(results.data.id >= 0);
 
         tu.logout(done);
       });

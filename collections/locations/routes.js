@@ -308,7 +308,7 @@ module.exports.getAnalytics = function(req, res){
     var query2 = sql.query([
       'SELECT {fields} FROM events',
         "WHERE (data::hstore->'locationId' = $locationId::text",
-          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT \"userId\" FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
+          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT \"id\" FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
           "OR CAST(data::hstore->'businessId' as integer) = (SELECT businesses.id FROM businesses INNER JOIN locations ON businesses.id=locations.\"businessId\" AND locations.id=$locationId::integer LIMIT 1))",
           'AND date > {startDate}'
     ]);

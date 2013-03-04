@@ -75,7 +75,7 @@ describe('GET /v1/managers/:id', function() {
         results = JSON.parse(results);
 
         assert(!results.error);
-        assert(results.data.userId === 11110);
+        assert(results.data.id === 11110);
 
         tu.logout(done);
       });
@@ -122,7 +122,7 @@ describe('POST /v1/managers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId >= 0);
+        assert(results.data.id >= 0);
 
         tu.logout(done);
       });

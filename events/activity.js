@@ -22,9 +22,9 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', '"userId"'] };
+          var options = { fields: ['"screenName"', 'id'] };
           db.api.consumers.setLogTags(TAGS);
-          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
+          db.api.consumers.findOne({ id: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -83,9 +83,9 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', '"userId"'] };
+          var options = { fields: ['"screenName"', 'id'] };
           db.api.consumers.setLogTags(TAGS);
-          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
+          db.api.consumers.findOne({ id: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -143,9 +143,9 @@ module.exports = {
 
     , tasks = {
         lookupConsumer: function(done){
-          var options = { fields: ['"screenName"', '"userId"'] };
+          var options = { fields: ['"screenName"', 'id'] };
           db.api.consumers.setLogTags(TAGS);
-          db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
+          db.api.consumers.findOne({ id: userId }, options, function(e, r, m){
             return done(e, r);
           });
         }
@@ -210,7 +210,7 @@ module.exports = {
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
               db.api.consumers.setLogTags(TAGS);
-              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
+              db.api.consumers.findOne({ id:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -278,7 +278,7 @@ module.exports = {
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
               db.api.consumers.setLogTags(TAGS);
-              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
+              db.api.consumers.findOne({ id:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -349,7 +349,7 @@ module.exports = {
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
               db.api.consumers.setLogTags(TAGS);
-              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
+              db.api.consumers.findOne({ id:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
@@ -419,7 +419,7 @@ module.exports = {
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
               db.api.consumers.setLogTags(TAGS);
-              db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
+              db.api.consumers.findOne({ id:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }

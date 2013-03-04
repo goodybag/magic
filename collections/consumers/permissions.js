@@ -1,10 +1,8 @@
 var consumerAll = [
   'id'
-, 'userId'
 , 'email'
 , 'singlyId'
 , 'singlyAccessToken'
-, 'userId'
 , 'firstName'
 , 'lastName'
 , 'screenName'
@@ -19,7 +17,7 @@ module.exports = {
     world: {
       read:   [
         'screenName'
-      , 'userId'
+      , 'id'
       , 'avatarUrl'
       ]
     , create: [
