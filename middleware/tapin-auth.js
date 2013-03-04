@@ -30,7 +30,7 @@ module.exports = function(req, res, next){
   // get current session
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
-  if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
+  if (tapinStationUser.groups && tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
 
   // override the response functions
   // - to restore the tapin user after the response is sent
