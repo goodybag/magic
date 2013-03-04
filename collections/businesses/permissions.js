@@ -1,6 +1,6 @@
 module.exports.business = {
   world: {
-    read:   ['id', 'name', 'locations:locations', 'tags', 'isGb']
+    read:   ['id', 'name', 'locations:locations', 'tags', 'isGB']
   , create: []
   , update: []
   }
