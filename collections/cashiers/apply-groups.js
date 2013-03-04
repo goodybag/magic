@@ -22,7 +22,7 @@ exports.owner = function(req, cb) {
 
   var userId = req.param('id');
 
-  db.getClient('cashiers owner apply groups', function(error, client){
+  db.getClient(['cashiers-owner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
 
     var query = cashiers.select(

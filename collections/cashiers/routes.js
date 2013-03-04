@@ -27,7 +27,7 @@ module.exports.get = function(req, res) {
   var TAGS = ['get-cashiers', req.uuid];
   logger.routes.debug(TAGS, 'fetching cashier ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client) {
+  db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -59,7 +59,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-cashiers', req.uuid];
   logger.routes.debug(TAGS, 'fetching cashiers ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -98,6 +98,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-cashiers', req.uuid];
   logger.routes.debug(TAGS, 'creating cashier');
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.registerUser('cashier', req.body, function(error, result){
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
@@ -115,7 +116,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-cashier', req.uuid];
   logger.routes.debug(TAGS, 'deleting cashier ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE users.id = $id');
@@ -143,6 +144,7 @@ module.exports.update = function(req, res){
   if (req.param('id') == 'session')
     userId = req.session.user.id;
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.updateUser('cashier', userId, req.body, function(error, result) {
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
     res.noContent();

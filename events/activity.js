@@ -18,10 +18,12 @@ module.exports = {
   function (userId, productId){
     var
       inputs = {}
+    , TAGS = ['activity-products-like-event']
 
     , tasks = {
         lookupConsumer: function(done){
           var options = { fields: ['"screenName"', '"userId"'] };
+          db.api.consumers.setLogTags(TAGS);
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -29,6 +31,7 @@ module.exports = {
 
       , lookupProduct: function(done){
           var options = { fields: ['name', '"businessId"'] };
+          db.api.products.setLogTags(TAGS);
           db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
@@ -40,9 +43,11 @@ module.exports = {
             return logger.error(TAGS, "Failed to store like event");
 
           var options = { fields: ['name'] };
+          db.api.businesses.setLogTags(TAGS);
           db.api.businesses.findOne(results.product.businessId, options, function(error, business){
             if (error) return logger.error(TAGS, error);
 
+            db.api.activity.setLogTags(TAGS);
             db.api.activity.insert({
               type:       'like'
             , date:       'now()'
@@ -74,10 +79,12 @@ module.exports = {
   function (userId, productId){
     var
       inputs = {}
+    , TAGS = ['activity-products-want-event']
 
     , tasks = {
         lookupConsumer: function(done){
           var options = { fields: ['"screenName"', '"userId"'] };
+          db.api.consumers.setLogTags(TAGS);
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -85,6 +92,7 @@ module.exports = {
 
       , lookupProduct: function(done){
           var options = { fields: ['name', '"businessId"'] };
+          db.api.products.setLogTags(TAGS);
           db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
@@ -96,9 +104,11 @@ module.exports = {
             return logger.error(TAGS, "Failed to store want event");
 
           var options = { fields: ['name'] };
+          db.api.businesses.setLogTags(TAGS);
           db.api.businesses.findOne(results.product.businessId, options, function(error, business){
             if (error) return logger.error(TAGS, error);
 
+            db.api.activity.setLogTags(TAGS);
             db.api.activity.insert({
               type:       'want'
             , date:       'now()'
@@ -134,6 +144,7 @@ module.exports = {
     , tasks = {
         lookupConsumer: function(done){
           var options = { fields: ['"screenName"', '"userId"'] };
+          db.api.consumers.setLogTags(TAGS);
           db.api.consumers.findOne({ userId: userId }, options, function(e, r, m){
             return done(e, r);
           });
@@ -141,6 +152,7 @@ module.exports = {
 
       , lookupProduct: function(done){
           var options = { fields: ['name', '"businessId"'] };
+          db.api.products.setLogTags(TAGS);
           db.api.products.findOne(productId, options, function(e, r, m){
             return done(e, r);
           });
@@ -152,9 +164,11 @@ module.exports = {
             return logger.error(TAGS, "Failed to store try event");
 
           var options = { fields: ['name'] };
+          db.api.businesses.setLogTags(TAGS);
           db.api.businesses.findOne(results.product.businessId, options, function(error, business){
             if (error) return logger.error(TAGS, error);
 
+            db.api.activity.setLogTags(TAGS);
             db.api.activity.insert({
               type:       'try'
             , date:       'now()'
@@ -185,7 +199,8 @@ module.exports = {
 , 'consumers.becameElite':
   function (userId, businessId, locationId){
     var
-      stage = {
+      TAGS = ['activity-consumers-becameElite-event']
+    , stage = {
         start: function(){
           stage.lookUpUserAndBusiness();
         }
@@ -194,12 +209,14 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
+              db.api.consumers.setLogTags(TAGS);
               db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , business: function(done){
               var options = { fields: ['name'] };
+              db.api.businesses.setLogTags(TAGS);
               db.api.businesses.findOne(businessId, options, function(e, r, m){
                 return done(e, r);
               });
@@ -227,6 +244,7 @@ module.exports = {
             })
           };
 
+          db.api.activity.setLogTags(TAGS);
           db.api.activity.insert(data, function(error){
             if (error) return stage.error(error);
             return stage.end();
@@ -249,7 +267,8 @@ module.exports = {
 , 'consumers.visit':
   function (userId, visitId, businessId, locationId, isFirstVisit){
     var
-      stage = {
+      TAGS = ['activity-consumers-visit-event']
+    , stage = {
         start: function(){
           stage.lookUpUserAndBusiness();
         }
@@ -258,12 +277,14 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
+              db.api.consumers.setLogTags(TAGS);
               db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , business: function(done){
               var options = { fields: ['name'] };
+              db.api.businesses.setLogTags(TAGS);
               db.api.businesses.findOne(businessId, options, function(e, r, m){
                 return done(e, r);
               });
@@ -293,6 +314,7 @@ module.exports = {
             })
           };
 
+          db.api.activity.setLogTags(TAGS);
           db.api.activity.insert(data, function(error){
             if (error) return stage.error(error);
             magic.emit('debug.visitActivityLogged');
@@ -316,7 +338,8 @@ module.exports = {
 , 'loyalty.punch':
   function (deltaPunches, userId, businessId, locationId, employeeId){
     var
-      stage = {
+      TAGS = ['activity-loyalty-punch-event']
+    , stage = {
         start: function(){
           stage.lookUpUserAndBusiness();
         }
@@ -325,12 +348,14 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
+              db.api.consumers.setLogTags(TAGS);
               db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , business: function(done){
               var options = { fields: ['name'] };
+              db.api.businesses.setLogTags(TAGS);
               db.api.businesses.findOne(businessId, options, function(e, r, m){
                 return done(e, r);
               });
@@ -360,6 +385,7 @@ module.exports = {
             })
           };
 
+          db.api.activity.setLogTags(TAGS);
           db.api.activity.insert(data, function(error){
             if (error) return stage.error(error);
             return stage.end();
@@ -382,7 +408,8 @@ module.exports = {
 , 'loyalty.redemption':
   function (deltaPunches, userId, businessId, locationId, employeeId){
     var
-      stage = {
+      TAGS = ['activity-loyalty-redemption-event']
+    , stage = {
         start: function(){
           stage.lookUpUserAndBusiness();
         }
@@ -391,18 +418,21 @@ module.exports = {
           utils.parallel({
             consumer: function(done){
               var options = { fields: ['"screenName"'] };
+              db.api.consumers.setLogTags(TAGS);
               db.api.consumers.findOne({ userId:userId }, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , business: function(done){
               var options = { fields: ['name'] };
+              db.api.businesses.setLogTags(TAGS);
               db.api.businesses.findOne(businessId, options, function(e, r, m){
                 return done(e, r);
               });
             }
           , loyaltySettings: function(done){
               var options = { fields: ['reward'] };
+              db.api.businessLoyaltySettings.setLogTags(TAGS);
               db.api.businessLoyaltySettings.findOne({ businessId: businessId }, options, function(e, r, m){
                 return done(e, r);
               });
@@ -438,6 +468,7 @@ module.exports = {
             })
           };
 
+          db.api.activity.setLogTags(TAGS);
           db.api.activity.insert(data, function(error){
             if (error) return stage.error(error);
             return stage.end();

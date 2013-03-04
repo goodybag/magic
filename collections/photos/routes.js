@@ -26,7 +26,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-photos', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of photos');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(*) OVER() as "metaTotal" FROM photos {where} {limit}');
@@ -64,7 +64,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-photo', req.uuid];
   logger.routes.debug(TAGS, 'fetching photo');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT * FROM photos WHERE id=$id');
@@ -90,7 +90,7 @@ module.exports.create = function(req, res){
   var error = utils.validate(inputs, db.schemas.photos);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('INSERT INTO photos ({fields}) VALUES ({values}) RETURNING id');
@@ -113,7 +113,7 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-photo', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
@@ -137,7 +137,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-photo', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM photos WHERE id=$id');

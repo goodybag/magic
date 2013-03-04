@@ -8,7 +8,7 @@ var
   config = require('../config')
 
   // Database
-  pg = require('pg')
+, pg = require('pg')
 , sql = require('sql')
 , pooler = require('generic-pool')
 , Transaction = require('pg-transaction')
@@ -42,6 +42,13 @@ var pool = pooler.Pool({
 
       if(err) return callback(err);
 
+      // monkey-patch the client query function to do logging
+      var clientQueryFn = client.query;
+      client.query = function() {
+        logger.debug(client.logTags, arguments[0], arguments[1]);
+        clientQueryFn.apply(this, arguments);
+      };
+
       client.on('error', function(e) {
         self.emit('error', e, client);
         pool.destroy(client);
@@ -67,20 +74,21 @@ var pool = pooler.Pool({
 });
 
 var unnamedPoolidCounter = 0;
-exports.getClient = function(id, callback){
-  if (typeof id == 'function') {
-    callback = id;
-    id = null;
+exports.getClient = function(logTags, callback){
+  if (typeof logTags == 'function') {
+    callback = logTags;
+    logTags = null;
   }
+  if (!logTags)
+    logTags = ['unnamed'+(unnamedPoolidCounter++)];
 
   if (config.outputActivePoolIds) {
-    if (!id)
-      id = 'unnamed'+(unnamedPoolidCounter++);
-    activePoolIds[id] = true;
+    activePoolIds[logTags[0]] = true;
   }
 
   return pool.acquire(function(error, client) {
     if (config.outputActivePoolIds && client) client.assignedPoolId = id;
+    if (client) client.logTags = logTags;
     callback(error, client);
   });
   // callback(null, client);

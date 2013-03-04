@@ -29,7 +29,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-redemptions', req.uuid];
   logger.routes.debug(TAGS, 'fetching redemptions');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
@@ -56,7 +56,7 @@ module.exports.create = function(req, res){
   var tapinStationId = req.body.tapinStationId;
   var businessId = null, locationId = null;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     // Ensure user is registered
@@ -82,6 +82,7 @@ module.exports.create = function(req, res){
           locationId = result.rows[0].locationId;
 
           // update punches
+          db.procedures.setLogTags(TAGS);
           db.procedures.updateUserLoyaltyStats(client, tx, userId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
             if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 

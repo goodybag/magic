@@ -11,6 +11,7 @@ var
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
 , templates = require('../../templates')
+, Transaction = require('pg-transaction')
 
 , logger  = {}
 ;
@@ -28,7 +29,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-consumers', req.uuid];
   logger.routes.debug(TAGS, 'fetching consumer ' + req.params.userId);
 
-  db.getClient(TAGS[0], function(error, client) {
+  db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -60,7 +61,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-consumers', req.uuid];
   logger.routes.debug(TAGS, 'fetching consumers ' + req.params.userId);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -99,6 +100,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-consumers', req.uuid];
   logger.routes.debug(TAGS, 'creating consumer');
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.registerUser('consumer', req.body, function(error, result){
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
@@ -120,7 +122,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-consumer', req.uuid];
   logger.routes.debug(TAGS, 'deleting consumer ' + req.params.userId);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE users.id = $id');
@@ -148,6 +150,7 @@ module.exports.update = function(req, res){
   if (req.param('userId') == 'session')
     userId = req.session.user.id;
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.updateUser('consumer', userId, req.body, function(error, result) {
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
     res.noContent();
@@ -171,7 +174,7 @@ module.exports.updatePassword = function(req, res){
   var token = new Buffer(req.headers.authorization.split(/\s+/).pop() || '', 'base64').toString();
   var oldPassword = token.split(/:/).pop();
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var tx = new Transaction(client);
@@ -234,7 +237,7 @@ module.exports.listCollections = function(req, res){
     limit--; // need to make room for "all"
   }
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -351,7 +354,7 @@ module.exports.createCollection = function(req, res){
   var userId = req.param('userId');
   var name = req.body.name;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('INSERT INTO collections ("userId", name, "isHidden") VALUES ($userId, $name, false) RETURNING id');
@@ -378,7 +381,7 @@ module.exports.getCollection = function(req, res){
   var userId = req.param('userId');
   var collectionId = req.param('collectionId');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -439,7 +442,7 @@ module.exports.getAllCollection = function(req, res){
 
   var userId = req.param('userId');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -508,7 +511,7 @@ module.exports.updateCollection = function(req, res){
   var collectionId = req.param('collectionId');
   var name = req.body.name;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE collections SET name=$name WHERE id::text=$id OR "pseudoKey"=$id');
@@ -534,7 +537,7 @@ module.exports.deleteCollection = function(req, res){
 
   var collectionId = req.param('collectionId');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM collections WHERE id::text=$id OR "pseudoKey"=$id');
@@ -560,7 +563,7 @@ module.exports.addCollectionProduct = function(req, res){
   var collectionId = req.param('collectionId');
   var productId = req.body.productId;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -595,7 +598,7 @@ module.exports.removeCollectionProduct = function(req, res){
   var collectionId = req.param('collectionId');
   var productId = req.param('productId');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query;
@@ -644,7 +647,7 @@ module.exports.createCardupdate = function(req, res){
   var email = req.body.email;
   var newCardId = req.body.cardId;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = 'SELECT users.id, users."cardId" FROM users WHERE users.email = $1';
@@ -689,7 +692,7 @@ module.exports.updateCard = function(req, res){
   var TAGS = ['update-consumer-card', req.uuid];
   logger.routes.debug(TAGS, 'changing consumer card');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // get cardupdate info

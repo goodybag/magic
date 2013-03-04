@@ -3,12 +3,14 @@
  */
 
 var
-  db        = require('../../db')
-, sql       = require('../../lib/sql')
-, utils     = require('../../lib/utils')
-, errors    = require('../../lib/errors')
-, config    = require('../../config')
-, templates = require('../../templates')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, config      = require('../../config')
+, templates   = require('../../templates')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
 , logger    = {}
 ;
@@ -27,7 +29,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -77,7 +79,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -138,7 +140,7 @@ module.exports.create = function(req, res){
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
@@ -195,7 +197,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE id=$id');
@@ -224,7 +226,7 @@ module.exports.update = function(req, res){
 
   utils.encryptPassword(password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
@@ -330,7 +332,7 @@ module.exports.createPasswordReset = function(req, res){
   if (!email)
     return res.error(errors.input.VALIDATION_FAILED, '`email` is required.');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     client.query('SELECT id FROM users WHERE email=$1', [email], function(error, result) {
@@ -373,7 +375,7 @@ module.exports.resetPassword = function(req, res){
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {

@@ -27,7 +27,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-charities', req.uuid];
   logger.routes.debug(TAGS, 'fetching charities ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM charities WHERE id=$id');
@@ -55,7 +55,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-charity', req.uuid];
   logger.routes.debug(TAGS, 'deleting charity ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM charities WHERE id=$id');
@@ -79,7 +79,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of charities');
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM charities {where} {limit}');
@@ -113,7 +113,7 @@ module.exports.list = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-charity', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
@@ -141,7 +141,7 @@ module.exports.create = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-charity', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
