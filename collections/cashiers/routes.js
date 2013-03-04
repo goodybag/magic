@@ -77,6 +77,16 @@ module.exports.list = function(req, res){
       query.$('emailFilter', '%'+req.param('filter')+'%');
     }
 
+    if (req.param('businessId')) {
+      query.where.and('cashiers."businessId" = $businessId');
+      query.$('businessId', req.param('businessId'));
+    }
+
+    if (req.param('locationId')) {
+      query.where.and('cashiers."locationId" = $locationId');
+      query.$('locationId', req.param('locationId'));
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     // run data query
