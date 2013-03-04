@@ -1,9 +1,10 @@
 var
-  db      = require('../db')
-, utils   = require('../lib/utils')
-, logger  = require('../lib/logger')
-, errors  = require('../lib/errors')
-, magic   = require('../lib/magic')
+  db          = require('../db')
+, utils       = require('../lib/utils')
+, logger      = require('../lib/logger')
+, errors      = require('../lib/errors')
+, magic       = require('../lib/magic')
+, Transaction = require('pg-transaction')
 
 , users       = db.tables.users
 , consumers   = db.tables.consumers

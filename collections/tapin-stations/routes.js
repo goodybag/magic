@@ -28,7 +28,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'fetching tapinStation ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client) {
+  db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -62,7 +62,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'fetching tapinStations ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -103,6 +103,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'creating tapinStation');
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.registerUser('tapin-station', req.body, function(error, result){
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
@@ -120,7 +121,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-tapinStation', req.uuid];
   logger.routes.debug(TAGS, 'deleting tapinStation ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE users.id = $id');
@@ -148,6 +149,7 @@ module.exports.update = function(req, res){
   if (userId == 'session')
     userId = req.session.user.id;
 
+  db.procedures.setLogTags(TAGS);
   db.procedures.updateUser('tapin-station', userId, req.body, function(error, result) {
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);
     res.noContent();
@@ -164,7 +166,7 @@ module.exports.createHeartbeat = function(req, res){
   var TAGS = ['tapinStations-heartbeat', req.uuid];
   logger.routes.debug(TAGS, 'emitting tapinStation ' + req.params.id + ' heartbeat');
 
-  db.getClient(TAGS[0], function(error, client) {
+  db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE "userId" = $id');

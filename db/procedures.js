@@ -4,6 +4,17 @@ var errors = require('../lib/errors');
 var utils = require('../lib/utils');
 var templates = require('../templates');
 var config = require('../config');
+var Transaction = require('pg-transaction');
+
+var currentLogTags = null;
+module.exports.setLogTags = function(tags) {
+  currentLogTags = tags;
+};
+var consumeLogTags = function() {
+  var tags = currentLogTags;
+  currentLogTags = null;
+  return tags;
+};
 
 /**
  * Consumer punch logic
@@ -155,6 +166,7 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
 };
 
 module.exports.ensureNotTaken = function(inputs, id, callback, extension){
+  var TAGS = consumeLogTags() || ['ensure-not-taken'];
   if (typeof id === "function"){
     extension = callback;
     callback = id;
@@ -213,7 +225,7 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   if (query.fields.fields.length === 0) return callback();
 
-  db.getClient(function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -239,7 +251,8 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 };
 
 module.exports.registerUser = function(group, inputs, callback){
-  db.getClient('register-user', function(error, client){
+  var TAGS = consumeLogTags() || ['register-user'];
+  db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
 
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
@@ -339,10 +352,11 @@ module.exports.registerUser = function(group, inputs, callback){
 };
 
 module.exports.updateUser = function(group, userId, inputs, callback) {
+  var TAGS = consumeLogTags() || ['create-user'];
   if (inputs.password)
     delete inputs.password; // for now, no password updates
 
-  db.getClient('update-user', function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
 
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');

@@ -145,7 +145,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createOrUpdateUser: function(user){
-      db.getClient(TAGS[0], function(error, client){
+      db.getClient(TAGS, function(error, client){
         if (error) return stage.dbError(error);
 
         var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
@@ -168,6 +168,7 @@ module.exports.oauthAuthenticate = function(req, res){
   , createUser: function(user){
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
+        db.procedures.setLogTags(TAGS);
         db.procedures.registerUser('consumer', user, function(error, consumer){
           if (error) return stage.error(error);
 
@@ -194,7 +195,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
       query.$('id', user.id);
 
-      db.getClient(TAGS['oauth-authenticate-lookup-users-groups'], function(error, client){
+      db.getClient(TAGS, function(error, client){
         if (error) return stage.dbError(error);
 
         client.query(query.toString(), query.$values, function(error, results){
@@ -240,7 +241,7 @@ module.exports.oauthAuthenticate = function(req, res){
 module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // First check for user existence

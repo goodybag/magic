@@ -17,7 +17,7 @@ exports.employee = function(req, cb) {
   var loyaltyId  = req.param('loyaltyId');
   var userId     = req.session.user.id;
 
-  db.getClient('loyaltyStats employee apply groups', function(error, client) {
+  db.getClient(['loyaltyStats employee apply groups', req.uuid], function(error, client) {
     if (error) cb(null);
 
     // were we given a consumer id in the request body?

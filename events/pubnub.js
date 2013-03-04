@@ -58,6 +58,7 @@ module.exports = {
 
 , 'products.update':
   function (productId, updates){
+    db.api.products.setLogTags(['pubnub-products-update-event']);
     db.api.products.findOne(productId, { fields: ['"businessId"'] }, function(err, product){
       if (err) return logger.error(['pubnub-products-update'], err);
       pubnub.publish({
