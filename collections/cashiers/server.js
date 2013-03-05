@@ -1,7 +1,7 @@
 /**
  * cashiers server
  */
- 
+
 var server      = require('express')();
 var middleware  = require('../../middleware');
 var routes      = require('./routes');
@@ -50,10 +50,10 @@ server.post(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
-, middleware.profile('permissions')
-, middleware.permissions(perms)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collection.methods.post.body)
+, middleware.profile('permissions')
+, middleware.permissions(perms)
 , middleware.profile('create cashier handler')
 , routes.create
 );
@@ -66,10 +66,10 @@ server.put(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.profile('permissions')
-, middleware.permissions(perms)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(perms)
 , middleware.profile('update cashier handler')
 , routes.update
 );
@@ -82,10 +82,10 @@ server.post(
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales', 'owner')
-, middleware.profile('permissions')
-, middleware.permissions(perms)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(perms)
 , middleware.profile('update cashier handler')
 , routes.update
 );

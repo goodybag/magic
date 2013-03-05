@@ -155,10 +155,7 @@ describe('POST /v1/cashiers', function() {
       var cashier = {
         email:      "cashier1234@goodybag.com"
       , password:   "password"
-      , firstName:  "Test"
-      , lastName:   "McTesterson"
-      , screenName: "testies"
-      , cardId:     "12345-ZZZ"
+      , cardId:     "123-ZZZ"
       };
 
       tu.post('/v1/cashiers', cashier, function(error, results, res){
