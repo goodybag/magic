@@ -508,8 +508,8 @@ module.exports.create = function(req, res){
   , insertProductLocations: function(client, productId) {
 
       var query = sql.query([
-        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
-          'SELECT $productId, locations.id, $businessId, locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon)',
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+          'SELECT $productId, locations.id, $businessId, locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), true',
             'FROM locations WHERE locations."businessId" = $businessId'
       ]);
       query.$('productId', productId);
