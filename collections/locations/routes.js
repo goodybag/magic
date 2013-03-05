@@ -187,8 +187,8 @@ module.exports.create = function(req, res){
 
       // create productLocations for all products related to the business
       var query = sql.query([
-        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
-        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon) FROM products WHERE products."businessId" = $businessId'
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon), true FROM products WHERE products."businessId" = $businessId'
       ]);
       query.$('locationId', newLocation.id);
       query.$('businessId', inputs.businessId);
@@ -396,7 +396,7 @@ module.exports.addProduct = function(req, res){
     ]);
     query.$('productId', inputs.productId);
     query.$('locationId', req.params.locationId);
-    query.$('inSpotlight', !!inputs.inSpotlight);
+    query.$('inSpotlight', (typeof inputs.inSpotlight != 'undefined') ? !!inputs.inSpotlight : true);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) {
