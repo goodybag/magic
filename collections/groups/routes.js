@@ -3,10 +3,12 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
 , logger  = {}
 ;
@@ -25,7 +27,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-groups', req.uuid];
   logger.routes.debug(TAGS, 'fetching groups ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -41,7 +43,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
         return res.json({ error: null, data: result.rows[0] });
@@ -61,7 +62,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-groups', req.uuid];
   logger.routes.debug(TAGS, 'fetching groups');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM groups {limit}');
@@ -72,7 +73,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
@@ -89,7 +89,7 @@ module.exports.create = function(req, res){
   var TAGS = ['create-groups', req.uuid];
   logger.routes.debug(TAGS, 'creating group');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -125,7 +125,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-group', req.uuid];
   logger.routes.debug(TAGS, 'deleting group ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM groups WHERE id = $id');
@@ -133,8 +133,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -148,7 +146,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-group', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction
@@ -164,12 +162,9 @@ module.exports.update = function(req, res){
       query.updates = sql.fields().addUpdateMap(inputs, query);
       query.$('id', +req.param('id') || 0);
 
-      logger.db.debug(TAGS, query.toString());
-
       // run update query
       client.query(query.toString(), query.$values, function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-        logger.db.debug(TAGS, result);
 
         // did the update occur?
         if (result.rowCount === 0) {
@@ -199,8 +194,7 @@ module.exports.update = function(req, res){
             }
 
             // done
-            tx.commit();
-            res.noContent();
+            tx.commit(function() { res.noContent(); });
           });
 
         });

@@ -1,9 +1,23 @@
+var consumerAll = [
+  'id'
+, 'email'
+, 'singlyId'
+, 'singlyAccessToken'
+, 'firstName'
+, 'lastName'
+, 'screenName'
+, 'avatarUrl'
+, 'cardId'
+, 'groups'
+, 'groupIds'
+];
+
 module.exports = {
   consumer: {
     world: {
       read:   [
         'screenName'
-      , 'userId'
+      , 'id'
       , 'avatarUrl'
       ]
     , create: [
@@ -23,23 +37,7 @@ module.exports = {
   , default: {}
 
   , owner: {
-      read:   [
-        'email'
-      , 'singlyId'
-      , 'singlyAccessToken'
-      , 'userId'
-      , 'firstName'
-      , 'lastName'
-      , 'screenName'
-      , 'avatarUrl'
-      , 'cardId'
-      , 'groups'
-      , 'groupIds'
-      , 'email'
-      , 'singlyAccessToken'
-      , 'singlyId'
-      , 'id'
-      ]
+      read: consumerAll
     , update: [
         'email'
       , 'singlyId'
@@ -49,12 +47,11 @@ module.exports = {
       , 'screenName'
       , 'avatarUrl'
       , 'cardId'
-      , 'userId'
       ]
     }
 
   , admin: {
-      read:   true
+      read:   consumerAll
     , create: true
     , update: true
     }
@@ -93,6 +90,7 @@ module.exports = {
 
   , owner: {
       read:   true
+    , create: ['name']
     , update: ['name']
     }
 
@@ -113,6 +111,11 @@ module.exports = {
   , owner: {
       read: true
     , create: ['productId']
+    }
+  , admin: {
+      read: true
+    , create: true
+    , update: true
     }
   }
 };

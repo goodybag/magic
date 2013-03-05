@@ -8,6 +8,7 @@ var
 , utils   = require('../../lib/utils')
 , sql     = require('../../lib/sql')
 , errors  = require('../../lib/errors')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 
@@ -29,7 +30,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of locations');
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // if sort=distance, validate that we got lat/lon
@@ -65,7 +66,7 @@ module.exports.list = function(req, res){
 
     // location filtering
     if (req.query.lat && req.query.lon) {
-      query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance')
+      query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
       if (req.query.range) {
@@ -107,10 +108,16 @@ module.exports.list = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (dataResult.rowCount === 0 && req.param('businessId')) {
+        return client.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, bizResult) {
+          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (bizResult.rowCount === 0)
+            return res.error(errors.input.NOT_FOUND);
+          return res.json({ error: null, data: [], meta: { total:0 } });
+        });
+      }
 
-      logger.db.debug(TAGS, dataResult);
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
   });
@@ -125,7 +132,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-location', req.uuid];
   logger.routes.debug(TAGS, 'fetching location');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
@@ -134,7 +141,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) {
         return res.status(404).end();
@@ -160,7 +166,7 @@ module.exports.create = function(req, res){
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
   // retrieve db client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     // build query
@@ -174,18 +180,15 @@ module.exports.create = function(req, res){
       query.values.add('(ll_to_earth('+inputs.lat+','+inputs.lon+'))');
     }
 
-    logger.db.debug(TAGS, query.toString());
-
     // run create query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
       var newLocation = result.rows[0];
 
       // create productLocations for all products related to the business
       var query = sql.query([
-        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
-        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon) FROM products WHERE products."businessId" = $businessId'
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon), true FROM products WHERE products."businessId" = $businessId'
       ]);
       query.$('locationId', newLocation.id);
       query.$('businessId', inputs.businessId);
@@ -208,7 +211,7 @@ module.exports.update = function(req, res){
   var TAGS = ['update-location', req.uuid];
 
   // retrieve db client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var inputs = req.body;
@@ -224,11 +227,9 @@ module.exports.update = function(req, res){
       query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
     }
 
-    logger.db.debug(TAGS, query.toString());
     // run update query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       // do we need to update the productLocations?
       if (!isUpdatingPosition) {
@@ -262,7 +263,7 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-location', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error){
       logger.routes.error(TAGS, error);
       return res.error(errors.internal.DB_FAILURE, error);
@@ -271,11 +272,8 @@ module.exports.del = function(req, res){
     var query = sql.query('DELETE FROM locations WHERE id=$id');
     query.$('id', req.param('locationId'));
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -291,7 +289,7 @@ module.exports.getAnalytics = function(req, res){
   var TAGS = ['get-location-analytics', req.uuid];
   logger.routes.debug(TAGS, 'fetching location analytics');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query1 = sql.query([
@@ -310,7 +308,7 @@ module.exports.getAnalytics = function(req, res){
     var query2 = sql.query([
       'SELECT {fields} FROM events',
         "WHERE (data::hstore->'locationId' = $locationId::text",
-          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT \"userId\" FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
+          "OR CAST(data::hstore->'tapinStationId' as integer) IN (SELECT \"id\" FROM \"tapinStations\" WHERE \"locationId\"=$locationId::integer)",
           "OR CAST(data::hstore->'businessId' as integer) = (SELECT businesses.id FROM businesses INNER JOIN locations ON businesses.id=locations.\"businessId\" AND locations.id=$locationId::integer LIMIT 1))",
           'AND date > {startDate}'
     ]);
@@ -349,24 +347,26 @@ module.exports.getAnalytics = function(req, res){
     addQueryset("'1-1-1969'::date"); // all time
 
     require('async').map(queries, function(item, next) {
-      // console.log(item);
       client.query(item.q, item.v, next);
     }, function(error, results) {
-      // console.log(error)
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, results);
 
-      if (results[0].rowCount === 0) {
-        return res.status(404).end();
-      }
+      // if (results[0].rowCount === 0) {
+      //   return res.status(404).end();
+      // }
 
-      var stats = {
-        day   : utils.extend(results[0].rows[0], results[1].rows[0], results[2].rows[0]),
-        week  : utils.extend(results[3].rows[0], results[4].rows[0], results[5].rows[0]),
-        month : utils.extend(results[6].rows[0], results[7].rows[0], results[8].rows[0]),
-        all   : utils.extend(results[9].rows[0], results[10].rows[0], results[11].rows[0]),
+      var baseStats = {
+        likes:0, wants:0, tries:0,
+        tapins:0, punches:0, redemptions:0,
+        visits:0, firstVisits:0, returnVisits:0,
+        becameElites:0, photos:0
       };
-      // console.log(stats);
+      var stats = {
+        day   : utils.extend(results[0].rows[0] || {}, results[1].rows[0] || {}, results[2].rows[0] || {}, baseStats),
+        week  : utils.extend(results[3].rows[0] || {}, results[4].rows[0] || {}, results[5].rows[0] || {}, baseStats),
+        month : utils.extend(results[6].rows[0] || {}, results[7].rows[0] || {}, results[8].rows[0] || {}, baseStats),
+        all   : utils.extend(results[9].rows[0] || {}, results[10].rows[0] || {}, results[11].rows[0] || {}, baseStats)
+      };
 
       return res.json({ error: null, data: stats });
     });
@@ -384,29 +384,31 @@ module.exports.addProduct = function(req, res){
   var inputs = req.body;
 
   // retrieve db client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var query = sql.query([
-      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "isSpotlight")',
-        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $isSpotlight',
+      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $inSpotlight',
           'FROM locations',
           'WHERE locations.id = $locationId',
             'AND NOT EXISTS (SELECT 1 FROM "productLocations" WHERE "productId" = $productId AND "locationId" = $locationId)'
     ]);
     query.$('productId', inputs.productId);
     query.$('locationId', req.params.locationId);
-    query.$('isSpotlight', !!inputs.isSpotlight);
+    query.$('inSpotlight', (typeof inputs.inSpotlight != 'undefined') ? !!inputs.inSpotlight : true);
 
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
+      if (error) {
+        if (/productId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { productId:'Id provided does not exist in products table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
 
       res.noContent();
 
       if (result.rowCount !== 0)
         magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
-      if (inputs.isSpotlight)
+      if (inputs.inSpotlight)
         magic.emit('locations.productSpotlightUpdate', req.params.locationId, inputs.productId, true);
     });
   });
@@ -420,12 +422,12 @@ module.exports.addProduct = function(req, res){
 module.exports.updateProduct = function(req, res){
   var TAGS = ['location-update-product', req.uuid];
 
-  if (typeof req.body.isSpotlight == 'undefined') {
+  if (typeof req.body.inSpotlight == 'undefined') {
     return res.error(errors.input.VALIDATION_FAILED, 'No valid values supplied for update')
   }
 
   // retrieve db client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var query = sql.query([
@@ -437,13 +439,12 @@ module.exports.updateProduct = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
       res.noContent();
 
-      if (typeof req.body.isSpotlight != 'undefined')
-        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.isSpotlight);
+      if (typeof req.body.inSpotlight != 'undefined')
+        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.inSpotlight);
     });
   });
 };
@@ -457,7 +458,7 @@ module.exports.removeProduct = function(req, res){
   var TAGS = ['location-remove-product', req.uuid];
 
   // retrieve db client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var query = sql.query([
@@ -468,7 +469,6 @@ module.exports.removeProduct = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
       res.noContent();
@@ -489,6 +489,7 @@ module.exports.submitKeyTagRequest = function(req, res){
 
   var $update = { lastKeyTagRequest: 'now()', keyTagRequestPending: true };
 
+  db.api.locations.setLogTags(TAGS);
   db.api.locations.update(req.param('locationId'), $update, function(error){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

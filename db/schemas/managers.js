@@ -1,5 +1,5 @@
 /**
- * Consumers Schema
+ * Managers Schema
  */
 
 if (typeof module === 'object' && typeof define !== 'function') {
@@ -9,8 +9,8 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var consumers = {
-    userId: {
+  var managers = {
+    id: {
       type: 'int'
     , meta: 'primary key references users(id) on delete cascade'
     , validators: { isInt:[] }
@@ -26,5 +26,5 @@ define(function(require){
     , validators: { isInt:[] }
     }
   };
-  return consumers;
+  return managers;
 });

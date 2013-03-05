@@ -22,20 +22,20 @@ exports.owner = function(req, cb) {
 
   var userId = req.param('id');
 
-  db.getClient('managers owner apply groups', function(error, client){
+  db.getClient(['managers owner apply groups', req.uuid], function(error, client){
     if (error) return cb(null);
 
     var query = managers.select(
-      managers.userId
+      managers.id
     ).where(
-      managers.userId.equals(req.session.user.id)
+      managers.id.equals(req.session.user.id)
     ).toQuery();
 
     client.query(query, function(error, result){
       if (error) return cb(null);
 
       if (result.rows.length === 0) return cb(null);
-      if (result.rows[0].userId != userId) return cb(null);
+      if (result.rows[0].id != userId) return cb(null);
 
       cb('owner');
     });

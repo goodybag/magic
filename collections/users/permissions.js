@@ -1,9 +1,11 @@
 var all = [
   'id'
 , 'email'
-, 'singlyUserId'
+, 'singlyId'
 , 'singlyAccessToken'
 , 'groups'
+, 'groups.id'
+, 'groups.name'
 , 'groupIds'
 , 'cardId'
 ];
@@ -29,7 +31,7 @@ module.exports = {
   }
 
 , admin: {
-    read:   all.concat('password')
+    read:   all
   , create: all.concat('password')
   , update: all.concat('password')
   }

@@ -9,9 +9,11 @@ collection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       query:
-        offset:  { type: int,     eg: 5 }
-        limit:   { type: int,     eg: 5 }
-        filter:  { type: string,  eg: bob }
+        offset:     { type: int,     eg: 5 }
+        limit:      { type: int,     eg: 5 }
+        filter:     { type: string,  eg: bob }
+        businessId: { type: id,      eg: 1 }
+        locationId: { type: id,      eg: 1 }
     post:
       desc: Add Manager
       auth:
@@ -21,8 +23,8 @@ collection:
         email:             { type: email,  eg: a_manager_XXX@thebusiness.com }
         password:          { type: string requires-email, eg: password }
         singlyId:          { type: string, eg: foobar_XXX }
-        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyz }
-        cardId:            { type: cardid, eg: 123456-ABC }
+        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyzXXX }
+        cardId:            { type: cardid, eg: 602XXX-ZZZ }
         businessId:        { type: int,    eg: 1 }
         locationId:        { type: int,    eg: 1 }
   children:
@@ -45,8 +47,12 @@ item:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        businessId:      { type: int,    eg: 1 }
-        locationId:      { type: int,    eg: 1 }
+        email:             { type: email,  eg: a_manager_XXX@thebusiness.com }
+        singlyId:          { type: string, eg: foobar_XXX }
+        singlyAccessToken: { type: string requires-singlyid, eg: abcdefghijklmnopqrstuvwxyzXXX }
+        cardId:            { type: cardid, eg: 602XXX-ZZZ }
+        businessId:        { type: int,    eg: 1 }
+        locationId:        { type: int,    eg: 1 }
     delete:
       desc: Delete Manager
       auth:

@@ -22,13 +22,13 @@ exports.owner = function(req, cb) {
 
   var userId = req.param('id');
 
-  db.getClient('cashiers owner apply groups', function(error, client){
+  db.getClient(['cashiers-owner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
 
     var query = cashiers.select(
-      cashiers.userId
+      cashiers.id
     ).where(
-      cashiers.userId.equals(req.session.user.id)
+      cashiers.id.equals(req.session.user.id)
     ).toQuery();
 
     client.query(query, function(error, result){

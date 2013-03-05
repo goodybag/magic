@@ -14,7 +14,7 @@ var
 
     callback = callback || utils.noop;
 
-    db.getClient(function(error, client){
+    db.getClient(['log-event'], function(error, client){
       if (error) return logger.error(TAGS, error);
 
       var inputs = {

@@ -53,6 +53,7 @@ collection:
         endFriday:            { type: time,    eg: 12:15pm }
         endSaturday:          { type: time,    eg: 12:15pm }
         keyTagRequestPending: { type: bool,    eg: false }
+        isEnabled:            { type: bool,    eg: true }
   children:
     - /locations/:id
 
@@ -98,6 +99,7 @@ item:
         endFriday:            { type: time,    eg: 12:15pm }
         endSaturday:          { type: time,    eg: 12:15pm }
         keyTagRequestPending: { type: bool,    eg: false }
+        isEnabled:            { type: bool,    eg: true }
     delete:
       desc: Delete Location
       auth:
@@ -137,7 +139,7 @@ productsCollection:
         eg: { email: admin@goodybag.com, password: password }
       body:
         productId:   { type: int, eg: 1 }
-        isSpotlight: { type: bool, eg: true }
+        inSpotlight: { type: bool, eg: true }
   children:
     - /locations/:locationId/products/:productId
 
@@ -155,7 +157,7 @@ productsItem:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        isSpotlight: { type: bool, eg: true }
+        inSpotlight: { type: bool, eg: true }
     delete:
       desc: Remove Product from Location
       auth:

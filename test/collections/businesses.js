@@ -9,142 +9,170 @@ var
 
 describe('GET /v1/businesses', function() {
   it('should respond with a business listing', function(done) {
-    tu.get('/v1/businesses', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.length > 0);
-      assert(payload.data[0].id);
-      assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
+      tu.get('/v1/businesses', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data[0].id);
+        assert(payload.data[0].name.length > 0);
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
   it('should filter', function(done) {
-    tu.get('/v1/businesses?filter=2', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name.length > 0);
-      done();
+    tu.populate('businesses', [{ name:'Business X' }], function(err, ids) {
+      tu.get('/v1/businesses?filter=X', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length === 1);
+        assert(payload.data[0].name == 'Business X');
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
   it('should filter', function(done) {
-    tu.get('/v1/businesses?filter=bus', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.length > 0);
-      done();
+    tu.populate('businesses', [{ name:'Business X' }, { name:'Business Y' }], function(err, ids) {
+      tu.get('/v1/businesses?filter=bus', function(err, results, res) {
+        assert(res.statusCode === 200);
+        var payload = JSON.parse(results);
+        assert(tu.arrHas(payload.data, 'name', 'Business X'));
+        assert(tu.arrHas(payload.data, 'name', 'Business Y'));
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 
   it('should filter by a single tag', function(done) {
-    tu.get('/v1/businesses?tag=uniquetag', function(err, payload, res) {
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length == 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['myuniquetag', 'foobar'] }, { name:'Business 2', tags:['foobar'] }], function(err, ids) {
+      tu.get('/v1/businesses?tag=myuniquetag', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length == 1);
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 
   it('should filter by mutliple tags', function(done) {
-    tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
+    tu.populate('businesses', [{ name:'Business X', tags:['food'] }, { name:'Business Y', tags:['apparel'] }], function(err, ids) {
+      tu.get('/v1/businesses?tag[]=food&tag[]=apparel', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(tu.arrHas(payload.data, 'name', 'Business X'));
+        assert(tu.arrHas(payload.data, 'name', 'Business Y'));
+        tu.depopulate('businesses', ids, done);
+      });
+    });
+  });
+
+  it('should filter by isVerified', function(done) {
+    tu.get('/v1/businesses?isVerified=true', function(err, payload, res) {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
-      assert(payload.data.length == 4);
-      done();
+      assert(payload.data.length == 5);
+      tu.get('/v1/businesses?isVerified=false', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length == 1);
+        done();
+      });
     });
   });
+
   it('should paginate', function(done) {
-    tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
+      tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length === 1);
+        assert(payload.data[0].name.length > 0);
+        assert(payload.meta.total > 1);
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
+
   it('should include locations on include=locations', function(done) {
-    tu.get('/v1/businesses?include=locations', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      for (var i = payload.data.length - 1; i >= 0; i--){
-        for (var ii = payload.data[i].locations.length - 1; ii >= 0; ii--){
-          assert(payload.data[i].locations[ii].lat != null && payload.data[i].locations[ii].lat != undefined);
-          assert(payload.data[i].locations[ii].lon != null && payload.data[i].locations[ii].lon != undefined);
-        }
-      }
-      done();
+    tu.populate('businesses', [{ name:'Locinclude 1' }, { name:'Locinclude 2' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0] }, { name:'Location 2', businessId:bids[1] }], function(err, lids) {
+        tu.get('/v1/businesses?filter=locinclude&include=locations', function(err, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data[0].locations[0].name == 'Location 1');
+          assert(results.data[1].locations[0].name == 'Location 2');
+          tu.depopulate('locations', lids, function() {
+            tu.depopulate('businesses', bids, done);
+          });
+        });
+      });
     });
   });
 });
 
 describe('GET /v1/businesses/food', function() {
   it('should respond with food items', function(done) {
-    tu.get('/v1/businesses/food?include=tags', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') === -1);
-      }).length === 0); // make sure all rows have the 'food' tag
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }, { name:'Business 2', tags:['apparel'] }], function(err, ids) {
+      tu.get('/v1/businesses/food?include=tags', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length > 0);
+        assert(payload.data.filter(function(p) {
+          return (p.tags.indexOf('food') === -1);
+        }).length === 0); // make sure all rows have the 'food' tag
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 });
 
 describe('GET /v1/businesses/fashion', function() {
   it('should respond with fashion items', function(done) {
-    tu.get('/v1/businesses/fashion?include=tags', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('apparel') === -1);
-      }).length === 0); // make sure all rows have the 'apparel' tag
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }, { name:'Business 2', tags:['apparel'] }], function(err, ids) {
+      tu.get('/v1/businesses/fashion?include=tags', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length > 0);
+        assert(payload.data.filter(function(p) {
+          return (p.tags.indexOf('apparel') === -1);
+        }).length === 0); // make sure all rows have the 'apparel' tag
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 });
 
 describe('GET /v1/businesses/other', function() {
   it('should respond with non-food and non-fashion items', function(done) {
-    tu.get('/v1/businesses/other?include=tags', function(err, payload, res) {
-      assert(res.statusCode == 200);
-      payload = JSON.parse(payload);
-      assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
-      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }, { name:'Business 2', tags:['apparel', 'foobar'] }, { name:'Business 3', tags:['foobar'] }], function(err, ids) {
+      tu.get('/v1/businesses/other?include=tags', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length > 0);
+        assert(payload.data.filter(function(p) {
+          return (p.tags.indexOf('food') !== -1 || p.tags.indexOf('apparel') !== -1);
+        }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 });
 
 describe('GET /v1/businesses/:id', function() {
   it('should respond with a single business document', function(done) {
-    var id = 1;
-    tu.get('/v1/businesses/' + id, function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.id === id);
-      done();
+    tu.populate('businesses', [{ name:'Business 1', tags:['food'] }], function(err, ids) {
+      tu.get('/v1/businesses/' + ids[0], function(err, results, res) {
+        var payload = JSON.parse(results);
+        assert(payload.data.id === ids[0]);
+        tu.depopulate('businesses', ids, done);
+      });
     });
   });
 
   it('should return 404 if the id is not in the database', function(done){
     tu.get('/v1/businesses/5', function(error, results, res){
-      assert(!error);
       assert(res.statusCode == 404);
       done();
     });
@@ -152,56 +180,95 @@ describe('GET /v1/businesses/:id', function() {
 
   it('should return 404 if the id is not in correct type', function(done){
     tu.get('/v1/businesses/asdf', function(error, results, res){
-      assert(!error);
       assert(res.statusCode == 404);
       done();
     });
   });
 
   it('should respond with a single business document with fields ' + perms.business.world.read.join(', '), function(done) {
-    var id = 1;
-    tu.get('/v1/businesses/' + id, function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.id === id);
+    tu.populate('businesses', [{
+        name: 'Business 1',
+        url: 'foobar.com',
+        logoUrl: 'foobar.com/logo.png',
+        cardCode: '123456-ABC',
+        menuDescription: 'foobar',
+        street1: 'asdf',
+        street2: 'asdf',
+        city: 'asdf',
+        state: 'TX',
+        zip: 12345,
+        tags:['food'],
+        isGB: false,
+        isVerified: true
+      }], function(err, ids) {
+      tu.get('/v1/businesses/' + ids[0], function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.id === ids[0]);
 
-      for (var key in payload.data){
-        assert(perms.business.world.read.indexOf(key) > -1);
-      }
+        for (var key in payload.data){
+          assert(perms.business.world.read.indexOf(key) > -1);
+        }
 
-      done();
+        tu.depopulate('businesses', ids, done);
+      });
     });
-
   });
 
   it('should respond with a businesses loyalty settings', function(done) {
-    var id = 1;
-    tu.get('/v1/businesses/' + id + '/loyalty', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.businessId === id);
-      done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      var loyalty = {
+          requiredItem: 'Something'
+        , reward: 'Some reward'
+        , regularPunchesRequired: 10
+        , elitePunchesRequired: 8
+        , punchesRequiredToBecomeElite: 24
+        , photoUrl: 'http://placekitten.com/204/300'
+      };
+      tu.loginAsAdmin(function() {
+        tu.patch('/v1/businesses/' + ids[0] + '/loyalty', loyalty, function() {
+          tu.logout(function() {
+            tu.get('/v1/businesses/' + ids[0] + '/loyalty', function(err, results, res) {
+              assert(res.statusCode == 200);
+              var payload = JSON.parse(results);
+              assert(payload.data.businessId === ids[0]);
+              tu.depopulate('businesses', ids, done);
+            });
+          });
+        });
+      });
     });
   });
 
   var permFields = perms.business.default.read.concat(perms.business.world.read);
   it('should respond with a single business document with fields ' + permFields.join(', '), function(done) {
-    tu.loginAsConsumer(function(error){
-      assert(!error);
-      var id = 1;
-      tu.get('/v1/businesses/' + id, function(err, results, res) {
-        assert(!err);
-        var payload = JSON.parse(results);
-        assert(!payload.error);
-        assert(payload.data.id === id);
+    tu.populate('businesses', [{
+        name: 'Business 1',
+        url: 'foobar.com',
+        logoUrl: 'foobar.com/logo.png',
+        cardCode: '123456-ABC',
+        menuDescription: 'foobar',
+        street1: 'asdf',
+        street2: 'asdf',
+        city: 'asdf',
+        state: 'TX',
+        zip: 12345,
+        tags:['food'],
+        isGB: false,
+        isVerified:true
+      }], function(err, ids) {
+      tu.loginAsConsumer(function(error, res){
+        tu.get('/v1/businesses/' + ids[0], function(err, results, res) {
+          var payload = JSON.parse(results);
+          assert(payload.data.id === ids[0]);
 
-        for (var key in payload.data){
-          assert(permFields.indexOf(key) > -1);
-        }
+          for (var key in payload.data){
+            assert(permFields.indexOf(key) > -1);
+          }
 
-        tu.logout(done);
+          tu.logout(function(){ tu.depopulate('businesses', ids, done); });
+        });
       });
     });
   });
@@ -209,17 +276,18 @@ describe('GET /v1/businesses/:id', function() {
 
 describe('DEL /v1/businesses/:id', function() {
   it('should delete a single business document', function(done) {
-    tu.loginAsAdmin(function(error, user){
-      // get the current count
-      tu.get('/v1/businesses', function(err, results, res) {
-        var total = JSON.parse(results).meta.total;
-        tu.del('/v1/businesses/3', function(err, results, res) {
-          assert(!err);
-          assert(res.statusCode == 204)
-          // compare to updated count
-          tu.get('/v1/businesses', function(err, results, res) {
-            assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
-            tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      tu.loginAsAdmin(function(error, user){
+        // get the current count
+        tu.get('/v1/businesses', function(err, results, res) {
+          var total = JSON.parse(results).meta.total;
+          tu.del('/v1/businesses/'+ids[0], function(err, results, res) {
+            assert(res.statusCode == 204);
+            // compare to updated count
+            tu.get('/v1/businesses', function(err, results, res) {
+              assert(parseInt(total, 10) - 1 === parseInt(JSON.parse(results).meta.total, 10));
+              tu.logout(function(){ tu.depopulate('businesses', ids, done); });
+            });
           });
         });
       });
@@ -241,7 +309,7 @@ describe('POST /v1/businesses', function(){
   it('should save a business and return the id', function(done){
     var business = {
       name: "Ballers, Inc."
-    , charityId: 2
+    , charityId: null
     , url: "http://ballersinc.com"
     , cardCode: "123456"
     , street1: "123 Sesame St"
@@ -252,22 +320,25 @@ describe('POST /v1/businesses', function(){
     , tags: ['foo', 'bar']
     };
 
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/businesses', business, function(error, results, res){
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
-        assert(results.data.id);
+    tu.populate('charities', [{ name:'Some Charity' }], function(err, charityIds) {
+      business.charityId = charityIds[0];
 
-        tu.get('/v1/businesses/' + results.data.id, function(error, results){
-          assert(!error);
+      tu.loginAsSales(function(error, user){
+        tu.post('/v1/businesses', business, function(error, results, res){
+          assert(res.statusCode == 200);
           results = JSON.parse(results);
-          assert(!results.error);
-          // is gb false by default
-          assert(results.data.isGB === false);
-          assert(results.data.isVerified === false);
-          tu.logout(function(){
-            done();
+          assert(results.data.id);
+
+          tu.get('/v1/businesses/' + results.data.id, function(error, results){
+            assert(!error);
+            results = JSON.parse(results);
+            assert(!results.error);
+            // is gb false by default
+            assert(results.data.isGB === false);
+            assert(results.data.isVerified === false);
+            tu.logout(function(){
+              done();
+            });
           });
         });
       });
@@ -277,7 +348,6 @@ describe('POST /v1/businesses', function(){
   it('should save a verified goodybag business and return the id', function(done){
     var business = {
       name: "Ballers, Inc. 3"
-    , charityId: 2
     , url: "http://ballersinc.com"
     , cardCode: "123456"
     , street1: "123 Sesame St"
@@ -313,7 +383,6 @@ describe('POST /v1/businesses', function(){
   it('should save a business with a null url and return the id', function(done){
     var business = {
       name: "Ballers, Inc. 2"
-    , charityId: 2
     , url: null
     , cardCode: "123456"
     , street1: "123 Sesame St"
@@ -349,12 +418,8 @@ describe('POST /v1/businesses', function(){
 
     tu.loginAsSales(function(error, user){
       tu.post('/v1/businesses', business, function(error, results, res){
-        assert(!error);
-        results = JSON.parse(results);
-        assert(results.error);
-        tu.logout(function(){
-          done();
-        });
+        assert(res.statusCode == 400);
+        tu.logout(done);
       });
     });
   });
@@ -367,127 +432,125 @@ describe('PATCH /v1/businesses/:id', function(){
     , url: "http://pmcgee.com"
     };
 
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-        tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      tu.loginAsSales(function(error, user){
+        tu.patch('/v1/businesses/' + ids[0], business, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 204);
+          tu.logout(done);
+        });
       });
     });
   });
 
   it('should login as a businesses manager and update the loyalty settings', function(done){
-    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error, user){
-      assert(!error);
-      var loyalty = {
-        requiredItem: 'Coffee'
-      , reward: 'Chicken'
-      };
-
-      tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-
-        tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('managers', [{ email:'loyalty@manager.com', password:'password', businessId:bids[0] }], function(err, uids) {
+        tu.login({ email: 'loyalty@manager.com', password: 'password' }, function(error, user){
           assert(!error);
-          results = JSON.parse(results);
-          assert(!results.error);
+          var loyalty = {
+            requiredItem: 'Coffee'
+          , reward: 'Chicken'
+          };
 
-          assert(results.data.requiredItem === loyalty.requiredItem);
-          assert(results.data.reward === loyalty.reward);
+          tu.patch('/v1/businesses/' + bids[0] + '/loyalty', loyalty, function(error, results, res){
+            assert(!error);
+            assert(res.statusCode == 204);
 
-          tu.logout(done);
+            tu.get('/v1/businesses/' + bids[0] + '/loyalty', function(error, results, res){
+              assert(!error);
+              results = JSON.parse(results);
+              assert(!results.error);
+
+              assert(results.data.requiredItem === loyalty.requiredItem);
+              assert(results.data.reward === loyalty.reward);
+
+              tu.logout(done);
+            });
+          });
         });
       });
     });
   });
 
   it('should login as a businesses manager and upsert the loyalty settings', function(done){
-    tu.login({ email: 'manager_of_biz_without_loyalty@gmail.com', password: 'password' }, function(error, user){
-      assert(!error);
-      var loyalty = {
-        requiredItem: 'Something'
-      , reward: 'Some reward'
-      , regularPunchesRequired: 10
-      , elitePunchesRequired: 8
-      , punchesRequiredToBecomeElite: 24
-      , photoUrl: 'http://placekitten.com/204/300'
-      };
-
-      tu.patch('/v1/businesses/' + 4 + '/loyalty', loyalty, function(error, results, res){
-        assert(res.statusCode == 204);
-
-        tu.get('/v1/businesses/' + 4 + '/loyalty', function(error, results, res){
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('managers', [{ email:'manager_of_biz_without_loyalty@gmail.com', password:'password', businessId:bids[0] }], function() {
+        tu.login({ email: 'manager_of_biz_without_loyalty@gmail.com', password: 'password' }, function(error, user){
           assert(!error);
-          results = JSON.parse(results);
-          assert(!results.error);
+          var loyalty = {
+            requiredItem: 'Something'
+          , reward: 'Some reward'
+          , regularPunchesRequired: 10
+          , elitePunchesRequired: 8
+          , punchesRequiredToBecomeElite: 24
+          , photoUrl: 'http://placekitten.com/204/300'
+          };
 
-          assert(results.data.requiredItem === loyalty.requiredItem);
-          assert(results.data.reward === loyalty.reward);
+          tu.patch('/v1/businesses/' + bids[0] + '/loyalty', loyalty, function(error, results, res){
+            assert(res.statusCode == 204);
 
-          tu.logout(done);
+            tu.get('/v1/businesses/' + bids[0] + '/loyalty', function(error, results, res){
+              assert(!error);
+              results = JSON.parse(results);
+              assert(!results.error);
+
+              assert(results.data.requiredItem === loyalty.requiredItem);
+              assert(results.data.reward === loyalty.reward);
+
+              tu.logout(done);
+            });
+          });
         });
       });
     });
   });
 
   it('should fail to update the loyalty settings because of invalid permissions', function(done){
-    tu.login({ email: 'manager_redeem3@gmail.com', password: 'password' }, function(error, user){
-      assert(!error);
-
-      var loyalty = {
-        requiredItem: 'Taco Bell'
-      , reward: 'Poop'
-      };
-
-      tu.patch('/v1/businesses/' + 1 + '/loyalty', loyalty, function(error, results, res){
-        assert(!error);
-
-        results = JSON.parse(results);
-        assert(results.error);
-        assert(results.error.name === "NOT_ALLOWED");
-
-        tu.get('/v1/businesses/' + 1 + '/loyalty', function(error, results, res){
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('managers', [{ email:'noloyaltyperms@manager.com', password:'password' }], function() {
+        tu.login({ email: 'noloyaltyperms@manager.com', password: 'password' }, function(error, user){
           assert(!error);
-          results = JSON.parse(results);
-          assert(!results.error);
 
-          assert(results.data.requiredItem != loyalty.requiredItem);
-          assert(results.data.reward != loyalty.reward);
+          var loyalty = {
+            requiredItem: 'Taco Bell'
+          , reward: 'Poop'
+          };
 
-          tu.logout(done);
+          tu.patch('/v1/businesses/' + bids[0] + '/loyalty', loyalty, function(error, results, res){
+            assert(!error);
+
+            results = JSON.parse(results);
+            assert(results.error);
+            assert(results.error.name === "NOT_ALLOWED");
+
+            tu.logout(done);
+          });
         });
       });
     });
   });
 
   it('should update a business\'s url to be null', function(done){
-    var business = {
-      url: null
-    };
-
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-        tu.logout(function(){
-          done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      tu.loginAsSales(function(error, user){
+        tu.patch('/v1/businesses/' + ids[0], { url:null }, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 204);
+          tu.logout(function(){
+            done();
+          });
         });
       });
     });
   });
 
   it('should update a business\'s url to be blank', function(done){
-    var business = {
-      url: ''
-    };
-
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/businesses/' + 1, business, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-        tu.logout(function(){
-          done();
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      tu.loginAsSales(function(error, user){
+        tu.patch('/v1/businesses/' + ids[0], { url:'' }, function(error, results, res){
+          assert(res.statusCode == 204);
+          tu.logout(done);
         });
       });
     });
@@ -498,17 +561,18 @@ describe('PATCH /v1/businesses/:id', function(){
       tags:['foo','bar','baz']
     };
 
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/businesses/1', business, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-        tu.get('/v1/businesses/1', function(error, results, res) {
-          assert(res.statusCode == 200);
-          results = JSON.parse(results);
-          assert(results.data.tags[0] == 'foo');
-          assert(results.data.tags[1] == 'bar');
-          assert(results.data.tags[2] == 'baz');
-          tu.logout(done);
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, ids) {
+      tu.loginAsSales(function(error, user){
+        tu.patch('/v1/businesses/'+ids[0], business, function(error, results, res){
+          assert(res.statusCode == 204);
+          tu.get('/v1/businesses/'+ids[0], function(error, results, res) {
+            assert(res.statusCode == 200);
+            results = JSON.parse(results);
+            assert(results.data.tags[0] == 'foo');
+            assert(results.data.tags[1] == 'bar');
+            assert(results.data.tags[2] == 'baz');
+            tu.logout(done);
+          });
         });
       });
     });

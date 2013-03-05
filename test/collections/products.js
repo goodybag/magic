@@ -17,6 +17,7 @@ describe('GET /v1/products', function() {
       assert(payload.data.length > 1);
       assert(payload.data[0].id);
       assert(payload.data[0].businessId);
+      assert(typeof payload.data[0].businessIsGB != 'undefined');
       assert(payload.data[0].name);
       assert(payload.meta.total > 1);
       done();
@@ -66,12 +67,13 @@ describe('GET /v1/products', function() {
     });
   });
 
-  it('should include inCollection if requested', function(done) {
+  it('should include collections if requested', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/products?include=inCollection', function(err, payload, res) {
+      tu.get('/v1/products?include=collections&limit=1000', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.filter(function(p) { return p.inCollection; }).length === 5);
+        assert(payload.data.filter(function(p) { return p.collections[0] == 1 && p.id == 1; }).length === 1);
+        assert(payload.data.filter(function(p) { return p.collections.length > 0; }).length > 0);
         tu.logout(done);
       });
     });
@@ -129,7 +131,7 @@ describe('GET /v1/products', function() {
         var results = payload.data;
         for (var i = results.length - 1; i >= 0; i--){
           assert(results[i].userWants === true);
-        };
+        }
         tu.logout(done);
       });
     });
@@ -233,7 +235,9 @@ describe('GET /v1/products', function() {
       payload = JSON.parse(payload);
 
       assert(!payload.error);
-      assert(payload.data[0].name == 'Strawberry');
+      assert(payload.data[0].name > payload.data[1].name);
+      assert(payload.data[1].name > payload.data[2].name);
+      assert(payload.data[2].name > payload.data[3].name);
       assert(payload.meta.total > 1);
       done();
     });
@@ -296,7 +300,7 @@ describe('GET /v1/locations/:locationId/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].isSpotlight == undefined);
+      assert(payload.data[0].inSpotlight == undefined);
       assert(payload.meta.total > 1);
       done();
     });
@@ -316,7 +320,7 @@ describe('GET /v1/locations/:locationId/products', function() {
       assert(payload.data[0].id == 1);
       assert(payload.data[0].businessId == 1);
       assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].isSpotlight == true);
+      assert(payload.data[0].inSpotlight == true);
       assert(payload.meta.total > 1);
       done();
     });
@@ -415,16 +419,14 @@ describe('GET /v1/businesses/:id/products', function() {
 });
 
 describe('GET /v1/products/food', function() {
-  it('should respond with food items', function(done) {
-    tu.get('/v1/products/food?include=tags', function(err, payload, res) {
+  it('should respond with products from food businesses', function(done) {
+    tu.get('/v1/products/food', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag == 'food'; })).length == 0;
-      }).length === 0); // make sure all rows have the 'food' tag
+      assert(payload.data.filter(function(p) { return [2,39].indexOf(+p.businessId) === -1; }).length === 0); // 2 and 39 are the businesses tagged 'food'
       done();
     });
   });
@@ -438,32 +440,28 @@ describe('GET /v1/products/food', function() {
 });
 
 describe('GET /v1/products/fashion', function() {
-  it('should respond with fashion items', function(done) {
-    tu.get('/v1/products/fashion?include=tags', function(err, payload, res) {
+  it('should respond with products from fashion businesses', function(done) {
+    tu.get('/v1/products/fashion', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag == 'apparel'; })).length == 0;
-      }).length === 0); // make sure all rows have the 'apparel' tag
+      assert(payload.data.filter(function(p) { return [1,4].indexOf(+p.businessId) === -1; }).length === 0); // 1 and 4 are the businesses tagged 'apparel'
       done();
     });
   });
 });
 
 describe('GET /v1/products/other', function() {
-  it('should respond with non-food and non-fashion items', function(done) {
-    tu.get('/v1/products/other?include=tags', function(err, payload, res) {
+  it('should respond with products from non-food and non-fashion businesses', function(done) {
+    tu.get('/v1/products/other', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
       assert(payload.data.length > 0);
-      assert(payload.data.filter(function(p) {
-        return (p.tags.filter(function(t) { return t.tag != 'food' && t.tag != 'apparel'; })).length == 0;
-      }).length === 0); // make sure no rows have the 'food' or 'apparel' tag
+      assert(payload.data.filter(function(p) { return [1,2,4,39].indexOf(+p.businessId) !== -1; }).length === 0); // none of the guys tested above
       done();
     });
   });
@@ -483,6 +481,7 @@ describe('GET /v1/products/:id', function() {
       assert(payload.data.id == 1);
       assert(payload.data.businessId == 1);
       assert(payload.data.name == 'Product 1');
+      assert(typeof payload.data.businessIsGB != 'undefined');
       assert(payload.data.categories.length > 1);
       assert(payload.data.tags.length > 1);
       done();
@@ -826,6 +825,7 @@ describe('POST /v1/products/:id/categories', function() {
   });
 
   it('should respond to an invalid payload with errors', function(done) {
+
     tu.loginAsAdmin(function() {
       tu.post('/v1/products/1/categories', JSON.stringify({ id:'foobar' }), 'application/json', function(err, payload, res) {
         assert(!err);
@@ -854,17 +854,17 @@ describe('DELETE /v1/products/:id/categories/:id', function() {
 
 });
 
-describe('POST /v1/products/:id/feelings', function(done) {
-  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(){
-    // someone forgot to logout D:
-    tu.logout(function(){
-      tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-        assert(!error);
-        
-        tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
-          assert(res.statusCode == 204);
-          tu.logout(done);
-        });
+describe('POST /v1/products/:id/feelings', function() {
+  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(done){
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+      
+      tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.meta.isFirstTapin);
+        assert(payload.meta.userId > 0);
+        tu.logout(done);
       });
     });
   });
@@ -874,14 +874,14 @@ describe('POST /v1/products/:id/feelings', function(done) {
       tu.get('/v1/products/3', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.likes === 0);
+        assert(payload.data.likes === 1);
         assert(payload.data.wants === 0);
         assert(payload.data.tries === 0);
         assert(payload.data.userLikes == false);
         assert(payload.data.userWants == false);
         assert(payload.data.userTried == false);
 
-        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {          
+        tu.post('/v1/products/3/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
           assert(res.statusCode == 204);
 
           tu.get('/v1/products/3', function(err, payload, res) {
@@ -896,9 +896,7 @@ describe('POST /v1/products/:id/feelings', function(done) {
             assert(payload.data.userWants == true);
             assert(payload.data.userTried == true);
 
-            tu.logout(function() {
-              done();
-            });
+            tu.logout(done);
           });
         });
       });
@@ -1073,6 +1071,72 @@ describe('POST /v1/products/:id/feelings', function(done) {
           });
         });
       });
+    });
+  });
+
+  it('should keep the tallies on track during high volumes of requests', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      var counter = 0;
+      var iterate = function() {
+        tu.post('/v1/products/4/feelings', { isLiked:true, isWanted:true, isTried:true }, function(err, payload, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(payload.data.likes === 1);
+            assert(payload.data.wants === 1);
+            assert(payload.data.tries === 1);
+            tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+              assert(res.statusCode == 204);
+              tu.get('/v1/products/4', function(err, payload, res) {
+                assert(res.statusCode == 200);
+                payload = JSON.parse(payload);
+                assert(payload.data.likes === 0);
+                assert(payload.data.wants === 0);
+                assert(payload.data.tries === 0);
+                if (counter++ >= 10)
+                  tu.logout(done);
+                else
+                  iterate();
+              });
+            });
+          });
+        });
+      };
+      iterate();
+    });
+  });
+
+  it('should keep the tallies on track during high volumes of requests', function(done) {
+    tu.login({ email:'consumer7@gmail.com', password:'password' }, function() {
+      var counter = 0;
+      var iterate = function() {
+        tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+          assert(res.statusCode == 204);
+          tu.get('/v1/products/4', function(err, payload, res) {
+            assert(res.statusCode == 200);
+            payload = JSON.parse(payload);
+            assert(payload.data.likes === 0);
+            assert(payload.data.wants === 0);
+            assert(payload.data.tries === 0);
+            tu.post('/v1/products/4/feelings', { isLiked:false, isWanted:false, isTried:false }, function(err, payload, res) {
+              assert(res.statusCode == 204);
+              tu.get('/v1/products/4', function(err, payload, res) {
+                assert(res.statusCode == 200);
+                payload = JSON.parse(payload);
+                assert(payload.data.likes === 0);
+                assert(payload.data.wants === 0);
+                assert(payload.data.tries === 0);
+                if (counter++ >= 10)
+                  tu.logout(done);
+                else
+                  iterate();
+              });
+            });
+          });
+        });
+      };
+      iterate();
     });
   });
 

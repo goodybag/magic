@@ -16,19 +16,19 @@ define(function(require){
     }
     , oddityLiveId: {
       type: 'int'
-    , meta: 'references "oddityLive"(id)'
+    , meta: 'references "oddityLive"(id) on delete cascade'
     }
     , businessId: {
       type: 'int'
-    , meta: 'references businesses(id)'
+    , meta: 'references businesses(id) on delete set null'
     }
     , userId: {
       type: 'int'
-    , meta: 'references users(id)'
+    , meta: 'references users(id) on delete set null'
     }
     , locationId: {
       type: 'int'
-    , meta: 'references locations(id)'
+    , meta: 'references locations(id) on delete set null'
     }
     , toReview: {
       type: 'boolean'

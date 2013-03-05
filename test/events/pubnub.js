@@ -15,7 +15,6 @@ describe('Product Likes: ', function() {
           tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
             tu.tapinAuthRequest('POST', '/v1/products/5/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
@@ -23,7 +22,7 @@ describe('Product Likes: ', function() {
           assert(message.userId == '11130');
           assert(message.productId == '5');
           pubnub.unsubscribe({ channel:'products.like' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -39,14 +38,13 @@ describe('Product Creates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.post('/v1/products', { businessId:1, name:'Pubnub Test Product' }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.product.name == 'Pubnub Test Product');
           pubnub.unsubscribe({ channel:'business-1.productCreate' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -62,7 +60,6 @@ describe('Product Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.put('/v1/products/5', { name:'Product 3.5555555' }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
@@ -70,7 +67,7 @@ describe('Product Updates: ', function() {
           assert(message.productId == '5');
           assert(message.updates.name == 'Product 3.5555555');
           pubnub.unsubscribe({ channel:'business-1.productUpdate' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -86,14 +83,13 @@ describe('Business Loyalty Settings Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.put('/v1/businesses/1/loyalty', { requiredItem:'The Triforce' }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.updates.requiredItem == 'The Triforce');
           pubnub.unsubscribe({ channel:'business-1.loyaltySettingsUpdate' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -109,14 +105,13 @@ describe('Business Logo Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.put('/v1/businesses/1', { logoUrl:'http://loljk.net/logo.png' }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.logoUrl == 'http://loljk.net/logo.png');
           pubnub.unsubscribe({ channel:'business-1.logoUpdate' });
-          done(); 
+          tu.logout(done);
         }
     });
   });
@@ -132,14 +127,13 @@ describe('Business Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.put('/v1/businesses/1', { name:'Business 3D!' }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.updates.name == 'Business 3D!');
           pubnub.unsubscribe({ channel:'business-1.update' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -155,14 +149,13 @@ describe('Tapin Station Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.put('/v1/tapin-stations/1', { galleryEnabled:false }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.updates.galleryEnabled === false);
           pubnub.unsubscribe({ channel:'tapinstation-1.update' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -178,7 +171,6 @@ describe('Location Product Stock Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.del('/v1/locations/1/products/1', function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
@@ -186,7 +178,7 @@ describe('Location Product Stock Updates: ', function() {
           assert(message.productId === 1);
           assert(message.isAvailable === false);
           pubnub.unsubscribe({ channel:'location-1.productStockUpdate' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -199,13 +191,12 @@ describe('Location Product Stock Updates: ', function() {
           tu.loginAsAdmin(function(error, user) {
             tu.post('/v1/locations/1/products', {productId:1}, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           pubnub.unsubscribe({ channel:'location-1.productStockUpdate' });
-          done();
+          tu.logout(done);
         }
     });
   });
@@ -219,17 +210,16 @@ describe('Location Product Spotlight Updates: ', function() {
         channel:'location-1.productSpotlightUpdate',
         connect:function() {
           tu.loginAsAdmin(function(error, user) {
-            tu.put('/v1/locations/1/products/1', { isSpotlight:false }, function(err, results, res) {
+            tu.put('/v1/locations/1/products/1', { inSpotlight:false }, function(err, results, res) {
               assert(res.statusCode == 200);
-              tu.logout();
             });
           });
         },
         callback:function (message) {
           assert(message.productId === 1);
-          assert(message.isSpotlight === false);
+          assert(message.inSpotlight === false);
           pubnub.unsubscribe({ channel:'location-1.productSpotlightUpdate' });
-          done();
+          tu.logout(done);
         }
     });
   });

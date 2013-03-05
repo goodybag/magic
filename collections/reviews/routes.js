@@ -27,7 +27,7 @@ module.exports.list = function(req, res){
   var TAGS = ['get-oddity-businesses list', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of oddity businesses', {uid: "more"});
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -73,7 +73,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-review', req.uuid];
   logger.routes.debug(TAGS, 'getting oddityMeta by id ' + req.params.id, {uid: "more"});
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if(error) res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -104,7 +104,7 @@ module.exports.update = function(req, res){
   var TAGS = ['update-review', req.uuid];
   logger.routes.debug(TAGS, 'update business from to review ' + req.params.id, {uid: "more"});
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = {
@@ -122,12 +122,8 @@ module.exports.update = function(req, res){
     query.updates.add('"lastUpdated" = now()');
     query.$('id', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -137,7 +133,7 @@ module.exports.hide = function(req, res){
   var TAGS = ['hide-reviews', req.uuid];
   logger.routes.debug(TAGS, 'hide multiple businesses from to review ' , {uid: "more"});
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
       if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     }

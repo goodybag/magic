@@ -41,18 +41,14 @@ module.exports.getOauthUrl = function(req, res){
     'facebook'
   ];
 
-  logger.routes.debug(TAGS, 'validing redirect_uri');
   if (!req.param('redirect_uri'))
     return res.error(errors.auth.INVALID_URI), logger.routes.error(TAGS, errors.auth.INVALID_URI);
 
-  logger.routes.debug(TAGS, 'determining if service is valid');
   if (!req.param('service'))
     return res.error(errors.auth.SERVICE_REQUIRED), logger.routes.error(TAGS, errors.auth.SERVICE_REQUIRED);
 
   if (validServices.indexOf(req.param('service')) === -1)
     return res.error(errors.auth.INVALID_SERVICE), logger.routes.error(TAGS, errors.auth.INVALID_SERVICE);
-
-  logger.routes.debug(TAGS, 'Sending back redirect url');
 
   return res.json({
     error: null
@@ -123,14 +119,13 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getSinglyId: function(accessToken){
-      singly.get('/profiles', data, function(error, result){
+      singly.get('/profiles', { access_token: accessToken }, function(error, result){
         if (error) return stage.singlyError(error);
 
         var user = {
           singlyId: result.body.id
         , singlyAccessToken: accessToken
         };
-
         // Get facebook data
         if (result.body.facebook) return stage.getFacebookData(accessToken, user);
 
@@ -150,7 +145,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createOrUpdateUser: function(user){
-      db.getClient(TAGS[0], function(error, client){
+      db.getClient(TAGS, function(error, client){
         if (error) return stage.dbError(error);
 
         var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
@@ -161,7 +156,7 @@ module.exports.oauthAuthenticate = function(req, res){
           if (error) return stage.dbError(error);
 
           if (result.rowCount === 0) return stage.createUser(user);
-          return stage.setSessionAndSend({
+          return stage.lookupUsersGroups({
             id: result.rows[0].id
           , singlyId: user.singlyId
           , singlyAccessToken: user.singlyAccessToken
@@ -170,10 +165,11 @@ module.exports.oauthAuthenticate = function(req, res){
       });
     }
 
-  , createUser: function(consumer){
+  , createUser: function(user){
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
-        db.procedures.registerConsumer(req.body, function(error, consumer){
+        db.procedures.setLogTags(TAGS);
+        db.procedures.registerUser('consumer', user, function(error, consumer){
           if (error) return stage.error(error);
 
           stage.setSessionAndSend(consumer);
@@ -199,7 +195,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
       query.$('id', user.id);
 
-      db.getClient(TAGS['oauth-authenticate-lookup-users-groups'], function(error, client){
+      db.getClient(TAGS, function(error, client){
         if (error) return stage.dbError(error);
 
         client.query(query.toString(), query.$values, function(error, results){
@@ -244,9 +240,8 @@ module.exports.oauthAuthenticate = function(req, res){
  */
 module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
-  logger.routes.debug(TAGS, 'attempting to authenticate');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // First check for user existence
@@ -256,14 +251,10 @@ module.exports.authenticate = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, result);
-
       if (result.rows.length === 0)
         return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
 
       var user = result.rows[0];
-
-      logger.db.debug(TAGS, "Comparing passwords");
 
       // Compare passwords
       utils.comparePasswords(req.body.password, user.password, function(error, success){
@@ -272,8 +263,6 @@ module.exports.authenticate = function(req, res){
 
         // Remove password
         delete user.password;
-
-        logger.db.debug(TAGS, "Getting groups and setting on user");
 
         // Setup groups
         query = sql.query([

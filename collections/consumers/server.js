@@ -157,6 +157,18 @@ server.post(
 , routes.createCollection
 );
 
+// consumers.getAllCollection
+server.get(
+  '/v1/consumers/:userId/collections/all'
+, middleware.profile('GET /v1/consumers/:userId/collections/all')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('permissions')
+, middleware.permissions(permissions.collection)
+, middleware.profile('get consumer all collection handler')
+, routes.getAllCollection
+);
+
 // consumers.getCollection
 server.get(
   '/v1/consumers/:userId/collections/:collectionId'
@@ -195,19 +207,7 @@ server.del(
 , routes.deleteCollection
 );
 
-// consumers.deleteCollections
-server.del(
-  '/v1/collections/:collectionId'
-, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId')
-, middleware.profile('apply groups consumers owner')
-, middleware.applyGroups(applyGroups.collectionOwner)
-, middleware.profile('permissions')
-, middleware.auth.allow('admin', 'owner')
-, middleware.profile('delete consumer collection handler')
-, routes.deleteCollection
-);
-
-// consumers.listCollectionProducts
+// require('../products/routes').list
 server.get(
   '/v1/consumers/:userId/collections/:collectionId/products'
 , middleware.profile('GET /v1/consumers/:userId/collections/:collectionId/products')
@@ -224,7 +224,7 @@ server.get(
 // consumers.addCollectionProduct
 server.post(
   '/v1/consumers/:userId/collections/:collectionId/products'
-, middleware.profile('POST /v1/consumers/:userId/collections/:collectionID')
+, middleware.profile('POST /v1/consumers/:userId/collections/:collectionId/products')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.collectionProductsCollection.methods.post.body)
 , middleware.profile('apply groups consumers owner')
@@ -233,6 +233,18 @@ server.post(
 , middleware.permissions(permissions.collectionProducts)
 , middleware.profile('add product to consumer collection handler')
 , routes.addCollectionProduct
+);
+
+// consumers.removeCollectionProduct
+server.delete(
+  '/v1/consumers/:userId/collections/:collectionId/products/:productId'
+, middleware.profile('DELETE /v1/consumers/:userId/collections/:collectionId/products/:productId')
+, middleware.profile('apply groups consumers owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'owner')
+, middleware.profile('remove product from consumer collection handler')
+, routes.removeCollectionProduct
 );
 
 module.exports = server;

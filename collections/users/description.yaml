@@ -16,7 +16,7 @@ collection:
         password:           { type: string, eg: password }
         singlyId:           { type: string }
         singlyAccessToken:  { type: string }
-        groups:             { type: int*,   eg: [1,2] }
+        groups:             { type: group*, eg: [1,2] }
         cardId:             { type: cardid, eg: 123456-ABC }
       auth:
         required: true
@@ -40,7 +40,7 @@ item:
       body:
         email:              { type: email,  eg: goody2@goodybag.com }
         password:           { type: string, eg: password }
-        groups:             { type: int*,   eg: [1,2] }
+        groups:             { type: group*, eg: [1,2] }
         singlyId:           { type: string }
         singlyAccessToken:  { type: string }
         cardId:             { type: cardid, eg: 123456-ABC }

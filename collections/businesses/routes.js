@@ -3,14 +3,15 @@
  */
 
 var
-  db         = require('../../db')
-, sql        = require('../../lib/sql')
-, utils      = require('../../lib/utils')
-, errors     = require('../../lib/errors')
+  db      = require('../../db')
+, sql     = require('../../lib/sql')
+, utils   = require('../../lib/utils')
+, errors  = require('../../lib/errors')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 
-, schemas    = db.schemas
+, schemas = db.schemas
 ;
 
 // Setup loggers
@@ -27,7 +28,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -42,7 +43,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0) {
         return res.status(404).end();
@@ -62,7 +62,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
   logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('UPDATE businesses SET "isDeleted"=true WHERE id=$id');
@@ -70,8 +70,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       return res.noContent();
     });
@@ -88,7 +86,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of businesses');
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var includes = [].concat(req.query.include);
@@ -137,12 +135,15 @@ module.exports.list = function(req, res){
       query.$('nameFilter', '%'+req.param('filter')+'%');
     }
 
+    // is verified filter
+    if (typeof req.param('isVerified') != "undefined") {
+      query.where.and('businesses."isVerified" is ' + ((/1|true/.test(req.param('isVerified'))) ? 'true' : 'false'));
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
 
@@ -173,7 +174,7 @@ module.exports.create = function(req, res){
   inputs.isDeleted = false;
   var tags = inputs.tags; delete inputs.tags;
   
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // query
@@ -194,11 +195,11 @@ module.exports.create = function(req, res){
       query.values.add(false);
     }
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
+      if (error) {
+        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
 
       var business = result.rows[0];
       if (!tags) return res.json({ error: null, data: business });
@@ -222,7 +223,7 @@ module.exports.create = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-business', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
@@ -240,10 +241,11 @@ module.exports.update = function(req, res){
     query.updates.add('"updatedAt" = now()');
     query.$('id', req.params.id);
 
-    logger.db.debug(TAGS, query.toString());
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
+      if (error) {
+        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
 
       if (typeof tags == 'undefined') {
         res.noContent();
@@ -291,7 +293,7 @@ module.exports.getLoyalty = function(req, res){
   var TAGS = ['get-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -302,7 +304,6 @@ module.exports.getLoyalty = function(req, res){
     query.$('id', +req.params.id || 0);
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount === 0)
         return res.json({ error: null, data: null });
@@ -321,7 +322,7 @@ module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
@@ -342,11 +343,7 @@ module.exports.updateLoyalty = function(req, res){
     , insertQuery.$values
     , function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        logger.db.debug(TAGS, result);
-
         res.noContent();
-
         magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
       }
     );

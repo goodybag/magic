@@ -13,7 +13,7 @@ exports.owner = function(req, cb) {
 
   var userId = req.session.user.id;
 
-  db.getClient('photo owner apply groups', function(error, client){
+  db.getClient(['photo-owner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
     
     var query = sql.query([
@@ -37,14 +37,14 @@ exports.businessOwner = function(req, cb) {
 
   var userId = req.session.user.id;
 
-  db.getClient('photo businessOwner apply groups', function(error, client){
+  db.getClient(['photo-businessOwner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
     
     var query = sql.query([
       'SELECT 1, {userTable}."businessId" FROM photos',
         'INNER JOIN {userTable} ON',
           '{userTable}."businessId" = photos."businessId" AND',
-          '{userTable}."userId" = $userId',
+          '{userTable}.id = $userId',
         'WHERE photos.id = $photoId'
     ]);
     query.userTable = (isManager) ? 'managers' : 'cashiers';

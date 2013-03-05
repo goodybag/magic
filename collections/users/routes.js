@@ -3,13 +3,16 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
-, config  = require('../../config')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, config      = require('../../config')
+, templates   = require('../../templates')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
-, logger  = {}
+, logger    = {}
 ;
 
 // Setup loggers
@@ -26,24 +29,40 @@ module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
-      'SELECT users.*, array_agg("usersGroups"."groupId") AS groups',
-        'FROM users LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-        'WHERE users.id = $id',
-        'GROUP BY users.id'
+      'SELECT users.*',
+        ', array_agg(groups.id)   AS "groupIds"',
+        ', array_agg(groups.name) AS "groupNames"',
+      'FROM users',
+      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+      'WHERE users.id = $id',
+      'GROUP BY users.id'
     ]);
+
     //query.fields = sql.fields().addSelectMap(req.fields);
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
-        return res.json({ error: null, data: result.rows[0] });
+        var row = result.rows[0];
+        row.groups = [];
+
+        if (row.groupIds && row.groupIds[0] != null){
+          for (var i = 0; i < row.groupIds.length; i++){
+            row.groups.push({ id: row.groupIds[i], name: row.groupNames[i] });
+          }
+        }
+
+        delete row.groupIds;
+        delete row.groupNames;
+
+        return res.json({ error: null, data: row });
       } else {
         return res.status(404).end();
       }
@@ -60,10 +79,21 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM users {where} {limit}');
+    var query = sql.query([
+      'SELECT users.*',
+        ', COUNT(users.id) OVER() AS "metaTotal"',
+        ', array_agg(groups.id)   AS "groupIds"',
+        ', array_agg(groups.name) AS "groupNames"',
+      'FROM users',
+      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+      '{where}',
+      'GROUP BY users.id {limit}'
+    ]);
+
     query.where = sql.where();
     query.limit = sql.limit(req.query.limit, req.query.offset);
 
@@ -74,10 +104,27 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
+
+      var rows = dataResult.rows;
+
+      rows = rows.map(function(r){
+        r.groups = [];
+
+        if (r.groupIds && r.groupIds[0] != null){
+          for (var i = 0; i < r.groupIds.length; i++){
+            r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
+          }
+        }
+
+        delete r.groupIds;
+        delete r.groupNames;
+
+        return r;
+      });
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+
+      return res.json({ error: null, data: rows, meta: { total:total } });
     });
   });
 };
@@ -93,7 +140,7 @@ module.exports.create = function(req, res){
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
@@ -123,7 +170,7 @@ module.exports.create = function(req, res){
           async.series((req.body.groups || []).map(function(groupId) {
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [newUser.id, groupId], done);
+              client.query(query, [newUser.id, typeof groupId === "object" ? groupId.id : groupId], done);
             };
           }), function(err, results) {
             // did any insert fail?
@@ -133,8 +180,7 @@ module.exports.create = function(req, res){
               return res.error(errors.input.INVALID_GROUPS);
             }
 
-            tx.commit();
-            return res.json({ error: null, data: newUser });
+            tx.commit(function() { res.json({ error: null, data: newUser }); });
           });
         });
       });
@@ -151,7 +197,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE id=$id');
@@ -159,8 +205,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -182,7 +226,7 @@ module.exports.update = function(req, res){
 
   utils.encryptPassword(password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
@@ -198,7 +242,7 @@ module.exports.update = function(req, res){
           async.series((groups || []).map(function(groupId) {
             return function(done) {
               var query = 'INSERT INTO "usersGroups" ("userId", "groupId") SELECT $1, $2 FROM groups WHERE groups.id = $2';
-              client.query(query, [req.param('id'), groupId], done);
+              client.query(query, [req.param('id'), typeof groupId === "object" ? groupId.id : groupId], done);
             };
           }), function(err, results) {
             // did any insert fail?
@@ -209,8 +253,7 @@ module.exports.update = function(req, res){
             }
 
             // done
-            tx.commit();
-            res.noContent();
+            tx.commit(function() { res.noContent(); });
           });
         });
       };
@@ -241,14 +284,11 @@ module.exports.update = function(req, res){
           query.$('cardId', cardId);
         }
 
-        logger.db.debug(TAGS, query.toString());
-
         if (query.updates.fields.length === 0) return applyGroupRelations();
 
         // run update query
         client.query(query.toString(), query.$values, function(error, result){
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-          logger.db.debug(TAGS, result);
 
           // did the update occur?
           if (result.rowCount === 0) {
@@ -268,8 +308,8 @@ module.exports.update = function(req, res){
 
           // are we done?
           if (typeof req.body.groups == 'undefined') {
-            tx.commit();
-            return res.noContent();
+            tx.commit(function(){ res.noContent(); });
+            return;
           }
 
           applyGroupRelations();
@@ -292,7 +332,7 @@ module.exports.createPasswordReset = function(req, res){
   if (!email)
     return res.error(errors.input.VALIDATION_FAILED, '`email` is required.');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     client.query('SELECT id FROM users WHERE email=$1', [email], function(error, result) {
@@ -335,7 +375,7 @@ module.exports.resetPassword = function(req, res){
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS[0], function(error, client){
+    db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {

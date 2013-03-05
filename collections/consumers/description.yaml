@@ -97,18 +97,22 @@ collectionsCollection:
     type: collection
     path: /consumers/:userId/collections
     params:
-      userId:     { type: int, eg: 7 }
+      userId:     { type: int, eg: 9 }
   methods:
     get:
       desc: List Consumer Collections
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
       query:
-        offset:  { type: int, eg: 5 }
-        limit:   { type: int, eg: 5 }
+        showHidden: { type: bool, eg: true }
+        offset:     { type: int, eg: 5 }
+        limit:      { type: int, eg: 5 }
     post:
       desc: Create Consumer Collection
       auth:
         required: true
-        eg: { email: consumer@goodybag.com, password: password }
+        eg: { email: consumer2@gmail.com, password: password }
       body:
         name:    { type: string, eg: My Collection, required: true }
 
@@ -117,29 +121,35 @@ collectionsItem:
     type: item
     path: /consumers/:userId/collections/:collectionId
     params:
-      userId:       { type: int, eg: 9 }
-      collectionId: { type: int, eg: 3 }
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
   methods:
     get:
       desc: Get Consumer Collection Info
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
     put:
       desc: Set Consumer Collection Info
       auth:
         required: true
-        eg: { email: admin@goodybag.com, password: password }
+        eg: { email: consumer2@gmail.com, password: password }
       body:
         name:    { type: string, eg: My Collection, required: true }
 
 collectionProductsCollection:
   resource:
-    type: item
+    type: collection
     path: /consumers/:userId/collections/:collectionId/products
     params:
-      userId:       { type: int, eg: 9 }
-      collectionId: { type: int, eg: 3 }
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
   methods:
     get:
       desc: List Consumer Collection Products
+      auth:
+        required: true
+        eg: { email: consumer2@gmail.com, password: password }
       query:
         lat:        { type: float,   eg: 10.123 }
         lon:        { type: float,   eg: 10.123 }
@@ -148,7 +158,7 @@ collectionProductsCollection:
         locationId: { type: id,      eg: 1 }
         tag:        { type: string*, eg: [food, apparel] }
         sort:       { type: string,  eg: -name, choices: [-name, name, -distance, distance, -random, random, -popular, popular] }
-        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, isSpotlight] }
+        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, collections] }
         offset:     { type: int,     eg: 5, default: 0 }
         limit:      { type: int,     eg: 5, default: 20 }
         spotlight:  { type: bool,    eg: false }
@@ -162,4 +172,20 @@ collectionProductsCollection:
         required: true
         eg: { email: consumer2@gmail.com, password: password }
       body:
-        productId: { type: int, eg: 1, required: true }
+        productId: { type: id, eg: 1, required: true }
+
+
+collectionsProductItem:
+  resource:
+    type: item
+    path: /consumers/:userId/collections/:collectionId/products/:productId
+    params:
+      userId:       { type: id, eg: 9 }
+      collectionId: { type: id, eg: 3 }
+      productId:    { type: id, eg: 1 }
+  methods:
+    delete:
+      desc: Remove Product From Consumer Collection
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

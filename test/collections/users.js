@@ -6,20 +6,23 @@ var utils = require('../../lib/utils');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
-    tu.get('/v1/users', function(error, results) {
-      assert(!error);
-      results = JSON.parse(results);
-      assert(!results.error);
-      assert(results.data.length > 0);
-      done();
-    });
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/users', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.length > 0);
+        assert(results.data[0].groups);
+        tu.logout(done);
+      });
+    })
   });
   it('should filter', function(done) {
     tu.get('/v1/users?filter=admin', function(err, results, res) {
       assert(!err);
       var payload = JSON.parse(results);
       assert(!payload.error);
-      assert(payload.data.length === 1);
+      assert(payload.data.length >= 1);
       done();
     });
   });
@@ -83,8 +86,8 @@ describe('POST /v1/users', function() {
           assert(res.statusCode == 200);
 
           results = JSON.parse(results);
-          assert(results.data.groups[0] === 1);
-          assert(results.data.groups[1] === 2);
+          assert(results.data.groups[0].id === 1);
+          assert(results.data.groups[1].id === 2);
 
           tu.logout(done);
         });
@@ -92,7 +95,7 @@ describe('POST /v1/users', function() {
     });
   });
 
-  it('should update users groups', function(done) {
+  it('should create a user and update users groups', function(done) {
     tu.loginAsAdmin(function() {
       var user = {
         email: "testmctesterson2@test.com"
@@ -106,12 +109,39 @@ describe('POST /v1/users', function() {
         assert(!results.error);
         assert(results.data.id >= 0);
 
-        tu.get('/v1/users/'+results.data.id, function(error, results, res) {
+        tu.get('/v1/users/' + results.data.id, function(error, results, res) {
           assert(!error);
           assert(res.statusCode == 200);
 
           results = JSON.parse(results);
-          assert(results.data.groups[0] === 1);
+          assert(results.data.groups[0].id === 1);
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should create a user and update users groups', function(done) {
+    tu.loginAsAdmin(function() {
+      var user = {
+        email: "testmctesterson3@test.com"
+      , password: "testetsetset"
+      , groups:[{id: 1}, {id: 2}, {id: 4}]
+      };
+
+      tu.post('/v1/users', user, function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.id >= 0);
+
+        tu.get('/v1/users/' + results.data.id, function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode == 200);
+
+          results = JSON.parse(results);
+          assert(results.data.groups[0].id === 1);
 
           tu.logout(done);
         });
@@ -138,7 +168,7 @@ describe('POST /v1/users', function() {
 
   it('should fail if included group does not exist', function(done){
     var user = {
-      email:'foobar'
+      email:'foobar@foobar.com'
     , password:'foobar'
     , groups:[10000]
     };
@@ -172,6 +202,54 @@ describe('PATCH /v1/users/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.email === 'new@email.com');
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should update users groups', function(done) {
+    tu.loginAsAdmin(function() {
+      var user = {
+        email: "testmctesterson4@test.com"
+      , password: "testetsetset"
+      , groups:[1, 2]
+      };
+
+      tu.put('/v1/users/13', user, function(error, results, res) {
+        assert(res.statusCode == 204)
+
+        tu.get('/v1/users/13', function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode == 200);
+
+          results = JSON.parse(results);
+          assert(results.data.groups[0].id === 1);
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should update users groups', function(done) {
+    tu.loginAsAdmin(function() {
+      var user = {
+        email: "testmctesterson4@test.com"
+      , password: "testetsetset"
+      , groups:[{id: 1}, {id: 2}, {id: 4}]
+      };
+
+      tu.put('/v1/users/13', user, function(error, results, res) {
+        assert(res.statusCode == 204)
+
+        tu.get('/v1/users/13', function(error, results, res) {
+          assert(!error);
+          assert(res.statusCode == 200);
+
+          results = JSON.parse(results);
+          assert(results.data.groups[0].id === 1);
+
           tu.logout(done);
         });
       });
@@ -249,7 +327,7 @@ describe('PATCH /v1/users/:id', function() {
 
   it('should fail if included group does not exist', function(done){
     var user = {
-      email: "foobar"
+      email: "foobar@foobar.com"
     , groups: [40000]
     };
     tu.loginAsAdmin(function() {
@@ -270,11 +348,11 @@ describe('PATCH /v1/users/:id', function() {
       email: "foo@bar.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res){
+      tu.patch('/v1/users/8', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 204);
 
-        tu.get('/v1/users/6', function(error, results, res){
+        tu.get('/v1/users/8', function(error, results, res){
           assert(!error);
           assert(res.statusCode === 200);
           assert(JSON.parse(results).data.groups.length !== 0);

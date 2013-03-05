@@ -15,6 +15,8 @@ var config = {
     , transports: {
         console: false
       , fileRotate: true
+      , papertrail: true
+      , loggly: true
       }
     }
   , http: {
@@ -29,7 +31,7 @@ var config = {
   , outputActivePoolIds: false
 
   , emailEnabled: false
-  , emailFromAddress: 'team@goodybag.com'
+  , emailFromAddress: 'info@goodybag.com'
 
   , cookieSecret: "g00dybagr0ck$!"
   , passwordSalt: "$G00DYBAGR0CK$!"
@@ -64,6 +66,18 @@ var config = {
         ;
       }
     }
+  , loggly: {
+      subdomain:'goodybagpaul'
+    , inputToken: '073b990f-2045-4f46-9290-84e9fc79ff61'
+    , auth: {
+        username: 'pfraze'
+      , password: 'imlikeabeaverbuildingadam!'
+      }
+    }
+  , papertrail: {
+      host: 'logs.papertrailapp.com'
+    , port: 24616
+    }
   }
 
 , dev: {
@@ -80,6 +94,8 @@ var config = {
 , test: {
     logging: {
       enabled: false
+    //   enabled: true
+    // , transports: { console: true }
     }
   , http: {
       port: 8986
@@ -153,6 +169,8 @@ var config = {
       enabled: true
     , transports: {
         console: true
+      , papertrail: true
+      , loggly: true
       }
     }
   , http: {

@@ -10,14 +10,14 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function(require){
   var tapinStations = {
-    userId: {
+    id: {
       type: 'int'
     , meta: 'primary key references users on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
+    , meta: 'references businesses on delete set null'
     , validators: { isInt:[] }
     }
   , locationId: {

@@ -4,11 +4,13 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
-, magic   = require('../../lib/magic')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, magic       = require('../../lib/magic')
+, Transaction = require('pg-transaction')
+, async       = require('async')
 
 , logger  = {}
 
@@ -30,7 +32,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of products');
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // if sort=distance, validate that we got lat/lon
@@ -42,7 +44,7 @@ module.exports.list = function(req, res){
     var includes = [].concat(req.query.include);
     var includeTags = includes.indexOf('tags') !== -1;
     var includeCats = includes.indexOf('categories') !== -1;
-    var includeInColl = includes.indexOf('inCollection') !== -1;
+    var includeColl = includes.indexOf('collections') !== -1;
 
     // build data query
     var query = sql.query([
@@ -53,7 +55,10 @@ module.exports.list = function(req, res){
         'GROUP BY {groupby}',
         '{sort} {limit}'
     ]);
-    query.fields  = sql.fields().add('products.*').add('businesses.name as "businessName"');
+    query.fields  = sql.fields()
+      .add('products.*')
+      .add('businesses.name as "businessName"')
+      .add('businesses."isGB" as "businessIsGB"');
     query.where   = sql.where();
     query.sort    = sql.sort(req.query.sort || '+name');
     query.limit   = sql.limit(req.query.limit, req.query.offset);
@@ -64,6 +69,26 @@ module.exports.list = function(req, res){
       query.where.and('products."businessId" = $businessId');
       query.$('businessId', req.param('businessId'));
     }
+    // business tag filter
+    else if (req.param('businessType')) {
+      if (req.param('businessType') == 'other') {
+        query.where.and([
+          'NOT EXISTS',
+            '(SELECT "businessTags".id FROM "businessTags"',
+              'WHERE "businessTags"."businessId" = businesses.id',
+                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', ['food', 'apparel']),
+            ')'
+        ].join(' '));
+      } else {
+        query.where.and([
+          'EXISTS',
+            '(SELECT "businessTags".id FROM "businessTags"',
+              'WHERE "businessTags"."businessId" = businesses.id',
+                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', req.param('businessType')),
+            ')'
+        ].join(' '));
+      }
+    }
 
     // location filtering
     if (req.query.lat && req.query.lon) {
@@ -73,7 +98,7 @@ module.exports.list = function(req, res){
       ].join(' ');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance')
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
       if (req.query.range) {
         query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
@@ -84,12 +109,12 @@ module.exports.list = function(req, res){
     if (req.param('locationId')){
       var joinType = "inner";
 
-      if (req.param('spotlight') || includes.indexOf('isSpotlight') > -1 || includes.indexOf('inSpotlight') > -1)
-        query.fields.add('case when "productLocations"."isSpotlight" IS NULL THEN false ELSE "productLocations"."isSpotlight" end as "isSpotlight"');
+      if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
+        query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
 
       if (!query.prodLocJoin) {
         query.prodLocJoin = [
-        , '{joinType} join "productLocations"'
+          '{joinType} join "productLocations"'
           , 'ON products."id" = "productLocations"."productId"'
           , 'and "productLocations"."locationId" = $locationId'
         ].join(' ');
@@ -128,14 +153,26 @@ module.exports.list = function(req, res){
 
     // consumer collection filtering
     if (req.param('collectionId')) {
-      query.collectionJoin = [
-        'INNER JOIN collections ON',
-          'collections.id = $collectionId',
-        'INNER JOIN "productsCollections" ON',
-          '"productsCollections"."productId" = products.id AND',
-          '"productsCollections"."collectionId" = collections.id'
-      ].join(' ');
-      query.$('collectionId', req.param('collectionId'));
+      if (req.param('collectionId') == 'all') {
+        query.collectionJoin = [
+          'INNER JOIN collections ON',
+            'collections."userId" = $userId',
+          'INNER JOIN "productsCollections" ON',
+            '"productsCollections"."productId" = products.id AND',
+            '"productsCollections"."collectionId" = collections.id'
+        ].join(' ');
+        query.$('userId', req.param('userId'));
+      } else {
+        query.collectionJoin = [
+          'INNER JOIN collections ON',
+            '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId) AND collections."userId" = $userId',
+          'INNER JOIN "productsCollections" ON',
+            '"productsCollections"."productId" = products.id AND',
+            '"productsCollections"."collectionId" = collections.id'
+        ].join(' ');
+        query.$('collectionId', req.param('collectionId'));
+        query.$('userId', req.param('userId'));
+      }
     }
 
     // tag include
@@ -178,23 +215,23 @@ module.exports.list = function(req, res){
       query.groupby.add('"productTries".id');
       query.$('userId', req.session.user.id);
 
-      if (req.param('userLikes') != null && typeof req.param('userLikes') != 'undefined')
+      if (req.param('userLikes') !== null && typeof req.param('userLikes') != 'undefined')
         query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
 
-      if (req.param('userTried') != null && typeof req.param('userTried') != 'undefined')
+      if (req.param('userTried') !== null && typeof req.param('userTried') != 'undefined')
         query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
 
-      if (req.param('userWants') != null && typeof req.param('userWants') != 'undefined')
+      if (req.param('userWants') !== null && typeof req.param('userWants') != 'undefined')
         query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
     }
 
     // is in collection join
-    if (includeInColl && req.session.user) {
-     query.fields.add([
-        'EXISTS(SELECT id FROM "productsCollections"',
+    if (includeColl && req.session.user) {
+      query.fields.add([
+        'array(SELECT "collectionId" FROM "productsCollections"',
           'WHERE "productsCollections"."productId" = products.id',
             'AND "productsCollections"."userId" = $userId',
-        ') AS "inCollection"'
+        ') AS "collections"'
       ].join(' '));
       query.$('userId', req.session.user.id);
     }
@@ -208,11 +245,11 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      logger.db.debug(TAGS, dataResult);
       var total = 0, userLikes = 0, userWants = 0, userTries = 0;
       if (dataResult.rowCount !== 0) {
         total = dataResult.rows[0].metaTotal;
@@ -247,7 +284,7 @@ module.exports.get = function(req, res){
   var TAGS = ['get-product', req.uuid];
   logger.routes.debug(TAGS, 'fetching product');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
@@ -273,6 +310,7 @@ module.exports.get = function(req, res){
 
     query.fields.add('products.*');
     query.fields.add('businesses.name as "businessName"');
+    query.fields.add('businesses."isGB" as "businessIsGB"');
 
     // user feelings join
     if (req.session.user) {
@@ -284,7 +322,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       var product = result.rows[0];
       if (!product) return res.status(404).end();
@@ -381,8 +418,8 @@ module.exports.create = function(req, res){
 
       if (!inputs.isEnabled) inputs.isEnabled = true;
 
-      if (typeof inputs.isSpotlight == null || typeof inputs.isSpotlight == undefined)
-        inputs.isSpotlight = true;
+      if (typeof inputs.inSpotlight == null || typeof inputs.inSpotlight == undefined)
+        inputs.inSpotlight = true;
 
       inputs.likes = 0;
       inputs.wants = 0;
@@ -394,7 +431,6 @@ module.exports.create = function(req, res){
       var query = sql.query('INSERT INTO products ({fields}) VALUES ({values}) RETURNING id');
       query.fields = sql.fields().addObjectKeys(inputs);
       query.values = sql.fields().addObjectValues(inputs, query);
-      logger.db.debug(TAGS, query.toString());
 
       // run query
       client.query(query.toString(), query.$values, function(error, results){
@@ -416,7 +452,7 @@ module.exports.create = function(req, res){
 
       var
         isCatObj  = (categories.length > 0) ? !!categories[0].id : false
-      , isTagObj  = (tags.length > 0) ? !!tags[0].id : false
+      , isTagObj  = (tags.length > 0) ? !!tags.id : false
 
         // Array of functions to execute in parallel
       , queries = []
@@ -472,8 +508,8 @@ module.exports.create = function(req, res){
   , insertProductLocations: function(client, productId) {
 
       var query = sql.query([
-        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position)',
-          'SELECT $productId, locations.id, $businessId, locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon)',
+        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+          'SELECT $productId, locations.id, $businessId, locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), true',
             'FROM locations WHERE locations."businessId" = $businessId'
       ]);
       query.$('productId', productId);
@@ -499,7 +535,7 @@ module.exports.create = function(req, res){
   };
 
   // Kick it off
-  db.getClient(TAGS[0], stage.clientReceived);
+  db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
@@ -595,8 +631,6 @@ module.exports.update = function(req, res){
       query.updates = sql.fields().addUpdateMap(inputs, query);
       query.$('productId', +req.param('productId') || 0);
 
-      logger.db.debug(TAGS, query.toString());
-
       client.query(query.toString(), query.$values, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -681,7 +715,7 @@ module.exports.update = function(req, res){
             if (tags.length === 0) return done();
 
             var
-              isObj = !!tags[0].id
+              isObj = !!tags.id
 
               // Array of functions to execute in parallel
             , queries = []
@@ -733,7 +767,7 @@ module.exports.update = function(req, res){
   };
 
   // Kick it off
-  db.getClient(TAGS[0], stage.clientReceived);
+  db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
@@ -745,19 +779,14 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-product', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM products WHERE id=$productId');
     query.$('productId', +req.param('productId') || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -772,7 +801,7 @@ module.exports.listCategories = function(req, res) {
   var TAGS = ['list-product-productcategory-relations', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of product\'s categories');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build query
@@ -786,8 +815,6 @@ module.exports.listCategories = function(req, res) {
     // run query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: result.rows });
     });
@@ -805,7 +832,7 @@ module.exports.addCategory = function(req, res) {
 
   var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
@@ -821,12 +848,8 @@ module.exports.addCategory = function(req, res) {
     query.$('productId', inputs.productId);
     query.$('productCategoryId', inputs.productCategoryId);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -840,7 +863,7 @@ module.exports.addCategory = function(req, res) {
 module.exports.delCategory = function(req, res) {
   var TAGS = ['delete-product-productcategory-relation', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // :TODO: make sure the product exists?
@@ -857,13 +880,8 @@ module.exports.delCategory = function(req, res) {
     query.$('productId', inputs.productId);
     query.$('productCategoryId', inputs.productCategoryId);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       res.noContent();
     });
   });
@@ -877,7 +895,7 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var inputs = {
@@ -887,8 +905,6 @@ module.exports.updateFeelings = function(req, res) {
       isWanted  : req.body.isWanted,
       isTried   : req.body.isTried
     };
-    var error = utils.validate(inputs, db.schemas.productsUsersFeelings);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
     // start the transaction
     var tx = new Transaction(client);
@@ -910,21 +926,21 @@ module.exports.updateFeelings = function(req, res) {
         if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
         if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
 
-        // fallback inputs to current feelings and ensure it's a boolean
-        var currentFeelings = result.rows[0];
-        if (typeof inputs.isLiked == 'undefined') { inputs.isLiked = !!currentFeelings.isLiked; }
-        else { inputs.isLiked = toBool(inputs.isLiked); }
-        if (typeof inputs.isWanted == 'undefined') { inputs.isWanted = !!currentFeelings.isWanted; }
-        else { inputs.isWanted = toBool(inputs.isWanted); }
-        if (typeof inputs.isTried == 'undefined') { inputs.isTried = !!currentFeelings.isTried; }
-        else { inputs.isTried = toBool(inputs.isTried); }
-
+        // fallback undefined inputs to current feelings and ensure defined inputs are boolean
+        var currentFeelings = {
+          isLiked:  result.rows[0].isLiked ? true : false,
+          isWanted: result.rows[0].isWanted ? true : false,
+          isTried:  result.rows[0].isTried ? true : false
+        };
+        inputs.isLiked  = (typeof inputs.isLiked == 'undefined') ? currentFeelings.isLiked : !!inputs.isLiked;
+        inputs.isWanted = (typeof inputs.isWanted == 'undefined') ? currentFeelings.isWanted : !!inputs.isWanted;
+        inputs.isTried  = (typeof inputs.isTried == 'undefined') ? currentFeelings.isTried : !!inputs.isTried;
 
         var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
         query.updates = sql.fields();
-        if (inputs.isLiked  != !!currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
-        if (inputs.isWanted != !!currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
-        if (inputs.isTried  != !!currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
+        if (inputs.isLiked  != currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
+        if (inputs.isWanted != currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
+        if (inputs.isTried  != currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
         query.$('id', +req.param('productId') || 0);
 
         if (query.updates.fields.length === 0) {
@@ -948,13 +964,12 @@ module.exports.updateFeelings = function(req, res) {
 
           // create/delete feelings
           var queries = [];
-          if (inputs.isLiked  != !!currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
-          if (inputs.isWanted != !!currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
-          if (inputs.isTried  != !!currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
+          if (inputs.isLiked  != currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
+          if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
+          if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
-            logger.db.debug(TAGS, result);
-
+            
             // end transaction
             tx.commit(function() {
 
@@ -990,7 +1005,3 @@ module.exports.updateFeelings = function(req, res) {
     });
   });
 };
-
-function toBool(v) {
-  return (typeof v == 'boolean') ? v : /1|true/.test(v);
-}

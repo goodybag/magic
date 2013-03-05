@@ -1,9 +1,10 @@
 var
-  db      = require('../db')
-, utils   = require('../lib/utils')
-, logger  = require('../lib/logger')
-, errors  = require('../lib/errors')
-, magic   = require('../lib/magic')
+  db          = require('../db')
+, utils       = require('../lib/utils')
+, logger      = require('../lib/logger')
+, errors      = require('../lib/errors')
+, magic       = require('../lib/magic')
+, Transaction = require('pg-transaction')
 
 , users       = db.tables.users
 , consumers   = db.tables.consumers
@@ -15,6 +16,7 @@ var
 
 module.exports = function(req, res, next){
   // pull out the tapin authorization
+  var TAGS = ['middleware-tapin-auth', req.uuid];
   var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
   if (!authMatch) return next();
   var cardId = authMatch[1];
@@ -29,28 +31,36 @@ module.exports = function(req, res, next){
   // get current session
   var tapinStationUser = req.session.user;
   if (!tapinStationUser) return next();
-  if (tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
+  if (tapinStationUser.groups && tapinStationUser.groups.indexOf('tapin-station') === -1) return next();
 
-  // override the res.json to restore the tapin user after the response is sent
+  // override the response functions
+  // - to restore the tapin user after the response is sent
+  // - to only send noContent if we're not sending back meta data
   var origjsonFn = res.json, origendFn = res.end;
   res.json = function(output) {
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
       output.meta.isFirstTapin = true;
+      output.meta.userId = req.session.user.id;
     }
     req.session.user = tapinStationUser;
     origjsonFn.apply(res, arguments);
   };
-
   res.end = function(){
     req.session.user = tapinStationUser;
     origendFn.apply(res, arguments);
+  };
+  res.noContent = function() {
+    if (isFirstTapin)
+      this.json({});
+    else
+      this.status(204).end();
   };
 
   var tx, client;
   var stage = {
     start: function() {
-      db.getClient(function(error, client_){
+      db.getClient(TAGS, function(error, client_){
         if (error) return stage.dbError(error);
         client = client_;
         tx = new Transaction(client);
@@ -80,23 +90,12 @@ module.exports = function(req, res, next){
       // Flag response to send meta.isFirstTapin = true;
       isFirstTapin = true;
 
-      var query = [
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "cardId") VALUES (null, null, $1) RETURNING id),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'consumer\' RETURNING id),',
-          '"consumer" AS',
-            '(INSERT INTO consumers ("userId") SELECT "user".id FROM "user")',
-        'SELECT "user".id as id FROM "user"'
-      ].join(' ');
-      client.query(query, [cardId], function(error, result) {
-        if (error) return stage.dbError(error);
+      db.procedures.setLogTags(TAGS);
+      db.procedures.registerUser('consumer', { cardId:cardId }, function(error, result) {
+        if (error) return stage.dbError(result); // registerUser gives error details in result
 
-        var user = result.rows[0];
+        var user = result;
         if (!user) return stage.dbError('Unable to create new user');
-        user.groups = ['consumer'];
         return stage.insertTapin(user);
       });
     }
@@ -104,8 +103,8 @@ module.exports = function(req, res, next){
   , insertTapin: function(user) {
       var query = [
         'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime")',
-          'SELECT $1, "tapinStations"."userId", $2, now() FROM "tapinStations"',
-            'WHERE "tapinStations"."userId" = $3',
+          'SELECT $1, "tapinStations".id, $2, now() FROM "tapinStations"',
+            'WHERE "tapinStations".id = $3',
           'RETURNING id'
       ].join(' ');
       client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
@@ -129,7 +128,7 @@ module.exports = function(req, res, next){
             ')',
           'SELECT $1, "businessId", "locationId", $3, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
             'LEFT JOIN "lastVisit" ON true',
-            'WHERE "userId" = $3',
+            'WHERE id = $3',
             'AND (',
               '"lastVisit"."dateTime" <= now() - \'3 hours\'::interval',
               'OR "lastVisit"."dateTime" IS NULL',
@@ -154,13 +153,13 @@ module.exports = function(req, res, next){
     }
 
   , end: function(user) {
-      tx.commit(function() {;
+      tx.commit(function() {
         // First groupIds
         if (!user.groupIds){
           user.groupIds = {};
           for (var i = user.groups.length - 1; i >= 0; i--){
             if (user[user.groups[i] + 'Id'])
-              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id']
+              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id'];
           }
         }
         req.session.user = user;

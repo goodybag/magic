@@ -8,24 +8,26 @@ var
 
 describe('GET /v1/charities', function() {
   it('should respond with a charity listing', function(done) {
-    tu.get('/v1/charities', function(err, results, res) {
-      assert(res.statusCode == 200);
-      var payload = JSON.parse(results);
-      assert(payload.data.length > 0);
-      assert(payload.data[0].id);
-      assert(payload.data[0].name.length > 0);
-      assert(payload.meta.total > 1);
-      done();
+    tu.populate('charities', [{ name:'Charity X' }, { name:'Charity Y' }], function(err, ids) {
+      tu.get('/v1/charities', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(tu.arrHas(payload.data, 'name', 'Charity X'));
+        assert(tu.arrHas(payload.data, 'name', 'Charity Y'));
+        tu.depopulate('charities', ids, done);
+      });
     });
   });
   it('should filter', function(done) {
-    tu.get('/v1/charities?filter=2', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.length === 1);
-      assert(payload.data[0].name.length > 0);
-      done();
+    tu.populate('charities', [{ name:'Charity X' }, { name:'Charity Y' }], function(err, ids) {
+      tu.get('/v1/charities?filter=X', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length === 1);
+        assert(payload.data[0].name == 'Charity X');
+        tu.depopulate('charities', ids, done);
+      });
     });
   });
   it('should paginate', function(done) {
@@ -34,7 +36,6 @@ describe('GET /v1/charities', function() {
       var payload = JSON.parse(results);
       assert(!payload.error);
       assert(payload.data.length === 1);
-      assert(payload.data[0].name.length > 0);
       assert(payload.meta.total > 1);
       done();
     });
@@ -43,13 +44,14 @@ describe('GET /v1/charities', function() {
 
 describe('GET /v1/charities/:id', function() {
   it('should respond with a single charity document', function(done) {
-    var id = 1;
-    tu.get('/v1/charities/' + id, function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(!payload.error);
-      assert(payload.data.id === id);
-      done();
+    tu.populate('charities', [{ name:'Charity 1' }], function(err, ids) {
+      tu.get('/v1/charities/' + ids[0], function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.id === ids[0]);
+        tu.depopulate('charities', ids, done);
+      });
     });
   });
 
@@ -72,16 +74,18 @@ describe('GET /v1/charities/:id', function() {
 
 describe('DEL /v1/charities/:id', function() {
   it('should delete a single charity document', function(done) {
-    tu.loginAsAdmin(function(error, user){
-      // get the current count
-      tu.get('/v1/charities', function(err, results, res) {
-        var total = JSON.parse(results).meta.total;
-        tu.del('/v1/charities/3', function(err, results, res) {
-          assert(res.statusCode == 204)
-          // compare to updated count
-          tu.get('/v1/charities', function(err, results, res) {
-            assert(parseInt(total) - 1 === parseInt(JSON.parse(results).meta.total));
-            tu.logout(done);
+    tu.populate('charities', [{ name:'Charity 1' }], function(err, ids) {
+      tu.loginAsAdmin(function(error, user){
+        // get the current count
+        tu.get('/v1/charities', function(err, results, res) {
+          var total = JSON.parse(results).meta.total;
+          tu.del('/v1/charities/'+ids[0], function(err, results, res) {
+            assert(res.statusCode == 204);
+            // compare to updated count
+            tu.get('/v1/charities', function(err, results, res) {
+              assert(parseInt(total, 10) - 1 === parseInt(JSON.parse(results).meta.total, 10));
+              tu.logout(done);
+            });
           });
         });
       });
@@ -134,59 +138,15 @@ describe('POST /v1/charities', function(){
   });
 });
 
-describe('POST /v1/charities/:id', function(){
-  it('should update a charity\'s name and url', function(done){
-    var charity = {
-      name: "Poophead McGees"
-    , logoUrl: "http://pmcgee.com"
-    };
-
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/charities/' + 1, charity, function(error, results, res){
-        assert(res.statusCode == 204);
-        tu.logout(done);
-      });
-    });
-  });
-
-  it('should fail to update a charity because of an invalid field', function(done){
-    var charity = {
-      logoUrl: 123
-    };
-    tu.loginAsSales(function(error, user){
-      tu.post('/v1/charities/' + 1, charity, function(error, results, res){
-        assert(res.statusCode == 400);
-        tu.logout(done);
-      });
-    });
-  });
-
-  it('should fail because user not allow to update information', function(done){
-    var charity = {
-      name: "Poophead McGees"
-    };
-    tu.loginAsClient(function(error, user){
-      tu.post('/v1/charities/' + 1, charity, function(error, results){
-        assert(!error);
-        assert(JSON.parse(results).error);
-        tu.logout(done);
-      });
-    });
-  });
-});
-
 describe('PATCH /v1/charities/:id', function(){
-  it('should update a charity\'s name and url', function(done){
-    var charity = {
-      name: "Poophead McGees"
-    , logoUrl: "http://pmcgee.com"
-    };
-
-    tu.loginAsSales(function(error, user){
-      tu.patch('/v1/charities/' + 1, charity, function(error, results, res){
-        assert(!error);
-        assert(res.statusCode == 204);
-        tu.logout(done);
+  it('should update a charity\'s name and url', function(done){    
+    tu.populate('charities', [{ name:'Charity 1' }], function(err, ids) {
+      tu.loginAsSales(function(error, user){
+        tu.patch('/v1/charities/'+ids[0], { name: "Poophead McGees", logoUrl: "http://pmcgee.com" }, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 204);
+          tu.logout(function(){ tu.depopulate('charities', ids, done); });
+        });
       });
     });
   });

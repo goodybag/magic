@@ -14,6 +14,9 @@ define(function(require){
       type: 'serial'
     , meta: 'primary key'
     }
+  , pseudoKey: {
+      type: 'text'
+    }
   , userId: {
       type: 'int'
     , meta: 'references users(id) on delete cascade'
@@ -23,7 +26,7 @@ define(function(require){
       type: 'text'
     , sanitizers: { trim:[] }
     }
-  , isMagical: {
+  , isHidden: {
       type: 'bool'
     }
   };

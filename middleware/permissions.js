@@ -94,12 +94,13 @@ module.exports = function(allPerms){
        * @param  {Object} doc         The document to be filtered
        */
     , filterDoc = function(permissions, doc, subKeyPrepend){
-        subKeyPrepend = subKeyPrepend || "";
+        if (typeof doc !== "object") return;
 
+        subKeyPrepend = subKeyPrepend || "";
         for (var key in doc){
           if (permissions.indexOf(subKeyPrepend + key) === -1){
             filtered.push(key);
-            delete doc[key]
+            delete doc[key];
             continue;
           }
 
@@ -164,16 +165,49 @@ module.exports = function(allPerms){
     }
 
     res.json = function(result){
-      // If there's an error or they have access to all, don't filter
-      if (result.error || perms.read === true) return json.apply(res, arguments);
+      // If there's an error, don't filter
+      if (result.error) return json.apply(res, arguments);
+
+      // If they have full read access, just filter out meta fields
+      if (perms.read === true) {
+        if (result.data) {
+          if (utils.isArray(result.data)) {
+            for (var i=result.data.length - 1; i >= 0; i--) {
+              var noDeletions = true;
+
+              for (var k in result.data[i]) {
+                if (k.indexOf('meta') === 0) {
+                  delete result.data[i][k];
+                  noDeletions = false;
+                }
+              }
+              if (noDeletions)
+                break; // save ourself from needless iterations
+            }
+          } else {
+            for (var k in result.data) {
+              if (k.indexOf('meta') === 0)
+                delete result.data[k];
+            }
+          }
+        }
+        return json.apply(res, arguments);
+      }
 
       // Filter all docs
+      var wasEmpty;
       if (utils.isArray(result.data)){
+        wasEmpty = utils.isEmpty(result.data[0]);
         for (var i = result.data.length - 1; i >= 0; i--){
           filterDoc(perms.read, result.data[i]);
         }
-      }else{
+        if (!wasEmpty && utils.isEmpty(result.data[0]))
+          return res.error(errors.auth.DATA_PERMISSIONS);
+      } else {
+        wasEmpty = utils.isEmpty(result.data);
         filterDoc(perms.read, result.data);
+        if (!wasEmpty && utils.isEmpty(result.data))
+          return res.error(errors.auth.DATA_PERMISSIONS);
       }
 
       json.apply(res, arguments);

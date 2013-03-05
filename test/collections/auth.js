@@ -28,6 +28,23 @@ describe('POST /v1/session', function() {
     });
   });
 
+  it('should authenticate user 11135 and return the user object', function(done) {
+    // First need to login
+    var user = {
+      email:    'tapin-station-11135@generated.goodybag.com'
+    , password: 'ef1d3973cba507eb3b19b83a0c49e014'
+    };
+    tu.post('/v1/session', user, function(error, results){
+      // Make sure there were no login errors
+      assert(!error);
+      results = JSON.parse(results);
+      assert(!results.error);
+      assert(results.data.id == 11135);
+      tu.logout(done);
+    });
+  });
+
+
   it('should authenticate a user and return the user object', function(done) {
     // First need to login
     var user = {

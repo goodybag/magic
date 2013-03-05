@@ -26,7 +26,7 @@ module.exports.get = function(req, res){
   logger.routes.debug(TAGS, 'fetching product category ' + req.params.id);
 
   // retrieve pg client
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
@@ -36,9 +36,6 @@ module.exports.get = function(req, res){
     // run data query
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
-
       return res.json({ error: null, data: result.rows[0] || null});
     });
   });
@@ -53,7 +50,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productCategories', req.uuid];
   logger.routes.debug(TAGS, 'fetching product categories');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(*) OVER() AS "metaTotal" FROM "productCategories" {where} {sort} {limit}');
@@ -68,8 +65,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
@@ -97,7 +92,7 @@ module.exports.create = function(req, res){
   var error = utils.validate(inputs, db.schemas.productCategories);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('INSERT INTO "productCategories" ({fields}) VALUES ({values}) RETURNING id');
@@ -106,8 +101,6 @@ module.exports.create = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       return res.json({ error: null, data: result.rows[0] });
     });
@@ -123,7 +116,7 @@ module.exports.del = function(req, res){
   var TAGS = ['del-product-category', req.uuid];
   logger.routes.debug(TAGS, 'deleting product-category ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM "productCategories" WHERE id=$id');
@@ -131,8 +124,6 @@ module.exports.del = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -147,7 +138,7 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-productCategory', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var inputs = req.body;
@@ -161,12 +152,8 @@ module.exports.update = function(req, res){
     query.updates = sql.fields().addUpdateMap(inputs, query);
     query.$('prodCatId', +req.params.id || 0);
 
-    logger.db.debug(TAGS, query.toString());
-
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });

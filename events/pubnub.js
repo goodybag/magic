@@ -58,6 +58,7 @@ module.exports = {
 
 , 'products.update':
   function (productId, updates){
+    db.api.products.setLogTags(['pubnub-products-update-event']);
     db.api.products.findOne(productId, { fields: ['"businessId"'] }, function(err, product){
       if (err) return logger.error(['pubnub-products-update'], err);
       pubnub.publish({
@@ -114,10 +115,10 @@ module.exports = {
   }
 
 , 'locations.productSpotlightUpdate':
-  function (locationId, productId, isSpotlight){
+  function (locationId, productId, inSpotlight){
     pubnub.publish({
         channel:'location-' + locationId + '.productSpotlightUpdate',
-        message:{ productId:+productId, isSpotlight:!!isSpotlight },
+        message:{ productId:+productId, inSpotlight:!!inSpotlight },
         callback:logErrors
     });
   }

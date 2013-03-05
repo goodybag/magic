@@ -5,6 +5,7 @@
 var
   db      = require('../db')
 , utils   = require('../lib/utils')
+, magic   = require('../lib/magic')
 
 , logger  = require('../lib/logger')({ app: 'api', component: 'activity' })
 
@@ -14,38 +15,12 @@ var
 module.exports = {
   'consumers.registered':
   function (consumer){
-    db.api.collections.insert({ userId:consumer.id, name:'All', isMagical:true });
-    db.api.collections.insert({ userId:consumer.id, name:'Fashion', isMagical:true });
-    db.api.collections.insert({ userId:consumer.id, name:'Food', isMagical:true });
-  }
-
-, 'consumers.addToCollection':
-  function (consumerId, collectionId, productId) {
-    var options = {
-      fields: { 'productCategories.id': 'id', 'productCategories.name': 'name' },
-      $innerJoin: { productCategories: { "productCategories.id": "productsProductCategories.productCategoryId" }}
-    };
-    db.api.productsProductCategories.find({ productId: productId }, options, function(error, result) {
-      if (error) return logger.error(TAGS, error);
-
-      add('All');
-      result.forEach(function(row) {
-        if (row.name.toLowerCase() == 'fashion')
-          add('Fashion');
-        if (row.name.toLowerCase() == 'food')
-          add('Food');
-      });
-    });
-
-    var add = function(name) {
-      db.api.collections.findOne({ isMagical:true, name:name }, function(error, result) {
-        if (error) return logger.error(TAGS, error);
-        db.api.productsCollections.insert({ collectionId:result.id, productId:productId, createdAt:'now()' }, function(error, result) {
-          if (error) return logger.error(TAGS, error);
-          magic.emit('debug.productAutomagickedToCollection', { collectionId:result.id, collectionName:name, productId:productId, orgCollectionId:collectionId, consumerId:consumerId });
-        });
-      });
-    };
-    
+    db.api.collections.setLogTags(['tasks-consumers-registered-event', 'consumer-'+consumer.id]);
+    db.api.collections.insert({ userId:consumer.id, name:'Uncategorized', isHidden:true, pseudoKey:'uncategorized' });
+    db.api.collections.setLogTags(['tasks-consumers-registered-event', 'consumer-'+consumer.id]);
+    db.api.collections.insert({ userId:consumer.id, name:'Fashion', isHidden:false, pseudoKey:'fashion' });
+    db.api.collections.setLogTags(['tasks-consumers-registered-event', 'consumer-'+consumer.id]);
+    db.api.collections.insert({ userId:consumer.id, name:'Food', isHidden:false, pseudoKey:'food' });
+    magic.emit('debug.newConsumerCollectionsCreated', consumer);
   }
 };

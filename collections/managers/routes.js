@@ -26,12 +26,12 @@ module.exports.get = function(req, res){
   var TAGS = ['get-managers', req.uuid];
   logger.routes.debug(TAGS, 'fetching manager ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client) {
+  db.getClient(TAGS, function(error, client) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query([
       'SELECT {fields} FROM users',
-        'LEFT JOIN "managers" ON "managers"."userId" = users.id',
+        'LEFT JOIN "managers" ON "managers".id = users.id',
         'WHERE users.id = $id'
     ]);
     query.fields = sql.fields().add('managers.*');
@@ -39,7 +39,6 @@ module.exports.get = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rowCount == 1) {
         return res.json({ error: null, data: result.rows[0] });
@@ -56,16 +55,16 @@ module.exports.get = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.list = function(req, res){
-  var TAGS = ['list-users', req.uuid];
-  logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
+  var TAGS = ['list-managers', req.uuid];
+  logger.routes.debug(TAGS, 'fetching managers');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM managers',
-        'INNER JOIN users ON managers."userId" = users.id',
+        'INNER JOIN users ON managers.id = users.id',
         '{where} {limit}'
     ]);
     query.fields = sql.fields().add('managers.*');
@@ -77,12 +76,21 @@ module.exports.list = function(req, res){
       query.$('emailFilter', '%'+req.param('filter')+'%');
     }
 
+    if (req.param('businessId')) {
+      query.where.and('managers."businessId" = $businessId');
+      query.$('businessId', req.param('businessId'));
+    }
+
+    if (req.param('locationId')) {
+      query.where.and('managers."locationId" = $locationId');
+      query.$('locationId', req.param('locationId'));
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
 
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
@@ -97,74 +105,27 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-managers', req.uuid];
-  logger.routes.debug(TAGS, 'creating manager ' + req.params.id);
+  logger.routes.debug(TAGS, 'creating manager');
 
-  utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
+  db.procedures.setLogTags(TAGS);
+  db.procedures.registerUser('manager', req.body, function(error, result){
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
 
-    db.getClient(TAGS[0], function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var query = sql.query([
-        'WITH',
-          '"user" AS',
-            '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
-              'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId',
-                'WHERE NOT EXISTS (SELECT 1 FROM users WHERE {uidField} = $uid)',
-                'RETURNING id),',
-          '"userGroup" AS',
-            '(INSERT INTO "usersGroups" ("userId", "groupId")',
-              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = \'manager\' RETURNING id),',
-          '"manager" AS',
-            '(INSERT INTO "managers" ("userId", "businessId", "locationId")',
-              'SELECT "user".id, $businessId, $locationId FROM "user")',
-        'SELECT "user".id as "userId" FROM "user"'
-      ]);
-      if (req.body.email) {
-        query.uidField = 'email';
-        query.$('uid', req.body.email);
-      } else {
-        query.uidField = '"singlyId"';
-        query.$('uid', req.body.singlyId);
-      }
-      var timestamp = +(new Date());
-      query.$('email', req.body.email || 'manager_'+timestamp+'@goodybag.com');
-      query.$('password', encryptedPassword);
-      query.$('salt', passwordSalt);
-      query.$('singlyId', req.body.singlyId);
-      query.$('singlyAccessToken', req.body.singlyAccessToken);
-      query.$('cardId', req.body.cardId || '');
-      query.$('businessId', req.body.businessId);
-      query.$('locationId', req.body.locationId);
-
-      client.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        // did the insert occur?
-        if (result.rowCount === 0) {
-          // email must have already existed
-          if (req.body.email) return res.error(errors.registration.EMAIL_REGISTERED);
-
-          // Access token already existed - for now, send back generic error
-          // Because they should have used POST /oauth to create/auth
-          return res.error(errors.internal.DB_FAILURE);
-        }
-
-        return res.json({ error: null, data: result.rows[0] });
-      });
-    });
+    res.json({ error: null, data: result });
+    magic.emit('managers.registered', result);
   });
 };
 
 /**
- * Delete user
+ * Delete manager
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
 module.exports.del = function(req, res){
-  var TAGS = ['del-user', req.uuid];
-  logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
+  var TAGS = ['del-manager', req.uuid];
+  logger.routes.debug(TAGS, 'deleting manager ' + req.params.id);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('DELETE FROM users WHERE users.id = $id');
@@ -173,8 +134,6 @@ module.exports.del = function(req, res){
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (result.rowCount === 0) return res.status(404).end();
-
-      logger.db.debug(TAGS, result);
 
       res.noContent();
     });
@@ -187,28 +146,16 @@ module.exports.del = function(req, res){
  * @param  {Object} res [description]
  */
 module.exports.update = function(req, res){
-  var TAGS = ['update-manager', req.uuid];
-  db.getClient(TAGS[0], function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+var TAGS = ['update-manager', req.uuid];
+  logger.routes.debug(TAGS, 'updating manager ' + req.params.id);
 
-    var query = sql.query('UPDATE managers SET {updates} WHERE "userId"=$id');
-    query.updates = sql.fields().addUpdateMap(req.body, query);
-    query.$('id', req.params.id);
+  var userId = req.param('id');
+  if (req.param('id') == 'session')
+    userId = req.session.user.id;
 
-    logger.db.debug(TAGS, query.toString());
-
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
-
-      // did the update occur?
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      // done
-      res.noContent();
-    });
+  db.procedures.setLogTags(TAGS);
+  db.procedures.updateUser('manager', userId, req.body, function(error, result) {
+    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+    res.noContent();
   });
 };

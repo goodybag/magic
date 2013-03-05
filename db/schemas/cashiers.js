@@ -10,7 +10,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 
 define(function(require){
   var consumers = {
-    userId: {
+    id: {
       type: 'int'
     , meta: 'primary key references users(id) on delete cascade'
     , validators: { isInt:[] }

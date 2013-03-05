@@ -33,10 +33,10 @@ define(function(require){
       table   : 'businessTags'
     , columns : '("businessId")'
     }
-  , cashiers_userId_idx: {
+  , cashiers_id_idx: {
       table   : 'cashiers'
     , type    : 'UNIQUE'
-    , columns : '("userId")'
+    , columns : '(id)'
     }
   , collections_id_idx: {
       table   : 'collections'
@@ -47,10 +47,10 @@ define(function(require){
       table   : 'collections'
     , columns : '("userId")'
     }
-  , consumers_userId_idx: {
+  , consumers_id_idx: {
       table   : 'consumers'
     , type    : 'UNIQUE'
-    , columns : '("userId")'
+    , columns : '(id)'
     }
   , events_id_idx: {
       table   : 'events'
@@ -72,10 +72,10 @@ define(function(require){
     , using   : 'gist'
     , columns : '(ll_to_earth(lat, lon))'
     }
-  , managers_userId_idx: {
+  , managers_id_idx: {
       table   : 'managers'
     , type    : 'UNIQUE'
-    , columns : '("userId")'
+    , columns : '(id)'
     }
   , photos_id_idx: {
       table   : 'photos'
@@ -104,6 +104,11 @@ define(function(require){
   , productLocations_productId_idx: {
       table   : 'productLocations'
     , columns : '("productId")'
+    }
+  , productLocations_productId_idx: {
+      table   : 'productLocations'
+    , using   : 'gist'
+    , columns : '(ll_to_earth(lat, lon))'
     }
   , products_id_idx: {
       table   : 'products'
@@ -181,7 +186,7 @@ define(function(require){
   , tapinStations_id_idx: {
       table   : 'tapinStations'
     , type    : 'UNIQUE'
-    , columns : '("userId")'
+    , columns : '(id)'
     }
   , users_id_idx: {
       table   : 'users'

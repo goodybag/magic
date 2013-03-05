@@ -29,7 +29,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-redemptions', req.uuid];
   logger.routes.debug(TAGS, 'fetching redemptions');
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
@@ -37,8 +37,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, dataResult);
-
       var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
       return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
     });
@@ -58,7 +56,7 @@ module.exports.create = function(req, res){
   var tapinStationId = req.body.tapinStationId;
   var businessId = null, locationId = null;
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     // Ensure user is registered
@@ -69,7 +67,7 @@ module.exports.create = function(req, res){
       if (result.rows.length === 0)
         return res.error(errors.input.INVALID_USERS), logger.routes.error(TAGS, errors.input.INVALID_USERS);
 
-      if (!(result.rows[0].email && result.rows[0].password) && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
+      if (!result.rows[0].email && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
         return res.error(errors.registration.NOT_REGISTERED), logger.routes.error(TAGS, errors.registration.NOT_REGISTERED);
 
       // start transaction
@@ -78,12 +76,13 @@ module.exports.create = function(req, res){
         if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
 
         // get business
-        client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE "userId"=$1', [tapinStationId], function(error, result) {
+        client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
           businessId = result.rows[0].businessId;
           locationId = result.rows[0].locationId;
 
           // update punches
+          db.procedures.setLogTags(TAGS);
           db.procedures.updateUserLoyaltyStats(client, tx, userId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
             if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 

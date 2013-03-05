@@ -18,7 +18,7 @@ describe('GET /v1/managers', function() {
       });
     });
   });
-  it('should filter', function(done) {
+  it('should filter by email', function(done) {
     tu.loginAsAdmin(function(){
       tu.get('/v1/managers?filter=some_manager', function(err, results, res) {
         assert(!err);
@@ -26,6 +26,28 @@ describe('GET /v1/managers', function() {
         assert(!payload.error);
         assert(payload.data.length >= 1);
 
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by business', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/managers?businessId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'businessId', 1));
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by location', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/managers?locationId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'locationId', 1));
         tu.logout(done);
       });
     });
@@ -53,7 +75,7 @@ describe('GET /v1/managers/:id', function() {
         results = JSON.parse(results);
 
         assert(!results.error);
-        assert(results.data.userId === 11110);
+        assert(results.data.id === 11110);
 
         tu.logout(done);
       });
@@ -91,7 +113,7 @@ describe('POST /v1/managers', function() {
       var manager = {
         email:      "manager_dude_99@test.com"
       , password:   "password"
-      , cardId:     "123456-XXZ"
+      , cardId:     "123555-XXZ"
       , businessId: 1
       , locationId: 1
       };
@@ -100,7 +122,7 @@ describe('POST /v1/managers', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId >= 0);
+        assert(results.data.id >= 0);
 
         tu.logout(done);
       });
@@ -165,6 +187,27 @@ describe('PATCH /v1/managers/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.locationId === 4);
+          tu.logout(function() {
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  it('should accept a null locationId', function(done) {
+    var manager = {
+      locationId: null
+    };
+    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
+      tu.patch('/v1/managers/11110', manager, function(error, results, res) {
+        assert(res.statusCode == 204);
+
+        tu.get('/v1/managers/11110', function(error, results) {
+          assert(!error);
+          results = JSON.parse(results);
+          assert(!results.error);
+          assert(results.data.locationId === null);
           tu.logout(function() {
             done();
           });

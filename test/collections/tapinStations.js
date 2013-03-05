@@ -18,7 +18,7 @@ describe('GET /v1/tapin-stations', function() {
       });
     });
   });
-  it('should filter', function(done) {
+  it('should filter by email', function(done) {
     tu.loginAsAdmin(function(){
       tu.get('/v1/tapin-stations?filter=tapin_station', function(err, results, res) {
         assert(!err);
@@ -26,6 +26,28 @@ describe('GET /v1/tapin-stations', function() {
         assert(!payload.error);
         assert(payload.data.length >= 1);
 
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by business', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations?businessId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'businessId', 1));
+        tu.logout(done);
+      });
+    });
+  });
+  it('should filter by location', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations?locationId=1', function(err, results, res) {
+        assert(res.statusCode == 200);
+        var payload = JSON.parse(results);
+        assert(payload.data.length >= 1);
+        assert(tu.arrHasOnly(payload.data, 'locationId', 1));
         tu.logout(done);
       });
     });
@@ -52,7 +74,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId == 11130);
+        assert(results.data.id == 11130);
 
         tu.logout(done);
       });
@@ -98,7 +120,7 @@ describe('POST /v1/tapin-stations', function() {
         assert(!error);
         results = JSON.parse(results);
         assert(!results.error);
-        assert(results.data.userId >= 0);
+        assert(results.data.id >= 0);
 
         tu.logout(done);
       });
@@ -133,9 +155,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
     };
     tu.loginAsAdmin(function(error){
       tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
-        assert(!error);
-        results = JSON.parse(results);
-        assert(!results.error);
+        assert(res.statusCode == 204);
 
         tu.get('/v1/tapin-stations/11130', function(error, results) {
           assert(!error);

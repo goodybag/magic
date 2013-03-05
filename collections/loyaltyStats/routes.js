@@ -4,10 +4,11 @@
  */
 
 var
-  db      = require('../../db')
-, sql     = require('../../lib/sql')
-, utils   = require('../../lib/utils')
-, errors  = require('../../lib/errors')
+  db          = require('../../db')
+, sql         = require('../../lib/sql')
+, utils       = require('../../lib/utils')
+, errors      = require('../../lib/errors')
+, Transaction = require('pg-transaction')
 
 , logger  = {}
 
@@ -29,6 +30,7 @@ module.exports.get = function(req, res){
 
   if (!req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED);
+  db.api.userLoyaltyStats.setLogTags(TAGS);
   db.api.userLoyaltyStats.findOne(req.param('loyaltyId'), function(error, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
@@ -48,7 +50,7 @@ module.exports.list = function(req, res){
   if (!req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED);
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // get stats
@@ -77,7 +79,6 @@ module.exports.list = function(req, res){
 
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      logger.db.debug(TAGS, result);
 
       if (result.rows.length > 0)
         return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows });
@@ -123,10 +124,12 @@ module.exports.list = function(req, res){
 
         utils.parallel({
           stats: function(done){
+            db.api.userLoyaltyStats.setLogTags(TAGS);
             db.api.userLoyaltyStats.insert(stat, done);
           }
 
         , settings: function(done){
+            db.api.businessLoyaltySettings.setLogTags(TAGS);
             db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
               done(e, r); // find passes back 3 params, which messes with the parallel fn results
             });
@@ -157,7 +160,7 @@ module.exports.list = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-loyaltystats', req.uuid];
 
-  db.getClient(TAGS[0], function(error, client){
+  db.getClient(TAGS, function(error, client){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var deltaPunches = req.body.deltaPunches;
@@ -180,8 +183,7 @@ module.exports.update = function(req, res){
       args.push(deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        tx.commit();
-        res.noContent();
+        tx.commit(function() { res.noContent(); });
 
         magic.emit('loyalty.punch', deltaPunches, userId, businessId, req.body.locationId, req.session.user.id);
         if (hasBecomeElite)
@@ -192,6 +194,7 @@ module.exports.update = function(req, res){
       });
 
       // update punches
+      db.procedures.setLogTags(TAGS);
       updateFn.apply({}, args);
     });
   });

@@ -123,7 +123,7 @@ describe('GET /v1/loyalty/businesses/:businessId', function(){
         assert(payload.data.numPunches == 5);
         assert(payload.data.totalPunches == 23);
         assert(payload.data.visitCount == 40);
-        assert(payload.data.reward == 'Chicken');
+        assert(payload.data.reward == 'Burrito');
         assert(payload.data.photoUrl == 'http://placekitten.com/200/300');
 
         tu.logout(done);
