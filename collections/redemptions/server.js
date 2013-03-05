@@ -32,7 +32,7 @@ server.post(
 , middleware.profile('apply groups redemptions locationEmployee')
 , middleware.applyGroups(applyGroups.locationEmployee)
 , middleware.profile('auth allow')
-, middleware.auth.allow('locationEmployee')
+, middleware.auth.allow('admin', 'locationEmployee')
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('create redemption handler')

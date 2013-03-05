@@ -33,6 +33,22 @@ describe('POST /v1/redemptions', function() {
     });
   });
 
+  it('should allow the redemptions from admin cashier at multiple locations', function(done) {
+    tu.login({ email:'cashier_redeem_admin@gmail.com', password:'password' }, function() {
+      tu.post('/v1/redemptions', { deltaPunches:200, userId:12, tapinStationId:11133 }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 204);
+
+        tu.post('/v1/redemptions', { deltaPunches:200, userId:12, tapinStationId:11135 }, function(err, payload, res) {
+          assert(!err);
+          assert(res.statusCode == 204);
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
   it('should not allow the redemption if the consumer is only partially registered', function(done) {
     tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
       tu.post('/v1/redemptions', { deltaPunches:2, userId:20, tapinStationId:11133 }, function(err, payload, res) {

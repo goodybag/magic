@@ -22,7 +22,7 @@ describe('GET /v1/users', function() {
       assert(!err);
       var payload = JSON.parse(results);
       assert(!payload.error);
-      assert(payload.data.length === 1);
+      assert(payload.data.length >= 1);
       done();
     });
   });
