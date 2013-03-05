@@ -100,6 +100,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('111
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '123456-XYY');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11126', 'cashier_at_deleted_location@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '123456-XYY');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11127', 'cashier_redeem_admin@gmail.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11137', 'cashier-11137@generated.goodybag.com', '$2a$10$wlk6VGTbVTCIq6ejzbauReAKGrmTmYjbRwx9PLMiBXOTZGPzwGoVy', '$2a$10$wlk6VGTbVTCIq6ejzbauRe', '255777-YRM');
 
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11130', 'tapin_station_0@goodybag.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11131', 'tapin_station_1@goodybag.com', '$2a$10$kZ7XRgT28fj/IXxyO9WF7eM.eRtf1p7zUWGeIHJIpSpkcyvB4LFTq', '$2a$10$kZ7XRgT28fj/IXxyO9WF7e');
@@ -151,6 +152,7 @@ INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11124', '1', '4
 INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11125', '2', '2');
 INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11126', '1', '5');
 INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11127', '1', '5');
+INSERT INTO "cashiers" (id, "businessId", "locationId") VALUES ('11137', '39', '51');
 COMMIT;
 
 -- TAPINSTATIONS
@@ -243,6 +245,7 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11122', '11122', '1
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11123', '11123', '11111');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11124', '11124', '11111');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11125', '11125', '11111');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11137', '11137', '11111');
 
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11126', '11127', '1');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11127', '11127', '11111');
