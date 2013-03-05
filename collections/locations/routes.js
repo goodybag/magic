@@ -49,7 +49,12 @@ module.exports.list = function(req, res){
     query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
     query.sort   = sql.sort(req.query.sort || '+name');
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+    // :TEMPORARY: the mobile app has a bug that requires us to turn off pagination
+    if (/iPhone/.test(req.headers['user-agent']))
+      query.limit = sql.limit(25, 0);
+    else
+      query.limit = sql.limit(req.query.limit, req.query.offset);
 
     // Show all or just enabled locatins
     if (!req.query.all){
