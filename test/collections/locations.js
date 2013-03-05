@@ -59,6 +59,19 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should TEMPORARILY ignore pagination when user agent indicates iphones', function(done) {
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:true }], function() {
+        tu.httpRequest({ path:'/v1/locations?offset=1&limit=1', headers: { 'user-agent': 'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C25 Safari/419.3' } }, null, function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.length > 1);
+          done();
+        });
+      });
+    });
+  });
+
   it('should filter by lat/lon/range', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
       tu.populate('locations', [{ name:'First', businessId:bids[0], lat:8, lon:8, isEnabled:true }, { name:'Second', businessId:bids[0], lat:8.001, lon:8.001, isEnabled:true }], function() {
