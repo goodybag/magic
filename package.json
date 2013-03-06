@@ -45,13 +45,14 @@
 
     "singly": "0.3.x",
 
-    "clouseau": "https://github.com/goodybag/clouseau/tarball/master"
+    "clouseau": "https://github.com/goodybag/clouseau/tarball/master",
+    
+    "mongode": "latest"
   },
   "devDependencies": {
     "better-assert": "1.0.x",
     "sinon": "1.5.x",
-    "mocha": "1.7.x",
-    "mongode": "latest"
+    "mocha": "1.7.x"
   },
   "scripts": {
     "test": "mocha test/test.js"
