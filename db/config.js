@@ -48,7 +48,7 @@ var config = {
   , 'events'
   , 'activity'
   ]
-, fixtureFile: 'staging'
+, fixtureFile: 'test'
 };
 
 module.exports = config;
