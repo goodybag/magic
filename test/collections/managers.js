@@ -178,7 +178,7 @@ describe('PATCH /v1/managers/:id', function() {
     var manager = {
       locationId: 4
     };
-    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
+    tu.loginAsAdmin(function(error){
       tu.patch('/v1/managers/11110', manager, function(error, results, res) {
         assert(res.statusCode == 204);
 
@@ -199,7 +199,7 @@ describe('PATCH /v1/managers/:id', function() {
     var manager = {
       locationId: null
     };
-    tu.login({ email: 'some_manager@gmail.com', password: 'password' }, function(error){
+    tu.loginAsAdmin(function(error){
       tu.patch('/v1/managers/11110', manager, function(error, results, res) {
         assert(res.statusCode == 204);
 

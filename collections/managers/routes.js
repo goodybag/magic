@@ -34,7 +34,7 @@ module.exports.get = function(req, res){
         'LEFT JOIN "managers" ON "managers".id = users.id',
         'WHERE users.id = $id'
     ]);
-    query.fields = sql.fields().add('managers.*');
+    query.fields = sql.fields().add('managers.*, users.*');
     query.$('id', +req.param('id') || 0);
 
     client.query(query.toString(), query.$values, function(error, result){
@@ -67,7 +67,7 @@ module.exports.list = function(req, res){
         'INNER JOIN users ON managers.id = users.id',
         '{where} {limit}'
     ]);
-    query.fields = sql.fields().add('managers.*');
+    query.fields = sql.fields().add('managers.*, users.*');
     query.where  = sql.where();
     query.limit  = sql.limit(req.query.limit, req.query.offset);
 

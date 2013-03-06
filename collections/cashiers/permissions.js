@@ -1,3 +1,14 @@
+var all = [
+  'id'
+, 'email'
+, 'singlyId'
+, 'singlyAccessToken'
+, 'groups'
+, 'cardId'
+, 'locationId'
+, 'businessId'
+];
+
 module.exports = {
   world: {
     read:   []
@@ -8,19 +19,19 @@ module.exports = {
 , default: {}
 
 , owner: {
-    read:   true
+    read:   all
   , update: ['email', 'password', 'singlyId', 'singlyAccessToken']
   }
 
 , sales: {
-    read:   true
-  , create: true
-  , update: true
+    read:   all
+  , create: all.concat('password')
+  , update: all.concat('password')
   }
 
 , admin: {
-    read:   true
-  , create: true
-  , update: true
+    read:   all
+  , create: all.concat('password')
+  , update: all.concat('password')
   }
 };
