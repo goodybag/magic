@@ -51,9 +51,12 @@ module.exports.list = function(req, res){
     query.sort   = sql.sort(req.query.sort || '+name');
 
     // :TEMPORARY: the mobile app has a bug that requires us to turn off pagination
-    if (/iPhone/.test(req.headers['user-agent']))
-      query.limit = sql.limit(25, 0);
-    else
+    if (/iPhone/.test(req.headers['user-agent']) || true) {
+      req.query.limit = 25 - (+req.query.offset||0);
+      if (req.query.limit <= 0)
+        return res.json({ error: null, data: [], meta: { total:0 } });
+      query.limit = sql.limit(req.query.limit, 0);
+    } else
       query.limit = sql.limit(req.query.limit, req.query.offset);
 
     // Show all or just enabled locatins
