@@ -16,7 +16,7 @@ define(function(require){
     }
   , tapinId: {
       type: 'int'
-    , meta: 'references tapins(id)'
+    , meta: 'references tapins(id) on delete set null'
     , validators: { isInt:[] }
     }
   , businessId: {

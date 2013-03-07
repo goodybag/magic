@@ -16,7 +16,7 @@ define(function(require){
     }
   , charityId: {
       type: 'int'
-    , meta: 'references charities(id)'
+    , meta: 'references charities(id) on delete set null'
     , validators: { isInt:[] }
     }
   , name: {

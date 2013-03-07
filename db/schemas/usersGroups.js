@@ -16,10 +16,12 @@ define(function(require){
     }
   , userId: {
       type: 'int'
+    , meta: 'references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , groupId: {
       type: 'int'
+    , meta: 'references groups(id) on delete cascade'
     , validators: { isInt:[] }
     }
   };
