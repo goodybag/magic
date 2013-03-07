@@ -190,55 +190,35 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   extension = extension || 'consumers';
 
-  var query = sql.query('select {fields} from users, "' + extension + '" {where}');
-
-  if (id){
-    query.where = sql.where();
-    query.where.and('users.id != $id');
-    query.where.and('"' + extension + '".id != $id');
-    query.$('id', id);
-  }
-
-  query.fields = sql.fields();
+  var query = sql.query('SELECT {subqueries}');
+  query.subqueries = sql.fields();
 
   if (inputs.email) {
-    query.fields.add(
-      'bool_or(case when users.email = $email then true else false end) as email'
-    );
+    query.subqueries.add('(SELECT id FROM users WHERE email = $email LIMIT 1) AS email');
     query.$('email', inputs.email);
   }
 
-  // If they're doing a user create, they're not intending on updating
-  // an existing oauth user
   if (inputs.singlyId) {
-    query.fields.add(
-      'bool_or(case when users."singlyId" = $singlyId then true else false end) as "singlyId"'
-    );
+    query.subqueries.add('(SELECT id FROM users WHERE "singlyId" = $singlyId LIMIT 1) AS "singlyId"');
     query.$('singlyId', inputs.singlyId);
   }
 
   if (inputs.singlyAccessToken) {
-    query.fields.add(
-      'bool_or(case when users."singlyAccessToken" = $singlyAccessToken then true else false end) as "singlyAccessToken"'
-    );
+    query.subqueries.add('(SELECT id FROM users WHERE "singlyAccessToken" = $singlyAccessToken LIMIT 1) AS "singlyAccessToken"');
     query.$('singlyAccessToken', inputs.singlyAccessToken);
   }
 
-  if (inputs.screenName) {
-    query.fields.add(
-      'bool_or(case when "' + extension + '"."screenName" = $screenName then true else false end) as "screenName"'
-    );
-    query.$('screenName', inputs.screenName);
-  }
-
   if (inputs.cardId) {
-    query.fields.add(
-      'bool_or(case when users."cardId" = $cardId  then true else false end) as "cardId"'
-    );
+    query.subqueries.add('(SELECT id FROM users WHERE "cardId" = $cardId LIMIT 1) AS "cardId"');
     query.$('cardId', inputs.cardId);
   }
 
-  if (query.fields.fields.length === 0) return callback();
+  if (inputs.screenName) {
+    query.subqueries.add('(SELECT id FROM "'+extension+'" WHERE "screenName" = $screenName LIMIT 1) AS "screenName"');
+    query.$('screenName', inputs.screenName);
+  }
+
+  if (query.subqueries.fields.length === 0) return callback();
 
   db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
@@ -248,15 +228,15 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
       if (result.rows.length > 0){
         result = result.rows[0];
 
-        if (result.email && inputs.email)
+        if (result.email && inputs.email && result.email != id)
           return callback(errors.registration.EMAIL_REGISTERED);
-        if (result.screenName && inputs.screenName)
+        if (result.screenName && inputs.screenName && result.screenName != id)
           return callback(errors.registration.SCREENNAME_TAKEN);
-        if (result.cardId && inputs.cardId)
+        if (result.cardId && inputs.cardId && result.cardId != id)
           return callback(errors.registration.CARD_ID_TAKEN);
-        if (result.singlyId && inputs.singlyId)
+        if (result.singlyId && inputs.singlyId && result.singlyId != id)
           return callback(errors.registration.SINGLY_ID_TAKEN);
-        if (result.singlyAccessToken && inputs.singlyAccessToken)
+        if (result.singlyAccessToken && inputs.singlyAccessToken && result.singlyAccessToken != id)
           return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
       }
 
