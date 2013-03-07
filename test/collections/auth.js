@@ -32,7 +32,7 @@ describe('POST /v1/session', function() {
     // First need to login
     var user = {
       email:    'tapin-station-11135@generated.goodybag.com'
-    , password: 'ef1d3973cba507eb3b19b83a0c49e014'
+    , password: 'password'
     };
     tu.post('/v1/session', user, function(error, results){
       // Make sure there were no login errors
