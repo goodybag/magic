@@ -8,8 +8,8 @@
 var
   mongo       = require('mongode')
 , pg          = require('pg')
-, db          = require('./index')
-, config      = require('../config')
+, db          = require('../index')
+, config      = require('../../config')
 , Transaction = require('pg-transaction')
 
 , startOffset = +process.argv[2] || 0
@@ -152,7 +152,7 @@ var
                   var businessId = mapBusinessId(stat.org.id);
 
                   if (!businessId) {
-                    console.log('WARNING: Failed to map old business id to DB: '+businessId);
+                    console.log('WARNING: Failed to map old business id to DB: '+stat.org.id);
                     return;
                   }
 
