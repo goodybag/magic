@@ -16,7 +16,7 @@ define(function(require){
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses on delete cascade'
+    , meta: 'references businesses(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , reward: {
