@@ -16,22 +16,22 @@ define(function(require){
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses'
+    , meta: 'references businesses(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , userId: {
       type: 'int'
-    , meta: 'references users on delete cascade'
+    , meta: 'references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , cashierUserId: {
       type: 'int'
-    , meta: 'references users'
+    , meta: 'references users(id) on delete set null'
     , validators: { isInt:[] }
     }
   , locationId: {
       type: 'int'
-    , meta: 'references locations'
+    , meta: 'references locations(id) on delete set null'
     , validators: { isInt:[] }
     }
   , tapinStationId: {

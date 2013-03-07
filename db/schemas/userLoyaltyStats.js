@@ -16,12 +16,12 @@ define(function(require){
     }
   , userId: {
       type: 'int'
-    , meta: 'references users on delete cascade'
+    , meta: 'references users(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , businessId: {
       type: 'int'
-    , meta: 'references businesses on delete cascade'
+    , meta: 'references businesses(id) on delete cascade'
     , validators: { isInt:[] }
     }
   , numPunches: {
