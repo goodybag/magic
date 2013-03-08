@@ -1,6 +1,8 @@
+var cluster = require('cluster');
+var workerName = (cluster.isMaster) ? 'master' : ('worker '+cluster.worker.id);
 require('nodetime').profile({
   accountKey: '3875155a1c6bdda474c47e977068303d5c008006',
-  appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] @'+require('os').hostname()
+  appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] @'+require('os').hostname()+' '+workerName
 });
 
 /**
@@ -9,8 +11,7 @@ require('nodetime').profile({
 
 var
 // Built-in
-  cluster = require('cluster')
-, os = require('os')
+  os = require('os')
 , http = require('http')
 , net = require('net')
 , repl = require('repl')
