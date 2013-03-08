@@ -45,7 +45,9 @@
 
     "singly": "0.3.x",
 
-    "clouseau": "https://github.com/goodybag/clouseau/tarball/master"
+    "clouseau": "https://github.com/goodybag/clouseau/tarball/master",
+    
+    "mongode": "latest"
   },
   "devDependencies": {
     "better-assert": "1.0.x",

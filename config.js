@@ -88,7 +88,7 @@ var config = {
   , baseUrl: 'http://localhost:3000'
 
   , outputActivePoolIds: false
-  , emailEnabled: true
+  , emailEnabled: false
   }
 
 , test: {
