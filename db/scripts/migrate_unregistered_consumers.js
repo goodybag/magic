@@ -39,7 +39,6 @@ var
       mongoDB.unclaimedbarcodestatistics.distinct('barcodeId', function(error, unclaimedCardids) {
         if (error) return onError(error, 'on consumers find for mongo');
         unclaimedCardids = unclaimedCardids.slice(startOffset, startOffset+batchSize);
-        console.log(unclaimedCardids); throw "";
         var numUnclaimedCardids=unclaimedCardids.length;
 
         var handleNextCard = function() {
