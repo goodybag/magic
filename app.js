@@ -1,10 +1,12 @@
 var cluster = require('cluster');
 var workerName = (cluster.isMaster) ? 'master' : ('worker '+cluster.worker.id);
-require('nodetime').profile({
-  accountKey: '3875155a1c6bdda474c47e977068303d5c008006',
-  appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] '+workerName,
-  features:{ transactionProfiler: false } // TRANSACTION PROFILER MUST NOT BE ENABLED ON PROD!!! it leaks request headers
-});
+if(process.env.NODETIME_ACCOUNT_KEY) {
+  require('nodetime').profile({
+    accountKey: process.env.NODETIME_ACCOUNT_KEY,
+    appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] @'+require('os').hostname()+' '+workerName,
+    features:{ transactionProfiler: false } // TRANSACTION PROFILER MUST NOT BE ENABLED ON PROD!!! it leaks request headers
+  });
+}
 
 /**
  * Module dependencies
