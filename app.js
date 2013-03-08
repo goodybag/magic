@@ -1,3 +1,7 @@
+require('nodetime').profile({
+  accountKey: '3875155a1c6bdda474c47e977068303d5c008006',
+  appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] @'+require('os').hostname()
+});
 
 /**
  * Module dependencies
