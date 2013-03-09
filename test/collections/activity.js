@@ -5,31 +5,31 @@ var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
 var magic = require('../../lib/magic');
 
-describe('Consumers Activity: ', function() {
+// describe('Consumers Activity: ', function() {
 
-  it('store an event when a consumer raises funds for charity', function(done) {
-    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      // Just like a product from a tablet and it will trigger a visit
-      tu.tapinAuthRequest('POST', '/v1/products/2222/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
-        assert(!error);
-        assert(res.statusCode === 204);
-      });
-      magic.once('debug.visitActivityLogged', function() {
-        tu.get('/v1/activity', function(error, results) {
-          assert(!error);
-          results = JSON.parse(results);
-          assert(!results.error);
-          assert(results.data.length > 0);
-          assert(results.data.filter(function(d){
-            return d.type === "donation" && d.userId === 18;
-          }).length === 1);
+//   it('store an event when a consumer raises funds for charity', function(done) {
+//     tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+//       // Just like a product from a tablet and it will trigger a visit
+//       tu.tapinAuthRequest('POST', '/v1/products/2222/feelings', '778899-CBC', { isLiked:true }, function(error, results, res) {
+//         assert(!error);
+//         assert(res.statusCode === 204);
+//       });
+//       magic.once('debug.visitActivityLogged', function() {
+//         tu.get('/v1/activity', function(error, results) {
+//           assert(!error);
+//           results = JSON.parse(results);
+//           assert(!results.error);
+//           assert(results.data.length > 0);
+//           assert(results.data.filter(function(d){
+//             return d.type === "donation" && d.userId === 18;
+//           }).length === 1);
 
-          tu.logout(done);
-        });
-      });
-    });
-  });
-});
+//           tu.logout(done);
+//         });
+//       });
+//     });
+//   });
+// });
 
 describe('Loyalty Activity', function(){
 

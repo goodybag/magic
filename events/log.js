@@ -60,7 +60,7 @@ module.exports = {
 
 , 'consumers.tapin':
   function (user, tapinStationId) {
-    insert('consumers.visit', { userId:user.id, tapinStationId:tapinStationId });
+    insert('consumers.tapin', { userId:user.id, tapinStationId:tapinStationId });
   }
 
 // , 'consumers.donation':
