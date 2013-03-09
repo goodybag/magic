@@ -111,7 +111,8 @@ module.exports = function(req, res, next){
         if (error) return stage.dbError(error);
         if (result.rowCount === 0) return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
         magic.emit('consumers.tapin', user, result.rows[0].id);
-        stage.insertVisit(user, result.rows[0].id);
+        // stage.insertVisit(user, result.rows[0].id);
+        stage.end(user);
       });
     }
 
