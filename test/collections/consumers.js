@@ -277,6 +277,7 @@ describe('PUT /v1/consumers/:id', function() {
     tu.loginAsAdmin(function() {
       tu.patch('/v1/consumers/6', consumer, function(error, results, res){
         assert(!error);
+        console.log(results);
         assert(res.statusCode == 400);
         results = JSON.parse(results);
         assert(results.error.name === "EMAIL_REGISTERED");
