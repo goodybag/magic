@@ -44,11 +44,10 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = sql.query(
-      'SELECT {fields} FROM locations {tagJoin} {where} GROUP BY locations.id {sort} {limit}'
+      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id {bizGroupBy} {sort} {limit}'
     );
     query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
-    query.sort   = sql.sort(req.query.sort || '+name');
 
     // :TEMPORARY: the mobile app has a bug that requires us to turn off pagination
     if (/iPhone/.test(req.headers['user-agent'])) {
@@ -56,12 +55,16 @@ module.exports.list = function(req, res){
       if (req.query.limit <= 0)
         return res.json({ error: null, data: [], meta: { total:0 } });
       query.limit = sql.limit(req.query.limit, 0);
+
+      query.businessJoin = 'join businesses on locations."businessId" = businesses.id';
+      query.fields.add('businesses.name as name');
+      query.bizGroupBy = ', businesses.name';
     } else
       query.limit = sql.limit(req.query.limit, req.query.offset);
 
     // Show all or just enabled locatins
     if (!req.query.all){
-      query.where.and('"isEnabled" = true');
+      query.where.and('locations."isEnabled" = true');
     } else {
       query.fields.add('"isEnabled"');
     }
@@ -109,13 +112,20 @@ module.exports.list = function(req, res){
       if(req.query.sort.indexOf('random') !== -1) {
         query.fields.add('random() as random'); // this is really inefficient
       }
+
+      if (req.query.sort[0] !== '-' && req.query.sort[0] !== '+')
+        req.query.sort = '+' + req.query.sort;
+      if (req.query.sort.indexOf('.') === -1 && ['random', 'distance'].indexOf(req.query.sort.substring(1)) === -1)
+        req.query.sort = req.query.sort[0] + 'locations.' + req.query.sort.substring(1);
+
+      query.sort = sql.sort(req.query.sort || '+locations.name');
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
+console.log(query.toString(), query.$values);
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       if (dataResult.rowCount === 0 && req.param('businessId')) {
         return client.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, bizResult) {
           if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
