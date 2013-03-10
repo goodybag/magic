@@ -64,6 +64,11 @@ module.exports.list = function(req, res){
     query.limit   = sql.limit(req.query.limit, req.query.offset);
     query.groupby = sql.fields().add('products.id').add('businesses.id');
 
+    // iphone mods - only products with photos
+    if (/iPhone/.test(req.headers['user-agent'])) {
+      query.where.and('"photoUrl" IS NOT NULL');
+    }
+
     // business filtering
     if (req.param('businessId')) { // use param() as this may come from the path or the query
       query.where.and('products."businessId" = $businessId');
