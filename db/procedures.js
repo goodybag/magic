@@ -175,12 +175,15 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   extension = extension || 'consumers';
 
-  var query = sql.query('select {fields} from users, "' + extension + '" {where}');
+  var query = sql.query([
+  , 'with "u" as ('
+    , ' select * from users left join "' + extension + '" on users.id = "' + extension + '".id {where}'
+  , ') select {fields} from u'
+  ]);
 
   if (id){
     query.where = sql.where();
     query.where.and('users.id != $id');
-    query.where.and('"' + extension + '".id != $id');
     query.$('id', id);
   }
 
@@ -188,7 +191,7 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   if (inputs.email)
     query.fields.add(
-      'bool_or(case when users.email = \''
+      'bool_or(case when u.email = \''
     + inputs.email
     + '\' then true else false end) as email'
     );
@@ -197,32 +200,32 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
   // an existing oauth user
   if (inputs.singlyId)
     query.fields.add(
-      'bool_or(case when users."singlyId" = \''
+      'bool_or(case when u."singlyId" = \''
     + inputs.singlyId
     + '\' then true else false end) as "singlyId"'
     );
 
   if (inputs.singlyAccessToken)
     query.fields.add(
-      'bool_or(case when users."singlyAccessToken" = \''
+      'bool_or(case when u."singlyAccessToken" = \''
     + inputs.singlyAccessToken
     + '\' then true else false end) as "singlyAccessToken"'
     );
 
   if (inputs.screenName)
     query.fields.add(
-      'bool_or(case when "' + extension + '"."screenName" = \''
+      'bool_or(case when u."screenName" = \''
     + inputs.screenName
     + '\' then true else false end) as "screenName"'
     );
 
   if (inputs.cardId)
     query.fields.add(
-      'bool_or(case when users."cardId" = \''
+      'bool_or(case when u."cardId" = \''
     + inputs.cardId
     + '\' then true else false end) as "cardId"'
     );
-
+  
   if (query.fields.fields.length === 0) return callback();
 
   db.getClient(TAGS, function(error, client){

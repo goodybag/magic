@@ -78,6 +78,7 @@ module.exports = function(req, res, next){
           'WHERE users."cardId" = $1',
           'GROUP BY users.id'
       ].join(' ');
+
       client.query(query, [cardId], function(error, result){
         if (error) return stage.dbError(error);
         var user = result.rows[0];
@@ -107,6 +108,7 @@ module.exports = function(req, res, next){
             'WHERE "tapinStations".id = $3',
           'RETURNING id'
       ].join(' ');
+
       client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
         if (result.rowCount === 0) return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
@@ -163,6 +165,7 @@ module.exports = function(req, res, next){
               user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id'];
           }
         }
+
         req.session.user = user;
         next();
       });

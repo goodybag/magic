@@ -122,7 +122,7 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-console.log(query.toString(), query.$values);
+    
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
