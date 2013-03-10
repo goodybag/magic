@@ -261,7 +261,6 @@ module.exports.registerUser = function(group, inputs, callback){
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
 
     module.exports.ensureNotTaken(inputs, function(error, result){
-      if (error) console.log(error);
       if (error) return callback(error, result);
 
       utils.encryptPassword(inputs.password, function(err, encryptedPassword, passwordSalt) {
