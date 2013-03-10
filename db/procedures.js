@@ -177,14 +177,13 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   var query = sql.query([
   , 'with "u" as ('
-    , ' select * from users left join ' + extension + ' on users.id = ' + extension + '.id'
+    , ' select * from users left join "' + extension + '" on users.id = "' + extension + '".id {where}'
   , ') select {fields} from u'
   ]);
 
   if (id){
     query.where = sql.where();
-    query.where.and('u.id != $id');
-    query.where.and('"' + extension + '".id != $id');
+    query.where.and('users.id != $id');
     query.$('id', id);
   }
 
@@ -262,6 +261,7 @@ module.exports.registerUser = function(group, inputs, callback){
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
 
     module.exports.ensureNotTaken(inputs, function(error, result){
+      if (error) console.log(error);
       if (error) return callback(error, result);
 
       utils.encryptPassword(inputs.password, function(err, encryptedPassword, passwordSalt) {
