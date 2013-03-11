@@ -1,9 +1,14 @@
 var cluster = require('cluster');
 var workerName = (cluster.isMaster) ? 'master' : ('worker '+cluster.worker.id);
-if(process.env.NODETIME_ACCOUNT_KEY) {
+if (process.env.NODETIME_ACCOUNT_KEY) {
+  var hostName = require('os').hostname().slice(0,10) + '...';
+  var now = new Date();
+  var d = (now.getMonth()+1)+'/'+now.getDate()+' '+now.getHours()+':'+now.getMinutes();
+  var profileLabel = 'Magic ['+d+'] @'+hostName+' '+workerName;
+
   require('nodetime').profile({
     accountKey: process.env.NODETIME_ACCOUNT_KEY,
-    appName: 'Magic ['+(process.env['GB_ENV']||'dev')+'] @'+require('os').hostname()+' '+workerName,
+    appName: profileLabel,
     features:{ transactionProfiler: false } // TRANSACTION PROFILER MUST NOT BE ENABLED ON PROD!!! it leaks request headers
   });
 }
@@ -108,8 +113,11 @@ if (cluster.isMaster){
   console.log("spawning");
   console.log("Master PID:", process.pid);
 
+  var environmentVariables = {
+    NODETIME_ACCOUNT_KEY: process.env.NODETIME_ACCOUNT_KEY
+  };
   for (var i = 0, worker; i < os.cpus().length; i++){
-    worker = cluster.fork();
+    worker = cluster.fork(environmentVariables);
     workers[worker.pid] = worker;
     numWorkers++;
 
