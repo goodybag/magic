@@ -140,7 +140,21 @@ module.exports.oauthAuthenticate = function(req, res){
         // Auto fill what we can
         user.firstName = result.body.data.first_name;
         user.lastName = result.body.data.last_name;
-        stage.createOrUpdateUser(user);
+        stage.checkIfUserIsPendingMigration(user, result.body.data.id);
+        // stage.createOrUpdateUser(user);
+      });
+    }
+
+  , checkIfUserIsPendingMigration: function(user, fbid){
+      var
+        $query = { facebookId: fbid, pending: true }
+      , options = {
+
+        }
+      ;
+
+      db.api.pendingFacebookUsers.update($query, $update, options, function(error, results){
+
       });
     }
 
