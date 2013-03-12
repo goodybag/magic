@@ -1,5 +1,6 @@
 var cluster = require('cluster');
-if (process.env.NODETIME_ACCOUNT_KEY) {
+
+if (typeof process.env.NODETIME_ACCOUNT_KEY != 'undefined' && process.env.NODETIME_ACCOUNT_KEY != 'undefined') {
   require('nodetime').profile({
     accountKey: process.env.NODETIME_ACCOUNT_KEY,
     appName: 'Magic',
