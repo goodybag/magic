@@ -1,14 +1,8 @@
 var cluster = require('cluster');
-var workerName = (cluster.isMaster) ? 'master' : ('worker '+cluster.worker.id);
 if (process.env.NODETIME_ACCOUNT_KEY) {
-  var hostName = require('os').hostname().slice(0,10) + '...';
-  var now = new Date();
-  var d = (now.getMonth()+1)+'/'+now.getDate()+' '+now.getHours()+':'+now.getMinutes();
-  var profileLabel = 'Magic ['+d+'] @'+hostName+' '+workerName;
-
   require('nodetime').profile({
     accountKey: process.env.NODETIME_ACCOUNT_KEY,
-    appName: profileLabel,
+    appName: 'Magic',
     features:{ transactionProfiler: false } // TRANSACTION PROFILER MUST NOT BE ENABLED ON PROD!!! it leaks request headers
   });
 }
