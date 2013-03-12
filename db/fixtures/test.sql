@@ -577,3 +577,11 @@ BEGIN;
 INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('1','1', '11', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-02-13 15:21:57.497542');
 INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('2','2', '22', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-01-13 15:21:57.497542');
 COMMIT;
+
+BEGIN;
+create table "pendingFacebookUsers" (
+  "facebookId" int primary key,
+  "cardId" text
+);
+create unique index "pendingFacebookUsers_cardId_idx" on "public"."pendingFacebookUsers" USING btree("cardId" ASC NULLS LAST);
+COMMIT;
