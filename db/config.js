@@ -23,6 +23,7 @@ var config = {
   , 'userRedemptions'
   , 'userPasswordResets'
   , 'consumerCardUpdates'
+  , 'pendingFacebookUsers'
 
   , 'tapins'
   , 'visits'
@@ -44,7 +45,7 @@ var config = {
 
   , 'oddityLive'
   , 'oddityMeta'
-  
+
   , 'events'
   , 'activity'
   ]

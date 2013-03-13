@@ -73,25 +73,12 @@ module.exports.oauthAuthenticate = function(req, res){
     'consumer'
   ];
 
-  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
+  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId) && !req.body.singlyAccessToken)
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
 
   if (supportedGroups.indexOf(req.body.group) === -1)
     return res.error(errors.auth.INVALID_GROUP), logger.routes.error(TAGS, errors.auth.INVALID_GROUP);
-
-
-  // Get the user accessToken/Id
-  // If the user exists
-    // Update their accessToken
-    // Update session
-    // Send session
-  // If the user doesn't exist
-    // Figure out what group they're authenticating to
-    // (?group=consumer)
-    // POST to that kind of account creation
-    // Update session with returned user
-    // Send session
 
   var stage = {
     start: function(){
@@ -99,7 +86,7 @@ module.exports.oauthAuthenticate = function(req, res){
         return stage.getAccessTokenAndId(req.body.code);
 
       if (req.body.singlyAccessToken && req.body.singlyId)
-        return stage.createOrUpdateUser({
+        return stage.getFacebookData(req.body.singlyAccessToken, {
           singlyId: req.body.singlyId
         , singlyAccessToken: req.body.singlyAccessToken
         });
@@ -126,6 +113,7 @@ module.exports.oauthAuthenticate = function(req, res){
           singlyId: result.body.id
         , singlyAccessToken: accessToken
         };
+
         // Get facebook data
         if (result.body.facebook) return stage.getFacebookData(accessToken, user);
 
@@ -140,7 +128,45 @@ module.exports.oauthAuthenticate = function(req, res){
         // Auto fill what we can
         user.firstName = result.body.data.first_name;
         user.lastName = result.body.data.last_name;
-        stage.createOrUpdateUser(user);
+
+        stage.checkIfUserIsPendingMigration(user, result.body.data.id);
+      });
+    }
+
+  , checkIfUserIsPendingMigration: function(user, fbid){
+      var
+        $query  = { facebookId: fbid, $null: ['pending'] }
+      , $update = { pending: false }
+      , options = { returning: ['cardId'] }
+      ;
+
+      db.api.pendingFacebookUsers.update($query, $update, options, function(error, results){
+        if (error) return stage.dbError(error);
+
+        if (results.length === 0) return stage.createOrUpdateUser(user);
+
+        user.cardId = results[0].cardId;
+
+        return stage.updatePendingUser(user);
+      });
+    }
+
+  , updatePendingUser: function(user){
+      var
+        $query  = { cardId: user.cardId }
+      , $update = { singlyId: user.singlyId, singlyAccessToken: user.singlyAccessToken }
+      , options = { returning: ['id'] }
+      ;
+
+      db.api.users.update($query, $update, options, function(error, results){
+        if (error) return stage.dbError(error);
+
+        // Herrmm that's weird
+        if (results.length === 0) return createOrUpdateUser(user);
+
+        user.id = results[0].id;
+
+        return stage.lookupUsersGroups(user);
       });
     }
 
