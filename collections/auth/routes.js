@@ -73,7 +73,7 @@ module.exports.oauthAuthenticate = function(req, res){
     'consumer'
   ];
 
-  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId))
+  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId) && !req.body.singlyAccessToken)
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
 
@@ -82,6 +82,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
   var stage = {
     start: function(){
+      console.log("Stage: start: function()")
       if (req.body.code)
         return stage.getAccessTokenAndId(req.body.code);
 
@@ -98,6 +99,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getAccessTokenAndId: function(code){
+    console.log("Stage: getAccessTokenAndId: function(code)", code)
       singly.getAccessToken(code, function(error, response, token){
         if (error) return stage.singlyError(error);
 
@@ -106,6 +108,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getSinglyId: function(accessToken){
+    console.log("Stage: getSinglyId: function(accessToken)", accessToken)
       singly.get('/profiles', { access_token: accessToken }, function(error, result){
         if (error) return stage.singlyError(error);
 
@@ -122,6 +125,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , getFacebookData: function(accessToken, user){
+    console.log("Stage: getFacebookData: function(accessToken, user)", accessToken, user)
       singly.get('/profiles/facebook', { access_token: accessToken }, function(error, result){
         if (error) return stage.singlyError(error);
 
@@ -134,8 +138,9 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , checkIfUserIsPendingMigration: function(user, fbid){
+    console.log("Stage: checkIfUserIsPendingMigration: function(user, fbid)", user, fbid)
       var
-        $query  = { facebookId: fbid, pending: true }
+        $query  = { facebookId: fbid, $null: ['pending'] }
       , $update = { pending: false }
       , options = { returning: ['cardId'] }
       ;
@@ -152,6 +157,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , updatePendingUser: function(user){
+    console.log("Stage: updatePendingUser: function(user)", user)
       var
         $query  = { cardId: user.cardId }
       , $update = { singlyId: user.singlyId, singlyAccessToken: user.singlyAccessToken }
@@ -166,11 +172,12 @@ module.exports.oauthAuthenticate = function(req, res){
 
         user.id = results[0].id;
 
-        return lookupUsersGroups(user);
+        return stage.lookupUsersGroups(user);
       });
     }
 
   , createOrUpdateUser: function(user){
+    console.log("Stage: createOrUpdateUser: function(user)", user)
       db.getClient(TAGS, function(error, client){
         if (error) return stage.dbError(error);
 
@@ -192,6 +199,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createUser: function(user){
+    console.log("Stage: createUser: function(user)", user)
       // Figure out which group creation thingy to send this to
       if (req.body.group === "consumer"){
         db.procedures.setLogTags(TAGS);
@@ -210,6 +218,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
     // This is a sham, but whatevs
   , lookupUsersGroups: function(user){
+    console.log("Stage: lookupUsersGroups: function(user)", user)
       var query = sql.query([
           'SELECT'
         , '  array_agg(groups.name)  as groups'
@@ -236,6 +245,7 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , setSessionAndSend: function(user){
+    console.log("Stage: setSessionAndSend: function(user)", user)
       req.session.user = user;
       res.json({ error: null, data: user });
     }
