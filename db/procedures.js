@@ -51,45 +51,52 @@ module.exports.updateUserLoyaltyStats = function(client, tx, userId, businessId,
 
       // Look up the business loyalty settings
       tx.query('SELECT * from "businessLoyaltySettings" where "businessId" = $1', [businessId], function(error, result) {
-          if (error) return cb(error);
-          var bls = result.rows[0];
-
-          var query = sql.query([
-            'UPDATE "userLoyaltyStats" SET {updates}',
-              'WHERE "userId"=$userId AND "businessId"=$businessId',
-              'RETURNING "numRewards", "dateBecameElite"'
-          ]);
-          query.updates = sql.fields();
-          query.$('userId', userId);
-          query.$('businessId', businessId);
-
-          var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite && !uls.isElite);
-          if (hasBecomeElite) {
-            query.updates.add('"isElite" = true');
-            query.updates.add('"dateBecameElite"  = now()');
-          }
-
-          var punchesRequired = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
-          var hasEarnedReward = (uls.numPunches >= punchesRequired);
-          var rewardsGained = 0;
-          if (hasEarnedReward) {
-            rewardsGained = Math.floor(uls.numPunches / punchesRequired); // this accounts for the possibility that they punched more than the # required
-            query.updates.add('"numPunches" = "numPunches" - $punchesRequired');
-            query.updates.add('"numRewards" = "numRewards" + $rewardsGained');
-            query.$('punchesRequired', punchesRequired * rewardsGained);
-            query.$('rewardsGained', rewardsGained);
-          }
-
-          if (!hasEarnedReward && !hasBecomeElite)
-            return cb(null, false, uls.numRewards, false, null);
-
-          // Update the users loyalty stat with elite
-          tx.query(query.toString(), query.$values, function(error, result) {
-            if (error) return cb(error);
-            cb(null, hasEarnedReward, result.rows[0].numRewards, hasBecomeElite, result.rows[0].dateBecameElite);
-          });
+        if (error) return cb(error);
+        var bls = result.rows[0];
+        if (!bls) {
+          // not set up yet, use a dummy structure
+          bls = {
+            punchesRequiredToBecomeElite: 10000000,
+            elitePunchesRequired:         10000000,
+            regularPunchesRequired:       10000000
+          };
         }
-      );
+
+        var query = sql.query([
+          'UPDATE "userLoyaltyStats" SET {updates}',
+            'WHERE "userId"=$userId AND "businessId"=$businessId',
+            'RETURNING "numRewards", "dateBecameElite"'
+        ]);
+        query.updates = sql.fields();
+        query.$('userId', userId);
+        query.$('businessId', businessId);
+
+        var hasBecomeElite = (uls.totalPunches >= bls.punchesRequiredToBecomeElite && !uls.isElite);
+        if (hasBecomeElite) {
+          query.updates.add('"isElite" = true');
+          query.updates.add('"dateBecameElite"  = now()');
+        }
+
+        var punchesRequired = (uls.isElite) ? bls.elitePunchesRequired : bls.regularPunchesRequired;
+        var hasEarnedReward = (uls.numPunches >= punchesRequired);
+        var rewardsGained = 0;
+        if (hasEarnedReward) {
+          rewardsGained = Math.floor(uls.numPunches / punchesRequired); // this accounts for the possibility that they punched more than the # required
+          query.updates.add('"numPunches" = "numPunches" - $punchesRequired');
+          query.updates.add('"numRewards" = "numRewards" + $rewardsGained');
+          query.$('punchesRequired', punchesRequired * rewardsGained);
+          query.$('rewardsGained', rewardsGained);
+        }
+
+        if (!hasEarnedReward && !hasBecomeElite)
+          return cb(null, false, uls.numRewards, false, null);
+
+        // Update the users loyalty stat with elite
+        tx.query(query.toString(), query.$values, function(error, result) {
+          if (error) return cb(error);
+          cb(null, hasEarnedReward, result.rows[0].numRewards, hasBecomeElite, result.rows[0].dateBecameElite);
+        });
+      });
     }
   );
 };
@@ -125,6 +132,14 @@ module.exports.updateUserLoyaltyStatsById = function(client, tx, statId, deltaPu
       tx.query('SELECT * from "businessLoyaltySettings" where "businessId" = $1', [uls.businessId], function(error, result) {
         if (error) return cb(error);
         var bls = result.rows[0];
+          if (!bls) {
+            // not set up yet, use a dummy structure
+            bls = {
+              punchesRequiredToBecomeElite: 10000000,
+              elitePunchesRequired:         10000000,
+              regularPunchesRequired:       10000000
+            };
+          }
 
         var query = sql.query([
           'UPDATE "userLoyaltyStats" SET {updates}',
@@ -175,58 +190,35 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   extension = extension || 'consumers';
 
-  var query = sql.query([
-  , 'with "u" as ('
-    , ' select * from users left join "' + extension + '" on users.id = "' + extension + '".id {where}'
-  , ') select {fields} from u'
-  ]);
+  var query = sql.query('SELECT {subqueries}');
+  query.subqueries = sql.fields();
 
-  if (id){
-    query.where = sql.where();
-    query.where.and('users.id != $id');
-    query.$('id', id);
+  if (inputs.email) {
+    query.subqueries.add('(SELECT id FROM users WHERE email = $email LIMIT 1) AS email');
+    query.$('email', inputs.email);
   }
 
-  query.fields = sql.fields();
+  if (inputs.singlyId) {
+    query.subqueries.add('(SELECT id FROM users WHERE "singlyId" = $singlyId LIMIT 1) AS "singlyId"');
+    query.$('singlyId', inputs.singlyId);
+  }
 
-  if (inputs.email)
-    query.fields.add(
-      'bool_or(case when u.email = \''
-    + inputs.email
-    + '\' then true else false end) as email'
-    );
+  if (inputs.singlyAccessToken) {
+    query.subqueries.add('(SELECT id FROM users WHERE "singlyAccessToken" = $singlyAccessToken LIMIT 1) AS "singlyAccessToken"');
+    query.$('singlyAccessToken', inputs.singlyAccessToken);
+  }
 
-  // If they're doing a user create, they're not intending on updating
-  // an existing oauth user
-  if (inputs.singlyId)
-    query.fields.add(
-      'bool_or(case when u."singlyId" = \''
-    + inputs.singlyId
-    + '\' then true else false end) as "singlyId"'
-    );
+  if (inputs.cardId) {
+    query.subqueries.add('(SELECT id FROM users WHERE "cardId" = $cardId LIMIT 1) AS "cardId"');
+    query.$('cardId', inputs.cardId);
+  }
 
-  if (inputs.singlyAccessToken)
-    query.fields.add(
-      'bool_or(case when u."singlyAccessToken" = \''
-    + inputs.singlyAccessToken
-    + '\' then true else false end) as "singlyAccessToken"'
-    );
+  if (inputs.screenName) {
+    query.subqueries.add('(SELECT id FROM "'+extension+'" WHERE "screenName" = $screenName LIMIT 1) AS "screenName"');
+    query.$('screenName', inputs.screenName);
+  }
 
-  if (inputs.screenName)
-    query.fields.add(
-      'bool_or(case when u."screenName" = \''
-    + inputs.screenName
-    + '\' then true else false end) as "screenName"'
-    );
-
-  if (inputs.cardId)
-    query.fields.add(
-      'bool_or(case when u."cardId" = \''
-    + inputs.cardId
-    + '\' then true else false end) as "cardId"'
-    );
-  
-  if (query.fields.fields.length === 0) return callback();
+  if (query.subqueries.fields.length === 0) return callback();
 
   db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
@@ -236,15 +228,15 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
       if (result.rows.length > 0){
         result = result.rows[0];
 
-        if (result.email && inputs.email)
+        if (result.email && inputs.email && result.email != id)
           return callback(errors.registration.EMAIL_REGISTERED);
-        if (result.screenName && inputs.screenName)
+        if (result.screenName && inputs.screenName && result.screenName != id)
           return callback(errors.registration.SCREENNAME_TAKEN);
-        if (result.cardId && inputs.cardId)
+        if (result.cardId && inputs.cardId && result.cardId != id)
           return callback(errors.registration.CARD_ID_TAKEN);
-        if (result.singlyId && inputs.singlyId)
+        if (result.singlyId && inputs.singlyId && result.singlyId != id)
           return callback(errors.registration.SINGLY_ID_TAKEN);
-        if (result.singlyAccessToken && inputs.singlyAccessToken)
+        if (result.singlyAccessToken && inputs.singlyAccessToken && result.singlyAccessToken != id)
           return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
       }
 
@@ -253,7 +245,13 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
   });
 };
 
-module.exports.registerUser = function(group, inputs, callback){
+module.exports.registerUser = function(group, inputs, options, callback){
+  if (!callback && typeof options == 'function'){
+    callback = options;
+    options = {};
+  }
+  options = options || {};
+
   var TAGS = consumeLogTags() || ['register-user'];
   db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
@@ -263,7 +261,8 @@ module.exports.registerUser = function(group, inputs, callback){
     module.exports.ensureNotTaken(inputs, function(error, result){
       if (error) return callback(error, result);
 
-      utils.encryptPassword(inputs.password, function(err, encryptedPassword, passwordSalt) {
+      var encrypt = (!options.dontEncrypt) ? utils.encryptPassword : function(p, s, cb) { cb(null, p, s); };
+      encrypt(inputs.password, inputs.passwordSalt, function(err, encryptedPassword, passwordSalt) {
 
         var query = sql.query([
           'WITH',
@@ -371,7 +370,7 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
 
         var updateRecord = function(table, callback) {
           var needsUpdate = false, data = {};
-          // Determine if we even need to update the consumer record
+          // Determine if we even need to update the record
           for (var i = db.fields[table].plain.length - 1; i >= 0; i--){
             if (db.fields[table].plain[i] in inputs){
               needsUpdate = true;
@@ -393,6 +392,7 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
           });
         };
 
+        // the magic starts here
         updateRecord('users', function(err, result) {
           if (err) return tx.abort(), callback(err, result);
           updateRecord(extension, function(err, result) {

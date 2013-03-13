@@ -119,6 +119,7 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
   var checkResults = function(continueCb) {
     return function(err, results) {
       if (err) {
+        logger.debug(client.logTags || ['upsert'], err);
         // an error, abort
         if (savePointed) { tx.release('upsert'); }
         tx.abort(function() { originalCb(err); });
