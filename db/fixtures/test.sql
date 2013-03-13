@@ -70,7 +70,8 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('3', 'tablet@g
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('4', 'client@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('5', 'consumer@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('6', 'dumb@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('7', 'tferguson@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABC');
+-- !NOTE! tferguson's password does NOT have the "salt" appended to its plaintext
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('7', 'tferguson@gmail.com', '$2a$10$nwNRXT7QQyY/IyqYMENyEeMccdOu/FKIrQTVedEUtAnBseEjOPJcu', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABC');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('8', 'somebody_else@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('9', 'consumer2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('10', 'consumer3@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
