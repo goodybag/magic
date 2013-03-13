@@ -1143,6 +1143,20 @@ describe('POST /v1/products/:id/feelings', function() {
 });
 
 
+describe('PUT /v1/products/:id/feelings', function() {
+  it('should tapin-auth a new user and update their feelings and return firstTapin, userId', function(done){
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+      
+      tu.tapinAuthRequest('PUT', '/v1/products/3/feelings', '432123-BAC', { isLiked: true }, function(error, payload, res){
+        assert(res.statusCode == 204);
+        tu.logout(done);
+      });
+    });
+  });
+});
+
+
 describe('location list filtering', function() {
   it('should maintain freshness as locations are added, changed, and removed', function(done) {
     tu.loginAsAdmin(function() {
