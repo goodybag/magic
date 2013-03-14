@@ -186,6 +186,18 @@ server.del(
 );
 
 // Products.updateFeelings
+server.put(
+  '/v1/products/:productId/feelings'
+, middleware.profile('PUT /v1/products/:productId/feelings')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales', 'manager', 'cashier', 'consumer')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.feelingsCollection.methods.post.body)
+, middleware.profile('update product feelings handler')
+, routes.updateFeelings
+);
+
+// Products.updateFeelings
 server.post(
   '/v1/products/:productId/feelings'
 , middleware.profile('POST /v1/products/:productId/feelings')
