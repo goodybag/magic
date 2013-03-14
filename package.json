@@ -38,7 +38,7 @@
     "js-yaml": "2.0.x",
     "bcrypt": "0.7.x",
     
-    "pg": "0.10.x",
+    "pg": "0.14.x",
     "pg-transaction": "0.1.x",
     "sql": "https://github.com/brianc/node-sql/tarball/master",
     "generic-pool": "2.0.x",
