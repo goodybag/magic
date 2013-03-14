@@ -63,15 +63,6 @@ module.exports = {
     insert('consumers.tapin', { userId:user.id, tapinStationId:tapinStationId });
   }
 
-// , 'consumers.donation':
-//   function (consumer, donation){
-//     insert('consumers.donation', {
-//       consumerId: consumer.id
-//     , donationId: donation.id
-//     , amount:     donation.amount
-//     });
-//   }
-
 , 'products.like':
   function (userId, productId){
     insert('products.like', { userId: userId, productId: productId });
