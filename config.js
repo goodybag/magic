@@ -51,9 +51,9 @@ var config = {
       secret_key: 'sec-c-M2JmZmY5MTUtNjkyZS00MGQ5LTgxYzMtMjhjNTJkYjk5NDVh'
     }
   , singly: {
-      clientId: "e8171ccd4a3b90f15bbb41088efccc06"
-    , clientSecret: "73fa4013446e9985e9217455479d3c3c"
-    , callbackUrl: "http://localhost:3000/v1/callback"
+      clientId: "60273b907ac74303b2d1bdc135f8d6e3"
+    , clientSecret: "c0376da804f99c01988dc7bff0b80f21"
+    , callbackUrl: "http://goodybag.com/"
     , apiBaseUrl: "https://api.singly.com"
 
       // Should probably make the url a template and make a util
