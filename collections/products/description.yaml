@@ -27,6 +27,7 @@ collection:
         userLikes:  { type: bool,    eg: false }
         userTried:  { type: bool,    eg: false }
         userWants:  { type: bool,    eg: false }
+        hasPhoto:   { type: bool,    eg: false }
     post:
       desc: Add Product
       auth:

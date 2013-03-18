@@ -64,8 +64,9 @@ module.exports.list = function(req, res){
     query.limit   = sql.limit(req.query.limit, req.query.offset);
     query.groupby = sql.fields().add('products.id').add('businesses.id');
 
-    // iphone mods - only products with photos
-    if (/iPhone/.test(req.headers['user-agent'])) {
+    // hasPhoto filtering
+    // :TEMP: iphone mods - only products with photos
+    if (req.param('hasPhoto') || /iPhone/.test(req.headers['user-agent'])) {
       query.where.and('"photoUrl" IS NOT NULL');
     }
 
