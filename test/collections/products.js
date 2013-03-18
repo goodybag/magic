@@ -211,6 +211,18 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should filter by having photo', function(done) {
+    tu.get('/v1/products?hasPhoto=1&limit=10000', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p) {
+        return !p.photoUrl;
+      }).length === 0);
+      done();
+    });
+  });
+
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/products?sort=name', function(err, payload, res) {
 
