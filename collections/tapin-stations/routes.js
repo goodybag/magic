@@ -113,10 +113,6 @@ module.exports.create = function(req, res){
   var TAGS = ['create-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'creating tapinStation');
 
-  // defaults
-  if (typeof req.body.numUnconfirmedPunchesAllowed == 'undefined')
-    req.body.numUnconfirmedPunchesAllowed = 1;
-
   db.procedures.setLogTags(TAGS);
   db.procedures.registerUser('tapin-station', req.body, function(error, result){
     if (error) return res.error(error, result), logger.routes.error(TAGS, result);

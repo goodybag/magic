@@ -149,7 +149,7 @@ describe('POST /v1/tapin-stations', function() {
         tu.get('/v1/tapin-stations/'+results.data.id, function(error, results, res) {
           assert(res.statusCode == 200);
           results = JSON.parse(results);
-          assert(results.data.numUnconfirmedPunchesAllowed == 1);
+          assert(results.data.numUnconfirmedPunchesAllowed === 0);
           tu.logout(done);
         });
       });
