@@ -356,6 +356,9 @@ module.exports.create = function(req, res){
   delete inputs.categories;
   delete inputs.tags;
 
+  if (req.session.user.groups.indexOf('consumer') != -1)
+    inputs.isVerified = false;
+
   var stage = {
     // Once we receive the client, kick everything off by
     clientReceived: function(error, client){
@@ -423,9 +426,6 @@ module.exports.create = function(req, res){
   , insertProduct: function(client){
 
       if (!inputs.isEnabled) inputs.isEnabled = true;
-
-      if (typeof inputs.inSpotlight == null || typeof inputs.inSpotlight == undefined)
-        inputs.inSpotlight = true;
 
       inputs.likes = 0;
       inputs.wants = 0;
