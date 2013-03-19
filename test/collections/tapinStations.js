@@ -114,15 +114,44 @@ describe('POST /v1/tapin-stations', function() {
       , password:   "password"
       , businessId: 1
       , locationId: 1
+      , numUnconfirmedPunchesAllowed: 2
       };
 
-      tu.post('/v1/tapin-stations', tapinStation, function(error, results) {
-        assert(!error);
+      tu.post('/v1/tapin-stations', tapinStation, function(error, results, res) {
+        assert(res.statusCode == 200);
         results = JSON.parse(results);
-        assert(!results.error);
         assert(results.data.id >= 0);
+        tu.get('/v1/tapin-stations/'+results.data.id, function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.numUnconfirmedPunchesAllowed == 2);
+          tu.logout(done);
+        });
+      });
+    });
+  });
 
-        tu.logout(done);
+  it('should use smart defaults', function(done) {
+    tu.loginAsAdmin(function(error){
+      assert(!error);
+
+      var tapinStation = {
+        email:      "tapinstation_with_defaults@goodybag.com"
+      , password:   "password"
+      , businessId: 1
+      , locationId: 1
+      };
+
+      tu.post('/v1/tapin-stations', tapinStation, function(error, results, res) {
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id >= 0);
+        tu.get('/v1/tapin-stations/'+results.data.id, function(error, results, res) {
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.numUnconfirmedPunchesAllowed == 1);
+          tu.logout(done);
+        });
       });
     });
   });
@@ -151,7 +180,8 @@ describe('POST /v1/tapin-stations', function() {
 describe('PATCH /v1/tapin-stations/:id', function() {
   it('should update a tapinStation', function(done) {
     var tapinStation = {
-      locationId: 4
+      locationId: 4,
+      numUnconfirmedPunchesAllowed: 3
     };
     tu.loginAsAdmin(function(error){
       tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
@@ -162,6 +192,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.locationId === 4);
+          assert(results.data.numUnconfirmedPunchesAllowed === 3);
           tu.logout(function() {
             done();
           });

@@ -318,14 +318,15 @@ module.exports.registerUser = function(group, inputs, options, callback){
           case 'tapin-station':
             query.extension = [
             '"station" AS',
-              '(INSERT INTO "tapinStations" ("id", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled")',
-                'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled FROM "user")'
+              '(INSERT INTO "tapinStations" ("id", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled", "numUnconfirmedPunchesAllowed")',
+                'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled, $numUnconfirmedPunchesAllowed FROM "user")'
             ].join(' ');
             query.$('group', 'tapin-station');
             query.$('businessId', inputs.businessId);
             query.$('locationId', inputs.locationId);
             query.$('loyaltyEnabled', !!inputs.loyaltyEnabled);
             query.$('galleryEnabled', !!inputs.galleryEnabled);
+            query.$('numUnconfirmedPunchesAllowed', (+inputs.numUnconfirmedPunchesAllowed) || 0);
             break;
           default:
             throw "Invalid group: "+group;
