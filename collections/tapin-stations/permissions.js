@@ -8,6 +8,7 @@ var all = [
 , 'locationId'
 , 'loyaltyEnabled'
 , 'galleryEnabled'
+, 'numUnconfirmedPunchesAllowed'
 ];
 
 module.exports = {

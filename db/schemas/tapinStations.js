@@ -35,6 +35,10 @@ define(function(require){
     , validators: { is: /true|false|1|0/ }
     , sanitizers: { toBoolean:[] }
     }
+  , numUnconfirmedPunchesAllowed: {
+      type: 'int'
+    , sanitizers: { isInt:[] }
+    }
   };
   return tapinStations;
 });
