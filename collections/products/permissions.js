@@ -55,6 +55,10 @@ module.exports = {
 
 , default: {}
 
+, consumer: {
+    create: ['businessId', 'name', 'description', 'price', 'categories', 'tags']
+  }
+
 , sales: {
     read:   true
   , create: true
