@@ -293,6 +293,9 @@ module.exports.get = function(req, res){
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+    var includes = [].concat(req.query.include);
+    var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+
     var query = sql.query([
       'SELECT {fields},',
         'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
@@ -326,8 +329,14 @@ module.exports.get = function(req, res){
       query.$('userId', req.session.user.id);
     }
 
+    // user photos join
+    if (req.session.user && includeUserPhotos) {
+      query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
+      query.$('userId', req.session.user.id);
+    }
+
     client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var product = result.rows[0];
       if (!product) return res.status(404).end();
@@ -336,6 +345,8 @@ module.exports.get = function(req, res){
         product.tags = (product.tags) ? JSON.parse(product.tags) : [];
       if (typeof product.categories != 'undefined')
         product.categories = (product.categories) ? JSON.parse(product.categories) : [];
+      if (typeof product.photos != 'undefined')
+        product.photos = (product.photos) ? JSON.parse(product.photos) : [];
 
       return res.json({ error: null, data: product });
     });
