@@ -356,7 +356,9 @@ module.exports.create = function(req, res){
   delete inputs.categories;
   delete inputs.tags;
 
-  if (req.session.user.groups.indexOf('consumer') != -1)
+  if (req.session.user.groups.indexOf('consumer') != -1 &&
+      req.session.user.groups.indexOf('admin') == -1 &&
+      req.session.user.groups.indexOf('sales') == -1)
     inputs.isVerified = false;
 
   var stage = {
