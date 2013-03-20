@@ -423,6 +423,37 @@ describe('POST /v1/businesses', function(){
       });
     });
   });
+
+  it('should allow consumers to creeate unverified businesses', function(done){
+    var business = {
+      name: "Consumers, Inc."
+    };
+
+    tu.login({ email:'tferguson@gmail.com', password:'password' }, function(error, user){
+      tu.post('/v1/businesses', business, function(error, results, res){
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.id);
+
+        tu.logout(function() {
+          tu.loginAsAdmin(function() {
+
+            tu.get('/v1/businesses/' + results.data.id, function(error, results){
+              assert(!error);
+              results = JSON.parse(results);
+              assert(!results.error);
+              // is gb false by default
+              assert(results.data.isGB === false);
+              assert(results.data.isVerified === false);
+              tu.logout(function(){
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
 });
 
 describe('PATCH /v1/businesses/:id', function(){
