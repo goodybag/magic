@@ -787,6 +787,16 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
       });
     });
   });
+  it('should include user photos data on request', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections/1/products?include=userPhotos', function(error, results, res) {
+        assert(res.statusCode == 200);
+        var products = JSON.parse(results).data;
+        assert(products.filter(function(p) { return typeof p.photos == 'undefined'; }).length === 0);
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/consumers/:id/collections/:collectionId/products', function() {
