@@ -112,7 +112,7 @@ describe('POST /v1/photos', function() {
 
   it('should respond with the id of a new photo', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/photos', { businessId:2, url:'http://placekitten.com/400/300' }, function(err, payload, res) {
+      tu.post('/v1/photos', { productId:1, url:'http://placekitten.com/400/300' }, function(err, payload, res) {
         assert(!err);
         payload = JSON.parse(payload);
         assert(res.statusCode == 200);
@@ -124,9 +124,19 @@ describe('POST /v1/photos', function() {
     });
   });
 
+ it('should respond with 400 if the product doesnt exist', function(done) {
+    tu.loginAsSales(function(error, user){
+      tu.post('/v1/photos', { productId:2, url:'http://placekitten.com/400/300' }, function(err, payload, res) {
+        assert(!err);
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should respond to an invalid payload with errors', function(done) {
     tu.loginAsSales(function(error, user){
-      tu.post('/v1/photos', { businessId:'foobar' }, function(err, payload, res) {
+      tu.post('/v1/photos', { productId:'foobar' }, function(err, payload, res) {
         assert(!err);
         payload = JSON.parse(payload);
         assert(res.statusCode == 400);

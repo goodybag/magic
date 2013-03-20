@@ -20,9 +20,7 @@ collection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        businessId: { type: id,     eg: 1 }
-        productId:  { type: id,     eg: 1 }
-        userId:     { type: id,     eg: 1 }
+        productId:  { type: id,     eg: 1, required: true }
         url:        { type: url,    eg: http://foobar.com/pic.png }
         notes:      { type: string, eg: Notes about this picture }
         isEnabled:  { type: bool,   eg: true }

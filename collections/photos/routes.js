@@ -87,20 +87,26 @@ module.exports.create = function(req, res){
   var TAGS = ['create-photo', req.uuid];
 
   var inputs = req.body;
+  inputs.userId = req.session.user.id;
+
   var error = utils.validate(inputs, db.schemas.photos);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('INSERT INTO photos ({fields}) VALUES ({values}) RETURNING id');
+    var query = sql.query('INSERT INTO photos ({fields}) (SELECT {values} FROM products WHERE id=$productId) RETURNING id');
     query.fields = sql.fields().addObjectKeys(inputs);
     query.values = sql.fields().addObjectValues(inputs, query);
 
+    query.fields.add('"businessId"');
+    query.values.add('products."businessId"');
+
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.json({ error: null, data: result.rows[0]|| null });
+      if (result.rowCount === 0)
+        return res.error(errors.input.VALIDATION_FAILED, { productId:'Product ID specified does not exist' });
+      return res.json({ error: null, data: result.rows[0] });
     });
   });
 };
