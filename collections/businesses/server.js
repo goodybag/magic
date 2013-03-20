@@ -136,7 +136,7 @@ server.post(
   '/v1/businesses'
 , middleware.profile('POST /v1/businesses')
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales')
+, middleware.auth.allow('admin', 'sales', 'consumer')
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
