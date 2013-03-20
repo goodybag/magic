@@ -37,10 +37,6 @@ var config = {
   , passwordSalt: "$G00DYBAGR0CK$!"
   , consumerPasswordSaltLength: 10
 
-  , facebook: {
-      id: "159340790837933"
-    , openGraphUrl: "https://graph.facebook.com/"
-    }
   , amazon: {
       awsId: "AKIAJZTPY46ZWGWU5JRQ"
     , awsSecret: "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"
@@ -51,7 +47,7 @@ var config = {
       secret_key: 'sec-c-M2JmZmY5MTUtNjkyZS00MGQ5LTgxYzMtMjhjNTJkYjk5NDVh'
     }
   , singly: {
-      clientId: "60273b907ac74303b2d1bdc135f8d6e3"
+      clientId: "f75b4f3c213b8539935ad88da572b726"
     , clientSecret: "c0376da804f99c01988dc7bff0b80f21"
     , callbackUrl: "http://goodybag.com/"
     , apiBaseUrl: "https://api.singly.com"
@@ -78,12 +74,19 @@ var config = {
       host: 'logs.papertrailapp.com'
     , port: 24616
     }
+
+  , facebook: {
+      id: "159340790837933"
+    , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
+    , openGraphUrl: "https://graph.facebook.com/"
+    }
   }
 
 , dev: {
     http: {
       port: 3000
     }
+
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
 
@@ -176,6 +179,7 @@ var config = {
   , http: {
       port: process.env['PORT'] || 5000
     }
+
   , baseUrl: 'http://magic.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
   , outputActivePoolIds: false
@@ -196,6 +200,29 @@ var config = {
   , outputActivePoolIds: false
   , emailEnabled: true
   , repl: { enabled: false }
+
+  , facebook: {
+      id: "152282721508707"
+    , secret: "dab936ceb6f17e79c3be136595d69144"
+    , openGraphUrl: "https://graph.facebook.com/"
+    }
+
+  , singly: {
+      clientId: "60273b907ac74303b2d1bdc135f8d6e3"
+    , clientSecret: "c0376da804f99c01988dc7bff0b80f21"
+    , callbackUrl: "http://goodybag.com/"
+    , apiBaseUrl: "https://api.singly.com"
+
+      // Should probably make the url a template and make a util
+      // function that performs this logic
+    , applyFacebookTokenUrl: function(token){
+        return "https://api.singly.com/auth/facebook/apply"
+        + "?client_id="     + config.defaults.singly.clientId
+        + "&client_secret=" + config.defaults.singly.clientSecret
+        + "&token="         + token
+        ;
+      }
+    }
   }
 };
 
