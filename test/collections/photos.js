@@ -151,6 +151,24 @@ describe('POST /v1/photos', function() {
 });
 
 
+describe('POST /v1/products/:id/photos', function() {
+
+  it('should respond with the id of a new photo', function(done) {
+    tu.loginAsSales(function(error, user){
+      tu.post('/v1/products/1/photos', { url:'http://placekitten.com/400/300' }, function(err, payload, res) {
+        assert(!err);
+        payload = JSON.parse(payload);
+        assert(res.statusCode == 200);
+
+        assert(!payload.error);
+        assert(payload.data.id);
+        tu.logout(done);
+      });
+    });
+  });
+
+});
+
 describe('PATCH /v1/photos/:id', function() {
 
   it('should respond with a 200', function(done) {
