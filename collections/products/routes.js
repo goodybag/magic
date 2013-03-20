@@ -45,6 +45,7 @@ module.exports.list = function(req, res){
     var includeTags = includes.indexOf('tags') !== -1;
     var includeCats = includes.indexOf('categories') !== -1;
     var includeColl = includes.indexOf('collections') !== -1;
+    var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
 
     // build data query
     var query = sql.query([
@@ -231,6 +232,12 @@ module.exports.list = function(req, res){
         query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
     }
 
+    // user photos join
+    if (req.session.user && includeUserPhotos) {
+      query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
+      query.$('userId', req.session.user.id);
+    }
+
     // is in collection join
     if (includeColl && req.session.user) {
       query.fields.add([
@@ -265,13 +272,16 @@ module.exports.list = function(req, res){
       }
 
       // parse out embedded results
-      if (includeTags || includeCats) {
+      if (includeTags || includeCats || includeUserPhotos) {
         dataResult.rows.forEach(function(row) {
           if (includeTags) {
-            row.tags = (row.tags) ? JSON.parse(row.tags) : [];
+            try { row.tags = (row.tags) ? JSON.parse(row.tags) : []; } catch(e) {}
           }
           if (includeCats) {
-            row.categories = (row.categories) ? JSON.parse(row.categories) : [];
+            try { row.categories = (row.categories) ? JSON.parse(row.categories) : []; } catch(e) {}
+          }
+          if (includeUserPhotos) {
+            try { row.photos = (row.photos) ? JSON.parse(row.photos) : []; } catch(e) {}
           }
         });
       }
