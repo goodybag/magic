@@ -173,9 +173,11 @@ module.exports.create = function(req, res){
   if (!inputs.isEnabled) inputs.isEnabled = true;
   inputs.isDeleted = false;
   var tags = inputs.tags; delete inputs.tags;
-  if (req.session.user.groups.indexOf('consumer') != -1)
+  if (req.session.user.groups.indexOf('consumer') != -1 &&
+      req.session.user.groups.indexOf('admin') == -1 &&
+      req.session.user.groups.indexOf('sales') == -1)
     inputs.isVerified = false;
-  
+
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
