@@ -147,14 +147,15 @@ module.exports.create = function(req, res){
       tx.begin(function() {
 
         var query = sql.query([
-          'INSERT INTO users (email, password, "passwordSalt", "cardId")',
-            'SELECT $email, $password, $salt, $cardId WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
+          'INSERT INTO users (email, password, "passwordSalt", "cardId", "createdAt")',
+            'SELECT $email, $password, $salt, $cardId, $createdAt WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
             'RETURNING id'
         ]);
         query.$('email', req.body.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
         query.$('cardId', req.body.cardId);
+        query.$('createdAt', 'now()');
         client.query(query.toString(), query.$values, function(error, result) {
           if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
