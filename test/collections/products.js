@@ -564,6 +564,26 @@ describe('POST /v1/products', function() {
     });
   });
 
+  it('should allow consumers to create an unverified product', function(done) {
+    tu.login({ email:'tferguson@gmail.com', password:'password' }, function() {
+      tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:1234 }), 'application/json', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.id);
+        tu.logout(function() {
+          tu.loginAsAdmin(function() {
+            tu.get('/v1/products/'+payload.data.id, function(err, payload, res) {
+              assert(res.statusCode == 200);
+              payload = JSON.parse(payload);
+              assert(payload.data.isVerified === false);
+              tu.logout(done);
+            });
+          });
+        });
+      });
+    });
+  });
+
   it('should not allow negative prices', function(done) {
     tu.loginAsAdmin(function() {
       tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:-1234 }), 'application/json', function(err, payload, res) {
