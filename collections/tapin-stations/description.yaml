@@ -26,6 +26,7 @@ collection:
         locationId:        { type: id,     eg: 1 }
         loyaltyEnabled:    { type: bool,   eg: true }
         galleryEnabled:    { type: bool,   eg: true }
+        numUnconfirmedPunchesAllowed: { type: int, eg: 1 }
   children:
     - /tapin-stations/:id
 
@@ -52,6 +53,7 @@ item:
         locationId:        { type: id,     eg: 1 }
         loyaltyEnabled:    { type: bool,   eg: true }
         galleryEnabled:    { type: bool,   eg: true }
+        numUnconfirmedPunchesAllowed: { type: int, eg: 1 }
     delete:
       desc: Delete Tapin Station
       auth:
