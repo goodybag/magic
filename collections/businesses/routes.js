@@ -142,7 +142,8 @@ module.exports.list = function(req, res){
 
     // is goodybag filter
     if (typeof req.param('isGB') != "undefined") {
-      query.where.and('businesses."isGB" is ' + ((/1|true/.test(req.param('isGB'))) ? 'true' : 'false'));
+      if ((/1|true/.test(req.param('isGB')))) query.where.and('businesses."isGB" is true');
+      else query.where.and('(businesses."isGB" is false or businesses."isGB" is null)');
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
