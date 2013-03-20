@@ -9,6 +9,7 @@ var all = [
 , 'loyaltyEnabled'
 , 'galleryEnabled'
 , 'numUnconfirmedPunchesAllowed'
+, 'createdAt'
 ];
 
 module.exports = {

@@ -10,6 +10,7 @@ var consumerAll = [
 , 'cardId'
 , 'groups'
 , 'groupIds'
+, 'createdAt'
 ];
 
 module.exports = {

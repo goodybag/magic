@@ -7,6 +7,7 @@ var all = [
 , 'cardId'
 , 'locationId'
 , 'businessId'
+, 'createdAt'
 ];
 
 module.exports = {

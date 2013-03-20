@@ -34,6 +34,9 @@ define(function(require){
     , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
     , sanitizers: { trim:[] }
     }
+  , createdAt: {
+      type: 'timestamp'
+    }
   };
   return users;
 });
