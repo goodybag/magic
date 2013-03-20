@@ -140,6 +140,12 @@ module.exports.list = function(req, res){
       query.where.and('businesses."isVerified" is ' + ((/1|true/.test(req.param('isVerified'))) ? 'true' : 'false'));
     }
 
+    // is goodybag filter
+    if (typeof req.param('isGB') != "undefined") {
+      if ((/1|true/.test(req.param('isGB')))) query.where.and('businesses."isGB" is true');
+      else query.where.and('(businesses."isGB" is false or businesses."isGB" is null)');
+    }
+
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, dataResult){
@@ -166,7 +172,7 @@ module.exports.list = function(req, res){
  */
 module.exports.create = function(req, res){
   var TAGS = ['create-business', req.uuid];
-  
+
   // defaults
   var inputs = req.body;
   if (!inputs.cardCode) inputs.cardCode = "000000";

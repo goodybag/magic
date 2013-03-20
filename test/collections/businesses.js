@@ -81,6 +81,20 @@ describe('GET /v1/businesses', function() {
     });
   });
 
+  it('should filter by isGB', function(done) {
+    tu.get('/v1/businesses?isGB=true', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data[0].isGB == true);
+      tu.get('/v1/businesses?isGB=false', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(!payload.data[0].isGB);
+        done();
+      });
+    });
+  });
+
   it('should paginate', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
       tu.get('/v1/businesses?offset=1&limit=1', function(err, results, res) {
