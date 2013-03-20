@@ -63,6 +63,19 @@ server.post(
 , routes.create
 );
 
+// Photos.create
+server.post(
+  '/v1/products/:productId/photos'
+, middleware.profile('POST /v1/photos')
+, function(req, res, next) { req.body.productId = req.param('productId'); next(); }
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.collection.methods.post.body)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('create photo handler')
+, routes.create
+);
+
 // Photos.get
 server.get(
   '/v1/photos/:photoId'
