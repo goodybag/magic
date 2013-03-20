@@ -513,6 +513,17 @@ describe('GET /v1/products/:id', function() {
     });
   });
 
+  it('should include user photos if requested', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products/4?include=userPhotos', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.photos.length === 1);
+        done();
+      });
+    });
+  });
+
   it('should respond 404 if product id is not in database', function(done){
     tu.get('/v1/products/100', function(err, payload, res) {
       assert(res.statusCode == 404);

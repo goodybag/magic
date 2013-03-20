@@ -73,7 +73,7 @@ function testValidRequest(methodDoc) {
 
 // EXPORTED
 function testExtradataRequest(methodDoc) {
-  if (methodDoc.hasNoAttrs()) return;
+  if (methodDoc.hasNoAttrs() || methodDoc.methodName == 'get') return;
 
   it('should respond 400 on '+methodDoc.getDesc()+' with unsupported input', function(done) {
     var requestDoc = methodDoc.makeRequestDoc();
