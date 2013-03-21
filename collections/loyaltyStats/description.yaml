@@ -14,6 +14,8 @@ collection:
         eg: { email: admin@goodybag.com, password: password }
       query:
         businessId:  { type: id, eg: 1 }
+        offset:      { type: int,     eg: 5 }
+        limit:       { type: int,     eg: 5 }
   children:
     - /loyalty/:id
 item:

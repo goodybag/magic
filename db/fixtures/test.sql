@@ -268,6 +268,7 @@ INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "total
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (5, 16, 1, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (6, 17, 1, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (7, 19, 1, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (8, 15, 2, 5, 23, 40, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
