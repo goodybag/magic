@@ -18,6 +18,11 @@ alter table "productTries" add foreign key ("userId")
   references users(id)
   on delete cascade;
 
+alter table "userRedemptions" drop constraint "userRedemptions_userId_fkey";
+alter table "userRedemptions" add foreign key ("userId")
+  references users(id)
+  on delete cascade;
+
 -- #451: Remove bad user (consumer) records
 delete from users where id not in (
   select id from consumers
