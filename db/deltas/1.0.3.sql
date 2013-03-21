@@ -1,5 +1,6 @@
 -- 1.0.3.sql
 alter table "deltas" alter column "date" type "timestamp";
+delete from deltas where version = '1.0.3';
 insert into deltas (version, date) values ('1.0.3', 'now()');
 
 -- Need to add delete behavior to match dev environment
