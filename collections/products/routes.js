@@ -67,7 +67,7 @@ module.exports.list = function(req, res){
 
     // hasPhoto filtering
     // :TEMP: iphone mods - only products with photos
-    if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && req.path == '/v1/products')) {
+    if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {
       query.where.and('"photoUrl" IS NOT NULL');
     }
 
