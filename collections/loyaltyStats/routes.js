@@ -54,7 +54,8 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // get stats
-    var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where}');
+    var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where} {limit}');
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
     query.fields = sql.fields().add('"userLoyaltyStats".*');
     query.fields.add('businesses.name AS "businessName"');
@@ -77,14 +78,17 @@ module.exports.list = function(req, res){
       query.$('businessId', req.param('businessId'));
     }
 
+    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
     client.query(query.toString(), query.$values, function(error, result){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+      var total = (result.rows[0]) ? result.rows[0].metaTotal : 0;
       if (result.rows.length > 0)
-        return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows });
+        return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows, meta: { total:total } });
 
       if (!req.param('businessId'))
-        return res.json({ error: null, data: [] });
+        return res.json({ error: null, data: [], meta: { total:total } });
 
       // They've requested either a loyaltystat that hasn't been created yet
       // Or a business that doesn't exist
@@ -145,7 +149,7 @@ module.exports.list = function(req, res){
           stat.elitePunchesRequired = results.settings.elitePunchesRequired;
           stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
 
-          res.json({ error: null, data: stat });
+          res.json({ error: null, data: stat, meta: { total:1 } });
         });
       });
     });

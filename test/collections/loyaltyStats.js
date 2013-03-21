@@ -50,6 +50,18 @@ describe('GET /v1/loyalty', function() {
     });
   });
 
+  it('should support pagination', function(done) {
+    tu.login({ email:'consumer4@gmail.com', password:'password' }, function() {
+      tu.get('/v1/loyalty?limit=1&offset=1', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(payload.data.length === 1);
+        assert(payload.meta.total > 1);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should respond with a 401 if no user is logged in', function(done) {
     tu.get('/v1/loyalty', function(err, payload, res) {
       assert(res.statusCode == 401);
@@ -169,9 +181,9 @@ describe('PUT /v1/loyalty/:loyaltyId', function() {
 
   it('should update the consumers stats', function(done){
     tu.login({ email:'some_manager@gmail.com', password:'password' }, function(error, user) {
-      tu.put('/v1/loyalty/8', { deltaPunches:1, locationId:1 }, function(err, payload, res) {
+      tu.put('/v1/loyalty/9', { deltaPunches:1, locationId:1 }, function(err, payload, res) {
         assert(res.statusCode == 204);
-        tu.get('/v1/loyalty/8', function(err, payload, res) {
+        tu.get('/v1/loyalty/9', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(!payload.error);
