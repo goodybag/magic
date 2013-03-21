@@ -358,6 +358,9 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
   if (inputs.password)
     delete inputs.password; // for now, no password updates
 
+  if (typeof inputs.email != 'undefined' && !inputs.email)
+    return callback(errors.input.VALIDATION_FAILED, { email:'Can not be set to a blank value.' });
+
   db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
 
