@@ -287,6 +287,18 @@ describe('PUT /v1/consumers/:id', function() {
     });
   });
 
+  it('should respond 400 if email is blank or null', function(done){
+    var consumer = {
+      email: ""
+    };
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/consumers/6', consumer, function(error, results, res){
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should update a users record even though they sent an email with put that already belongs to them', function(done){
     var consumer = {
       email: "tferguson@gmail.com"
