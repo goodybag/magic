@@ -8,7 +8,7 @@ collection:
       query:
         offset:  { type: int,     eg: 5 }
         limit:   { type: int,     eg: 5 }
-        filter:  { type: string,  eg: business }
+        filter:  { type: string,  eg: bob }
     post:
       desc: Add Consumer
       body:
