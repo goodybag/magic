@@ -1,5 +1,6 @@
 -- 1.0.3.sql
 alter table "deltas" alter column "date" type "timestamp";
+delete from deltas where version = '1.0.3';
 insert into deltas (version, date) values ('1.0.3', 'now()');
 
 -- Need to add delete behavior to match dev environment
@@ -15,6 +16,11 @@ alter table "productWants" add foreign key ("userId")
 
 alter table "productTries" drop constraint "productTries_userId_fkey";
 alter table "productTries" add foreign key ("userId")
+  references users(id)
+  on delete cascade;
+
+alter table "userRedemptions" drop constraint "userRedemptions_userId_fkey";
+alter table "userRedemptions" add foreign key ("userId")
   references users(id)
   on delete cascade;
 
