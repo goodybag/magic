@@ -1,8 +1,6 @@
 var all = [
   'id'
 , 'email'
-, 'password'
-, 'id'
 , 'tapinStationId'
 , 'businessId'
 , 'locationId'
@@ -23,18 +21,18 @@ module.exports = {
 
 , owner: {
     read:   all
-  , update: all
+  , update: all.concat('password')
   }
 
 , sales: {
     read:   all
-  , create: all
-  , update: all
+  , create: all.concat('password')
+  , update: all.concat('password')
   }
 
 , admin: {
     read:   all
-  , create: all
-  , update: all
+  , create: all.concat('password')
+  , update: all.concat('password')
   }
 };
