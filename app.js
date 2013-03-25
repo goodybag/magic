@@ -36,10 +36,10 @@ process.on('uncaughtException', function (err){
 });
 
 // :DEBUG: profiler
-var Profiler = require('clouseau');
-Profiler.enabled = true;
-Profiler.catchAll = false;
-Profiler.init({ displayInterval:0, useMicrotime:true });
+// var Profiler = require('clouseau');
+// Profiler.enabled = true;
+// Profiler.catchAll = false;
+// Profiler.init({ displayInterval:0, useMicrotime:true });
 
 // instantiate HTTP server
 var app = require('./lib/server').createAppServer();
