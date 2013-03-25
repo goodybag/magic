@@ -206,7 +206,7 @@ describe('PATCH /v1/tapin-stations/:id', function() {
       loyaltyEnabled: true
     };
     tu.loginAsConsumer(function() {
-      tu.patch('/v1/tapin-stations/7', tapinStation, function(error, results, res) {
+      tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -215,6 +215,18 @@ describe('PATCH /v1/tapin-stations/:id', function() {
         tu.logout(function() {
           done();
         });
+      });
+    });
+  });
+
+  it('should allow a blank location id', function(done) {
+    var tapinStation = {
+      locationId: ''
+    };
+    tu.loginAsAdmin(function() {
+      tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
+        assert(res.statusCode == 204);
+        tu.logout(done);
       });
     });
   });
