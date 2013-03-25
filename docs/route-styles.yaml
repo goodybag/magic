@@ -1,0 +1,5 @@
+- !styles
+  :root > :has(.resource):
+    handler: route
+  .methods > * > .body, .methods > * > .query:
+    handler: validation

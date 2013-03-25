@@ -36,6 +36,7 @@
     "node.extend": "1.0.x",
     "noop": "0.2.x",
     "js-yaml": "2.0.x",
+    "JSONSelect": "0.4.x",
     "bcrypt": "0.7.x",
     
     "pg": "0.14.x",

@@ -25,28 +25,13 @@ try {
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
 
-var yamlImportType = new yaml.Type('!import', {
-  loader: {
-    kind: 'string',
-    resolver: function(str) {
-      return 'WE SHOULD LOAD THIS: '+str;
-    }
-  }
+var cascade = require('../lib/cascade');
+var basepath = require('path').join(__dirname, '..');
+var doc = new cascade.loadDocument('/collections/consumers/description.yaml', {
+  basepath: basepath,
+  styles: ['/docs/route-styles.yaml']
 });
-var yamlStylesType = new yaml.Type('!styles', {
-  loader: {
-    kind: 'object',
-    resolver: function(obj) {
-      return 'WE SHOULD TREAT THIS AS STYLES: '+JSON.stringify(obj);
-    }
-  }
-});
-
-var STYLED_SCHEMA = yaml.Schema.create([yamlImportType, yamlStylesType]);
-var rawYaml = require('fs').readFileSync(require('path').join(__dirname, '../collections/consumers/description.yaml'), 'utf8');
-console.log(yaml.load(rawYaml, {schema:STYLED_SCHEMA}));
-
-
+console.log(doc.rootNode);
 
 
 // create server

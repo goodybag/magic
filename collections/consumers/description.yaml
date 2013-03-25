@@ -1,14 +1,3 @@
-- !import myfile.yaml
-- !import mysecondfile.yaml
-
-- !styles
-  :root > :has(.resource):
-    handler: route
-  .methods > * > .body, .methods > * > .query:
-    handler: validation
-  .class:
-    handler: ["class", ":root > .classes"]
-
 -
   resource:
     type: collection
@@ -43,7 +32,6 @@
     get:
       desc: Get Consumer
     put:
-      class: 'c'
       desc: Update Consumer
       auth:
         required: true
