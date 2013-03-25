@@ -187,9 +187,7 @@ describe('PATCH /v1/managers/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.locationId === 4);
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -208,9 +206,7 @@ describe('PATCH /v1/managers/:id', function() {
           results = JSON.parse(results);
           assert(!results.error);
           assert(results.data.locationId === null);
-          tu.logout(function() {
-            done();
-          });
+          tu.logout(done);
         });
       });
     });
@@ -227,9 +223,7 @@ describe('PATCH /v1/managers/:id', function() {
         results = JSON.parse(results);
         assert(results.error);
         assert(results.error.name === "NOT_ALLOWED");
-        tu.logout(function() {
-          done();
-        });
+        tu.logout(done);
       });
     });
   });

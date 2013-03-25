@@ -358,6 +358,7 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
   if (inputs.password)
     delete inputs.password; // for now, no password updates
 
+  // :DEBUG: this is a temporary fix while the document cascade api is built
   if (typeof inputs.email != 'undefined' && !inputs.email)
     return callback(errors.input.VALIDATION_FAILED, { email:'Can not be set to a blank value.' });
 

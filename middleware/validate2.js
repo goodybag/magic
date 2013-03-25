@@ -37,6 +37,9 @@ var
             }
           }
         }
+        // treat any blank string as a null
+        if (v === '')
+          inputs[k] = null;
         continue;
       }
 
