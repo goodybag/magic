@@ -75,6 +75,7 @@ describe('GET /v1/tapin-stations/:id', function() {
         results = JSON.parse(results);
         assert(!results.error);
         assert(results.data.id == 11130);
+        assert(typeof results.data.password == 'undefined');
 
         tu.logout(done);
       });
