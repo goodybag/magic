@@ -1,7 +1,9 @@
-var Profiler = require('clouseau');
+// var Profiler = require('clouseau');
+var Profiler = {};
 
 var profile = function(name, params) {
   return function(req, res, next) {
+    return next();
     var n = name;
 
     if (!Profiler.catchAll && !req.param('profile')) {
