@@ -24,6 +24,31 @@ try {
 }
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
+
+var yamlImportType = new yaml.Type('!import', {
+  loader: {
+    kind: 'string',
+    resolver: function(str) {
+      return 'WE SHOULD LOAD THIS: '+str;
+    }
+  }
+});
+var yamlStylesType = new yaml.Type('!styles', {
+  loader: {
+    kind: 'object',
+    resolver: function(obj) {
+      return 'WE SHOULD TREAT THIS AS STYLES: '+JSON.stringify(obj);
+    }
+  }
+});
+
+var STYLED_SCHEMA = yaml.Schema.create([yamlImportType, yamlStylesType]);
+var rawYaml = require('fs').readFileSync(require('path').join(__dirname, '../collections/consumers/description.yaml'), 'utf8');
+console.log(yaml.load(rawYaml, {schema:STYLED_SCHEMA}));
+
+
+
+
 // create server
 var app = require('../lib/server').createAppServer();
 app.use(require('../collections/debug/server'));

@@ -1,4 +1,15 @@
-collection:
+- !import myfile.yaml
+- !import mysecondfile.yaml
+
+- !styles
+  :root > :has(.resource):
+    handler: route
+  .methods > * > .body, .methods > * > .query:
+    handler: validation
+  .class:
+    handler: ["class", ":root > .classes"]
+
+-
   resource:
     type: collection
     path: /consumers
@@ -22,7 +33,7 @@ collection:
   children:
     - /consumers/:id
 
-item:
+-
   resource:
     type: item
     path: /consumers/:id
@@ -32,6 +43,7 @@ item:
     get:
       desc: Get Consumer
     put:
+      class: 'c'
       desc: Update Consumer
       auth:
         required: true
@@ -43,13 +55,14 @@ item:
         cardId:          { type: cardid, eg: 610XXX-URV }
         screenName:      { type: string, eg: jdoe_XXX }
         avatarUrl:       { type: url,    eg: http://placekitten.com/200/300 }
+
     delete:
       desc: Delete Consumer
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
 
-consumerPasswordItem:
+-
   resource:
     type: item
     path: /consumers/:id/password
@@ -69,7 +82,7 @@ consumerPasswordItem:
         required: true
         eg: { email: admin@goodybag.com, password: password }
 
-cardUpdatesCollection:
+-
   resource:
     type: collection
     path: /consumers/cardupdate
@@ -82,7 +95,7 @@ cardUpdatesCollection:
   children:
     - /consumers/cardupdate/:token
 
-cardUpdatesItem:
+-
   resource:
     type: item
     path: /consumers/cardupdate/:token
@@ -92,7 +105,7 @@ cardUpdatesItem:
     post:
       desc: Finalize Card Change
 
-collectionsCollection:
+-
   resource:
     type: collection
     path: /consumers/:userId/collections
@@ -116,7 +129,7 @@ collectionsCollection:
       body:
         name:    { type: string, eg: My Collection, required: true }
 
-collectionsItem:
+-
   resource:
     type: item
     path: /consumers/:userId/collections/:collectionId
@@ -137,7 +150,7 @@ collectionsItem:
       body:
         name:    { type: string, eg: My Collection, required: true }
 
-collectionProductsCollection:
+-
   resource:
     type: collection
     path: /consumers/:userId/collections/:collectionId/products
@@ -175,7 +188,7 @@ collectionProductsCollection:
         productId: { type: id, eg: 1, required: true }
 
 
-collectionsProductItem:
+-
   resource:
     type: item
     path: /consumers/:userId/collections/:collectionId/products/:productId

@@ -218,6 +218,18 @@ describe('PATCH /v1/tapin-stations/:id', function() {
       });
     });
   });
+
+  it('should respond 400 on invalid values', function(done) {
+    var tapinStation = {
+      locationId: null
+    };
+    tu.loginAsAdmin(function(error){
+      tu.patch('/v1/tapin-stations/11130', tapinStation, function(error, results, res) {
+        assert(res.statusCode == 400);
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('DEL /v1/tapin-stations/:id', function() {
