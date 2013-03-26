@@ -1,0 +1,18 @@
+- !styles
+  :root > :has(.resource):
+    __reduce: resource
+  .methods > *:
+    __reduce: method
+    resource: !select ':nth-parent(2)'
+    authCreds: !select '.auth .eg'
+    queryString:
+      __ops: { makeQueryString: !select ':parent .query > *' }
+    pathString:
+      __ops:
+        makePathString:
+          - !select ':parent .resource .path'
+          - !select ':parent .resource .params'
+    requestPath:
+      __ops: { concat: ['/v1', !select ':parent .pathString', '?', !select ':parent .queryString'] }
+    payload:
+      __ops: { makePayload: !select ':parent .body' }

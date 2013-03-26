@@ -25,7 +25,7 @@ try {
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
 
-var cascade = require('../lib/cascade');
+var cascade = require('../lib/docs/cascade');
 var basepath = require('path').join(__dirname, '..');
 var doc = new cascade.loadDocument('/collections/consumers/description.yaml', {
   basepath: basepath,
