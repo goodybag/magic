@@ -94,14 +94,27 @@ describe('POST /v1/consumers', function() {
     tu.post('/v1/consumers', consumer, function(error, results, res) {
       assert(res.statusCode == 200);
       results = JSON.parse(results);
-      assert(results.data.id >= 0);
-      tu.get('/v1/consumers/'+results.data.id, function(error, results) {
+      var id = results.data.id;
+      assert(id >= 0);
+      tu.get('/v1/consumers/'+id, function(error, results) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         for (var k in consumer) {
           if (k != 'password') assert(results.data[k] == consumer[k]);
         }
-        tu.logout(done);
+
+        // Ensure createdAt is getting set
+        tu.loginAsAdmin(function(error){
+          assert(!error);
+
+          tu.get('/v1/consumers/'+id, function(error, results) {
+            assert(!error);
+            results = JSON.parse(results);
+            assert(results.data.createdAt != null);
+
+            tu.logout(done);
+          });
+        });
       });
     });
   });
