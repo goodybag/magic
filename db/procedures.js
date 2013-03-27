@@ -267,8 +267,8 @@ module.exports.registerUser = function(group, inputs, options, callback){
         var query = sql.query([
           'WITH',
             '"user" AS',
-              '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId")',
-                'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId RETURNING *),',
+              '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId", "createdAt")',
+                'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId, $createdAt RETURNING *),',
             '"userGroup" AS',
               '(INSERT INTO "usersGroups" ("userId", "groupId")',
                 'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = $group RETURNING id),',
@@ -281,6 +281,7 @@ module.exports.registerUser = function(group, inputs, options, callback){
         query.$('singlyId', inputs.singlyId);
         query.$('singlyAccessToken', inputs.singlyAccessToken);
         query.$('cardId', inputs.cardId || '');
+        query.$('createdAt', 'now()');
 
         switch (group) {
           case 'consumer':
