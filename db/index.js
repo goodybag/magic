@@ -237,6 +237,8 @@ exports.schemas = {
 
 , events:                    require('./schemas/events')
 , activity:                  require('./schemas/activity')
+
+, poplistItems:              require('./schemas/poplistItems')
 };
 
 exports.fields = fields;

@@ -30,6 +30,12 @@ var config = {
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 
+  , algorithms: {
+      popular: {
+        numLists: 20
+      }
+    }
+
   , emailEnabled: false
   , emailFromAddress: 'info@goodybag.com'
 
