@@ -5,6 +5,11 @@
 var db          = require('../../db');
 var Transaction = require('pg-transaction');
 var async       = require('async');
+var config      = require('../../config');
+
+var logger = {
+  routes: require('../../lib/logger')({app: 'api', component: 'routes'})
+};
 
 module.exports.getRebuildPopularListInterface = function(req, res) {
   res.send([
@@ -13,30 +18,30 @@ module.exports.getRebuildPopularListInterface = function(req, res) {
 };
 
 module.exports.rebuildPopularList = function(req, res) {
-  console.log('popular list update trigged');
+  var TAGS = ['rebuild-popular-list', req.uuid];
 
-  db.getClient(function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), console.log(error);
+  db.getClient(TAGS, function(error, client){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var tx = new Transaction(client);
     tx.begin(function(error) {
-      if (error) return res.error(errors.internal.DB_FAILURE, error), console.log('Error while starting transaction', error);
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       // lock our target
       tx.query('SELECT id FROM "poplistItems" WHERE "isActive" = true FOR UPDATE NOWAIT', function(error) {
         // errors should actually occur if the rows were previously locked
-        if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), console.log('Error while locking product lists', error);
+        if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         // deprecate old lists
         tx.query('UPDATE "poplistItems" SET "isActive" = false WHERE "isActive" = true', function(error) {
-          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), console.log('Error while deprecating product lists', error);
+          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
           var fullList = [];
           var makeList = function(listid, cb) {
             // get the current productset
             tx.query('SELECT id, "businessId" as bid FROM products WHERE "photoUrl" IS NOT NULL ORDER BY products.likes DESC', function(error, results) {
-              if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), console.log('Error while selecting products', error);
-              if (results.rowCount === 0) return tx.abort(), res.error(errors.internal.DB_FAILURE, 'no products returned'), console.log('Error while selecting products: no products returned');
+              if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              if (results.rowCount === 0) return tx.abort(), res.error(errors.internal.DB_FAILURE, 'no products returned'), logger.routes.error(TAGS, 'Error while selecting products: no products returned');
 
               var products = results.rows;
               var makeSample = function(n, x, y) {
@@ -94,8 +99,7 @@ module.exports.rebuildPopularList = function(req, res) {
           // make the lists
           async.each(range(config.algorithms.popular.numLists), makeList, function(error) {
             insertListItems(tx, fullList, function(error) {
-              if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), console.log('Error while inserting new product lists', error);
-              console.log('popular lists updated successfully');
+              if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
               tx.commit();
               res.send("popular lists updated successfully");
             });
