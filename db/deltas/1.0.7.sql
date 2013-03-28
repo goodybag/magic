@@ -1,4 +1,6 @@
--- 1.0.6.sql
+-- 1.0.7.sql
+delete from deltas where version = '1.0.7';
+insert into deltas (version, date) values ('1.0.7', 'now()');
 
 -- popular lists
 CREATE TABLE "poplistItems" (
