@@ -28,6 +28,7 @@ collection:
         userTried:  { type: bool,    eg: false }
         userWants:  { type: bool,    eg: false }
         hasPhoto:   { type: bool,    eg: false }
+        listid:     { type: id,      eg: 1 }
     post:
       desc: Add Product
       auth:

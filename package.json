@@ -26,7 +26,7 @@
 
     "validator": "0.4.x",
     
-    "async": "0.1.x",
+    "async": "0.2.x",
     "when": "1.7.x",
 
     "request": "2.12.x",

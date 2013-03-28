@@ -6,7 +6,7 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
 var permissions = require('./permissions');
-var desc = require('./description')
+var desc = require('./description');
 
 // Products.list
 server.get(

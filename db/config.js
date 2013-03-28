@@ -48,6 +48,8 @@ var config = {
 
   , 'events'
   , 'activity'
+
+  , 'poplistItems'
   ]
 , fixtureFile: 'test'
 };

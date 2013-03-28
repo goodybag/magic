@@ -50,7 +50,7 @@ module.exports.list = function(req, res){
     // build data query
     var query = sql.query([
       'SELECT {fields} FROM products',
-        '{prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
+        '{poplistJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
         'INNER JOIN businesses ON businesses.id = products."businessId"',
         '{where}',
         'GROUP BY {groupby}',
@@ -253,8 +253,25 @@ module.exports.list = function(req, res){
     if (req.query.sort) {
       if (req.query.sort.indexOf('random') !== -1)
         query.fields.add('random() as random'); // this is really inefficient
-      else if (req.query.sort.indexOf('popular') !== -1)
-        query.fields.add('random() as popular'); // :TODO:
+      else if (req.query.sort.indexOf('popular') !== -1) {
+        query.poplistJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
+        query.fields.add('pli.id as popular');
+        query.groupby.add('pli.id');
+
+        var listid = Math.floor(Math.random()*config.algorithms.popular.numLists);
+        var onehour = 1000 * 60 * 60;
+        if (req.query.listid)
+          listid = req.query.listid;
+        else if (req.session) {
+          if (req.session.currentPopListid && ((req.session.currentPopListCreated - new Date()) < onehour || req.query.offset !== 0))
+            listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
+          else {
+            req.session.currentPopListid = listid; // :TEMP: store current list from session
+            req.session.currentPopListCreated = new Date();
+          }
+        }
+        query.$('poplistid', listid);
+      }
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
@@ -286,7 +303,7 @@ module.exports.list = function(req, res){
         });
       }
 
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total, userLikes:userLikes, userWants:userWants, userTries:userTries } });
+      res.json({ error: null, data: dataResult.rows, meta: { total:total, userLikes:userLikes, userWants:userWants, userTries:userTries } });
     });
   });
 };

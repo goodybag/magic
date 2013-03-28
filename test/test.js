@@ -54,7 +54,11 @@ before(function(done) {
     self.httpServer = require('http').createServer(app);
     self.httpServer.listen(8986, function(err){
       if (err) throw err;
-      done();
+      tu.loginAsAdmin(function() {
+        tu.post('/v1/admin/algorithms/popular', {}, function() {
+          tu.logout(done);
+        });
+      });
     });
     self.httpServer.on('connection', function(socket) {
       socket.on('error', function(e) { console.log("SOCKET ERROR", e); });
