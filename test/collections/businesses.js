@@ -132,7 +132,7 @@ describe('GET /v1/businesses/requests', function() {
       tu.get('/v1/businesses/requests', function(error, results){
         assert(!error);
         results = JSON.parse(results);
-        assert(results.length > 0);
+        assert(results.data.length > 0);
         tu.logout(done);
       });
     });
@@ -149,10 +149,9 @@ describe('GET /v1/businesses/requests', function() {
 
 describe('POST /v1/businesses/requests', function() {
   it('should save a business reqest', function(done) {
-    tu.post('/v1/businesses/requests', { name: 'Testerrroooo' }, function(error, results){
+    tu.post('/v1/businesses/requests', { name: 'Testerrroooo' }, function(error, results, res){
       assert(!error);
-      results = JSON.parse(results);
-      assert(results.length > 0);
+      assert(res.statusCode == 204);
       tu.logout(done);
     });
   });

@@ -199,6 +199,7 @@ exports.schemas = {
 , businesses:                require('./schemas/businesses')
 , businessLoyaltySettings:   require('./schemas/businessLoyaltySettings')
 , businessTags:              require('./schemas/businessTags')
+, businessRequests:          require('./schemas/businessRequests')
 , locations:                 require('./schemas/locations')
 
 , users:                     require('./schemas/users')

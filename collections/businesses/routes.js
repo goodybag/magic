@@ -364,7 +364,7 @@ module.exports.addRequest = function(req, res){
   var TAGS = ['add-business-request', req.uuid];
   logger.routes.debug(TAGS, 'adding business request ' + req.body.name);
 
-  db.api.businessRequests.insert({ name: req.body.name }, function(error, result){
+  db.api.businessRequests.insert({ name: req.body.name }, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.noContent();
@@ -374,14 +374,12 @@ module.exports.addRequest = function(req, res){
 };
 
 module.exports.listRequests = function(req, res){
-  var TAGS = ['add-business-request', req.uuid];
-  logger.routes.debug(TAGS, 'adding business request ' + req.body.name);
+  var TAGS = ['list-business-requests', req.uuid];
+  logger.routes.debug(TAGS, 'listing business requests');
 
-  db.api.businessRequests.insert({ name: req.body.name }, function(error, result){
+  db.api.businessRequests.find({}, { order: 'id desc' }, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    res.noContent();
-
-    magic.emit('business.requested', req.body.name);
+    res.json({ error: null, data: results });
   });
 };

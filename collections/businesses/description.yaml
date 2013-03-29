@@ -109,4 +109,4 @@ requests:
     post:
       desc: Add business request
       body:
-        name:                         { type: string, eg: Kirby Lane }
+        name:                         { type: string, required: true, eg: Kirby Lane }
