@@ -359,3 +359,29 @@ module.exports.updateLoyalty = function(req, res){
     );
   });
 };
+
+module.exports.addRequest = function(req, res){
+  var TAGS = ['add-business-request', req.uuid];
+  logger.routes.debug(TAGS, 'adding business request ' + req.body.name);
+
+  db.api.businessRequests.insert({ name: req.body.name }, function(error, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.noContent();
+
+    magic.emit('business.requested', req.body.name);
+  });
+};
+
+module.exports.listRequests = function(req, res){
+  var TAGS = ['add-business-request', req.uuid];
+  logger.routes.debug(TAGS, 'adding business request ' + req.body.name);
+
+  db.api.businessRequests.insert({ name: req.body.name }, function(error, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.noContent();
+
+    magic.emit('business.requested', req.body.name);
+  });
+};

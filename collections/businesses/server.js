@@ -24,6 +24,28 @@ server.get(
 , routes.list
 );
 
+// Businesses.listRequests
+server.get(
+  '/v1/businesses/requests'
+, middleware.profile('GET /v1/businesses/requests')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales')
+, middleware.profile('list business requests handler')
+, routes.listRequests
+);
+
+// Businesses.addRequest
+server.post(
+  '/v1/businesses/requests'
+, middleware.profile('POST /v1/businesses/requests')
+, middleware.profile('permissions')
+, middleware.permissions(permissions.business)
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.requests.methods.post.body)
+, middleware.profile('add business requests handler')
+, routes.addRequest
+);
+
 // Businesses.list
 server.get(
   '/v1/businesses/food'
