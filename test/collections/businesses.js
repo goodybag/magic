@@ -8,14 +8,17 @@ var
 ;
 
 describe('GET /v1/businesses', function() {
-  it('should respond with a business listing', function(done) {
-    tu.populate('businesses', [{ name:'Business 1' }, { name:'Business 2' }], function(err, ids) {
+  it('should respond with a business listing of all verified businesses', function(done) {
+    var data = [{ name:'Business 1' }, { name:'Business UNVERIFIED', isVerified: false }];
+    tu.populate('businesses', data, function(err, ids) {
       tu.get('/v1/businesses', function(err, results, res) {
         assert(!err);
         var payload = JSON.parse(results);
         assert(!payload.error);
         assert(payload.data[0].id);
         assert(payload.data[0].name.length > 0);
+        // Filter by isVerified not true - should be 0
+        assert(payload.data.filter(function(a){ return a.name == 'Business UNVERIFIED'; }).length === 0);
         tu.depopulate('businesses', ids, done);
       });
     });
@@ -78,6 +81,15 @@ describe('GET /v1/businesses', function() {
         assert(payload.data.length == 1);
         done();
       });
+    });
+  });
+
+  it('should not filter by isVerified', function(done) {
+    tu.get('/v1/businesses?isVerified[]=true&isVerified[]=false', function(err, payload, res) {
+      assert(res.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.length == 6);
+      done();
     });
   });
 
@@ -380,7 +392,7 @@ describe('POST /v1/businesses', function(){
             assert(!results.error);
             // is gb false by default
             assert(results.data.isGB === false);
-            assert(results.data.isVerified === false);
+            assert(results.data.isVerified === true);
             tu.logout(function(){
               done();
             });
