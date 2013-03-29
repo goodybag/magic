@@ -10,6 +10,7 @@ var config = {
   , 'businesses'
   , 'businessLoyaltySettings'
   , 'businessTags'
+  , 'businessRequests'
   , 'locations'
 
   , 'users'
