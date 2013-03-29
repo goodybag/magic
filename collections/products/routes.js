@@ -263,7 +263,7 @@ module.exports.list = function(req, res){
         if (req.query.listid)
           listid = req.query.listid;
         else if (req.session) {
-          if (req.session.currentPopListid && ((req.session.currentPopListCreated - new Date()) < onehour || req.query.offset !== 0))
+          if (req.session.currentPopListid && req.session.currentPopListCreated && ((new Date() - new Date(req.session.currentPopListCreated)) < onehour || req.query.offset < 1))
             listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
           else {
             req.session.currentPopListid = listid; // :TEMP: store current list from session
