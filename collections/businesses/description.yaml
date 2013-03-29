@@ -16,7 +16,7 @@ collection:
         offset:     { type: int,     eg: 5, default: 0 }
         limit:      { type: int,     eg: 5, default: 20 }
         filter:     { type: string,  eg: business }
-        isVerified: { type: bool,    eg: true }
+        isVerified: { type: bool*,   eg: [true, false, 1, 0] }
         isGB:       { type: bool,    eg: true }
     post:
       desc: Add Business
