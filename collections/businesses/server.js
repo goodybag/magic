@@ -38,8 +38,6 @@ server.get(
 server.post(
   '/v1/businesses/requests'
 , middleware.profile('POST /v1/businesses/requests')
-, middleware.profile('permissions')
-, middleware.permissions(permissions.business)
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.requests.methods.post.body)
 , middleware.profile('add business requests handler')

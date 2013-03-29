@@ -141,8 +141,8 @@ describe('GET /v1/businesses/requests', function() {
   it('should respond with a 403', function(done) {
     tu.get('/v1/businesses/requests', function(error, results, res){
       assert(!error);
-      assert(res.statusCode == 403);
-      tu.logout(done);
+      assert(res.statusCode == 401);
+      done()
     });
   });
 });
