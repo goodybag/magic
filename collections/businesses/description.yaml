@@ -91,7 +91,22 @@ loyaltySettings:
       body:
         reward:                       { type: string, eg: A Burrito }
         requiredItem:                 { type: string, eg: A Taco }
-        regularPunchesRequired:       { type: int, eg: 10 }
-        elitePunchesRequired:         { type: int, eg: 5 }
-        punchesRequiredToBecomeElite: { type: int, eg: 20 }
-        photoUrl:                     { type: url, eg: http://foo.com/image.png }
+        regularPunchesRequired:       { type: int,    eg: 10 }
+        elitePunchesRequired:         { type: int,    eg: 5 }
+        punchesRequiredToBecomeElite: { type: int,    eg: 20 }
+        photoUrl:                     { type: url,    eg: http://foo.com/image.png }
+
+requests:
+  resource:
+    type: item
+    path: /businesses/requests
+  methods:
+    get:
+      desc: Get business requests
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    post:
+      desc: Add business request
+      body:
+        name:                         { type: string, required: true, eg: Kirby Lane }

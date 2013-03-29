@@ -580,3 +580,11 @@ BEGIN;
 INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('1','1', '11', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-02-13 15:21:57.497542');
 INSERT INTO "oddityMeta" (id, "userId","oddityLiveId", "toReview", "changeColumns", "isHidden", "hiddenBy", "reviewedBy", "lastUpdated") VALUES ('2','2', '22', true, true, false, 'admin@goodybag.com', 'sales@goodybag.com', '2013-01-13 15:21:57.497542');
 COMMIT;
+
+-- Business requests
+begin;
+insert into "businessRequests" (name) values ('Kerby Lane');
+insert into "businessRequests" (name) values ('Awesome shop');
+insert into "businessRequests" (name) values ('That place across McDonalds');
+insert into "businessRequests" (name) values ('Chevron');
+commit;

@@ -53,7 +53,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-activity', req.uuid];
   logger.routes.debug(TAGS, 'fetching activity ' + req.params.id);
 
-  var query = {}, options = { order: 'order by id desc' };
+  var query = {}, options = { order: 'id desc' };
 
   // if (req.param('filter'))      query.type = '%' + req.param('filter') + '%';
   if (req.param('userId'))     query.userId     = req.param('userId');
