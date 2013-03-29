@@ -136,8 +136,24 @@ module.exports.list = function(req, res){
     }
 
     // is verified filter
-    if (typeof req.param('isVerified') != "undefined") {
-      query.where.and('businesses."isVerified" is ' + ((/1|true/.test(req.param('isVerified'))) ? 'true' : 'false'));
+    var isVerified = req.param('isVerified');
+    if (typeof isVerified != "undefined") {
+      if (Array.isArray(isVerified) && isVerified.length > 0){
+        // Ensure each value is actually just a boolean
+        isVerified = isVerified.map(function(a){ return /1|true/.test(a); });
+        if (isVerified.indexOf(true) > -1 && isVerified.indexOf(false) > -1){
+          // Actually do nothing in this case
+
+        } else if (isVerified.indexOf(true) > -1){
+          query.where.and('businesses."isVerified" is true');
+        } else {
+          query.where.and('(businesses."isVerified" is false or businesses."isVerified" is null)');
+        }
+      } else {
+        query.where.and('businesses."isVerified" is ' + ((/1|true/.test(isVerified)) ? 'true' : 'false'));
+      }
+    } else {
+      query.where.and('businesses."isVerified" is true');
     }
 
     // is goodybag filter
@@ -200,9 +216,20 @@ module.exports.create = function(req, res){
       query.values.add(false);
     }
 
-    if (req.body.isVerified == null || req.body.isVerified == undefined){
-      query.fields.add('"isVerified"');
-      query.values.add(false);
+    if (!req.session
+    || !req.session.user
+    || !req.session.user.groups
+    || (req.session.user.groups.indexOf('admin') === -1
+    && req.session.user.groups.indexOf('sales') === -1)){
+      if (req.body.isVerified == null || req.body.isVerified == undefined){
+        query.fields.add('"isVerified"');
+        query.values.add(false);
+      }
+    } else {
+      if (req.body.isVerified == null || req.body.isVerified == undefined){
+        query.fields.add('"isVerified"');
+        query.values.add(true);
+      }
     }
 
     client.query(query.toString(), query.$values, function(error, result){
