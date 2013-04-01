@@ -44,6 +44,26 @@ server.post(
 , routes.addRequest
 );
 
+// Businesses.listContactEntries
+server.get(
+  '/v1/businesses/contact-entries'
+, middleware.profile('GET /v1/businesses/contact-entries')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales')
+, middleware.profile('list business contact handler')
+, routes.listContactEntries
+);
+
+// Businesses.addContactEntry
+server.post(
+  '/v1/businesses/contact-entries'
+, middleware.profile('POST /v1/businesses/contact-entries')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.contact.methods.post.body)
+, middleware.profile('add business contact form entry handler')
+, routes.addContactEntry
+);
+
 // Businesses.list
 server.get(
   '/v1/businesses/food'

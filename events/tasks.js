@@ -3,11 +3,13 @@
  */
 
 var
-  db      = require('../db')
-, utils   = require('../lib/utils')
-, magic   = require('../lib/magic')
+  db        = require('../db')
+, utils     = require('../lib/utils')
+, magic     = require('../lib/magic')
+, config    = require('../config')
+, templates = require('../templates')
 
-, logger  = require('../lib/logger')({ app: 'api', component: 'activity' })
+, logger    = require('../lib/logger')({ app: 'api', component: 'activity' })
 
 , TAGS = ['events', 'tasks']
 ;
@@ -22,5 +24,16 @@ module.exports = {
     db.api.collections.setLogTags(['tasks-consumers-registered-event', 'consumer-'+consumer.id]);
     db.api.collections.insert({ userId:consumer.id, name:'Food', isHidden:false, pseudoKey:'food' });
     magic.emit('debug.newConsumerCollectionsCreated', consumer);
+  }
+
+  // Email jag or something about the business contacting us
+, 'business.contacted':
+  function (info){
+    utils.sendEmail(
+      config.emailFromAddress
+    , config.emailFromAddress
+    , 'Business Contacted Us'
+    , JSON.stringify(info, true, '  ')
+    );
   }
 };

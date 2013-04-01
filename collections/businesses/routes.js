@@ -410,3 +410,35 @@ module.exports.listRequests = function(req, res){
     res.json({ error: null, data: results });
   });
 };
+
+module.exports.addContactEntry = function(req, res){
+  var TAGS = ['add-business-contact-entries', req.uuid];
+  logger.routes.debug(TAGS, 'adding business contact entry');
+
+  var contactInfo = {
+    name:             req.body.name
+  , businessName:     req.body.businessName
+  , email:            req.body.email
+  , zip:              req.body.zip
+  , comments:         req.body.comments
+  };
+
+  db.api.businessContact.insert(contactInfo, function(error, results){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.noContent();
+
+    magic.emit('business.contacted', contactInfo);
+  });
+};
+
+module.exports.listContactEntries = function(req, res){
+  var TAGS = ['list-business-contact-entries', req.uuid];
+  logger.routes.debug(TAGS, 'listing business contact entries');
+
+  db.api.businessContact.find({}, { order: 'id desc' }, function(error, results){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.json({ error: null, data: results });
+  });
+};

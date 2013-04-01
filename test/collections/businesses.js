@@ -698,3 +698,34 @@ describe('PATCH /v1/businesses/:id', function(){
     });
   });
 });
+
+describe('GET /v1/businesses/contact', function(){
+  it('should respond with a list of business contact entries', function(done){
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/businesses/contact', function(error, results){
+        assert(!error);
+        results = JSON.parse(results);
+        assert(results.data.length > 0);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond with a 403', function(done){
+    tu.get('/v1/businesses/contact', function(error, results, res){
+      assert(!error);
+      assert(res.statusCode == 401);
+      done()
+    });
+  });
+});
+
+describe('POST /v1/businesses/contact', function(){
+  it('should save a business reqest', function(done) {
+    tu.post('/v1/businesses/contact', { name: 'Testerrroooo' }, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode == 204);
+      tu.logout(done);
+    });
+  });
+});
