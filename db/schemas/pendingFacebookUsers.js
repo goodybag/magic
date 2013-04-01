@@ -14,8 +14,9 @@ define(function(require){
       type: 'bigint'
     , meta: 'primary key'
     }
-  , cardId: {
-      type: 'text'
+  , userId: {
+      type: 'int'
+    , meta: 'references users(id)'
     }
   , pending: {
       type: 'boolean'
