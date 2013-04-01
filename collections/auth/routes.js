@@ -137,7 +137,7 @@ module.exports.oauthAuthenticate = function(req, res){
       var
         $query  = { facebookId: fbid, $null: ['pending'] }
       , $update = { pending: false }
-      , options = { returning: ['cardId'] }
+      , options = { returning: ['userId'] }
       ;
 
       db.api.pendingFacebookUsers.update($query, $update, options, function(error, results){
@@ -145,7 +145,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
         if (results.length === 0) return stage.createOrUpdateUser(user);
 
-        user.cardId = results[0].cardId;
+        user.id = results[0].userId;
 
         return stage.updatePendingUser(user);
       });
@@ -153,18 +153,18 @@ module.exports.oauthAuthenticate = function(req, res){
 
   , updatePendingUser: function(user){
       var
-        $query  = { cardId: user.cardId }
-      , $update = { singlyId: user.singlyId, singlyAccessToken: user.singlyAccessToken }
-      , options = { returning: ['id'] }
+        $update = { singlyId: user.singlyId, singlyAccessToken: user.singlyAccessToken }
+      , options = { returning: ['cardId', 'email'] }
       ;
 
-      db.api.users.update($query, $update, options, function(error, results){
+      db.api.users.update(user.id, $update, options, function(error, results){
         if (error) return stage.dbError(error);
 
         // Herrmm that's weird
         if (results.length === 0) return createOrUpdateUser(user);
 
-        user.id = results[0].id;
+        user.cardId = results[0].cardId;
+        user.email = results[0].email;
 
         return stage.lookupUsersGroups(user);
       });
