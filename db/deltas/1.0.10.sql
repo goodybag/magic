@@ -30,3 +30,7 @@ insert into "businessTags" ("businessId", tag) values (2011, 'food'); -- Wholly 
 insert into "businessTags" ("businessId", tag) values (1977, 'food'); -- Goodfellers
 insert into "businessTags" ("businessId", tag) values (1974, 'food'); -- Brass House
 insert into "businessTags" ("businessId", tag) values (1975, 'food'); -- Big Daddy's Burgers & Bar
+
+-- #491 - cardID upper
+
+update users set "cardId" = upper(users."cardId");

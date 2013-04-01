@@ -88,7 +88,7 @@ describe('POST /v1/consumers', function() {
     , lastName:   "McTesterson"
     , screenName: "testies"
     , avatarUrl:  "http://loljk.com/foobar.png"
-    , cardId:     "123456-ZZZ"
+    , cardId:     "123456-zzz"
     };
 
     tu.post('/v1/consumers', consumer, function(error, results, res) {
@@ -100,7 +100,8 @@ describe('POST /v1/consumers', function() {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         for (var k in consumer) {
-          if (k != 'password') assert(results.data[k] == consumer[k]);
+          if (k == 'cardId') assert(results.data[k] == consumer[k].toUpperCase())
+          else if (k != 'password') assert(results.data[k] == consumer[k]);
         }
 
         // Ensure createdAt is getting set

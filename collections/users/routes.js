@@ -154,7 +154,7 @@ module.exports.create = function(req, res){
         query.$('email', req.body.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
-        query.$('cardId', req.body.cardId);
+        query.$('cardId', req.body.cardId ? req.body.cardId.toUpperCase() : null);
         query.$('createdAt', 'now()');
         client.query(query.toString(), query.$values, function(error, result) {
           if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
@@ -282,7 +282,7 @@ module.exports.update = function(req, res){
         }
         if (cardId) {
           query.updates.add('"cardId" = $cardId');
-          query.$('cardId', cardId);
+          query.$('cardId', cardId.toUpperCase());
         }
 
         if (query.updates.fields.length === 0) return applyGroupRelations();
