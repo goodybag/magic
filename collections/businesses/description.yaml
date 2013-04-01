@@ -114,10 +114,10 @@ requests:
 contact:
   resource:
     type: item
-    path: /businesses/contact-entries
+    path: /businesses/contact-requests
   methods:
     get:
-      desc: Get business contact entries
+      desc: Get business contact requests
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }

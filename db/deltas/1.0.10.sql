@@ -2,7 +2,7 @@
 insert into deltas (version, date) values ('1.0.10', 'now()');
 
 -- # 476 - Business Contact entries
-create table "businessContact" (
+create table "businessContactRequests" (
   id              serial primary key
 , name            text
 , "businessName"  text

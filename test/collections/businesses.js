@@ -699,10 +699,10 @@ describe('PATCH /v1/businesses/:id', function(){
   });
 });
 
-describe('GET /v1/businesses/contact-entries', function(){
+describe('GET /v1/businesses/contact-requests', function(){
   it('should respond with a list of business contact entries', function(done){
     tu.loginAsAdmin(function(){
-      tu.get('/v1/businesses/contact-entries', function(error, results){
+      tu.get('/v1/businesses/contact-requests', function(error, results){
         assert(!error);
         results = JSON.parse(results);
         assert(results.data.length > 0);
@@ -712,7 +712,7 @@ describe('GET /v1/businesses/contact-entries', function(){
   });
 
   it('should respond with a 403', function(done){
-    tu.get('/v1/businesses/contact-entries', function(error, results, res){
+    tu.get('/v1/businesses/contact-requests', function(error, results, res){
       assert(!error);
       assert(res.statusCode == 401);
       done()
@@ -720,7 +720,7 @@ describe('GET /v1/businesses/contact-entries', function(){
   });
 });
 
-describe('POST /v1/businesses/contact-entries', function(){
+describe('POST /v1/businesses/contact-requests', function(){
   it('should save a business contact entry', function(done) {
     var info = {
       name: 'Bob Johnson'
@@ -730,7 +730,7 @@ describe('POST /v1/businesses/contact-entries', function(){
     , comments: 'I WANT GOODYBAG. YOU GIVE TO BOB. BOB WANT TABLET. BOB WANT MENU ITEMS ON TABLET IN STORE. BOB HAVE MANY THINGS. BOB.'
     };
 
-    tu.post('/v1/businesses/contact-entries', info, function(error, results, res){
+    tu.post('/v1/businesses/contact-requests', info, function(error, results, res){
       assert(!error);
       assert(res.statusCode == 204);
       tu.logout(done);
@@ -746,7 +746,7 @@ describe('POST /v1/businesses/contact-entries', function(){
     , comments: 'I WANT GOODYBAG. YOU GIVE TO BOB. BOB WANT TABLET. BOB WANT MENU ITEMS ON TABLET IN STORE. BOB HAVE MANY THINGS. BOB.'
     };
 
-    tu.post('/v1/businesses/contact-entries', info, function(error, results, res){
+    tu.post('/v1/businesses/contact-requests', info, function(error, results, res){
       assert(!error);
       assert(res.statusCode == 400);
       tu.logout(done);

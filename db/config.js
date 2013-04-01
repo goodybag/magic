@@ -11,7 +11,7 @@ var config = {
   , 'businessLoyaltySettings'
   , 'businessTags'
   , 'businessRequests'
-  , 'businessContact'
+  , 'businessContactRequests'
   , 'locations'
 
   , 'users'

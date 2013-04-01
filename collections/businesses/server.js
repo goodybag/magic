@@ -44,24 +44,24 @@ server.post(
 , routes.addRequest
 );
 
-// Businesses.listContactEntries
+// Businesses.listContactRequests
 server.get(
-  '/v1/businesses/contact-entries'
-, middleware.profile('GET /v1/businesses/contact-entries')
+  '/v1/businesses/contact-requests'
+, middleware.profile('GET /v1/businesses/contact-requests')
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin', 'sales')
-, middleware.profile('list business contact handler')
-, routes.listContactEntries
+, middleware.profile('list business contact requests handler')
+, routes.listContactRequests
 );
 
-// Businesses.addContactEntry
+// Businesses.addContactRequest
 server.post(
-  '/v1/businesses/contact-entries'
-, middleware.profile('POST /v1/businesses/contact-entries')
+  '/v1/businesses/contact-requests'
+, middleware.profile('POST /v1/businesses/contact-requests')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.contact.methods.post.body)
-, middleware.profile('add business contact form entry handler')
-, routes.addContactEntry
+, middleware.profile('add business contact request handler')
+, routes.addContactRequest
 );
 
 // Businesses.list

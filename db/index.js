@@ -200,7 +200,7 @@ exports.schemas = {
 , businessLoyaltySettings:   require('./schemas/businessLoyaltySettings')
 , businessTags:              require('./schemas/businessTags')
 , businessRequests:          require('./schemas/businessRequests')
-, businessContact:           require('./schemas/businessContact')
+, businessContactRequests:   require('./schemas/businessContactRequests')
 , locations:                 require('./schemas/locations')
 
 , users:                     require('./schemas/users')

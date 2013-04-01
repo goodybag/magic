@@ -411,9 +411,9 @@ module.exports.listRequests = function(req, res){
   });
 };
 
-module.exports.addContactEntry = function(req, res){
-  var TAGS = ['add-business-contact-entries', req.uuid];
-  logger.routes.debug(TAGS, 'adding business contact entry');
+module.exports.addContactRequest = function(req, res){
+  var TAGS = ['add-business-contact-requests', req.uuid];
+  logger.routes.debug(TAGS, 'adding business contact request');
 
   var contactInfo = {
     name:             req.body.name
@@ -423,7 +423,7 @@ module.exports.addContactEntry = function(req, res){
   , comments:         req.body.comments
   };
 
-  db.api.businessContact.insert(contactInfo, function(error, results){
+  db.api.businessContactRequests.insert(contactInfo, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.noContent();
@@ -432,11 +432,11 @@ module.exports.addContactEntry = function(req, res){
   });
 };
 
-module.exports.listContactEntries = function(req, res){
-  var TAGS = ['list-business-contact-entries', req.uuid];
-  logger.routes.debug(TAGS, 'listing business contact entries');
+module.exports.listContactRequests = function(req, res){
+  var TAGS = ['list-business-contact-requests', req.uuid];
+  logger.routes.debug(TAGS, 'listing business contact requests');
 
-  db.api.businessContact.find({}, { order: 'id desc' }, function(error, results){
+  db.api.businessContactRequests.find({}, { order: 'id desc' }, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.json({ error: null, data: results });
