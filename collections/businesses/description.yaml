@@ -110,3 +110,22 @@ requests:
       desc: Add business request
       body:
         name:                         { type: string, required: true, eg: Kirby Lane }
+
+contact:
+  resource:
+    type: item
+    path: /businesses/contact-requests
+  methods:
+    get:
+      desc: Get business contact requests
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    post:
+      desc: Add business contact info
+      body:
+        name:                         { type: string, required: true, eg: John Jacob }
+        businessName:                 { type: string, required: true, eg: Kirby Lane }
+        email:                        { type: email,  required: true, eg: steve@biz.goodybag.com }
+        zip:                          { type: int,    required: true, eg: 75189 }
+        comments:                     { type: string, eg: These are my comments!! How are you? }
