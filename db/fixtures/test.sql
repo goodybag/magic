@@ -591,8 +591,8 @@ commit;
 
 -- Business contact entries
 begin;
-insert into "businessRequests" (name, "businessName", email, zip, comments) values ('John Jacob', 'Kerby Lane', 'steve@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
-insert into "businessRequests" (name, "businessName", email, zip, comments) values ('John Jacobs', 'Biz1', 'steve1@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
-insert into "businessRequests" (name, "businessName", email, zip, comments) values ('John Johnson', 'Biz2', 'steve2@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
-insert into "businessRequests" (name, "businessName", email, zip, comments) values ('John blalj', 'Biz3', 'steve3@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
+insert into "businessContact" (name, "businessName", email, zip, comments) values ('John Jacob', 'Kerby Lane', 'steve@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
+insert into "businessContact" (name, "businessName", email, zip, comments) values ('John Jacobs', 'Biz1', 'steve1@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
+insert into "businessContact" (name, "businessName", email, zip, comments) values ('John Johnson', 'Biz2', 'steve2@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
+insert into "businessContact" (name, "businessName", email, zip, comments) values ('John blalj', 'Biz3', 'steve3@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
 commit;

@@ -29,7 +29,7 @@ module.exports = {
   // Email jag or something about the business contacting us
 , 'business.contacted':
   function (info){
-    utils.sendEmail(
+    utils.sendMail(
       config.emailFromAddress
     , config.emailFromAddress
     , 'Business Contacted Us'
