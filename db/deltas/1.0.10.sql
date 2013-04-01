@@ -30,3 +30,15 @@ insert into "businessTags" ("businessId", tag) values (2011, 'food'); -- Wholly 
 insert into "businessTags" ("businessId", tag) values (1977, 'food'); -- Goodfellers
 insert into "businessTags" ("businessId", tag) values (1974, 'food'); -- Brass House
 insert into "businessTags" ("businessId", tag) values (1975, 'food'); -- Big Daddy's Burgers & Bar
+
+-- #492 - Pending facebook users use userId instead of cardId
+
+alter table "pendingFacebookUsers" add column "userId" int;
+alter table "pendingFacebookUsers" add foreign key ("userId") references users(id);
+
+update "pendingFacebookUsers"
+  set "userId" = users.id
+  from users
+  where "pendingFacebookUsers"."cardId" = users."cardId";
+
+alter table "pendingFacebookUsers" drop column "cardId";
