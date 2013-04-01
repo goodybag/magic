@@ -160,7 +160,7 @@ describe('GET /v1/businesses/requests', function() {
 });
 
 describe('POST /v1/businesses/requests', function() {
-  it('should save a business reqest', function(done) {
+  it('should save a business request', function(done) {
     tu.post('/v1/businesses/requests', { name: 'Testerrroooo' }, function(error, results, res){
       assert(!error);
       assert(res.statusCode == 204);
@@ -695,6 +695,61 @@ describe('PATCH /v1/businesses/:id', function(){
           done();
         });
       });
+    });
+  });
+});
+
+describe('GET /v1/businesses/contact-requests', function(){
+  it('should respond with a list of business contact entries', function(done){
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/businesses/contact-requests', function(error, results){
+        assert(!error);
+        results = JSON.parse(results);
+        assert(results.data.length > 0);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond with a 403', function(done){
+    tu.get('/v1/businesses/contact-requests', function(error, results, res){
+      assert(!error);
+      assert(res.statusCode == 401);
+      done()
+    });
+  });
+});
+
+describe('POST /v1/businesses/contact-requests', function(){
+  it('should save a business contact entry', function(done) {
+    var info = {
+      name: 'Bob Johnson'
+    , businessName: 'The Thing Store'
+    , email: 'bob@thethingstore.com'
+    , zip: 75189
+    , comments: 'I WANT GOODYBAG. YOU GIVE TO BOB. BOB WANT TABLET. BOB WANT MENU ITEMS ON TABLET IN STORE. BOB HAVE MANY THINGS. BOB.'
+    };
+
+    tu.post('/v1/businesses/contact-requests', info, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode == 204);
+      tu.logout(done);
+    });
+  });
+
+  it('should fail to save a business contact entry', function(done) {
+    var info = {
+      name: 'Bob Johnson'
+    , businessName: 'The Thing Store'
+    , email: 'bob@'
+    , zip: '75189'
+    , comments: 'I WANT GOODYBAG. YOU GIVE TO BOB. BOB WANT TABLET. BOB WANT MENU ITEMS ON TABLET IN STORE. BOB HAVE MANY THINGS. BOB.'
+    };
+
+    tu.post('/v1/businesses/contact-requests', info, function(error, results, res){
+      assert(!error);
+      assert(res.statusCode == 400);
+      tu.logout(done);
     });
   });
 });
