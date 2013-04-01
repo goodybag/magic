@@ -128,4 +128,4 @@ contact:
         businessName:                 { type: string, required: true, eg: Kirby Lane }
         email:                        { type: email,  required: true, eg: steve@biz.goodybag.com }
         zip:                          { type: int,    required: true, eg: 75189 }
-        comments:                     { type: string, required: true, eg: These are my comments!! How are you? }
+        comments:                     { type: string, eg: These are my comments!! How are you? }

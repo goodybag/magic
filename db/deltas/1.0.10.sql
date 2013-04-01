@@ -5,7 +5,7 @@ insert into deltas (version, date) values ('1.0.10', 'now()');
 create table "businessContact" (
   id              serial primary key
 , name            text
-, businessName    text
+, "businessName"  text
 , email           text
 , zip             int
 , comments        text
