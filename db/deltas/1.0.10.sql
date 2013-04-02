@@ -52,7 +52,11 @@ alter table "pendingFacebookUsers" drop column "cardId";
 -- Turn empty string cardIds into nulls
 update users set "cardId" = null where "cardId" = '';
 
+<<<<<<< HEAD
 -- Delete user loyalty stats from users who shouldn't exist
+=======
+-- Eliminate cardIds not in the range 150000-900000
+>>>>>>> master
 with bad_card_id_users as (
   select * from users where
     (upper("cardId") < '130000-AAA' or
@@ -61,6 +65,7 @@ with bad_card_id_users as (
     "cardId" != '' and
     "cardId" != '777777-XYZ'
 )
+<<<<<<< HEAD
 delete from "userLoyaltyStats" where "userId" in (
   select id from bad_card_id_users
     left join "pendingFacebookUsers"
@@ -103,6 +108,12 @@ delete from users where id in (
   select id from bad_card_id_users
     left join "pendingFacebookUsers"
       on "pendingFacebookUsers"."userId" = bad_card_id_users.id
+=======
+delete from users where id in (
+  select id from bad_card_id_users
+    left join "pendingFacebookUsers"
+      on "pendingFacebookUsers"."cardId" = bad_card_id_users."cardId"
+>>>>>>> master
   where
     bad_card_id_users.email is null and
     "pendingFacebookUsers"."facebookId" is null
