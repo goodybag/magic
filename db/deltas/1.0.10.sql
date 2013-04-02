@@ -31,6 +31,10 @@ insert into "businessTags" ("businessId", tag) values (1977, 'food'); -- Goodfel
 insert into "businessTags" ("businessId", tag) values (1974, 'food'); -- Brass House
 insert into "businessTags" ("businessId", tag) values (1975, 'food'); -- Big Daddy's Burgers & Bar
 
+-- #491 - cardID upper
+
+update users set "cardId" = upper(users."cardId");
+
 -- #492 - Pending facebook users use userId instead of cardId
 
 alter table "pendingFacebookUsers" add column "userId" int;

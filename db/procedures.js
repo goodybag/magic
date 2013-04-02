@@ -258,6 +258,8 @@ module.exports.registerUser = function(group, inputs, options, callback){
 
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
 
+    if (inputs.cardId) inputs.cardId = inputs.cardId.toUpperCase();
+
     module.exports.ensureNotTaken(inputs, function(error, result){
       if (error) return callback(error, result);
 
@@ -362,6 +364,8 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
   // :DEBUG: this is a temporary fix while the document cascade api is built
   if (typeof inputs.email != 'undefined' && !inputs.email)
     return callback(errors.input.VALIDATION_FAILED, { email:'Can not be set to a blank value.' });
+
+  if (inputs.cardId) inputs.cardId = inputs.cardId.toUpperCase();
 
   db.getClient(TAGS, function(error, client){
     if (error) return callback(errors.internal.DB_FAILURE, error);
