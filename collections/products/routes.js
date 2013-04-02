@@ -107,6 +107,8 @@ module.exports.list = function(req, res){
       query.$('lon', req.query.lon);
       query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
       if (req.query.range) {
+        // If querying by range, don't include null lat/lon
+        query.prodLocJoin = query.prodLocJoin.replace('LEFT', 'INNER');
         query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
         query.$('range', req.query.range);
       }
