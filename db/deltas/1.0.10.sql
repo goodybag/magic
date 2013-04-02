@@ -34,3 +34,15 @@ insert into "businessTags" ("businessId", tag) values (1975, 'food'); -- Big Dad
 -- #491 - cardID upper
 
 update users set "cardId" = upper(users."cardId");
+
+-- #492 - Pending facebook users use userId instead of cardId
+
+alter table "pendingFacebookUsers" add column "userId" int;
+alter table "pendingFacebookUsers" add foreign key ("userId") references users(id);
+
+update "pendingFacebookUsers"
+  set "userId" = users.id
+  from users
+  where "pendingFacebookUsers"."cardId" = users."cardId";
+
+alter table "pendingFacebookUsers" drop column "cardId";
