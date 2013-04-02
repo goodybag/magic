@@ -100,7 +100,7 @@ module.exports.list = function(req, res){
     // location filtering
     if (req.query.lat && req.query.lon) {
       query.prodLocJoin = [
-        'INNER JOIN "productLocations" ON',
+        'LEFT JOIN "productLocations" ON',
           '"productLocations"."productId" = products.id'
       ].join(' ');
       query.$('lat', req.query.lat);
@@ -275,7 +275,6 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -1015,7 +1014,7 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
             if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
-            
+
             // end transaction
             tx.commit(function() {
 
