@@ -46,3 +46,74 @@ update "pendingFacebookUsers"
   where "pendingFacebookUsers"."cardId" = users."cardId";
 
 alter table "pendingFacebookUsers" drop column "cardId";
+
+-- #495 - cleanup dup accounts cardId stuff
+
+-- Turn empty string cardIds into nulls
+update users set "cardId" = null where "cardId" = '';
+
+-- Delete user loyalty stats from users who shouldn't exist
+with bad_card_id_users as (
+  select * from users where
+    (upper("cardId") < '130000-AAA' or
+     upper("cardId") > '900000-ZZZ') and
+    "cardId" is not null and
+    "cardId" != '' and
+    "cardId" != '777777-XYZ'
+)
+delete from "userLoyaltyStats" where "userId" in (
+  select id from bad_card_id_users
+    left join "pendingFacebookUsers"
+      on "pendingFacebookUsers"."userId" = bad_card_id_users.id
+  where
+    bad_card_id_users.email is null and
+    "pendingFacebookUsers"."facebookId" is null
+);
+
+-- Delete user tapins
+with bad_card_id_users as (
+  select * from users where
+    (upper("cardId") < '130000-AAA' or
+     upper("cardId") > '900000-ZZZ') and
+    "cardId" is not null and
+    "cardId" != '' and
+    "cardId" != '777777-XYZ'
+)
+delete from tapins where "userId" in (
+  select id from bad_card_id_users
+    left join "pendingFacebookUsers"
+      on "pendingFacebookUsers"."userId" = bad_card_id_users.id
+  where
+    bad_card_id_users.email is null and
+    "pendingFacebookUsers"."facebookId" is null
+);
+
+-- Eliminate users whose cardIds not in the range 150000-900000
+-- And who dont have an email or not pending fb user
+with bad_card_id_users as (
+  select * from users where
+    (upper("cardId") < '130000-AAA' or
+     upper("cardId") > '900000-ZZZ') and
+    "cardId" is not null and
+    "cardId" != '' and
+    "cardId" != '777777-XYZ'
+)
+
+delete from users where id in (
+  select id from bad_card_id_users
+    left join "pendingFacebookUsers"
+      on "pendingFacebookUsers"."userId" = bad_card_id_users.id
+  where
+    bad_card_id_users.email is null and
+    "pendingFacebookUsers"."facebookId" is null
+);
+
+-- Any remainders, just set their cardId to null
+update users set "cardId" = null where id in (
+  select id from users where
+    (upper("cardId") < '130000-AAA' or
+     upper("cardId") > '900000-ZZZ') and
+    "cardId" is not null and
+    "cardId" != '' and
+    "cardId" != '777777-XYZ'
+);
