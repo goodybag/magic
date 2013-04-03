@@ -101,6 +101,8 @@ module.exports.oauthAuthenticate = function(req, res){
       singly.getAccessToken(code, function(error, response, token){
         if (error) return stage.singlyError(error);
 
+        console.log(response, token);
+
         stage.getSinglyId(token.access_token);
       });
     }
