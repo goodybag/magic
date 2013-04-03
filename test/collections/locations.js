@@ -66,7 +66,6 @@ describe('GET /v1/locations', function() {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(payload.data.length === 2);
-          console.log(payload);
           assert(payload.data[0].name == 'First');
           assert(payload.data[1].name == 'Second');
           assert(payload.meta.total > 1);

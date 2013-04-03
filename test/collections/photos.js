@@ -203,11 +203,16 @@ describe('PATCH /v1/photos/:id', function() {
     });
   });
 
-  it('should allow an owning consumer to update', function(done) {
+  it('should allow an owning consumer to update and read', function(done) {
     tu.login({ email:'consumer3@gmail.com', password:'password' }, function() {
       tu.patch('/v1/photos/2', { notes:'this will happen' }, function(err, payload, res) {
         assert(res.statusCode == 204);
-        tu.logout(done);
+        tu.get('/v1/photos/2', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.notes == 'this will happen');
+          tu.logout(done);
+        });
       });
     });
   });
