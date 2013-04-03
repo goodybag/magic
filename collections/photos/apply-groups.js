@@ -15,7 +15,7 @@ exports.owner = function(req, cb) {
 
   db.getClient(['photo-owner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
-    
+
     var query = sql.query([
       'SELECT 1 FROM photos',
         'WHERE photos.id = $photoId AND photos."userId" = $userId'
@@ -39,7 +39,7 @@ exports.businessOwner = function(req, cb) {
 
   db.getClient(['photo-businessOwner-apply-groups', req.uuid], function(error, client){
     if (error) return cb(null);
-    
+
     var query = sql.query([
       'SELECT 1, {userTable}."businessId" FROM photos',
         'INNER JOIN {userTable} ON',
