@@ -1,12 +1,12 @@
 module.exports.business = {
   world: {
-    read:   ['id', 'name', 'locations:locations', 'tags', 'isGB']
+    read:   ['id', 'name', 'locations:locations', 'tags', 'isGB', 'url', 'logoUrl']
   , create: []
   , update: []
   }
 
 , default: {
-    read:   ['charityId', 'url', 'logoUrl', 'menuDescription']
+    read:   ['charityId', 'menuDescription']
   }
 
 , consumer: {
