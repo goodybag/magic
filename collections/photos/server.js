@@ -80,6 +80,8 @@ server.post(
 server.get(
   '/v1/photos/:photoId'
 , middleware.profile('GET /v1/photos/:photoId')
+, middleware.profile('apply groups photos owner')
+, middleware.applyGroups(applyGroups.owner)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('get photo handler')
