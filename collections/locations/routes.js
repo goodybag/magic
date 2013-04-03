@@ -44,29 +44,26 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = sql.query(
-      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id {bizGroupBy} {sort} {limit}'
+      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id, businesses.name {sort} {limit}'
     );
     query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
 
+    query.businessJoin = 'left join businesses on locations."businessId" = businesses.id';
+    query.fields.add('businesses.name as "businessName"');
+
     // :TEMPORARY: the mobile app has a bug that requires us to turn off pagination
     if (/iPhone/.test(req.headers['user-agent'])) {
-      req.query.limit = 25 - (+req.query.offset||0);
-      if (req.query.limit <= 0)
-        return res.json({ error: null, data: [], meta: { total:0 } });
-      query.limit = sql.limit(req.query.limit, 0);
-
-      query.businessJoin = 'join businesses on locations."businessId" = businesses.id';
       query.fields.add('businesses.name as name');
-      query.bizGroupBy = ', businesses.name';
-    } else
-      query.limit = sql.limit(req.query.limit, req.query.offset);
+    }
+
+    query.limit = sql.limit(req.query.limit, req.query.offset);
 
     // Show all or just enabled locatins
     if (!req.query.all){
       query.where.and('locations."isEnabled" = true');
     } else {
-      query.fields.add('"isEnabled"');
+      query.fields.add('locations."isEnabled"');
     }
 
     // business filtering
@@ -77,7 +74,7 @@ module.exports.list = function(req, res){
 
     // location filtering
     if (req.query.lat && req.query.lon) {
-      query.fields.add('earth_distance(ll_to_earth($lat,$lon), position) AS distance');
+      query.fields.add('earth_distance(ll_to_earth($lat,$lon), locations.position) AS distance');
       query.$('lat', req.query.lat);
       query.$('lon', req.query.lon);
       if (req.query.range) {
@@ -122,7 +119,7 @@ module.exports.list = function(req, res){
     }
 
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
-    
+
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
       if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
