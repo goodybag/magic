@@ -99,7 +99,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
   , getAccessTokenAndId: function(code){
       singly.getAccessToken(code, function(error, response, token){
-        if (error) return stage.singlyError(error);
+        if (error || token.error) return stage.singlyError(error || token.error);
 
         stage.getSinglyId(token.access_token);
       });
