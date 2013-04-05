@@ -780,9 +780,8 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
       tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
         assert(res.statusCode == 200);
         results = JSON.parse(results);
-        console.log(results);
         assert(results.data.length == 2);
-        assert(results.data[0].id > results.data[1].id)
+        assert(new Date(results.data[0].createdAt) >= new Date(results.data[1].createdAt))
         tu.logout(done);
       });
     });
