@@ -14,7 +14,7 @@
           console.log(event.data.rid);
           var rid = event.data.rid;
 
-          window.parent.postMessage("just testing");
+          window.parent.postMessage("just testing", '*');
 
           return windowProxy.post('just testing');
 
