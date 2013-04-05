@@ -14,7 +14,7 @@
           console.log(event.data.rid);
           var rid = event.data.rid;
 
-          return windowProxy.post(JSON.stringify({ rid: rid }));
+          return windowProxy.post('just testing');
 
           event.data.success = function(results){
             if (typeof results == 'string') results = JSON.parse(results);
