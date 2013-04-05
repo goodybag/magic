@@ -3,7 +3,6 @@
   <head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://www.goodybag.com/js/porthole.js"></script>
-    <!--[if IE]><script type="text/javascript" src="http://www.goodybag.com/js/json2.js"></script><![endif]-->
     <script type="text/javascript">
       var windowProxy;
 
@@ -16,6 +15,8 @@
           console.log('PROXY RECEIVED DATA', event);
 
           var rid = event.data.rid;
+
+          return windowProxy.post({ rid: rid });
 
           event.data.success = function(results){
             if (typeof results == 'string') results = JSON.parse(results);
