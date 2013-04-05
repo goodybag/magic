@@ -9,12 +9,13 @@ var
 describe('GET /v1/locations', function() {
 
   it('should respond with a location listing of all enabled locations', function(done) {
-    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+    tu.populate('businesses', [{ name:'Business 1', logoUrl: 'http://poop.bu.tt/1.jpg' }], function(err, bids) {
       tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }, { name:'Location 2', businessId:bids[0], isEnabled:false }], function() {
         tu.get('/v1/locations', function(err, payload, res) {
           assert(res.statusCode == 200);
           payload = JSON.parse(payload);
           assert(payload.meta.total > 1);
+          assert(payload.data.filter(function(l){ return l.logoUrl == 'http://poop.bu.tt/1.jpg'; }).length > 0);
           assert(tu.arrHas(payload.data, 'isEnabled', false) === false);
           done();
         });
