@@ -44,15 +44,16 @@ module.exports.list = function(req, res){
 
     // build data query
     var query = sql.query(
-      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id, businesses.name {sort} {limit}'
+      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id, businesses.name, businesses."logoUrl" {sort} {limit}'
     );
     query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
     query.where  = sql.where();
 
     query.businessJoin = 'left join businesses on locations."businessId" = businesses.id';
     query.fields.add('businesses.name as "businessName"');
+    query.fields.add('businesses."logoUrl" as "logoUrl"');
 
-    // :TEMPORARY: the mobile app has a bug that requires us to turn off pagination
+    // :TEMPORARY: the mobile app doesn't use the businessName field
     if (/iPhone/.test(req.headers['user-agent'])) {
       query.fields.add('businesses.name as name');
     }
