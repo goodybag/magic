@@ -4,19 +4,17 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://www.goodybag.com/js/porthole.js"></script>
     <script type="text/javascript">
-      var windowProxy;
-
       window.onload = function(){
         // Create a proxy window to send to and receive messages from the parent
-        windowProxy = new Porthole.WindowProxy('http://www.goodybag.com/{{page}}');
+        var windowProxy = new Porthole.WindowProxy('http://www.goodybag.com/{{page}}');
 
         // Register an event handler to receive messages;
         windowProxy.addEventListener(function(event){
-          console.log('PROXY RECEIVED DATA', JSON.stringify(event));
-
+          console.log('PROXY RECEIVED DATA', JSON.stringify(event);
+          console.log(event.data.rid);
           var rid = event.data.rid;
 
-          return windowProxy.post({ rid: rid });
+          return windowProxy.post(JSON.stringify({ rid: rid }));
 
           event.data.success = function(results){
             if (typeof results == 'string') results = JSON.parse(results);
