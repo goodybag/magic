@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <script type="text/javascript">
+      var windowProxy;
+      window.onload=function(){
+        // Create a proxy window to send to and receive
+        // messages from the parent
+        windowProxy = new Porthole.WindowProxy('http://www.goodybag.com/');
+
+        // Register an event handler to receive messages;
+        windowProxy.addEventListener(function(event) {
+            // handle event
+        });
+      };
+    </script>
+  </head>
+  <body></body>
+</html>
