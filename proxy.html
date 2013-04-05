@@ -1,16 +1,39 @@
 <!DOCTYPE HTML>
 <html>
   <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.goodybag.com/js/porthole.js"></script>>
     <script type="text/javascript">
       var windowProxy;
-      window.onload=function(){
-        // Create a proxy window to send to and receive
-        // messages from the parent
-        windowProxy = new Porthole.WindowProxy('http://www.goodybag.com/');
+
+      window.onload = function(){
+        // Create a proxy window to send to and receive messages from the parent
+        windowProxy = new Porthole.WindowProxy('http://www.goodybag.com/{{page}}');
 
         // Register an event handler to receive messages;
-        windowProxy.addEventListener(function(event) {
-            // handle event
+        windowProxy.addEventListener(function(event){
+          console.log('PROXY RECEIVED DATA', event);
+
+          var rid = event.data.rid;
+
+          event.data.success = function(results){
+            if (typeof results == 'string') results = JSON.parse(results);
+            results = results || {};
+            results.rid = rid;
+            windowProxy.post(results);
+          };
+
+          event.data.error = function(xhr, status, error){
+            error = xhr.responseText ? JSON.parse(error.responseText) : error;
+            windowProxy.post({ xhr: xhr, status: status, error: error, rid: rid });
+          };
+
+          // No need for CORS
+          delete event.data.withCredentials;
+          delete event.data.xhrFields;
+
+          // Send
+          $.ajax(event.data);
         });
       };
     </script>
