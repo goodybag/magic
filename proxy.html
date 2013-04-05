@@ -12,7 +12,7 @@
 
         // Register an event handler to receive messages;
         windowProxy.addEventListener(function(event){
-          console.log('PROXY RECEIVED DATA', event);
+          console.log('PROXY RECEIVED DATA', JSON.stringify(event));
 
           var rid = event.data.rid;
 
