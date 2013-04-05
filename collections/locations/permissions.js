@@ -5,6 +5,7 @@ module.exports = {
     , 'businessId'
     , 'name'
     , 'businessName'
+    , 'logoUrl'
     , 'tags'
     , 'lat'
     , 'lon'
