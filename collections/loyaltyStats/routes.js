@@ -71,7 +71,7 @@ module.exports.list = function(req, res){
     query.userJoin = 'JOIN users ON users.id = "userLoyaltyStats"."userId"';
 
     query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
-    query.where = sql.where().and('"userLoyaltyStats"."totalPunches" > 0');
+    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
     query.$('userId', req.param('userId') || req.session.user.id);
 
     if (req.param('businessId')){
