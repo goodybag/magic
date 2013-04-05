@@ -61,7 +61,7 @@ module.exports.list = function(req, res){
       .add('businesses.name as "businessName"')
       .add('businesses."isGB" as "businessIsGB"');
     query.where   = sql.where();
-    query.sort    = sql.sort(req.query.sort || '+name');
+    query.sort    = sql.sort(req.query.sort || (req.param('collectionId') ? '-"productsCollections"."createdAt"' : '+name'));
     query.limit   = sql.limit(req.query.limit, req.query.offset);
     query.groupby = sql.fields().add('products.id').add('businesses.id');
 
@@ -181,7 +181,10 @@ module.exports.list = function(req, res){
         ].join(' ');
         query.$('collectionId', req.param('collectionId'));
         query.$('userId', req.param('userId'));
+
       }
+      query.fields.add('"productsCollections"."createdAt" as "createdAt"');
+      query.groupby.add('"productsCollections"."createdAt"');
     }
 
     // tag include
@@ -279,7 +282,7 @@ module.exports.list = function(req, res){
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
     // run data query
     client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) return console.log(query.toString(), query.$values, error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var total = 0, userLikes = 0, userWants = 0, userTries = 0;
       if (dataResult.rowCount !== 0) {
