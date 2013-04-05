@@ -61,7 +61,7 @@ module.exports.list = function(req, res){
       .add('businesses.name as "businessName"')
       .add('businesses."isGB" as "businessIsGB"');
     query.where   = sql.where();
-    query.sort    = sql.sort(req.query.sort || '+name');
+    query.sort    = sql.sort(req.query.sort || (req.param('collectionId') ? '-id' : '+name'));
     query.limit   = sql.limit(req.query.limit, req.query.offset);
     query.groupby = sql.fields().add('products.id').add('businesses.id');
 

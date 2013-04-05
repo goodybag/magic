@@ -779,7 +779,10 @@ describe('GET /v1/consumers/:id/collections/:collectionId/products', function() 
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/consumers/7/collections/1/products', function(error, results, res) {
         assert(res.statusCode == 200);
-        assert(JSON.parse(results).data.length == 2);
+        results = JSON.parse(results);
+        console.log(results);
+        assert(results.data.length == 2);
+        assert(results.data[0].id > results.data[1].id)
         tu.logout(done);
       });
     });
