@@ -8,7 +8,6 @@
       window.onload = function(){
 
         var socket = new easyXDM.Socket({
-          remote: "http://www.goodybag.com/", // the path to the provider
           onMessage:function(message, origin) {
             alert("INSIDE");
           }
