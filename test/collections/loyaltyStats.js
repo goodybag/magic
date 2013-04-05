@@ -71,11 +71,17 @@ describe('GET /v1/loyalty', function() {
 
   it('should give isRegistered false if no email or singly token', function(done) {
     tu.loginAsAdmin(function() {
-      tu.get('/v1/consumers/19/loyalty', function(err, payload, res) {
-        assert(res.statusCode == 200);
-        payload = JSON.parse(payload);
-        assert(payload.data[0].isRegistered === false);
-        tu.logout(done);
+      // Throw it off first by upserting a punchCard
+      tu.get('/v1/consumers/19/loyalty/1', function(error, payload){
+        assert(!error);
+
+        tu.get('/v1/consumers/19/loyalty', function(err, payload, res) {
+          assert(res.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data[0].isRegistered === false);
+          assert(payload.data.filter(function(l){ l.totalPunches == 0; }).length == 0)
+          tu.logout(done);
+        });
       });
     });
   });
