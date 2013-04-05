@@ -555,7 +555,7 @@ describe('GET /v1/consumers/:id/collections', function() {
       });
     });
   });
-  it('should include All, Food, and Fashion', function(done) {
+  it('should include All, Food, and NOT Fashion', function(done) {
     // gotta make a new consumer through the API first-- that's how these collections get made
     tu.post('/v1/consumers', { email:'allfoodfashion@consumers.com', password:'password' });
     magic.once('debug.newConsumerCollectionsCreated', function() {
@@ -566,7 +566,7 @@ describe('GET /v1/consumers/:id/collections', function() {
           results = JSON.parse(results);
           assert(results.data.filter(function(c) { return c.id == 'all'; }).length === 1);
           assert(results.data.filter(function(c) { return c.id == 'food'; }).length === 1);
-          assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 1);
+          assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 0);
           tu.logout(done);
         });
       });
@@ -583,7 +583,6 @@ describe('GET /v1/consumers/:id/collections', function() {
           results = JSON.parse(results);
           assert(results.data.filter(function(c) { return c.id == 'all'; }).length === 1);
           assert(results.data.filter(function(c) { return c.id == 'food'; }).length === 1);
-          assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 1);
           assert(results.data.filter(function(c) { return c.id == 'uncategorized'; }).length === 1);
           tu.logout(done);
         });
@@ -650,6 +649,21 @@ describe('GET /v1/consumers/:id/collections/:collectionId', function() {
       done();
     });
   });
+  it('should respond 404 with invalid collection name', function(done){
+    // gotta make a new consumer through the API first-- that's how these collections get made
+    tu.post('/v1/consumers', { email:'blahblahalhblahlblh@consumers.com', password:'password' });
+    magic.once('debug.newConsumerCollectionsCreated', function() {
+      tu.login({ email: 'blahblahalhblahlblh@consumers.com', password: 'password' }, function(error, user){
+        assert(!error);
+
+        tu.get('/v1/consumers/' + user.id + '/collections/fashion', function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 404);
+          tu.logout(done);
+        });
+      });
+    });
+  })
 });
 
 describe('POST /v1/consumers/:id/collections', function() {
@@ -728,23 +742,23 @@ describe('DELETE /v1/consumers/:consumerId/collections/:collectionId', function(
     });
   });
 
-  it('should delete a users collection via the pseudo-key', function(done) {
-    // gotta make a new consumer through the API first-- that's how these collections get made
-    tu.post('/v1/consumers', { email:'pseudokeydelete@consumers.com', password:'password' });
-    magic.once('debug.newConsumerCollectionsCreated', function() {
-      tu.login({ email: 'pseudokeydelete@consumers.com', password: 'password' }, function(error, user){
-        tu.del('/v1/consumers/'+user.id+'/collections/fashion', function(error, results, res){
-          assert(res.statusCode == 204);
-          tu.get('/v1/consumers/'+user.id+'/collections', function(error, results, res){
-            assert(res.statusCode == 200);
-            results = JSON.parse(results);
-            assert(results.data.filter(function(c){ return c.name === 'Fashion'; }).length === 0);
-            tu.logout(done);
-          });
-        });
-      });
-    });
-  });
+  // it('should delete a users collection via the pseudo-key', function(done) {
+  //   // gotta make a new consumer through the API first-- that's how these collections get made
+  //   tu.post('/v1/consumers', { email:'pseudokeydelete@consumers.com', password:'password' });
+  //   magic.once('debug.newConsumerCollectionsCreated', function() {
+  //     tu.login({ email: 'pseudokeydelete@consumers.com', password: 'password' }, function(error, user){
+  //       tu.del('/v1/consumers/'+user.id+'/collections/fashion', function(error, results, res){
+  //         assert(res.statusCode == 204);
+  //         tu.get('/v1/consumers/'+user.id+'/collections', function(error, results, res){
+  //           assert(res.statusCode == 200);
+  //           results = JSON.parse(results);
+  //           assert(results.data.filter(function(c){ return c.name === 'Fashion'; }).length === 0);
+  //           tu.logout(done);
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 
   it('should fail to delete a users collection because of insufficient permissions', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
