@@ -13,7 +13,9 @@
           console.log('PROXY RECEIVED DATA', JSON.stringify(event));
           console.log(event.data.rid);
           var rid = event.data.rid;
-          alert(parent.document.body.innerHTML);
+
+          window.parent.postMessage("just testing");
+
           return windowProxy.post('just testing');
 
           event.data.success = function(results){
