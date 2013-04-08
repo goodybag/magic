@@ -10,6 +10,10 @@ var
 , _ = require('underscore')
 , validate = function(schema, inputs) {
     schema = schema || {};
+
+    // query-param to avoid caching is ok
+    delete inputs._;
+
     var errors = {}, i, j;
     var unvalidatedKeys = Object.keys(inputs || {});
 
