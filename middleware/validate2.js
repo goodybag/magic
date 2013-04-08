@@ -17,6 +17,9 @@ var
       if (!schema[k].type)
         throw "Schema entry "+k+" is missing `type`";
 
+      // query-param to avoid caching is ok
+      if (k == '_') continue;
+
       var v = inputs[k], unless;
 
       // update tracking
