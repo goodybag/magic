@@ -10,15 +10,16 @@ var
 , _ = require('underscore')
 , validate = function(schema, inputs) {
     schema = schema || {};
+
+    // query-param to avoid caching is ok
+    delete inputs._;
+
     var errors = {}, i, j;
     var unvalidatedKeys = Object.keys(inputs || {});
 
     for (var k in schema) {
       if (!schema[k].type)
         throw "Schema entry "+k+" is missing `type`";
-
-      // query-param to avoid caching is ok
-      if (k == '_') continue;
 
       var v = inputs[k], unless;
 
