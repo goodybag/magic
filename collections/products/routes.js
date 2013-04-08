@@ -65,6 +65,8 @@ module.exports.list = function(req, res){
     query.limit   = sql.limit(req.query.limit, req.query.offset);
     query.groupby = sql.fields().add('products.id').add('businesses.id');
 
+    query.where.and('businesses."isVerified" is true');
+
     // hasPhoto filtering
     // :TEMP: iphone mods - only products with photos
     if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {

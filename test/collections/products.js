@@ -24,6 +24,36 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should respond with a product listing that does not include products from unverified businesses', function(done) {
+    var data = [{ name: 'blakjsdkljfasjdf', isVerified: false }]
+    tu.populate('businesses', data, function(err, ids) {
+
+      assert(!err);
+      var data = [{ name: 'something', businessId: ids[0] }];
+      tu.populate('products', data, function(err, ids){
+
+        assert(!err);
+        var pid = ids[0];
+
+        tu.get('/v1/products?limit=10000', function(err, payload, res) {
+
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          assert(!payload.error);
+          assert(payload.data.length > 1);
+          assert(payload.data.filter(function(p){
+            return p.id == pid;
+          }).length == 0)
+
+          tu.del('/v1/products/' + pid, done);
+        });
+      });
+    });
+  });
+
   it('should paginate', function(done) {
     tu.get('/v1/products?offset=1&limit=1', function(err, payload, res) {
 
