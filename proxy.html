@@ -170,6 +170,7 @@
 
                                     // determine if origin is trusted
                                     if (alwaysTrusted || aclAllowedOrigin == "*" || aclAllowedOrigin.indexOf(remote.origin) != -1) {
+                                        console.log(aclAllowedMethods);
                                         // determine if the request method was allowed
                                         if (aclAllowedMethods && aclAllowedMethods != "*" && aclAllowedMethods.indexOf(config.method) == -1) {
                                             errorMessage = "DISALLOWED_REQUEST_METHOD";
