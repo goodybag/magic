@@ -605,19 +605,33 @@ describe('POST /v1/products', function() {
     });
   });
 
-  it('should allow consumers to create an unverified product', function(done) {
-    tu.login({ email:'tferguson@gmail.com', password:'password' }, function() {
-      tu.post('/v1/products', JSON.stringify({ businessId:2, name:'asdf', price:1234 }), 'application/json', function(err, payload, res) {
+  it('should allow consumers to create an unverified product at an unverified and have it show in collection', function(done) {
+    tu.login({ email:'tferguson@gmail.com', password:'password' }, function(error, user) {
+      tu.post('/v1/products', JSON.stringify({ businessId:4, name:'asdf', price:1234 }), 'application/json', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
         assert(payload.data.id);
-        tu.logout(function() {
-          tu.loginAsAdmin(function() {
-            tu.get('/v1/products/'+payload.data.id, function(err, payload, res) {
-              assert(res.statusCode == 200);
-              payload = JSON.parse(payload);
-              assert(payload.data.isVerified === false);
-              tu.logout(done);
+
+        var pid = payload.data.id;
+        tu.post('/v1/consumers/' + user.id + '/collections/1/products', { productId: pid }, function(error, payload, res){
+          assert(!error);
+          assert(res.statusCode == 204);
+
+          tu.get('/v1/consumers/' + user.id + '/collections/all/products?limit=10000', function(error, payload, res){
+            assert(!error);
+            payload = JSON.parse(payload);
+
+            assert(payload.data.filter(function(p){ return p.id == pid; }).length == 1);
+
+            tu.logout(function() {
+              tu.loginAsAdmin(function() {
+                tu.get('/v1/products/'+pid, function(err, payload, res) {
+                  assert(res.statusCode == 200);
+                  payload = JSON.parse(payload);
+                  assert(payload.data.isVerified === false);
+                  tu.logout(done);
+                });
+              });
             });
           });
         });
