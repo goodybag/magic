@@ -329,7 +329,7 @@ module.exports.listCollections = function(req, res){
           name         : 'All',
           isHidden     : false,
           numProducts  : (aggResult.rows[0]) ? aggResult.rows[0].numProducts : 0,
-          photoUrl     : '', // :TODO:
+          photoUrl     : config.allCollectionPhotoUrl,
           totalMyLikes : (aggResult.rows[0]) ? aggResult.rows[0].totalMyLikes : 0,
           totalMyWants : (aggResult.rows[0]) ? aggResult.rows[0].totalMyWants : 0,
           totalMyTries : (aggResult.rows[0]) ? aggResult.rows[0].totalMyTries : 0
@@ -488,7 +488,7 @@ module.exports.getAllCollection = function(req, res){
         name         : 'All',
         isHidden     : false,
         numProducts  : (dataResult.rows[0]) ? dataResult.rows[0].numProducts : 0,
-        photoUrl     : '', // :TODO:
+        photoUrl     : config.allCollectionPhotoUrl,
         totalMyLikes : (dataResult.rows[0]) ? dataResult.rows[0].totalMyLikes : 0,
         totalMyWants : (dataResult.rows[0]) ? dataResult.rows[0].totalMyWants : 0,
         totalMyTries : (dataResult.rows[0]) ? dataResult.rows[0].totalMyTries : 0
