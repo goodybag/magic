@@ -8,6 +8,7 @@ var
 , sanitizerFns = require('../lib/sanitizers')
 , utils  = require('../lib/utils')
 , _ = require('underscore')
+
 , validate = function(schema, inputs) {
     schema = schema || {};
 
@@ -67,8 +68,15 @@ var
         }
       }
 
-      // types validation
+
+      // types validation - start off with types
       var validators = schema[k].type.split(' ');
+
+      // Try out each attribute and see if there's a function for it
+      for (var attr in schema[k]){
+        if (typeof validatorFns[attr] == 'function') validators.push(attr);
+      }
+
       for (i=0; i < validators.length; i++) {
 
         // parse * trailer
@@ -93,7 +101,7 @@ var
             error = 'Can not be an array.';
           else {
             for (j=0; j < v.length; j++) {
-              error = validatorFn(v[j], inputs, k);
+              error = validatorFn(v[j], inputs, k, schema[k], schema[k].arguments ? schema[k].arguments[validators[i]] : null);
               if (error)
                 break;
             }
@@ -102,7 +110,7 @@ var
           if (mustBeArray)
             error = 'Must be an array.';
           else {
-            error = validatorFn(v, inputs, k);
+            error = validatorFn(v, inputs, k, schema[k], schema[k].arguments ? schema[k].arguments[validators[i]] : null);
           }
         }
         if (error) {
@@ -122,6 +130,22 @@ var
     return errors;
   }
 , createBodyValidator = function(schema){
+    // Prepare validator args array
+    for (var key in schema){
+      schema[key].arguments = {};
+
+      for (var attr in schema[key]){
+        if (attr == 'arguments') continue;
+
+        // If they're providing an array, use that as args
+        // Else make an array with a single item in it
+        if (Array.isArray(schema[key]))
+          schema[key].arguments[attr] = schema[key][attr];
+        else
+          schema[key].arguments[attr] = [schema[key][attr]];
+      }
+    }
+
     return function(req, res, next){
 
       var errors = validate(schema, req.body);
