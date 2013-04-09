@@ -30,6 +30,8 @@ var config = {
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 
+  , allCollectionPhotoUrl: 'http://cdn.filepicker.io/api/file/8jCqOI3JRKXckMfepkCX'
+
   , algorithms: {
       popular: {
         numLists: 20

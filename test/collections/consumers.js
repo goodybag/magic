@@ -564,9 +564,13 @@ describe('GET /v1/consumers/:id/collections', function() {
         tu.get('/v1/consumers/'+user.id+'/collections', function(error, results, res) {
           assert(res.statusCode == 200);
           results = JSON.parse(results);
-          assert(results.data.filter(function(c) { return c.id == 'all'; }).length === 1);
+          // Ensure the all collection has the photoUrl set
+          assert(results.data.filter(function(c) {
+            return c.id == 'all' && c.photoUrl == config.allCollectionPhotoUrl;
+          }).length === 1);
           assert(results.data.filter(function(c) { return c.id == 'food'; }).length === 1);
           assert(results.data.filter(function(c) { return c.id == 'fashion'; }).length === 0);
+
           tu.logout(done);
         });
       });
