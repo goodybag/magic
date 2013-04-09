@@ -30,7 +30,7 @@ var config = {
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 
-  , allCollectionPhotoUrl: 'https://cdn.filepicker.io/api/file/8jCqOI3JRKXckMfepkCX'
+  , allCollectionPhotoUrl: 'http://cdn.filepicker.io/api/file/8jCqOI3JRKXckMfepkCX'
 
   , algorithms: {
       popular: {
