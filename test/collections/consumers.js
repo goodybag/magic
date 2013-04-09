@@ -216,6 +216,26 @@ describe('POST /v1/consumers', function() {
       done();
     })
   });
+
+  it('should fail if the password is too short', function(done){
+    var consumer = {
+      email:      "testmctesterson99@test.com"
+    , password:   "pa"
+    , firstName:  "Test"
+    , lastName:   "McTesterson"
+    , screenName: "testies"
+    , avatarUrl:  "http://loljk.com/foobar.png"
+    , cardId:     "123456-zzz"
+    };
+
+    tu.post('/v1/consumers', consumer, function(error, results, res){
+      assert(!error);
+      results = JSON.parse(results);
+      assert(res.statusCode === 400);
+      assert(results.error.name == 'VALIDATION_FAILED');
+      done();
+    })
+  });
 });
 
 describe('PUT /v1/consumers/:id', function() {

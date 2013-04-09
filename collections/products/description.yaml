@@ -37,7 +37,7 @@ collection:
       body:
         businessId:      { type: id,               eg: 1 }
         name:            { type: string,           eg: My Product, required: true }
-        description:     { type: string,           eg: This is the description of the product }
+        description:     { type: string,           eg: This is the description of the product, max: 300 }
         price:           { type: int non-negative, eg: 1299 }
         categories:      { type: int+,             eg: [2] }
         tags:            { type: int+,             eg: [1] }
@@ -67,7 +67,7 @@ item:
       body:
         businessId:      { type: id,               eg: 1 }
         name:            { type: string,           eg: My Product }
-        description:     { type: string,           eg: This is the description of the product }
+        description:     { type: string,           eg: This is the description of the product, max: 300 }
         price:           { type: int non-negative, eg: 1299 }
         photoUrl:        { type: url,              eg: http://foo.com/image.png }
         categories:      { type: int+,             eg: [2] }

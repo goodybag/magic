@@ -605,6 +605,29 @@ describe('POST /v1/products', function() {
     });
   });
 
+  it('should fail to add product because of an invalid product description length', function(done) {
+    tu.loginAsAdmin(function() {
+      var product = { businessId:2, name:'asdf', price:1234 };
+
+      product.description = "";
+      for (var i = 0; i < 301; i++){
+        product.description += "a";
+      }
+
+      tu.post('/v1/products', JSON.stringify(product), 'application/json', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 400);
+
+        payload = JSON.parse(payload);
+        assert(payload.error);
+        assert(payload.error.name == 'VALIDATION_FAILED');
+        assert(payload.error.details.description);
+        tu.logout(done);
+      });
+    });
+  });
+
   it('should allow consumers to create an unverified product at an unverified and have it show in collection', function(done) {
     tu.login({ email:'tferguson@gmail.com', password:'password' }, function(error, user) {
       tu.post('/v1/products', JSON.stringify({ businessId:4, name:'asdf', price:1234 }), 'application/json', function(err, payload, res) {
