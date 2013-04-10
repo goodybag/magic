@@ -71,7 +71,7 @@ module.exports.list = function(req, res){
     query.userJoin = 'JOIN users ON users.id = "userLoyaltyStats"."userId"';
 
     query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
-    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
+
     query.$('userId', req.param('userId') || req.session.user.id);
 
     if (req.param('businessId')){
@@ -82,11 +82,23 @@ module.exports.list = function(req, res){
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, result){
+
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var total = (result.rows[0]) ? result.rows[0].metaTotal : 0;
-      if (result.rows.length > 0)
-        return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows, meta: { total:total } });
+
+      if (result.rows.length > 0){
+        // If it's a single record (user->business), then we want the 0'd out card
+        if (req.param('businessId'))
+          return res.json({ error: null, data: result.rows[0], meta: { total:total } });
+
+        // If it's a listing (user), then we don't want the 0'd out cards
+        var filtered = result.rows.filter(function(r){
+          return r.totalPunches > 0;
+        });
+
+        return res.json({ error: null, data: filtered, meta: { total:filtered.length } });
+      }
 
       if (!req.param('businessId'))
         return res.json({ error: null, data: [], meta: { total:total } });
