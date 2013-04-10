@@ -401,6 +401,40 @@ describe('GET /v1/locations/:locationId/products', function() {
     });
   });
 
+  it('should respond with a product listing for all at the business', function(done) {
+    var locationId = 1;
+    var businessId = 1;
+
+    tu.post('/v1/products', { name: 'blaaahhh', businessId: businessId }, function(err, payload, res){
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      var productId = payload.data.id;
+
+      tu.get('/v1/locations/' + locationId + '/products?all=true', function(err, payload, res) {
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        assert(!payload.error);
+        assert(payload.data.length > 1);
+        assert(payload.data[0].id == 1);
+        assert(payload.data[0].businessId == 1);
+        assert(payload.data[0].name == 'Product 1');
+        assert(payload.data[0].isAvailable == true);
+        assert(payload.data.filter(function(p){ return !p.isAvailable; }).length > 0);
+
+        assert(payload.meta.total > 1);
+        done();
+      });
+    });
+
+  });
 });
 
 
