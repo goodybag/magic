@@ -71,7 +71,10 @@ module.exports.list = function(req, res){
     query.userJoin = 'JOIN users ON users.id = "userLoyaltyStats"."userId"';
 
     query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
-    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
+
+    if (!req.param('businessId'))
+      query.where.and('"userLoyaltyStats"."totalPunches" > 0');
+
     query.$('userId', req.param('userId') || req.session.user.id);
 
     if (req.param('businessId')){
@@ -82,14 +85,20 @@ module.exports.list = function(req, res){
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, result){
+
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var total = (result.rows[0]) ? result.rows[0].metaTotal : 0;
-      if (result.rows.length > 0)
-        return res.json({ error: null, data: req.param('businessId') ? result.rows[0] : result.rows, meta: { total:total } });
 
-      if (!req.param('businessId'))
-        return res.json({ error: null, data: [], meta: { total:total } });
+      if (result.rows.length > 0){
+        return res.json({
+          error: null
+        , data: req.param('businessId') ? result.rows[0] : result.rows
+        , meta: { total:total }
+        });
+      } else if (!req.param('businessId')){
+        return res.json({ error: null , data: [] , meta: { total: 0 } });
+      }
 
       // They've requested either a loyaltystat that hasn't been created yet
       // Or a business that doesn't exist
