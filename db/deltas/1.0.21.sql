@@ -1,7 +1,7 @@
 -- 1.0.21.sql
 insert into deltas (version, date) values ('1.0.21', 'now()');
 
-#516 - Duplicate loyalty stats
+-- #516 - Duplicate loyalty stats
 
 -- Clear bad records
 ----------------------------------------------------------------
