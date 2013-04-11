@@ -85,6 +85,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('17'
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('18', 'consumer7@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '778899-CBC');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('19', null, null, null, '432123-AAA');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', null, null, null, '432123-AAB');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('21', 'someconsumer21@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '432123-AAC');
 
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXX');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXZ');
@@ -129,6 +130,7 @@ INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('17'
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('18', 'Consumer', 'Six', 'consumer6');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('19', 'Unregistered', 'Consumer', 'unregistered_consumer');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('21', 'Some', 'Consumer', 'some_consumer21');
 COMMIT;
 
 -- MANAGERS
@@ -229,6 +231,7 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('13', '12', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('14', '16', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('15', '17', '5');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('16', '18', '5');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('17', '21', '5');
 
 -- -- manager
 
@@ -269,6 +272,8 @@ INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "total
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (6, 17, 1, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (7, 19, 1, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (8, 15, 2, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (9, 15, 2, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (10, 15, 3, 5, 23, 40, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 
