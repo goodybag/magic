@@ -253,9 +253,6 @@ module.exports.registerUser = function(group, inputs, options, callback){
   options = options || {};
 
   var TAGS = consumeLogTags() || ['register-user'];
-  db.getClient(TAGS, function(error, client){
-    if (error) return callback(errors.internal.DB_FAILURE, error);
-
     var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
 
     if (inputs.cardId) inputs.cardId = inputs.cardId.toUpperCase();
@@ -266,74 +263,77 @@ module.exports.registerUser = function(group, inputs, options, callback){
       var encrypt = (!options.dontEncrypt) ? utils.encryptPassword : function(p, s, cb) { cb(null, p, s); };
       encrypt(inputs.password, inputs.passwordSalt, function(err, encryptedPassword, passwordSalt) {
 
-        var query = sql.query([
-          'WITH',
-            '"user" AS',
-              '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId", "createdAt")',
-                'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId, $createdAt RETURNING *),',
-            '"userGroup" AS',
-              '(INSERT INTO "usersGroups" ("userId", "groupId")',
-                'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = $group RETURNING id),',
-            '{extension}',
-          'SELECT "user".id as "userId" FROM "user"'
-        ]);
-        query.$('email', inputs.email);
-        query.$('password', encryptedPassword);
-        query.$('salt', passwordSalt);
-        query.$('singlyId', inputs.singlyId);
-        query.$('singlyAccessToken', inputs.singlyAccessToken);
-        query.$('cardId', inputs.cardId || '');
-        query.$('createdAt', 'now()');
+      var query = sql.query([
+        'WITH',
+          '"user" AS',
+            '(INSERT INTO users (email, password, "passwordSalt", "singlyId", "singlyAccessToken", "cardId", "createdAt")',
+              'SELECT $email, $password, $salt, $singlyId, $singlyAccessToken, $cardId, $createdAt RETURNING *),',
+          '"userGroup" AS',
+            '(INSERT INTO "usersGroups" ("userId", "groupId")',
+              'SELECT "user".id, groups.id FROM groups, "user" WHERE groups.name = $group RETURNING id),',
+          '{extension}',
+        'SELECT "user".id as "userId" FROM "user"'
+      ]);
+      query.$('email', inputs.email);
+      query.$('password', encryptedPassword);
+      query.$('salt', passwordSalt);
+      query.$('singlyId', inputs.singlyId);
+      query.$('singlyAccessToken', inputs.singlyAccessToken);
+      query.$('cardId', inputs.cardId || '');
+      query.$('createdAt', 'now()');
 
-        switch (group) {
-          case 'consumer':
-            query.extension = [
-            '"consumer" AS',
-              '(INSERT INTO "consumers" ("id", "firstName", "lastName", "screenName", "avatarUrl")',
-                'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")'
-            ].join(' ');
-            query.$('group', 'consumer');
-            query.$('firstName', inputs.firstName);
-            query.$('lastName', inputs.lastName);
-            query.$('screenName', inputs.screenName);
-            query.$('avatarUrl', inputs.avatarUrl);
-            break;
-          case 'cashier':
-            query.extension = [
-            '"cashier" AS',
-              '(INSERT INTO "cashiers" ("id", "businessId", "locationId")',
-                'SELECT "user".id, $businessId, $locationId FROM "user")'
-            ].join(' ');
-            query.$('group', 'cashier');
-            query.$('businessId', inputs.businessId);
-            query.$('locationId', inputs.locationId);
-            break;
-          case 'manager':
-            query.extension = [
-            '"manager" AS',
-              '(INSERT INTO "managers" ("id", "businessId", "locationId")',
-                'SELECT "user".id, $businessId, $locationId FROM "user")'
-            ].join(' ');
-            query.$('group', 'manager');
-            query.$('businessId', inputs.businessId);
-            query.$('locationId', inputs.locationId);
-            break;
-          case 'tapin-station':
-            query.extension = [
-            '"station" AS',
-              '(INSERT INTO "tapinStations" ("id", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled", "numUnconfirmedPunchesAllowed")',
-                'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled, $numUnconfirmedPunchesAllowed FROM "user")'
-            ].join(' ');
-            query.$('group', 'tapin-station');
-            query.$('businessId', inputs.businessId);
-            query.$('locationId', inputs.locationId);
-            query.$('loyaltyEnabled', !!inputs.loyaltyEnabled);
-            query.$('galleryEnabled', !!inputs.galleryEnabled);
-            query.$('numUnconfirmedPunchesAllowed', (+inputs.numUnconfirmedPunchesAllowed) || 0);
-            break;
-          default:
-            throw "Invalid group: "+group;
-        }
+      switch (group) {
+        case 'consumer':
+          query.extension = [
+          '"consumer" AS',
+            '(INSERT INTO "consumers" ("id", "firstName", "lastName", "screenName", "avatarUrl")',
+              'SELECT "user".id, $firstName, $lastName, $screenName, $avatarUrl FROM "user")'
+          ].join(' ');
+          query.$('group', 'consumer');
+          query.$('firstName', inputs.firstName);
+          query.$('lastName', inputs.lastName);
+          query.$('screenName', inputs.screenName);
+          query.$('avatarUrl', inputs.avatarUrl);
+          break;
+        case 'cashier':
+          query.extension = [
+          '"cashier" AS',
+            '(INSERT INTO "cashiers" ("id", "businessId", "locationId")',
+              'SELECT "user".id, $businessId, $locationId FROM "user")'
+          ].join(' ');
+          query.$('group', 'cashier');
+          query.$('businessId', inputs.businessId);
+          query.$('locationId', inputs.locationId);
+          break;
+        case 'manager':
+          query.extension = [
+          '"manager" AS',
+            '(INSERT INTO "managers" ("id", "businessId", "locationId")',
+              'SELECT "user".id, $businessId, $locationId FROM "user")'
+          ].join(' ');
+          query.$('group', 'manager');
+          query.$('businessId', inputs.businessId);
+          query.$('locationId', inputs.locationId);
+          break;
+        case 'tapin-station':
+          query.extension = [
+          '"station" AS',
+            '(INSERT INTO "tapinStations" ("id", "businessId", "locationId", "loyaltyEnabled", "galleryEnabled", "numUnconfirmedPunchesAllowed")',
+              'SELECT "user".id, $businessId, $locationId, $loyaltyEnabled, $galleryEnabled, $numUnconfirmedPunchesAllowed FROM "user")'
+          ].join(' ');
+          query.$('group', 'tapin-station');
+          query.$('businessId', inputs.businessId);
+          query.$('locationId', inputs.locationId);
+          query.$('loyaltyEnabled', !!inputs.loyaltyEnabled);
+          query.$('galleryEnabled', !!inputs.galleryEnabled);
+          query.$('numUnconfirmedPunchesAllowed', (+inputs.numUnconfirmedPunchesAllowed) || 0);
+          break;
+        default:
+          throw "Invalid group: "+group;
+      }
+
+      db.getClient(TAGS, function(error, client){
+        if (error) return callback(errors.internal.DB_FAILURE, error);
 
         client.query(query.toString(), query.$values, function(error, result) {
           if (error) return callback(errors.internal.DB_FAILURE, error);
@@ -367,12 +367,12 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
 
   if (inputs.cardId) inputs.cardId = inputs.cardId.toUpperCase();
 
-  db.getClient(TAGS, function(error, client){
-    if (error) return callback(errors.internal.DB_FAILURE, error);
+  var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
+  module.exports.ensureNotTaken(inputs, userId, function(error, result){
+    if (error) return callback(error, result);
 
-    var extension = (group == 'tapin-station') ? 'tapinStations' : (group+'s');
-    module.exports.ensureNotTaken(inputs, userId, function(error, result){
-      if (error) return callback(error, result);
+    db.getClient(TAGS, function(error, client){
+      if (error) return callback(errors.internal.DB_FAILURE, error);
 
       var tx = new Transaction(client);
       tx.begin(function(error){

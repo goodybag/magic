@@ -31,16 +31,16 @@ module.exports.list = function(req, res){
   var TAGS = ['list-products', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of products');
 
+  // if sort=distance, validate that we got lat/lon
+  if (req.query.sort && req.query.sort.indexOf('distance') !== -1) {
+    if (!req.query.lat || !req.query.lon) {
+      return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
+    }
+  }
   // retrieve pg client
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // if sort=distance, validate that we got lat/lon
-    if (req.query.sort && req.query.sort.indexOf('distance') !== -1) {
-      if (!req.query.lat || !req.query.lon) {
-        return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
-      }
-    }
     var includes = [].concat(req.query.include);
     var includeTags = includes.indexOf('tags') !== -1;
     var includeCats = includes.indexOf('categories') !== -1;
