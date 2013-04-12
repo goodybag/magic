@@ -679,6 +679,42 @@ describe('/v1/locations/:id/products', function() {
       });
     });
   });
+
+  it('should add products to productLocations when a new location is added', function(done){
+
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('products', [{ name:'Product 1', businessId:bids[0], isEnabled:true }], function(err, pids) {
+
+          tu.loginAsAdmin(function(error,user){
+            tu.post('/v1/locations', { name: 'Location 2', businessId: bids[0], isEnabled: true }, function(error, results, res){
+              assert(res.statusCode == 200);
+
+              results = JSON.parse(results);
+
+              assert(!results.error);
+              var lid = results.data.id;
+              assert(lid);
+
+              tu.get('/v1/locations/' + lid + '/products', function(error, results, res){
+                assert(res.statusCode == 200);
+                results = JSON.parse(results);
+                assert(!results.error);
+
+                assert(results.data.length == 1);
+                assert(results.data[0].id == pids[0]);
+
+                tu.logout(done);
+              });
+
+            });
+          });
+
+        });
+      });
+    });
+  });
+
 });
 
 describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
