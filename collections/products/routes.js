@@ -492,7 +492,7 @@ module.exports.create = function(req, res){
 
         // If they didn't provide categories or tags, stop here
         if ((!categories || categories.length === 0) && (!tags || tags.length === 0))
-          return stage.end(results.rows[0].id);
+          return stage.insertProductLocations(client, results.rows[0].id);
 
         // Move on to next stage
         stage.insertProductCategoriesTagsRelations(client, results.rows[0].id, categories, tags);
