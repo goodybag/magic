@@ -401,6 +401,44 @@ describe('GET /v1/locations/:locationId/products', function() {
     });
   });
 
+  it('should respond with a product listing for all at the business', function(done) {
+    var locationId = 1;
+    var businessId = 1;
+
+    tu.loginAsAdmin(function(){
+
+      tu.post('/v1/products', { name: 'blaaahhh', businessId: businessId }, function(err, payload, res){
+
+        assert(!err);
+        assert(res.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        var productId = payload.data.id;
+
+        tu.get('/v1/locations/' + locationId + '/products?all=true&limit=100000', function(err, payload, res) {
+
+          assert(!err);
+          assert(res.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          assert(!payload.error);
+          assert(payload.data.length > 1);
+          // Should bring be back both available and non-available products in all
+          assert(payload.data.filter(function(p){ return p.isAvailable; }).length > 0);
+          assert(payload.data.filter(function(p){ return !p.isAvailable; }).length > 0);
+          assert(payload.data.filter(function(p){ return p.id == productId && p.businessId == businessId; }).length == 1);
+          assert(payload.data.filter(function(p){ return p.businessId == businessId; }).length == payload.data.length);
+
+          assert(payload.meta.total > 1);
+
+          tu.logout(done);
+        });
+      });
+
+    });
+  });
 });
 
 
@@ -416,9 +454,7 @@ describe('GET /v1/businesses/:id/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 0);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Product 1');
+      assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
       assert(payload.meta.total > 1);
       done();
     });
@@ -434,11 +470,9 @@ describe('GET /v1/businesses/:id/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 0);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].tags.length > 0);
-      assert(payload.data[0].categories.length > 0);
+      assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
+      assert(payload.data.filter(function(p){ return p.tags.length > 0; }).length > 0);
+      assert(payload.data.filter(function(p){ return p.categories.length > 0; }).length > 0);
       assert(payload.meta.total > 1);
       done();
     });
