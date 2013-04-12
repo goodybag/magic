@@ -64,52 +64,52 @@ SELECT setval('locations_id_seq', (SELECT MAX(id) from "locations")); -- advance
 -- --   password: "password"
 
 BEGIN;
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('1', 'admin@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('2', 'sales@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('3', 'tablet@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('4', 'client@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('5', 'consumer@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('6', 'dumb@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('1', 'admin@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('2', 'sales@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('3', 'tablet@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('4', 'client@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('5', 'consumer@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('6', 'dumb@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 -- !NOTE! tferguson's password does NOT have the "salt" appended to its plaintext
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('7', 'tferguson@gmail.com', '$2a$10$nwNRXT7QQyY/IyqYMENyEeMccdOu/FKIrQTVedEUtAnBseEjOPJcu', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABC');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('8', 'somebody_else@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('9', 'consumer2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('10', 'consumer3@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11', 'consumer_redeem1@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '723457-ABD');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('12', 'consumer_redeem2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-ABD');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-YYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-YYZ');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('15', 'consumer4@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-CO4');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('16', 'consumer5@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '778899-CBA');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('17', 'consumer6@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '778899-CBB');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('18', 'consumer7@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '778899-CBC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('7', 'tferguson@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('8', 'somebody_else@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('9', 'consumer2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('10', 'consumer3@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11', 'consumer_redeem1@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '723457-ABD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('12', 'consumer_redeem2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('13', 'iamgoingtogetdeleted@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-YYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('14', 'iamgoingtogetdeleted2@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-YYZ');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('15', 'consumer4@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-CO4');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('16', 'consumer5@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '778899-CBA');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('17', 'consumer6@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '778899-CBB');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('18', 'consumer7@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '778899-CBC');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('19', null, null, null, '432123-AAA');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', null, null, null, '432123-AAB');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('21', 'someconsumer21@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '432123-AAC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('21', 'someconsumer21@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '432123-AAC');
 
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXX');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXZ');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11112', 'manager_getting_deleted@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11113', 'manager_redeem1@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-MA1');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11114', 'manager_redeem2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11115', 'manager_redeem3@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XXY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXX');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXZ');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11112', 'manager_getting_deleted@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11113', 'manager_redeem1@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-MA1');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11114', 'manager_redeem2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11115', 'manager_redeem3@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXY');
 
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11120', 'some_cashier@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYX');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11121', 'some_cashier2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYZ');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11122', 'cashier_getting_deleted@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', null);
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11123', 'cashier_redeem1@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11124', 'cashier_redeem2@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11126', 'cashier_at_deleted_location@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11127', 'cashier_redeem_admin@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe', '123456-XYY');
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11137', 'cashier-11137@generated.goodybag.com', '$2a$10$wlk6VGTbVTCIq6ejzbauReAKGrmTmYjbRwx9PLMiBXOTZGPzwGoVy', '$2a$10$wlk6VGTbVTCIq6ejzbauRe', '255777-YRM');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11120', 'some_cashier@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYX');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11121', 'some_cashier2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYZ');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11122', 'cashier_getting_deleted@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', null);
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11123', 'cashier_redeem1@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11124', 'cashier_redeem2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11125', 'cashier_redeem3@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11126', 'cashier_at_deleted_location@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11127', 'cashier_redeem_admin@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XYY');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11137', 'cashier-11137@generated.goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '255777-YRM');
 
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11130', 'tapin_station_0@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11131', 'tapin_station_1@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11132', 'tapin_station_2@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11133', 'ts_redeem1@goodybag.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'consumer_mutated@gmail.com', '$2a$10$ap103GX.pIl2GwY7m3keEew3JDZSMJw0Fci15zZnINqUPt56Y0m.i', '$2a$10$ap103GX.pIl2GwY7m3keEe');
-INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfu');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11130', 'tapin_station_0@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11131', 'tapin_station_1@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11132', 'tapin_station_2@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11133', 'ts_redeem1@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'consumer_mutated@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
