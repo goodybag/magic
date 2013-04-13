@@ -6,7 +6,7 @@ var app = require(__dirname + '/../lib/app');
 omf(app, function(app) {
   app.get('/crossdomain.xml', function(res) {
     res.is.ok();
-    res.has.header('content-type', 'text/xml');
+    res.has.header('content-type', 'application/xml');
     it('has correct body', function() {
       var wanted = '<allow-access-from domain="*" />'
       assert(this.response.body.indexOf(wanted) > -1, "body missing required text " + wanted);
