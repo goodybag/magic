@@ -6,29 +6,23 @@
   "directories": {
     "test": "test"
   },
-  "engines" : { 
+  "engines": {
     "node": "0.8.x",
     "npm": "1.1.x"
   },
   "dependencies": {
     "underscore": "1.4.x",
     "lodash": "1.0.x",
-
     "express": "3.0.x",
-
     "winston": "0.6.x",
     "express-winston": "0.1.x",
     "winston-papertrail": "0.0.6",
     "winston-loggly": "0.6.x",
-    
     "nodemailer": "0.3.x",
     "pubnub": "https://github.com/pfraze/pubnub-nodejs/tarball/master",
-
     "validator": "0.4.x",
-    
     "async": "0.2.x",
     "when": "1.7.x",
-
     "request": "2.12.x",
     "moment": "1.7.x",
     "randomstring": "1.0.x",
@@ -37,23 +31,20 @@
     "noop": "0.2.x",
     "js-yaml": "2.0.x",
     "bcrypt": "0.7.x",
-    
     "pg": "0.14.x",
     "pg-transaction": "0.1.x",
     "sql": "https://github.com/brianc/node-sql/tarball/master",
     "generic-pool": "2.0.x",
-
     "singly": "0.3.x",
-
     "clouseau": "https://github.com/goodybag/clouseau/tarball/master",
     "nodetime": "0.8.x",
-    
     "mongode": "latest"
   },
   "devDependencies": {
     "better-assert": "1.0.x",
     "sinon": "1.5.x",
-    "mocha": "1.7.x"
+    "mocha": "1.7.x",
+    "omf": "~0.4.0"
   },
   "scripts": {
     "test": "mocha test/test.js"
