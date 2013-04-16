@@ -250,9 +250,10 @@ module.exports.list = function(req, res){
     // is in collection join
     if (includeColl && req.session.user) {
       query.fields.add([
-        'array(SELECT "collectionId" FROM "productsCollections"',
-          'WHERE "productsCollections"."productId" = products.id',
-            'AND "productsCollections"."userId" = $userId',
+        'array(SELECT (CASE WHEN coll."pseudoKey" IS NOT NULL THEN coll."pseudoKey" ELSE coll.id::text END) FROM "productsCollections" pc, collections coll',
+          'WHERE pc."collectionId" = coll.id',
+            'AND pc."productId" = products.id',
+            'AND pc."userId" = $userId',
         ') AS "collections"'
       ].join(' '));
       query.$('userId', req.session.user.id);
