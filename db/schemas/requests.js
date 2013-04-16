@@ -35,7 +35,7 @@ define(function(require){
     , sanitizers: { trim:[] }
     }
   , createdAt: {
-      type: 'timestamp'
+      type: 'timestamp without time zone'
     }
   };
 });

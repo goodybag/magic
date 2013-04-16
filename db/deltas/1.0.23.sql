@@ -13,5 +13,5 @@ CREATE TABLE requests (
        url text,
        application text,
        "userAgent" text,
-       "createdAt" timestamp
+       "createdAt" timestamp without time zone
 );
