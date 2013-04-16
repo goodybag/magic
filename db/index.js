@@ -241,6 +241,8 @@ exports.schemas = {
 , activity:                  require('./schemas/activity')
 
 , poplistItems:              require('./schemas/poplistItems')
+
+, requests:                  require('./schemas/requests');
 };
 
 exports.fields = fields;
