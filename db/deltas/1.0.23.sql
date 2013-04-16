@@ -12,5 +12,6 @@ CREATE TABLE requests (
        "httpMethod" text,
        url text,
        application text,
-       "userAgent" text
+       "userAgent" text,
+       "createdAt" timestamp
 );

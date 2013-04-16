@@ -17,7 +17,8 @@ module.exports = function() {
       httpMethod:req.method,
       url:req.url,
       application:headers['application'],
-      userAgent:headers['user-agent']
+      userAgent:headers['user-agent'],
+      createdAt:(new Date()).toISOString()
     }, {returning:false});
 
     next();

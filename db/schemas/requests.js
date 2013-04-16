@@ -34,6 +34,9 @@ define(function(require){
       type: 'text'
     , sanitizers: { trim:[] }
     }
+  , createdAt: {
+      type: 'timestamp'
+    }
   };
   return consumers;
 });
