@@ -9,14 +9,16 @@ module.exports = function() {
 
     var TAGS = ['middleware-request-logger', req.uuid];
 
-    db.getClient(TAGS, function(error, client) {
-      if (error)
-        return; //TODO: error handling
+    db.api.requests.setLogTags(TAGS);
 
-      var query = 'INSERT INTO requests ("uuid", "userId", "httpMethod", "url", "application", "userAgent")';
-      var values = [req.uuid, req.session.user.id, req.method, req.url, headers['application'], headers['user-agent']];
-      client.query(query, values, null);
-    });
+    db.api.requests.insert({
+      uuid:req.uuid,
+      userId:req.session.user != null ? req.session.user.id : null,
+      httpMethod:req.method,
+      url:req.url,
+      application:headers['application'],
+      userAgent:headers['user-agent']
+    }, {returning:false});
 
     next();
   }
