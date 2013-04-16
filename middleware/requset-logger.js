@@ -7,13 +7,13 @@ module.exports = function() {
     for (k in req.headers)
       headers[k.toLowerCase()] = req.headers[k];
 
-    var TAGS = ['middleware-request-logging', req.uuid];
+    var TAGS = ['middleware-request-logger', req.uuid];
 
     db.getClient(TAGS, function(error, client) {
       if (error)
         return; //TODO: error handling
 
-      var query = 'INSERT INTO requests ("uuid", "userId", "method", "url", "application", "userAgent")';
+      var query = 'INSERT INTO requests ("uuid", "userId", "httpMethod", "url", "application", "userAgent")';
       var values = [req.uuid, req.session.user.id, req.method, req.url, headers['application'], headers['user-agent']];
       client.query(query, values, null);
     });

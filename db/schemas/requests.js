@@ -18,7 +18,7 @@ define(function(require){
       type: 'int'
     , validators: { isInt:[] }
     }
-  , method: {
+  , httpMethod: {
       type: 'text'
     , sanitizers: { trim:[] }
     }
