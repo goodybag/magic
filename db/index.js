@@ -242,7 +242,7 @@ exports.schemas = {
 
 , poplistItems:              require('./schemas/poplistItems')
 
-, requests:                  require('./schemas/requests');
+, requests:                  require('./schemas/requests')
 };
 
 exports.fields = fields;
