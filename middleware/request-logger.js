@@ -4,7 +4,7 @@ var requests = db.tables.requests;
 module.exports = function() {
   return function(req, res, next) {
     var headers = {};
-    for (k in req.headers)
+    for (var k in req.headers)
       headers[k.toLowerCase()] = req.headers[k];
 
     var TAGS = ['middleware-request-logger', req.uuid];
