@@ -52,6 +52,7 @@ var config = {
   , 'activity'
 
   , 'poplistItems'
+  , 'requests'
   ]
 , fixtureFile: 'test'
 };
