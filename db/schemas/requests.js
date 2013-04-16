@@ -9,7 +9,7 @@ if (typeof module === 'object' && typeof define !== 'function') {
 }
 
 define(function(require){
-  var consumers = {
+  return {
     uuid: {
       type: 'text'
     , meta: 'primary key'
@@ -38,5 +38,4 @@ define(function(require){
       type: 'timestamp'
     }
   };
-  return consumers;
 });
