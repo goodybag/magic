@@ -16,7 +16,6 @@ define(function(require){
     }
   , userId: {
       type: 'int'
-    , meta: 'references users(id)'
     , validators: { isInt:[] }
     }
   , method: {
