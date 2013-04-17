@@ -358,19 +358,21 @@ module.exports.getLoyalty = function(req, res){
 module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
+console.log("#############################");
+console.log(req.body);
+console.log("#############################");
+  var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
+  updateQuery.updates = sql.fields().addUpdateMap(req.body, updateQuery);
+  updateQuery.$('id', req.params.id);
+
+  var insertQuery = sql.query('INSERT INTO "businessLoyaltySettings" ({fields}) VALUES ({values})');
+  insertQuery.fields = sql.fields().addObjectKeys(req.body);
+  insertQuery.fields.add('"businessId"');
+  insertQuery.values = sql.fields().addObjectValues(req.body, insertQuery);
+  insertQuery.values.add(req.param('id'));
 
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
-    updateQuery.updates = sql.fields().addUpdateMap(req.body, updateQuery);
-    updateQuery.$('id', req.params.id);
-
-    var insertQuery = sql.query('INSERT INTO "businessLoyaltySettings" ({fields}) VALUES ({values})');
-    insertQuery.fields = sql.fields().addObjectKeys(req.body);
-    insertQuery.fields.add('"businessId"');
-    insertQuery.values = sql.fields().addObjectValues(req.body, insertQuery);
-    insertQuery.values.add(req.param('id'));
 
     db.upsert(
       client

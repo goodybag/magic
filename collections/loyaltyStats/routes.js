@@ -57,7 +57,17 @@ module.exports.list = function(req, res){
     var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where} {limit}');
     query.limit = sql.limit(req.query.limit, req.query.offset);
 
-    query.fields = sql.fields().add('"userLoyaltyStats".*');
+    query.fields = sql.fields().add(
+      db.fields.userLoyaltyStats.withTable.exclude('numRewards')
+    );
+    query.fields.add([
+      'case when'
+    , '  "userLoyaltyStats"."isElite" is true'
+    , '    then ("userLoyaltyStats"."numPunches" / "businessLoyaltySettings"."elitePunchesRequired")::int'
+    , '  else'
+    , '    ("userLoyaltyStats"."numPunches" / "businessLoyaltySettings"."regularPunchesRequired")::int'
+    , 'end as "numRewards"'
+    ].join('\n'));
     query.fields.add('businesses.name AS "businessName"');
     query.fields.add('"businessLoyaltySettings".reward AS reward');
     query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
@@ -85,6 +95,7 @@ module.exports.list = function(req, res){
     query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
     client.query(query.toString(), query.$values, function(error, result){
+      console.log(query.toString(), query.$values, error)
 
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
