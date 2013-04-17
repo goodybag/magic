@@ -102,7 +102,8 @@ describe('GET /v1/products', function() {
       tu.get('/v1/products?include=collections&limit=1000', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data.filter(function(p) { return p.collections[0] == 1 && p.id == 1; }).length === 1);
+        assert(payload.data.filter(function(p) { return p.collections[0] === "mypseudo" && p.id === 1; }).length === 1);
+        assert(payload.data.filter(function(p) { return p.collections[0] === "2" && p.id === 3; }).length === 1);
         assert(payload.data.filter(function(p) { return p.collections.length > 0; }).length > 0);
         tu.logout(done);
       });
