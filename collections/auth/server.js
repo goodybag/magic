@@ -5,6 +5,7 @@
 var server = require('express')();
 var routes = require('./routes');
 var middleware  = require('../../middleware');
+var desc = require('./description');
 
 server.get(
   '/v1/session'
@@ -17,6 +18,7 @@ server.post(
   '/v1/session'
 , middleware.profile('POST /v1/session')
 , middleware.profile('create session handler')
+, middleware.validate2.body(desc.session.methods.post.body)
 , routes.authenticate
 );
 
