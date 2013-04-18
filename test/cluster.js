@@ -15,25 +15,25 @@ describe('cluster', function() {
     omf('http://localhost:' + port, function(app) {
       app.get('/ping');
 
-      //make the server throw an error 20 times
-      for(var i = 0; i < 10; i++) {
+      for(var i = 0; i < 7; i++) {
         it('disconnects request on unhandled error', function(done) {
           //what I want to do here is issue a few error requests and a few
           //requests which should not error all at once.  The point is the
           //error requests should all error and the ping requests should all
           //200.  This tests that the shutdown/recycle behavior will not 
           //force-kill active requests
-          var getError = function(done) {
+          var getError = function(cb) {
             app.request.get(app.url('/error'), function(err, res) {
+              //TODO this will change to a response 500 after domains are added
               assert(err, 'should have received a node error');
-              done();
+              cb();
             });
           };
-          var getPing = function(done) {
+          var getPing = function(cb) {
             app.request.get(app.url('/ping'), function(err, res) {
               assert.equal(err, null, 'expected 200 status on ping request but got error ' + (err||0).stack)
               assert.equal(res.statusCode, 200, 'should have 200 status');
-              done();
+              cb();
             });
           };
           async.parallel([getError, getPing, getError, getPing], done);
