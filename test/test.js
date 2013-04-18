@@ -85,6 +85,7 @@ require('./collections/reviews');
 require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
+require('./collections/req-log');
 
 // require('./events/pubnub');
 
