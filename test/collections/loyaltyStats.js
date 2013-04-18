@@ -132,6 +132,62 @@ describe('GET /v1/consumers/:userId/loyalty/:businessId', function(){
     })({ email: 'someconsumer21@gmail.com', password: 'password' }, 1, done);
   });
 
+  it('Should display the correct numRewards even if requirements change', function(done){
+    var userId = 22, businessId = 501;
+
+    utils.stage({
+      start: function(next, end){
+        next('auth')
+      }
+
+    , auth: function(next){
+        tu.loginAsAdmin(function(error){
+          assert(!error);
+
+          next('getUserLoyaltyStats');
+        });
+      }
+
+    , getUserLoyaltyStats: function(next, end){
+        tu.get('/v1/consumers/' + userId + '/loyalty/' + businessId, function(error, results, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+
+          results = JSON.parse(results).data;
+
+          assert(results.numRewards == 0);
+
+          next('updateBusinessLoyaltySettings');
+        });
+      }
+
+    , updateBusinessLoyaltySettings: function(next, end){
+        var $update = {
+          regularPunchesRequired: 5
+        };
+
+        tu.put('/v1/businesses/' + businessId + '/loyalty', JSON.stringify($update), function(error, results, response){
+          assert(!error);
+          assert(response.statusCode == 204);
+
+          next('userLoyaltyStatsAdjusted')
+        });
+      }
+
+    , userLoyaltyStatsAdjusted: function(next, end){
+        tu.get('/v1/consumers/' + userId + '/loyalty/' + businessId, function(error, results, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+
+          results = JSON.parse(results).data;
+
+          assert(results.numRewards == 1);
+
+          tu.logout(end);
+        });
+      }
+    })(done);
+  });
 });
 
 describe('GET /v1/loyalty/businesses/:businessId', function(){
