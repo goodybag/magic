@@ -383,7 +383,7 @@ module.exports.updateLoyalty = function(req, res){
     , function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         res.noContent();
-        magic.emit('loyalty.settingsUpdate', req.params.id, req.body, result);
+        magic.emit('loyalty.settingsUpdate', req.params.id, req.body, result.rows[0]);
       }
     );
   });

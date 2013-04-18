@@ -51,9 +51,7 @@ module.exports = {
   }
 
 , 'loyalty.settingsUpdate':
-  function (id, body, result) {
-    var changes = result.rows[0];
-
+  function (id, body, changes) {
     var eliteChanged = changes.new_elite < changes.old_elite;
     var regularChanged = changes.new_regular < changes.old_regular;
 
