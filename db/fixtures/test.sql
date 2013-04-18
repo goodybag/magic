@@ -17,6 +17,7 @@ INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", str
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isVerified", "isDeleted") VALUES ('4', 2, 'Business 4', 'http://foobar.com', 'http://placekitten.com/500/500', '1234', '123 Foobar St', '#1', 'Austin', 'TX', 78701, true, false, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isVerified", "isDeleted") VALUES ('39', 2, 'Amys Ice Cream ', 'http://foobar.com', 'http://placekitten.com/500/500', '000000', '3500 guadalupe St', null, 'Austin', 'TX', 78705, true, true, false);
 INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isVerified", "isDeleted") VALUES ('500', 2, 'Biz With No Locations', 'http://foobar.com', 'http://placekitten.com/500/500', '000000', '3500 guadalupe St', null, 'Austin', 'TX', 78705, true, true, false);
+INSERT INTO "businesses" (id, "charityId", name, url, "logoUrl", "cardCode", street1, street2, city, state, zip, "isEnabled", "isVerified", "isDeleted") VALUES ('501', 2, 'Biz 501', 'http://foobar.com', 'http://placekitten.com/500/500', '000000', '3500 guadalupe St', null, 'Austin', 'TX', 78705, true, true, false);
 COMMIT;
 SELECT setval('businesses_id_seq', (SELECT MAX(id) from "businesses")); -- advance the sequence past the IDs just used
 
@@ -27,6 +28,7 @@ INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem",
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (2, 2, 'Umbrella', 'Hat', 6, 3, 20, 'http://placekitten.com/200/300');
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (3, 3, 'Bee Repellant', 'Angry Bees', 20, 15, 30, 'http://placekitten.com/200/300');
 INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (4, 39, 'Ice Cream', 'Treat', 8, 4, 10, 'http://placekitten.com/200/300');
+INSERT INTO "businessLoyaltySettings" (id, "businessId", reward, "requiredItem", "regularPunchesRequired", "elitePunchesRequired", "punchesRequiredToBecomeElite", "photoUrl") VALUES (5, 501, 'Some reward', 'Some required item', 10, 8, 20, 'http://placekitten.com/200/300');
 COMMIT;
 SELECT setval('"businessLoyaltySettings_id_seq"', (SELECT MAX(id) from "businessLoyaltySettings")); -- advance the sequence past the IDs just used
 
@@ -86,6 +88,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('18'
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('19', null, null, null, '432123-AAA');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', null, null, null, '432123-AAB');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('21', 'someconsumer21@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '432123-AAC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('22', 'someconsumer22@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '432123-AAC');
 
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXX');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXZ');
@@ -131,6 +134,7 @@ INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('18'
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('19', 'Unregistered', 'Consumer', 'unregistered_consumer');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('21', 'Some', 'Consumer', 'some_consumer21');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('22', 'Some', 'Consumer', 'some_consumer22');
 COMMIT;
 
 -- MANAGERS
@@ -274,6 +278,7 @@ INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "total
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (8, 15, 2, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (9, 15, 2, 5, 23, 40, 0, false, now(), null);
 INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (10, 15, 3, 5, 23, 40, 0, false, now(), null);
+INSERT INTO "userLoyaltyStats" (id, "userId", "businessId", "numPunches", "totalPunches", "visitCount", "numRewards", "isElite", "lastVisit", "dateBecameElite") VALUES (11, 22, 501, 9, 9, 0, 0, false, now(), null);
 COMMIT;
 SELECT setval('"userLoyaltyStats_id_seq"', (SELECT MAX(id) from "userLoyaltyStats")); -- advance the sequence past the IDs just used
 

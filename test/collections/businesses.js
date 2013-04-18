@@ -74,7 +74,7 @@ describe('GET /v1/businesses', function() {
     tu.get('/v1/businesses?isVerified=true', function(err, payload, res) {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
-      assert(payload.data.length == 5);
+      assert(payload.data.length == 6);
       tu.get('/v1/businesses?isVerified=false', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
@@ -88,7 +88,7 @@ describe('GET /v1/businesses', function() {
     tu.get('/v1/businesses?isVerified[]=true&isVerified[]=false', function(err, payload, res) {
       assert(res.statusCode == 200);
       payload = JSON.parse(payload);
-      assert(payload.data.length == 6);
+      assert(payload.data.length == 7);
       done();
     });
   });
