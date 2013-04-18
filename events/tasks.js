@@ -68,15 +68,10 @@ module.exports = {
     if (eliteChanged !== regularChanged)
       query.where = query.where.and('"isElite" IS ' + (eliteChanged ? 'TRUE' : 'FALSE'));
 
-    console.log('query where: ', query.where);
-
     query.id = id;
 
     query.eliteRequired = changes.new_elite;
     query.regularRequired = changes.new_regular;
-
-    console.log("query: ", query.toString());
-    console.log("values: ", query.$values);
 
     var TAGS = ['loyalty-settings-update'];
     db.getClient(TAGS, function(error, client){
