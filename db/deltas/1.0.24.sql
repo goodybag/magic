@@ -1,7 +1,7 @@
 -- 1.0.21.sql
 insert into deltas (version, date) values ('1.0.24', 'now()');
 
-#498 - Some businesses have fubar productLocations
+-- #498 - Some businesses have fubar productLocations
 
 -- Hey, I just met you, and this is crazy
 -- So here's my sql, call me AL;SDJFLK;ASDFJLASD
