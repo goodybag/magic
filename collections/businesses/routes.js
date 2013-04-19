@@ -362,7 +362,9 @@ module.exports.updateLoyalty = function(req, res){
   db.getClient(TAGS, function(error, client){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var updateQuery = sql.query('UPDATE "businessLoyaltySettings" SET {updates} WHERE "businessId"=$id');
+    var updateQuery = sql.query('UPDATE "businessLoyaltySettings" AS main SET {updates} FROM "businessLoyaltySettings" AS old'
+                              + ' WHERE main."businessId"=$id AND main.id=old.id'
+                              + ' RETURNING main."regularPunchesRequired" AS new_regular, main."elitePunchesRequired" AS new_elite, old."regularPunchesRequired" AS old_regular, old."elitePunchesRequired" AS old_elite');
     updateQuery.updates = sql.fields().addUpdateMap(req.body, updateQuery);
     updateQuery.$('id', req.params.id);
 
@@ -381,7 +383,7 @@ module.exports.updateLoyalty = function(req, res){
     , function(error, result){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         res.noContent();
-        magic.emit('loyalty.settingsUpdate', req.params.id, req.body);
+        magic.emit('loyalty.settingsUpdate', req.params.id, req.body, result.rows != null ? result.rows[0] : undefined);
       }
     );
   });
