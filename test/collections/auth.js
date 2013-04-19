@@ -117,9 +117,11 @@ describe('POST /v1/session', function() {
       password: "password"
     }
     tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
-      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000 06:00:10 GMT;') !== -1);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
       tu.logout(done);
     });
   });
@@ -131,9 +133,11 @@ describe('POST /v1/session', function() {
       remember: true
     }
     tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
-      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000 06:00:10 GMT;') !== -1);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
       tu.logout(done);
     });
   });
@@ -145,6 +149,8 @@ describe('POST /v1/session', function() {
       remember: false
     }
     tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
       assert(cookies[0].indexOf('Expires') === -1);
@@ -234,11 +240,12 @@ describe('POST /v1/oauth', function(){
     , singlyAccessToken: fbUsers[0].access_token
     };
 
-    tu.post('/v1/session', user, function(error, results, response) {
+    tu.post('/v1/oauth', user, function(error, results, response) {
       assert(error == null);
+      assert(JSON.parse(results).error == null);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
-      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000 06:00:10 GMT;') !== -1);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
       tu.logout(done);
     });
   });
@@ -251,11 +258,12 @@ describe('POST /v1/oauth', function(){
     , remember: true
     };
 
-    tu.post('/v1/session', user, function(error, results, response) {
+    tu.post('/v1/oauth', user, function(error, results, response) {
       assert(error == null);
+      assert(JSON.parse(results).error == null);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
-      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000 06:00:10 GMT;') !== -1);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
       tu.logout(done);
     });
   });
@@ -268,8 +276,11 @@ describe('POST /v1/oauth', function(){
     , remember: false
     };
 
-    tu.post('/v1/session', user, function(error, results, response) {
+    console.log('remember false');
+    tu.post('/v1/oauth', user, function(error, results, response) {
       assert(error == null);
+      assert(JSON.parse(results).error == null);
+      console.log('results: ', results);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
       assert(cookies[0].indexOf('Expires') === -1);
