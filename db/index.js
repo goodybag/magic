@@ -22,7 +22,8 @@ var
 // , pooler = require('generic-pool')
 , Api = require('../lib/api')
 , async = require('async')
-, logger = require('../lib/logger')({app: 'api', component: 'db'});
+, logger = require('../lib/logger')({app: 'api', component: 'db'})
+, ok = require('okay')
 ;
 
 exports.api = {};
@@ -86,12 +87,55 @@ exports.getClient = function(logTags, callback){
     activePoolIds[logTags[0]] = true;
   }
 
-  return pool.acquire(function(error, client) {
-    if (config.outputActivePoolIds && client) client.assignedPoolId = id;
-    if (client) client.logTags = logTags;
-    callback(error, client);
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    if(err) {
+      var tag = ['unable to checkout client from the pool'];
+      logger.error(client.logTags.concat(tag), err);
+      return callback(err);
+    }
+    client.logTags = logTags;
+    //monkey-patch query method
+    var queries = [];
+    if(!client.$query) {
+      client.$query = client.query;
+
+      client.query = function(text, values, callback) {
+        logger.debug(client.logTags, arguments[0], arguments[1]);
+        client.$query.apply(client, arguments);
+        queries.push(text);
+      };
+    }
+    //TODO auto-release after a specific timeout
+    var tid = setTimeout(function() {
+      logger.warn(client.logTags, 'client has been checked out for too long!');
+      console.log(client.logTags, 'client has been checked out for too long!');
+      console.log(queries);
+    }, 1000);
+    client.once('drain', function() {
+      clearTimeout(tid);
+      done()
+    });
+    callback(null, client);
   });
-  // callback(null, client);
+
+  return;
+};
+
+exports.query = function(text, params, callback) {
+  if(typeof params === 'function') {
+    callback = params;
+    params = {};
+  }
+  if(text.toQuery) {
+    var q = text.toQuery();
+    text = q.text;
+    params = q.values;
+  }
+  exports.getClient(ok(callback, function(client) {
+    return client.$query(text, params, ok(callback, function(result) {
+      return callback(null, result.rows, result);
+    }));
+  }));
 };
 
 /**
