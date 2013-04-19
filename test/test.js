@@ -7,6 +7,10 @@ var yaml = require('js-yaml');
 // ==========
 require('./utils');
 
+// static tests
+// ==========
+require(__dirname + '/static');
+
 // functional tests
 // ================
 // enable profiler
@@ -50,6 +54,7 @@ app.use(require('../collections/activity/server'));
 before(function(done) {
   var self = this;
   var setupDb = require('../db/setup');
+  this.timeout(10000);
   setupDb(require('./db-config.js'), function() {
     self.httpServer = require('http').createServer(app);
     self.httpServer.listen(8986, function(err){
