@@ -11,3 +11,8 @@ DELETE FROM consumers WHERE id NOT IN (SELECT id from users);
 ALTER TABLE consumers ADD CONSTRAINT consumers_id_fkey FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE managers ADD CONSTRAINT managers_id_fkey FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE cashiers ADD CONSTRAINT cashiers_id_fkey FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- #521 - cascade business deletions to punchcards
+
+ALTER TABLE "userLoyaltyStats" DROP CONSTRAINT "userLoyaltyStats_businessId_fkey";
+ALTER TABLE "userLoyaltyStats" ADD CONSTRAINT "userLoyaltyStats_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES businesses(id) ON DELETE CASCADE;
