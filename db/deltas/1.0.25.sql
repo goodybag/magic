@@ -1,7 +1,7 @@
 -- 1.0.25.sql
 insert into deltas (version, date) values ('1.0.25', 'now()');
 
--- #503 - Missing some database constraints on consumers, managers, and cachiers
+-- #503 - Missing some database constraints on consumers, managers, and cashiers
 
 -- remove consumers that don't have a cooresponding user
 
