@@ -240,7 +240,7 @@ module.exports.oauthAuthenticate = function(req, res){
 
       // use session cookie if remember is set to false
       var remember = req.body.remember;
-      if (remember != null && !req.remember) {
+      if (remember != null && !remember) {
         req.session.cookie._expires = null;
         req.session.cookie.originalMaxAge = null;
       }
@@ -322,7 +322,7 @@ module.exports.authenticate = function(req, res){
 
           // use session cookie if remember is set to false
           var remember = req.body.remember;
-          if (remember != null && !req.remember) {
+          if (remember != null && !remember) {
             req.session.cookie._expires = null;
             req.session.cookie.originalMaxAge = null;
           }
