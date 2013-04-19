@@ -27,26 +27,22 @@ module.exports.get = function(req, res) {
   var TAGS = ['get-cashiers', req.uuid];
   logger.routes.debug(TAGS, 'fetching cashier ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client) {
+  var query = sql.query([
+    'SELECT {fields} FROM users',
+      'LEFT JOIN "cashiers" ON "cashiers".id = users.id',
+      'WHERE users.id = $id'
+  ]);
+  query.fields = sql.fields().add('cashiers.*, users.*');
+  query.$('id', +req.param('id') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM users',
-        'LEFT JOIN "cashiers" ON "cashiers".id = users.id',
-        'WHERE users.id = $id'
-    ]);
-    query.fields = sql.fields().add('cashiers.*, users.*');
-    query.$('id', +req.param('id') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount == 1) {
-        return res.json({ error: null, data: result.rows[0] });
-      } else {
-        return res.status(404).end();
-      }
-    });
+    if (result.rowCount == 1) {
+      return res.json({ error: null, data: result.rows[0] });
+    } else {
+      return res.status(404).end();
+    }
   });
 };
 

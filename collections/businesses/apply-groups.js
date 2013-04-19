@@ -14,16 +14,14 @@ exports.ownerManager = function(req, cb) {
   var businessId = req.param('id');
   var userId     = req.session.user.id;
 
-  db.getClient(['businesses-ownerManager', req.uuid], function(error, client) {
-    if (error) cb(null);
+  var tags = ['businesses-ownerManager', req.uuid];
 
-    var query = sql.query('SELECT id FROM managers WHERE id = $id AND "businessId" = $businessId');
-    query.$('id', userId);
-    query.$('businessId', businessId);
+  var query = sql.query('SELECT id FROM managers WHERE id = $id AND "businessId" = $businessId');
+  query.$('id', userId);
+  query.$('businessId', businessId);
 
-    client.query(query.toString(), query.$values, function(error, result) {
-      if (error || result.rowCount === 0) return cb(null);
-      cb('ownerManager');
-    });
+  db.query(query, function(error, rows, result) {
+    if (error || result.rowCount === 0) return cb(null);
+    cb('ownerManager');
   });
 };

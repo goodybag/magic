@@ -62,17 +62,13 @@ module.exports.del = function(req, res){
   var TAGS = ['del-business', req.uuid];
   logger.routes.debug(TAGS, 'deleting business ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('UPDATE businesses SET "isDeleted"=true WHERE id=$id');
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('UPDATE businesses SET "isDeleted"=true WHERE id=$id');
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.noContent();
-    });
+    return res.noContent();
   });
 };
 
@@ -85,100 +81,96 @@ module.exports.list = function(req, res){
   var TAGS = ['list-businesses', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of businesses');
 
-  // retrieve pg client
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var includes = [].concat(req.query.include);
-    var includeLocations = includes.indexOf('locations') !== -1;
-    var includeTags = includes.indexOf('tags') !== -1;
+  var includes = [].concat(req.query.include);
+  var includeLocations = includes.indexOf('locations') !== -1;
+  var includeTags = includes.indexOf('tags') !== -1;
 
-    var query = sql.query([
-      'SELECT {fields} FROM businesses {locationJoin} {tagJoin}',
-        '{where} GROUP BY businesses.id {sort} {limit}'
-    ]);
-    query.fields = sql.fields().add("businesses.*");
-    query.where  = sql.where()
-      .and('businesses."isDeleted" = false')
-      .and('businesses."isEnabled" = true');
-    query.sort   = sql.sort(req.query.sort || 'name');
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
+  var query = sql.query([
+    'SELECT {fields} FROM businesses {locationJoin} {tagJoin}',
+      '{where} GROUP BY businesses.id {sort} {limit}'
+  ]);
+  query.fields = sql.fields().add("businesses.*");
+  query.where  = sql.where()
+    .and('businesses."isDeleted" = false')
+    .and('businesses."isEnabled" = true');
+  query.sort   = sql.sort(req.query.sort || 'name');
+  query.limit  = sql.limit(req.query.limit, req.query.offset);
 
-    if (includeLocations) {
-      query.fields.add('array_to_json(array(SELECT row_to_json("locations".*) FROM locations WHERE locations."businessId" = businesses.id)) as locations');
-    }
+  if (includeLocations) {
+    query.fields.add('array_to_json(array(SELECT row_to_json("locations".*) FROM locations WHERE locations."businessId" = businesses.id)) as locations');
+  }
 
-    // tag filtering
-    if (req.query.tag) {
-      var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+  // tag filtering
+  if (req.query.tag) {
+    var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+    query.tagJoin = [
+      'INNER JOIN "businessTags" ON',
+        '"businessTags"."businessId" = businesses.id AND',
+        tagsClause
+    ].join(' ');
+  }
+
+  // tag include
+  if (includeTags) {
+    if (!req.query.tag) {
       query.tagJoin = [
-        'INNER JOIN "businessTags" ON',
-          '"businessTags"."businessId" = businesses.id AND',
-          tagsClause
+        'LEFT JOIN "businessTags" ON',
+          '"businessTags"."businessId" = businesses.id'
       ].join(' ');
     }
+    query.fields.add('array_agg("businessTags".tag) as tags');
+  }
 
-    // tag include
-    if (includeTags) {
-      if (!req.query.tag) {
-        query.tagJoin = [
-          'LEFT JOIN "businessTags" ON',
-            '"businessTags"."businessId" = businesses.id'
-        ].join(' ');
-      }
-      query.fields.add('array_agg("businessTags".tag) as tags');
-    }
+  // name filter
+  if (req.param('filter')) {
+    query.where.and('businesses.name ILIKE $nameFilter');
+    query.$('nameFilter', '%'+req.param('filter')+'%');
+  }
 
-    // name filter
-    if (req.param('filter')) {
-      query.where.and('businesses.name ILIKE $nameFilter');
-      query.$('nameFilter', '%'+req.param('filter')+'%');
-    }
+  // is verified filter
+  var isVerified = req.param('isVerified');
+  if (typeof isVerified != "undefined") {
+    if (Array.isArray(isVerified) && isVerified.length > 0){
+      // Ensure each value is actually just a boolean
+      isVerified = isVerified.map(function(a){ return /1|true/.test(a); });
+      if (isVerified.indexOf(true) > -1 && isVerified.indexOf(false) > -1){
+        // Actually do nothing in this case
 
-    // is verified filter
-    var isVerified = req.param('isVerified');
-    if (typeof isVerified != "undefined") {
-      if (Array.isArray(isVerified) && isVerified.length > 0){
-        // Ensure each value is actually just a boolean
-        isVerified = isVerified.map(function(a){ return /1|true/.test(a); });
-        if (isVerified.indexOf(true) > -1 && isVerified.indexOf(false) > -1){
-          // Actually do nothing in this case
-
-        } else if (isVerified.indexOf(true) > -1){
-          query.where.and('businesses."isVerified" is true');
-        } else {
-          query.where.and('(businesses."isVerified" is false or businesses."isVerified" is null)');
-        }
+      } else if (isVerified.indexOf(true) > -1){
+        query.where.and('businesses."isVerified" is true');
       } else {
-        query.where.and('businesses."isVerified" is ' + ((/1|true/.test(isVerified)) ? 'true' : 'false'));
+        query.where.and('(businesses."isVerified" is false or businesses."isVerified" is null)');
       }
     } else {
-      query.where.and('businesses."isVerified" is true');
+      query.where.and('businesses."isVerified" is ' + ((/1|true/.test(isVerified)) ? 'true' : 'false'));
+    }
+  } else {
+    query.where.and('businesses."isVerified" is true');
+  }
+
+  // is goodybag filter
+  if (typeof req.param('isGB') != "undefined") {
+    if ((/1|true/.test(req.param('isGB')))) query.where.and('businesses."isGB" is true');
+    else query.where.and('(businesses."isGB" is false or businesses."isGB" is null)');
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  db.query(query, function(error, rows, dataResult){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+    if (includeLocations) {
+      dataResult.rows.forEach(function(r) {
+        if (typeof r.locations != 'undefined')
+          r.locations = (r.locations) ? JSON.parse(r.locations) : [];
+      });
     }
 
-    // is goodybag filter
-    if (typeof req.param('isGB') != "undefined") {
-      if ((/1|true/.test(req.param('isGB')))) query.where.and('businesses."isGB" is true');
-      else query.where.and('(businesses."isGB" is false or businesses."isGB" is null)');
-    }
-
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
-      if (includeLocations) {
-        dataResult.rows.forEach(function(r) {
-          if (typeof r.locations != 'undefined')
-            r.locations = (r.locations) ? JSON.parse(r.locations) : [];
-        });
-      }
-
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-     });
-  });
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
+   });
 };
 
 /**

@@ -126,6 +126,7 @@ exports.query = function(text, params, callback) {
     callback = params;
     params = {};
   }
+
   if(text.toQuery) {
     var q = text.toQuery();
     text = q.text;

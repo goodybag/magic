@@ -171,22 +171,19 @@ module.exports.oauthAuthenticate = function(req, res){
     }
 
   , createOrUpdateUser: function(user){
-      db.getClient(TAGS, function(error, client){
+
+      var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
+      query.$('token', user.singlyAccessToken);
+      query.$('id', user.singlyId);
+
+      db.query(query, function(error, rows, result){
         if (error) return stage.dbError(error);
 
-        var query = sql.query('UPDATE users SET "singlyAccessToken" = $token WHERE "singlyId" = $id returning *');
-        query.$('token', user.singlyAccessToken);
-        query.$('id', user.singlyId);
-
-        client.query(query.toString(), query.$values, function(error, result){
-          if (error) return stage.dbError(error);
-
-          if (result.rowCount === 0) return stage.createUser(user);
-          return stage.lookupUsersGroups({
-            id: result.rows[0].id
-          , singlyId: user.singlyId
-          , singlyAccessToken: user.singlyAccessToken
-          });
+        if (result.rowCount === 0) return stage.createUser(user);
+        return stage.lookupUsersGroups({
+          id: result.rows[0].id
+        , singlyId: user.singlyId
+        , singlyAccessToken: user.singlyAccessToken
         });
       });
     }
