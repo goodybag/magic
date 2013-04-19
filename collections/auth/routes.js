@@ -237,6 +237,15 @@ module.exports.oauthAuthenticate = function(req, res){
 
   , setSessionAndSend: function(user){
       req.session.user = user;
+
+      // use session cookie if remember is set to false
+      var remember = req.body.remember;
+      if (remember != null && !req.remember) {
+        req.session.cookie._expires = null;
+        req.session.cookie.originalMaxAge = null;
+      }
+
+
       res.json({ error: null, data: user });
     }
 

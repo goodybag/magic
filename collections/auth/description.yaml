@@ -27,3 +27,4 @@ oauth:
         singlyId:          { type: string, required: { unless: code },      eg: asdf }
         singlyAccessToken: { type: string, required: { unless: code },      eg: asdf }
         code:              { type: string, required: { unless: singlyId },  eg: asdf }
+        remember:          { type: bool, required: false, eg:true }
