@@ -29,27 +29,7 @@ try {
 Profiler.init({ displayInterval:0, useMicrotime:true });
 
 // create server
-var app = require('../lib/server').createAppServer();
-app.use(require('../collections/debug/server'));
-app.use(require('../collections/auth/server'));
-app.use(require('../collections/charities/server'));
-app.use(require('../collections/businesses/server'));
-app.use(require('../collections/locations/server'));
-app.use(require('../collections/products/server'));
-app.use(require('../collections/productCategories/server'));
-app.use(require('../collections/users/server'));
-app.use(require('../collections/consumers/server'));
-app.use(require('../collections/managers/server'));
-app.use(require('../collections/tapin-stations/server'));
-app.use(require('../collections/cashiers/server'));
-app.use(require('../collections/groups/server'));
-app.use(require('../collections/loyaltyStats/server'));
-app.use(require('../collections/photos/server'));
-app.use(require('../collections/productTags/server'));
-app.use(require('../collections/reviews/server'));
-app.use(require('../collections/redemptions/server'));
-app.use(require('../collections/events/server'));
-app.use(require('../collections/activity/server'));
+var app = require('../lib/app');
 
 before(function(done) {
   var self = this;
