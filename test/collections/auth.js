@@ -110,6 +110,54 @@ describe('POST /v1/session', function() {
       done();
     });
   });
+
+  it('should use an eterna-cookie if remember is not supplied', function(done) {
+    var user = {
+      email: "admin@goodybag.com",
+      password: "password"
+    }
+    tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
+      tu.logout(done);
+    });
+  });
+
+  it('should use an eterna-cookie if remember is true', function(done) {
+    var user = {
+      email: "admin@goodybag.com",
+      password: "password",
+      remember: true
+    }
+    tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
+      tu.logout(done);
+    });
+  });
+
+  it('should use a session cookie if remember is false', function(done) {
+    var user = {
+      email: "admin@goodybag.com",
+      password: "password",
+      remember: false
+    }
+    tu.post('/v1/session', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires') === -1);
+      tu.logout(done);
+    });
+  });
+
 });
 
 describe('GET /v1/oauth', function() {
@@ -182,6 +230,61 @@ describe('POST /v1/oauth', function(){
       assert(results.error);
       assert(results.error.name === "INVALID_GROUP");
       done();
+    });
+  });
+
+  it('should use an eterna-cookie if remember is not supplied', function(done) {
+    var user = {
+      group: 'consumer'
+    , singlyId: fbUsers[0].account
+    , singlyAccessToken: fbUsers[0].access_token
+    };
+
+    tu.post('/v1/oauth', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
+      tu.logout(done);
+    });
+  });
+
+  it('should use an eterna-cookie if remember is true', function(done) {
+    var user = {
+      group: 'consumer'
+    , singlyId: fbUsers[0].account
+    , singlyAccessToken: fbUsers[0].access_token
+    , remember: true
+    };
+
+    tu.post('/v1/oauth', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires=Wed, 01 Jan 3000') !== -1);
+      tu.logout(done);
+    });
+  });
+
+  it('should use a session cookie if remember is false', function(done) {
+    var user = {
+      group: 'consumer'
+    , singlyId: fbUsers[0].account
+    , singlyAccessToken: fbUsers[0].access_token
+    , remember: false
+    };
+
+    console.log('remember false');
+    tu.post('/v1/oauth', user, function(error, results, response) {
+      assert(error == null);
+      assert(JSON.parse(results).error == null);
+      console.log('results: ', results);
+      var cookies = response.headers['set-cookie'];
+      assert(cookies != null);
+      assert(cookies[0].indexOf('Expires') === -1);
+      tu.logout(done);
     });
   });
 });
