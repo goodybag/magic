@@ -263,29 +263,130 @@ describe('DEL /v1/tapin-stations/:id', function() {
   });
 });
 
-
-describe('POST /v1/tapin-stations/:id/heartbeat', function() {
-
-  it('creates a heartbeat event', function(done) {
-    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
-      tu.post('/v1/tapin-stations/11130/heartbeat', {}, function(err, results, res) {
+describe('GET /v1/tapin-stations/heartbeats', function() {
+  it('lists heartbeats', function(done){
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations/heartbeats', function(error, results, res){
+        assert(!error);
         assert(res.statusCode == 200);
+
+        results = JSON.parse(results);
+
+        assert(
+          results.data.filter(function(hb){
+            return hb.businessId == 1 && hb.locationId == 1 && hb.userId == 11130;
+          }).length > 0
+        );
+
+        assert(
+          results.data.filter(function(hb){
+            return hb.businessId == 39 && hb.locationId == 51 && hb.userId == 11135;
+          }).length > 0
+        );
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('lists heartbeats and filters by business', function(done){
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations/heartbeats?businessId=1', function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+
+        results = JSON.parse(results);
+
+        assert(
+          results.data.filter(function(hb){
+            return hb.businessId == 1;
+          }).length == results.data.length
+        );
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('lists heartbeats and filters by location', function(done){
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations/heartbeats?locationId=1', function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+
+        results = JSON.parse(results);
+
+        assert(
+          results.data.filter(function(hb){
+            return hb.locationId == 1;
+          }).length == results.data.length
+        );
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should tell the client not authenticated', function(done) {
+    tu.get('/v1/tapin-stations/heartbeats', function(err, results, res) {
+      assert(res.statusCode == 401);
+      done();
+    });
+  });
+
+  it('should tell the client not allowed', function(done) {
+    tu.loginAsConsumer(function(){
+      tu.get('/v1/tapin-stations/heartbeats', function(err, results, res) {
+        assert(res.statusCode == 403);
+        done();
+      });
+    });
+  });
+
+  it('should respond with invalid query params', function(done) {
+    tu.loginAsAdmin(function(){
+      tu.get('/v1/tapin-stations/heartbeats?poop=butt', function(err, results, res) {
+        assert(res.statusCode == 400);
+        results = JSON.parse(results);
+        assert(results.error.name == 'VALIDATION_FAILED');
+        done();
+      });
+    });
+  });
+});
+
+describe('POST /v1/tapin-stations/:id/heartbeats', function() {
+
+  it('creates a heartbeat', function(done) {
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      tu.post('/v1/tapin-stations/11130/heartbeats', { wifi: 8 }, function(err, results, res) {
+        assert(res.statusCode == 204);
         tu.logout(function() {
-          // Give server time to handle the event
-          setTimeout(function(){
-            tu.loginAsAdmin(function() {
-              tu.get('/v1/events?filter=tapinstations.heartbeat', function(error, results) {
-                assert(res.statusCode == 200);
-                results = JSON.parse(results);
-                assert(results.data.length > 0);
-                assert(results.data.filter(function(d){
-                  return d.data.tapinStationId === '11130';
-                }).length !== 0);
-                tu.logout(done);
-              });
+          tu.loginAsAdmin(function() {
+            tu.get('/v1/tapin-stations/11130/heartbeats', function(error, results, res) {
+              assert(res.statusCode == 200);
+              results = JSON.parse(results);
+              assert(results.data.length > 0);
+              assert(results.data.filter(function(d){
+                return d.userId == 11130 && d.data.wifi == 8;
+              }).length !== 0);
+              tu.logout(done);
             });
-          }, 100);
+          });
         });
+      });
+    });
+  });
+
+  it('should tell the client not authenticated', function(done) {
+    tu.post('/v1/tapin-stations/11130/heartbeats', { wifi: 8 }, function(err, results, res) {
+      assert(res.statusCode == 401);
+      done();
+    });
+  });
+
+  it('should tell the client not allowed', function(done) {
+    tu.loginAsConsumer(function(){
+      tu.post('/v1/tapin-stations/11130/heartbeats', { wifi: 8 }, function(err, results, res) {
+        assert(res.statusCode == 403);
+        done();
       });
     });
   });

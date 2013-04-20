@@ -606,3 +606,11 @@ insert into "businessContactRequests" (name, "businessName", email, zip, comment
 insert into "businessContactRequests" (name, "businessName", email, zip, comments) values ('John Johnson', 'Biz2', 'steve2@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
 insert into "businessContactRequests" (name, "businessName", email, zip, comments) values ('John blalj', 'Biz3', 'steve3@biz.goodybag.com', 75189, 'whooooo yaaaaaay alright comments woooooooo');
 commit;
+
+
+-- heartbeats
+
+BEGIN;
+INSERT INTO heartbeats ("userId", "businessId", "locationId", "createdAt", data) VALUES (11130, 1, 1, now(), '{"foo":"bar"}');
+INSERT INTO heartbeats ("userId", "businessId", "locationId", "createdAt", data) VALUES (11135, 39, 51, now(), '{"foo":"baz"}');
+COMMIT;
