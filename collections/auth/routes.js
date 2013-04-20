@@ -237,6 +237,15 @@ module.exports.oauthAuthenticate = function(req, res){
 
   , setSessionAndSend: function(user){
       req.session.user = user;
+
+      // use session cookie if remember is set to false
+      var remember = req.body.remember;
+      if (remember != null && !remember) {
+        req.session.cookie._expires = null;
+        req.session.cookie.originalMaxAge = null;
+      }
+
+
       res.json({ error: null, data: user });
     }
 
@@ -310,6 +319,13 @@ module.exports.authenticate = function(req, res){
 
           // Save user in session
           req.session.user = user;
+
+          // use session cookie if remember is set to false
+          var remember = req.body.remember;
+          if (remember != null && !remember) {
+            req.session.cookie._expires = null;
+            req.session.cookie.originalMaxAge = null;
+          }
 
           // TODO: get user info based on groups
           return res.json({ error: null, data: user });
