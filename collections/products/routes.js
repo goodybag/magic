@@ -607,6 +607,12 @@ module.exports.update = function(req, res){
   delete inputs.categories;
   delete inputs.tags;
 
+  if (tags && tags.length > 0){
+    if (typeof tags[0] == 'number'){
+      tags = tags.map(function(t){ return { id: t }; });
+    }
+  }
+
   var stage = {
     // Once we receive the client, kick everything off by
     clientReceived: function(error, client){
@@ -654,7 +660,7 @@ module.exports.update = function(req, res){
               'WHERE "productTags".id IN ({tagIds})'
           ]);
           query.$('productId', req.param('productId'));
-          query.tagIds = [].concat(tags).map(function(i) { return parseInt(i,10); }).join(',');
+          query.tagIds = [].concat(tags).map(function(i) { return parseInt(i.id || i); }).join(',');
           client.query(query.toString(), query.$values, done);
         }
 
@@ -770,7 +776,7 @@ module.exports.update = function(req, res){
             if (tags.length === 0) return done();
 
             var
-              isObj = !!tags.id
+              isObj = !!tags[0].id
 
               // Array of functions to execute in parallel
             , queries = []

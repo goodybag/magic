@@ -70,8 +70,8 @@ item:
         description:     { type: string,           eg: This is the description of the product, max: 300 }
         price:           { type: int non-negative, eg: 1299 }
         photoUrl:        { type: url,              eg: http://foo.com/image.png }
-        categories:      { type: int+,             eg: [2] }
-        tags:            { type: int+,             eg: [1] }
+        categories:      { type: string+,          eg: [2] }
+        tags:            { type: mixed+,           eg: [{ id: 1 }, 2] }
         isVerified:      { type: bool,             eg: true }
         isArchived:      { type: bool,             eg: true }
         isEnabled:       { type: bool,             eg: true }
