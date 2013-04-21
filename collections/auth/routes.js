@@ -218,17 +218,14 @@ module.exports.oauthAuthenticate = function(req, res){
 
       query.$('id', user.id);
 
-      db.getClient(TAGS, function(error, client){
+
+      db.query(query, function(error, rows, results){
         if (error) return stage.dbError(error);
 
-        client.query(query.toString(), query.$values, function(error, results){
-          if (error) return stage.dbError(error);
+        var result = rows[0];
+        user.groups = result ? result.groups : [];
 
-          var result = results.rows[0];
-          user.groups = result ? result.groups : [];
-
-          stage.setSessionAndSend(user);
-        });
+        stage.setSessionAndSend(user);
       });
     }
 
@@ -273,49 +270,46 @@ module.exports.oauthAuthenticate = function(req, res){
 module.exports.authenticate = function(req, res){
   var TAGS = ['email-authentication', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  // First check for user existence
+  var query = sql.query('SELECT id, email, password FROM users WHERE email = $email');
+  query.$('email', req.body.email || '');
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // First check for user existence
-    var query = sql.query('SELECT id, email, password FROM users WHERE email = $email');
-    query.$('email', req.body.email || '');
+    if (result.rows.length === 0)
+      return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    var user = result.rows[0];
 
-      if (result.rows.length === 0)
-        return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
+    // Compare passwords
+    utils.comparePasswords(req.body.password, user.password, function(error, success){
+      if (!success)
+        return res.error(errors.auth.INVALID_PASSWORD), logger.routes.error(TAGS, error);
 
-      var user = result.rows[0];
+      // Remove password
+      delete user.password;
 
-      // Compare passwords
-      utils.comparePasswords(req.body.password, user.password, function(error, success){
-        if (!success)
-          return res.error(errors.auth.INVALID_PASSWORD), logger.routes.error(TAGS, error);
+      // Setup groups
+      query = sql.query([
+        'SELECT'
+      , '  array_agg(groups.name)  as groups'
+      , 'FROM "usersGroups"'
+      , '  LEFT JOIN groups'
+      , '    ON "usersGroups"."groupId" = groups.id'
+      , 'WHERE "usersGroups"."userId"  = $id'
+      ]);
 
-        // Remove password
-        delete user.password;
+      query.$('id', user.id);
 
-        // Setup groups
-        query = sql.query([
-          'SELECT'
-        , '  array_agg(groups.name)  as groups'
-        , 'FROM "usersGroups"'
-        , '  LEFT JOIN groups'
-        , '    ON "usersGroups"."groupId" = groups.id'
-        , 'WHERE "usersGroups"."userId"  = $id'
-        ]);
+      db.query(query, function(error, rows, results){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        query.$('id', user.id);
+        var result = results.rows[0];
+        user.groups = result ? result.groups : [];
 
-        client.query(query.toString(), query.$values, function(error, results){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-          var result = results.rows[0];
-          user.groups = result ? result.groups : [];
-
-          // Save user in session
-          req.session.user = user;
+        // Save user in session
+        req.session.user = user;
 
           // use session cookie if remember is set to false
           var remember = req.body.remember;
@@ -329,7 +323,6 @@ module.exports.authenticate = function(req, res){
         }); // End setup groups query
       }); // End compare passwords
     }); // End User existence query
-  }); // End getClient
 };
 
 /**

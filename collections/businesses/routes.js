@@ -28,28 +28,24 @@ module.exports.get = function(req, res){
   var TAGS = ['get-business', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query([
+    'SELECT {fields} FROM businesses',
+      'LEFT JOIN "businessTags" ON "businessTags"."businessId" = businesses.id',
+      'WHERE businesses.id = $id AND businesses."isDeleted" = false',
+      'GROUP BY businesses.id'
+  ]);
+  query.fields = sql.fields().add("businesses.*");
+  query.$('id', +req.params.id || 0);
+  query.fields.add('array_agg("businessTags"."tag") as tags');
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM businesses',
-        'LEFT JOIN "businessTags" ON "businessTags"."businessId" = businesses.id',
-        'WHERE businesses.id = $id AND businesses."isDeleted" = false',
-        'GROUP BY businesses.id'
-    ]);
-    query.fields = sql.fields().add("businesses.*");
-    query.$('id', +req.params.id || 0);
-    query.fields.add('array_agg("businessTags"."tag") as tags');
+    if (result.rowCount === 0) {
+      return res.status(404).end();
+    }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -192,55 +188,51 @@ module.exports.create = function(req, res){
       req.session.user.groups.indexOf('sales') == -1)
     inputs.isVerified = false;
 
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  // query
+  var query = sql.query('INSERT INTO businesses ({fields}) VALUES ({values}) RETURNING id');
+  query.fields = sql.fields().addObjectKeys(inputs);
+  query.values = sql.fields().addObjectValues(inputs, query);
 
-    // query
-    var query = sql.query('INSERT INTO businesses ({fields}) VALUES ({values}) RETURNING id');
-    query.fields = sql.fields().addObjectKeys(inputs);
-    query.values = sql.fields().addObjectValues(inputs, query);
+  query.fields.add('"createdAt"').add('"updatedAt"');
+  query.values.add('now()').add('now()');
 
-    query.fields.add('"createdAt"').add('"updatedAt"');
-    query.values.add('now()').add('now()');
+  if (req.body.isGB == null || req.body.isGB == undefined){
+    query.fields.add('"isGB"');
+    query.values.add(false);
+  }
 
-    if (req.body.isGB == null || req.body.isGB == undefined){
-      query.fields.add('"isGB"');
+  if (!req.session
+  || !req.session.user
+  || !req.session.user.groups
+  || (req.session.user.groups.indexOf('admin') === -1
+  && req.session.user.groups.indexOf('sales') === -1)){
+    if (req.body.isVerified == null || req.body.isVerified == undefined){
+      query.fields.add('"isVerified"');
       query.values.add(false);
     }
+  } else {
+    if (req.body.isVerified == null || req.body.isVerified == undefined){
+      query.fields.add('"isVerified"');
+      query.values.add(true);
+    }
+  }
 
-    if (!req.session
-    || !req.session.user
-    || !req.session.user.groups
-    || (req.session.user.groups.indexOf('admin') === -1
-    && req.session.user.groups.indexOf('sales') === -1)){
-      if (req.body.isVerified == null || req.body.isVerified == undefined){
-        query.fields.add('"isVerified"');
-        query.values.add(false);
-      }
-    } else {
-      if (req.body.isVerified == null || req.body.isVerified == undefined){
-        query.fields.add('"isVerified"');
-        query.values.add(true);
-      }
+  db.query(query, function(error, rows, result){
+    if (error) {
+      if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+      return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
     }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) {
-        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
-        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      }
+    var business = result.rows[0];
+    if (!tags) return res.json({ error: null, data: business });
 
-      var business = result.rows[0];
-      if (!tags) return res.json({ error: null, data: business });
+    // add tags
+    var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
+    query += (Array.isArray(tags) ? tags : [tags]).map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
+    db.query(query, [business.id].concat(tags), function(error, rows, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      // add tags
-      var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
-      query += (Array.isArray(tags) ? tags : [tags]).map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
-      client.query(query, [business.id].concat(tags), function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        return res.json({ error: null, data: business });
-      });
+      return res.json({ error: null, data: business });
     });
   });
 };
@@ -252,31 +244,39 @@ module.exports.create = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-business', req.uuid];
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  var inputs = req.body;
+  var tags = inputs.tags;
+  delete inputs.tags;
 
-    var inputs = req.body;
-    var tags = inputs.tags;
-    delete inputs.tags;
+  // PG should be handling this
+  delete inputs.createdAt;
+  delete inputs.updatedAt;
 
-    // PG should be handling this
-    delete inputs.createdAt;
-    delete inputs.updatedAt;
+  inputs.id = req.params.id; // make sure there's always something in the update
 
-    inputs.id = req.params.id; // make sure there's always something in the update
+  var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
+  query.updates = sql.fields().addUpdateMap(inputs, query);
+  query.updates.add('"updatedAt" = now()');
+  query.$('id', req.params.id);
 
-    var query = sql.query('UPDATE businesses SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(inputs, query);
-    query.updates.add('"updatedAt" = now()');
-    query.$('id', req.params.id);
+  db.query(query, function(error, rows, result){
+    if (error) {
+      if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
+      return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) {
-        if (/charityId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { charityId:'Id provided does not exist in charities table.' }), logger.routes.error(TAGS, error);
-        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      }
+    if (typeof tags == 'undefined') {
+      res.noContent();
+      magic.emit('businesses.update', req.params.id, inputs);
+      if (inputs.logoUrl)
+        magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
+      return;
+    }
 
-      if (typeof tags == 'undefined') {
+    db.query('DELETE FROM "businessTags" WHERE "businessId" = $1', [req.params.id], function(error, rows, result) {
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      if (tags.length === 0) {
         res.noContent();
         magic.emit('businesses.update', req.params.id, inputs);
         if (inputs.logoUrl)
@@ -284,30 +284,18 @@ module.exports.update = function(req, res){
         return;
       }
 
-      client.query('DELETE FROM "businessTags" WHERE "businessId" = $1', [req.params.id], function(error, result) {
+      var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
+      query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
+      db.query(query, [req.params.id].concat(tags), function(error, rows, result) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        if (tags.length === 0) {
-          res.noContent();
-          magic.emit('businesses.update', req.params.id, inputs);
-          if (inputs.logoUrl)
-            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
-          return;
-        }
+        res.noContent();
 
-        var query = 'INSERT INTO "businessTags" ("businessId", tag) VALUES ';
-        query += tags.map(function(_, i) { return '($1, $'+(i+2)+')'; }).join(', ');
-        client.query(query, [req.params.id].concat(tags), function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-          res.noContent();
-
-          if (tags)
-            inputs.tags = tags;
-          magic.emit('businesses.update', req.params.id, inputs);
-          if (inputs.logoUrl)
-            magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
-        });
+        if (tags)
+          inputs.tags = tags;
+        magic.emit('businesses.update', req.params.id, inputs);
+        if (inputs.logoUrl)
+          magic.emit('businesses.logoUpdate', req.params.id, inputs.logoUrl);
       });
     });
   });
@@ -322,23 +310,20 @@ module.exports.getLoyalty = function(req, res){
   var TAGS = ['get-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'fetching business ' + req.params.id + ' loyalty');
 
-  db.getClient(TAGS, function(error, client){
+
+  var query = sql.query([
+    'SELECT {fields} FROM "businessLoyaltySettings"',
+      'WHERE "businessId" = $id'
+  ]);
+  query.fields = sql.fields().add('"businessLoyaltySettings".*');
+  query.$('id', +req.params.id || 0);
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM "businessLoyaltySettings"',
-        'WHERE "businessId" = $id'
-    ]);
-    query.fields = sql.fields().add('"businessLoyaltySettings".*');
-    query.$('id', +req.params.id || 0);
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (result.rowCount === 0)
+      return res.json({ error: null, data: null });
 
-      if (result.rowCount === 0)
-        return res.json({ error: null, data: null });
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 

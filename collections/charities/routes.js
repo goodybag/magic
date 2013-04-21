@@ -27,22 +27,18 @@ module.exports.get = function(req, res){
   var TAGS = ['get-charities', req.uuid];
   logger.routes.debug(TAGS, 'fetching charities ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT {fields} FROM charities WHERE id=$id');
+  query.fields = sql.fields().add("charities.*");
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT {fields} FROM charities WHERE id=$id');
-    query.fields = sql.fields().add("charities.*");
-    query.$('id', +req.params.id || 0);
+    if (result.rowCount === 0) {
+      return res.status(404).end();
+    }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -55,17 +51,13 @@ module.exports.del = function(req, res){
   var TAGS = ['del-charity', req.uuid];
   logger.routes.debug(TAGS, 'deleting charity ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM charities WHERE id=$id');
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('DELETE FROM charities WHERE id=$id');
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -78,29 +70,24 @@ module.exports.list = function(req, res){
   var TAGS = ['list-charities', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of charities');
 
-  // retrieve pg client
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT {fields} FROM charities {where} {limit}');
+  query.fields = sql.fields().add("charities.*");
+  query.where  = sql.where();
+  query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+  if (req.param('filter')) {
+    query.where.and('charities.name ILIKE $nameFilter');
+    query.$('nameFilter', '%'+req.param('filter')+'%');
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  // run data query
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT {fields} FROM charities {where} {limit}');
-    query.fields = sql.fields().add("charities.*");
-    query.where  = sql.where();
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
-
-    if (req.param('filter')) {
-      query.where.and('charities.name ILIKE $nameFilter');
-      query.$('nameFilter', '%'+req.param('filter')+'%');
-    }
-
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
-    // run data query
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 
@@ -113,23 +100,19 @@ module.exports.list = function(req, res){
 module.exports.create = function(req, res){
   var TAGS = ['create-charity', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var inputs = req.body;
+
+  var error = utils.validate(inputs, schemas.charities);
+  if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
+
+  var query = sql.query('INSERT INTO charities ({fields}) VALUES ({values}) RETURNING id');
+  query.fields = sql.fields().addObjectKeys(inputs);
+  query.values = sql.fields().addObjectValues(inputs, query);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var inputs = req.body;
-
-    var error = utils.validate(inputs, schemas.charities);
-    if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('INSERT INTO charities ({fields}) VALUES ({values}) RETURNING id');
-    query.fields = sql.fields().addObjectKeys(inputs);
-    query.values = sql.fields().addObjectValues(inputs, query);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -141,19 +124,16 @@ module.exports.create = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-charity', req.uuid];
-  db.getClient(TAGS, function(error, client){
+
+  var inputs = req.body;
+
+  var query = sql.query('UPDATE charities SET {updates} WHERE id=$id');
+  query.updates = sql.fields().addUpdateMap(inputs, query);
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var inputs = req.body;
-
-    var query = sql.query('UPDATE charities SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(inputs, query);
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
+    res.noContent();
   });
 };
