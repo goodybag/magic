@@ -26,6 +26,7 @@ var
 , ok = require('okay')
 ;
 
+require('pg-parse-float')(pg);
 exports.api = {};
 exports.pg = pg;
 exports.sql = sql;
