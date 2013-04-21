@@ -29,17 +29,13 @@ module.exports.list = function(req, res){
   var TAGS = ['list-redemptions', req.uuid];
   logger.routes.debug(TAGS, 'fetching redemptions');
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('SELECT *, COUNT(id) OVER() AS "metaTotal" FROM "userRedemptions" {limit}');
-    query.limit = sql.limit(req.query.limit, req.query.offset);
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 

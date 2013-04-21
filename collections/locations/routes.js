@@ -36,107 +36,102 @@ module.exports.list = function(req, res){
     }
   }
 
-  // retrieve pg client
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  var includes = [].concat(req.query.include);
+  var includeTags = includes.indexOf('tags') !== -1;
 
-    var includes = [].concat(req.query.include);
-    var includeTags = includes.indexOf('tags') !== -1;
+  // build data query
+  var query = sql.query(
+    'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id, businesses.name, businesses."logoUrl" {sort} {limit}'
+  );
+  query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
+  query.where  = sql.where();
 
-    // build data query
-    var query = sql.query(
-      'SELECT {fields} FROM locations {tagJoin} {businessJoin} {where} GROUP BY locations.id, businesses.name, businesses."logoUrl" {sort} {limit}'
-    );
-    query.fields = sql.fields().add(db.fields.locations.withTable.exclude('isEnabled'));
-    query.where  = sql.where();
+  query.businessJoin = 'left join businesses on locations."businessId" = businesses.id';
+  query.fields.add('businesses.name as "businessName"');
+  query.fields.add('businesses."logoUrl" as "logoUrl"');
 
-    query.businessJoin = 'left join businesses on locations."businessId" = businesses.id';
-    query.fields.add('businesses.name as "businessName"');
-    query.fields.add('businesses."logoUrl" as "logoUrl"');
+  // :TEMPORARY: the mobile app doesn't use the businessName field
+  if (/iPhone/.test(req.headers['user-agent'])) {
+    query.fields.add('businesses.name as name');
+  }
 
-    // :TEMPORARY: the mobile app doesn't use the businessName field
-    if (/iPhone/.test(req.headers['user-agent'])) {
-      query.fields.add('businesses.name as name');
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  // Show all or just enabled locatins
+  if (!req.query.all){
+    query.where.and('locations."isEnabled" = true');
+  } else {
+    query.fields.add('locations."isEnabled"');
+  }
+
+  // business filtering
+  if (req.param('businessId')) { // use param() as this may come from the path or the query
+    query.where.and('locations."businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+
+  // location filtering
+  if (req.query.lat && req.query.lon) {
+    query.fields.add('earth_distance(ll_to_earth($lat,$lon), locations.position) AS distance');
+    query.$('lat', req.query.lat);
+    query.$('lon', req.query.lon);
+    if (req.query.range) {
+      query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
+      query.$('range', req.query.range);
     }
+  }
 
-    query.limit = sql.limit(req.query.limit, req.query.offset);
+  // tag filtering
+  if (req.query.tag) {
+    var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+    query.tagJoin = [
+      'INNER JOIN "businessTags" ON',
+        '"businessTags"."businessId" = locations."businessId" AND',
+        tagsClause
+    ].join(' ');
+  }
 
-    // Show all or just enabled locatins
-    if (!req.query.all){
-      query.where.and('locations."isEnabled" = true');
-    } else {
-      query.fields.add('locations."isEnabled"');
-    }
-
-    // business filtering
-    if (req.param('businessId')) { // use param() as this may come from the path or the query
-      query.where.and('locations."businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-
-    // location filtering
-    if (req.query.lat && req.query.lon) {
-      query.fields.add('earth_distance(ll_to_earth($lat,$lon), locations.position) AS distance');
-      query.$('lat', req.query.lat);
-      query.$('lon', req.query.lon);
-      if (req.query.range) {
-        query.where.and('earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth(lat, lon)');
-        query.$('range', req.query.range);
-      }
-    }
-
-    // tag filtering
-    if (req.query.tag) {
-      var tagsClause = sql.filtersMap(query, '"businessTags".tag {=} $filter', req.query.tag);
+  // tag include
+  if (includeTags) {
+    if (!req.query.tag) {
       query.tagJoin = [
-        'INNER JOIN "businessTags" ON',
-          '"businessTags"."businessId" = locations."businessId" AND',
-          tagsClause
+        'LEFT JOIN "businessTags" ON',
+          '"businessTags"."businessId" = locations."businessId"'
       ].join(' ');
     }
+    query.fields.add('array_agg("businessTags".tag) as tags');
+  }
 
-    // tag include
-    if (includeTags) {
-      if (!req.query.tag) {
-        query.tagJoin = [
-          'LEFT JOIN "businessTags" ON',
-            '"businessTags"."businessId" = locations."businessId"'
-        ].join(' ');
-      }
-      query.fields.add('array_agg("businessTags".tag) as tags');
+  // random sort
+  if (req.query.sort) {
+    if(req.query.sort.indexOf('random') !== -1) {
+      query.fields.add('random() as random'); // this is really inefficient
     }
 
-    // random sort
-    if (req.query.sort) {
-      if(req.query.sort.indexOf('random') !== -1) {
-        query.fields.add('random() as random'); // this is really inefficient
-      }
+    if (req.query.sort[0] !== '-' && req.query.sort[0] !== '+')
+      req.query.sort = '+' + req.query.sort;
+    if (req.query.sort.indexOf('.') === -1 && ['random', 'distance'].indexOf(req.query.sort.substring(1)) === -1)
+      req.query.sort = req.query.sort[0] + 'locations.' + req.query.sort.substring(1);
 
-      if (req.query.sort[0] !== '-' && req.query.sort[0] !== '+')
-        req.query.sort = '+' + req.query.sort;
-      if (req.query.sort.indexOf('.') === -1 && ['random', 'distance'].indexOf(req.query.sort.substring(1)) === -1)
-        req.query.sort = req.query.sort[0] + 'locations.' + req.query.sort.substring(1);
+    query.sort = sql.sort(req.query.sort || '+locations.name');
+  }
 
-      query.sort = sql.sort(req.query.sort || '+locations.name');
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  // run data query
+  db.query(query, function(error, rows, dataResult){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (dataResult.rowCount === 0 && req.param('businessId')) {
+      return db.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, rows, bizResult) {
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        if (bizResult.rowCount === 0)
+          return res.error(errors.input.NOT_FOUND);
+        return res.json({ error: null, data: [], meta: { total:0 } });
+      });
     }
 
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
-    // run data query
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (dataResult.rowCount === 0 && req.param('businessId')) {
-        return client.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, bizResult) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          if (bizResult.rowCount === 0)
-            return res.error(errors.input.NOT_FOUND);
-          return res.json({ error: null, data: [], meta: { total:0 } });
-        });
-      }
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 
@@ -149,22 +144,18 @@ module.exports.get = function(req, res){
   var TAGS = ['get-location', req.uuid];
   logger.routes.debug(TAGS, 'fetching location');
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
+  query.fields = sql.fields().add("locations.*");
+  query.$('id', +req.param('locationId') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT {fields} FROM locations WHERE id=$id');
-    query.fields = sql.fields().add("locations.*");
-    query.$('id', +req.param('locationId') || 0);
+    if (result.rowCount === 0) {
+      return res.status(404).end();
+    }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount === 0) {
-        return res.status(404).end();
-      }
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -182,39 +173,34 @@ module.exports.create = function(req, res){
   var error = utils.validate(inputs, schemas.locations);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  // retrieve db client
-  db.getClient(TAGS, function(error, client){
-    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+  // build query
+  var query = sql.query('INSERT INTO locations ({fields}) VALUES ({values}) RETURNING id');
+  query.fields = sql.fields().addObjectKeys(inputs);
+  query.values = sql.fields().addObjectValues(inputs, query);
 
-    // build query
-    var query = sql.query('INSERT INTO locations ({fields}) VALUES ({values}) RETURNING id');
-    query.fields = sql.fields().addObjectKeys(inputs);
-    query.values = sql.fields().addObjectValues(inputs, query);
+  // add calculations
+  if (inputs.lat && inputs.lon) {
+    query.fields.add('position');
+    query.values.add('(ll_to_earth('+inputs.lat+','+inputs.lon+'))');
+  }
 
-    // add calculations
-    if (inputs.lat && inputs.lon) {
-      query.fields.add('position');
-      query.values.add('(ll_to_earth('+inputs.lat+','+inputs.lon+'))');
-    }
+  // run create query
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    var newLocation = result.rows[0];
 
-    // run create query
-    client.query(query.toString(), query.$values, function(error, result){
+    // create productLocations for all products related to the business
+    var query = sql.query([
+      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+      'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon), true FROM products WHERE products."businessId" = $businessId'
+    ]);
+    query.$('locationId', newLocation.id);
+    query.$('businessId', inputs.businessId);
+    query.$('lat', inputs.lat);
+    query.$('lon', inputs.lon);
+    db.query(query, function(error, rows, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      var newLocation = result.rows[0];
-
-      // create productLocations for all products related to the business
-      var query = sql.query([
-        'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
-        'SELECT products.id, $locationId, $businessId, $lat, $lon, ll_to_earth($lat, $lon), true FROM products WHERE products."businessId" = $businessId'
-      ]);
-      query.$('locationId', newLocation.id);
-      query.$('businessId', inputs.businessId);
-      query.$('lat', inputs.lat);
-      query.$('lon', inputs.lon);
-      client.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        return res.json({ error: null, data: newLocation });
-      });
+      return res.json({ error: null, data: newLocation });
     });
   });
 };
@@ -227,47 +213,42 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-location', req.uuid];
 
-  // retrieve db client
-  db.getClient(TAGS, function(error, client){
-    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+  var inputs = req.body;
 
-    var inputs = req.body;
+  var query = sql.query('UPDATE locations SET {updates} WHERE id=$id');
+  query.updates = sql.fields().addUpdateMap(inputs, query);
+  query.$('id', req.param('locationId'));
 
-    var query = sql.query('UPDATE locations SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(inputs, query);
-    query.$('id', req.param('locationId'));
+  var isUpdatingPosition = (typeof inputs.lat != 'undefined' || typeof inputs.lon != 'undefined');
+  var lat = inputs.lat ? inputs.lat : '"lat"';
+  var lon = inputs.lon ? inputs.lon : '"lon"';
+  if (isUpdatingPosition) {
+    query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
+  }
 
-    var isUpdatingPosition = (typeof inputs.lat != 'undefined' || typeof inputs.lon != 'undefined');
-    var lat = inputs.lat ? inputs.lat : '"lat"';
-    var lon = inputs.lon ? inputs.lon : '"lon"';
-    if (isUpdatingPosition) {
-      query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
+  // run update query
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    // do we need to update the productLocations?
+    if (!isUpdatingPosition) {
+      return res.noContent();
     }
 
-    // run update query
-    client.query(query.toString(), query.$values, function(error, result){
+    var updates = {};
+    if (typeof lat == 'number') updates.lat = lat;
+    if (typeof lon == 'number') updates.lon = lon;
+
+    // update related productLocations
+    var query = sql.query('UPDATE "productLocations" SET {updates} WHERE "locationId"=$id');
+    query.updates = sql.fields().addUpdateMap(updates, query);
+    query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
+    query.$('id', req.param('locationId'));
+
+    db.query(query, function(error, rows, result) {
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      // do we need to update the productLocations?
-      if (!isUpdatingPosition) {
-        return res.noContent();
-      }
-
-      var updates = {};
-      if (typeof lat == 'number') updates.lat = lat;
-      if (typeof lon == 'number') updates.lon = lon;
-
-      // update related productLocations
-      var query = sql.query('UPDATE "productLocations" SET {updates} WHERE "locationId"=$id');
-      query.updates = sql.fields().addUpdateMap(updates, query);
-      query.updates.add('position = (ll_to_earth('+lat+','+lon+'))');
-      query.$('id', req.param('locationId'));
-
-      client.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        res.noContent();
-      });
+      res.noContent();
     });
   });
 };
@@ -280,20 +261,13 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-location', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+  var query = sql.query('DELETE FROM locations WHERE id=$id');
+  query.$('id', req.param('locationId'));
 
-    var query = sql.query('DELETE FROM locations WHERE id=$id');
-    query.$('id', req.param('locationId'));
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -400,34 +374,29 @@ module.exports.addProduct = function(req, res){
 
   var inputs = req.body;
 
-  // retrieve db client
-  db.getClient(TAGS, function(error, client){
-    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+  var query = sql.query([
+    'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
+      'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $inSpotlight',
+        'FROM locations',
+        'WHERE locations.id = $locationId',
+          'AND NOT EXISTS (SELECT 1 FROM "productLocations" WHERE "productId" = $productId AND "locationId" = $locationId)'
+  ]);
+  query.$('productId', inputs.productId);
+  query.$('locationId', req.params.locationId);
+  query.$('inSpotlight', (typeof inputs.inSpotlight != 'undefined') ? !!inputs.inSpotlight : true);
 
-    var query = sql.query([
-      'INSERT INTO "productLocations" ("productId", "locationId", "businessId", lat, lon, position, "inSpotlight")',
-        'SELECT $productId, locations.id, locations."businessId", locations.lat, locations.lon, ll_to_earth(locations.lat, locations.lon), $inSpotlight',
-          'FROM locations',
-          'WHERE locations.id = $locationId',
-            'AND NOT EXISTS (SELECT 1 FROM "productLocations" WHERE "productId" = $productId AND "locationId" = $locationId)'
-    ]);
-    query.$('productId', inputs.productId);
-    query.$('locationId', req.params.locationId);
-    query.$('inSpotlight', (typeof inputs.inSpotlight != 'undefined') ? !!inputs.inSpotlight : true);
+  db.query(query, function(error, rows, result){
+    if (error) {
+      if (/productId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { productId:'Id provided does not exist in products table.' }), logger.routes.error(TAGS, error);
+      return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    }
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) {
-        if (/productId/.test(error.detail)) return res.error(errors.input.VALIDATION_FAILED, { productId:'Id provided does not exist in products table.' }), logger.routes.error(TAGS, error);
-        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      }
+    res.noContent();
 
-      res.noContent();
-
-      if (result.rowCount !== 0)
-        magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
-      if (inputs.inSpotlight)
-        magic.emit('locations.productSpotlightUpdate', req.params.locationId, inputs.productId, true);
-    });
+    if (result.rowCount !== 0)
+      magic.emit('locations.productStockUpdate', req.params.locationId, inputs.productId, true);
+    if (inputs.inSpotlight)
+      magic.emit('locations.productSpotlightUpdate', req.params.locationId, inputs.productId, true);
   });
 };
 
@@ -443,26 +412,21 @@ module.exports.updateProduct = function(req, res){
     return res.error(errors.input.VALIDATION_FAILED, 'No valid values supplied for update')
   }
 
-  // retrieve db client
-  db.getClient(TAGS, function(error, client){
-    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+  var query = sql.query([
+    'UPDATE "productLocations" SET {updates} WHERE "locationId" = $locationId AND "productId" = $productId'
+  ]);
+  query.$('productId', req.params.productId);
+  query.$('locationId', req.params.locationId);
+  query.updates = sql.fields().addUpdateMap(req.body, query);
 
-    var query = sql.query([
-      'UPDATE "productLocations" SET {updates} WHERE "locationId" = $locationId AND "productId" = $productId'
-    ]);
-    query.$('productId', req.params.productId);
-    query.$('locationId', req.params.locationId);
-    query.updates = sql.fields().addUpdateMap(req.body, query);
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+    res.noContent();
 
-      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      res.noContent();
-
-      if (typeof req.body.inSpotlight != 'undefined')
-        magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.inSpotlight);
-    });
+    if (typeof req.body.inSpotlight != 'undefined')
+      magic.emit('locations.productSpotlightUpdate', req.params.locationId, req.params.productId, req.body.inSpotlight);
   });
 };
 
@@ -474,24 +438,19 @@ module.exports.updateProduct = function(req, res){
 module.exports.removeProduct = function(req, res){
   var TAGS = ['location-remove-product', req.uuid];
 
-  // retrieve db client
-  db.getClient(TAGS, function(error, client){
-    if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+  var query = sql.query([
+    'DELETE FROM "productLocations" WHERE "locationId" = $locationId AND "productId" = $productId'
+  ]);
+  query.$('productId', req.params.productId);
+  query.$('locationId', req.params.locationId);
 
-    var query = sql.query([
-      'DELETE FROM "productLocations" WHERE "locationId" = $locationId AND "productId" = $productId'
-    ]);
-    query.$('productId', req.params.productId);
-    query.$('locationId', req.params.locationId);
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
+    res.noContent();
 
-      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      res.noContent();
-
-      magic.emit('locations.productStockUpdate', req.params.locationId, req.params.productId, false);
-    });
+    magic.emit('locations.productStockUpdate', req.params.locationId, req.params.productId, false);
   });
 };
 

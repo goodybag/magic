@@ -220,28 +220,24 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
 
   if (query.subqueries.fields.length === 0) return callback();
 
-  db.getClient(TAGS, function(error, client){
+  db.query(query, function(error, rows, result){
     if (error) return callback(errors.internal.DB_FAILURE, error);
+    if (result.rows.length > 0){
+      result = result.rows[0];
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return callback(errors.internal.DB_FAILURE, error);
-      if (result.rows.length > 0){
-        result = result.rows[0];
+      if (result.email && inputs.email && result.email != id)
+        return callback(errors.registration.EMAIL_REGISTERED);
+      if (result.screenName && inputs.screenName && result.screenName != id)
+        return callback(errors.registration.SCREENNAME_TAKEN);
+      if (result.cardId && inputs.cardId && result.cardId != id)
+        return callback(errors.registration.CARD_ID_TAKEN);
+      if (result.singlyId && inputs.singlyId && result.singlyId != id)
+        return callback(errors.registration.SINGLY_ID_TAKEN);
+      if (result.singlyAccessToken && inputs.singlyAccessToken && result.singlyAccessToken != id)
+        return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
+    }
 
-        if (result.email && inputs.email && result.email != id)
-          return callback(errors.registration.EMAIL_REGISTERED);
-        if (result.screenName && inputs.screenName && result.screenName != id)
-          return callback(errors.registration.SCREENNAME_TAKEN);
-        if (result.cardId && inputs.cardId && result.cardId != id)
-          return callback(errors.registration.CARD_ID_TAKEN);
-        if (result.singlyId && inputs.singlyId && result.singlyId != id)
-          return callback(errors.registration.SINGLY_ID_TAKEN);
-        if (result.singlyAccessToken && inputs.singlyAccessToken && result.singlyAccessToken != id)
-          return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
-      }
-
-      return callback();
-    });
+    return callback();
   });
 };
 
@@ -332,25 +328,21 @@ module.exports.registerUser = function(group, inputs, options, callback){
           throw "Invalid group: "+group;
       }
 
-      db.getClient(TAGS, function(error, client){
+      db.query(query, function(error, rows, result) {
         if (error) return callback(errors.internal.DB_FAILURE, error);
 
-        client.query(query.toString(), query.$values, function(error, result) {
-          if (error) return callback(errors.internal.DB_FAILURE, error);
+        inputs.userId = result.rows[0].userId;
 
-          inputs.userId = result.rows[0].userId;
+        // Return session object
+        var user = {
+          id: inputs.userId
+        , email: inputs.email
+        , singlyAccessToken: inputs.singlyAccessToken
+        , singlyId: inputs.singlyId
+        , groups: [group]
+        };
 
-          // Return session object
-          var user = {
-            id: inputs.userId
-          , email: inputs.email
-          , singlyAccessToken: inputs.singlyAccessToken
-          , singlyId: inputs.singlyId
-          , groups: [group]
-          };
-
-          callback(null, user);
-        });
+        callback(null, user);
       });
     }, extension);
   });

@@ -22,22 +22,18 @@ exports.owner = function(req, cb) {
 
   var userId = req.param('id');
 
-  db.getClient(['managers owner apply groups', req.uuid], function(error, client){
+  var query = managers.select(
+    managers.id
+  ).where(
+    managers.id.equals(req.session.user.id)
+  ).toQuery();
+
+  db.query(query, function(error, rows, result){
     if (error) return cb(null);
 
-    var query = managers.select(
-      managers.id
-    ).where(
-      managers.id.equals(req.session.user.id)
-    ).toQuery();
+    if (result.rows.length === 0) return cb(null);
+    if (result.rows[0].id != userId) return cb(null);
 
-    client.query(query, function(error, result){
-      if (error) return cb(null);
-
-      if (result.rows.length === 0) return cb(null);
-      if (result.rows[0].id != userId) return cb(null);
-
-      cb('owner');
-    });
+    cb('owner');
   });
 };

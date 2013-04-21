@@ -22,58 +22,16 @@ var
 // , pooler = require('generic-pool')
 , Api = require('../lib/api')
 , async = require('async')
-, logger = require('../lib/logger')({app: 'api', component: 'db'});
+, logger = require('../lib/logger')({app: 'api', component: 'db'})
+, ok = require('okay')
 ;
 
+require('pg-parse-float')(pg);
 exports.api = {};
 exports.pg = pg;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
-// TODO: I don't think this is using the connection pool
-// find out best way to do this
-
-var activePoolIds = {};
-var pool = pooler.Pool({
-  name: 'postgres'
-, max: 10
-, create: function(callback) {
-    new pg.Client(config.postgresConnStr).connect(function(err, client) {
-
-      if(err) return callback(err);
-
-      // monkey-patch the client query function to do logging
-      var clientQueryFn = client.query;
-      client.query = function() {
-        logger.debug(client.logTags, arguments[0], arguments[1]);
-        clientQueryFn.apply(this, arguments);
-      };
-
-      client.on('error', function(e) {
-        self.emit('error', e, client);
-        pool.destroy(client);
-      });
-
-      client.on('drain', function() {
-        if (client.assignedPoolId) {
-          delete activePoolIds[client.assignedPoolId];
-        }
-        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds));
-        pool.release(client);
-      });
-
-      callback(err, client);
-    });
-  }
-, destroy: function(client) {
-    client.end();
-  }
-, max: 30
-, idleTimeoutMillis: 30 * 1000
-, reapIntervalMillis: 1000
-});
-
-var unnamedPoolidCounter = 0;
 exports.getClient = function(logTags, callback){
   if (typeof logTags == 'function') {
     callback = logTags;
@@ -86,12 +44,59 @@ exports.getClient = function(logTags, callback){
     activePoolIds[logTags[0]] = true;
   }
 
-  return pool.acquire(function(error, client) {
-    if (config.outputActivePoolIds && client) client.assignedPoolId = id;
-    if (client) client.logTags = logTags;
-    callback(error, client);
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    if(err) {
+      var tag = ['unable to checkout client from the pool'];
+      logger.error(client.logTags.concat(tag), err);
+      return callback(err);
+    }
+    client.logTags = logTags;
+    //monkey-patch query method
+    var queries = [];
+    if(!client.$query) {
+      client.$query = client.query;
+
+      client.query = function(text, values, callback) {
+        logger.debug(client.logTags, arguments[0], arguments[1]);
+        client.$query.apply(client, arguments);
+        queries.push(text);
+      };
+    }
+    //TODO auto-release after a specific timeout
+    var tid = setTimeout(function() {
+      logger.warn(client.logTags, 'client has been checked out for too long!');
+      console.log(client.logTags, 'client has been checked out for too long!');
+      console.log(queries);
+    }, 1000);
+    client.once('drain', function() {
+      clearTimeout(tid);
+      done()
+    });
+    callback(null, client);
   });
-  // callback(null, client);
+
+  return;
+};
+
+exports.query = function(text, params, callback) {
+  if(typeof params === 'function') {
+    callback = params;
+    params = {};
+  }
+
+  if(text.toQuery) {
+    var q = text.toQuery();
+    text = q.text;
+    params = q.values;
+  }
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    client.query(text, params, function(err, result) {
+      //release the client
+      done();
+      if(err) return callback(err);
+      return callback(null, result.rows, result);
+    });
+  });
 };
 
 /**
