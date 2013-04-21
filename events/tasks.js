@@ -74,9 +74,6 @@ module.exports = {
     query.regularRequired = changes.new_regular;
 
     var TAGS = ['loyalty-settings-update'];
-    db.getClient(TAGS, function(error, client){
-      if (error) return;
-      client.query(query.toString(), query.$values, function(error, result){});
-    });
+    db.query(query, function(error, rows, result){});
   }
 };

@@ -132,11 +132,14 @@ exports.query = function(text, params, callback) {
     text = q.text;
     params = q.values;
   }
-  exports.getClient(ok(callback, function(client) {
-    return client.$query(text, params, ok(callback, function(result) {
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    client.query(text, params, function(err, result) {
+      //release the client
+      done();
+      if(err) return callback(err);
       return callback(null, result.rows, result);
-    }));
-  }));
+    });
+  });
 };
 
 /**

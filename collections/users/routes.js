@@ -29,44 +29,40 @@ module.exports.get = function(req, res){
   var TAGS = ['get-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query([
+    'SELECT users.*',
+      ', array_agg(groups.id)   AS "groupIds"',
+      ', array_agg(groups.name) AS "groupNames"',
+    'FROM users',
+    'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+    'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+    'WHERE users.id = $id',
+    'GROUP BY users.id'
+  ]);
+
+  //query.fields = sql.fields().addSelectMap(req.fields);
+  query.$('id', +req.param('id') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT users.*',
-        ', array_agg(groups.id)   AS "groupIds"',
-        ', array_agg(groups.name) AS "groupNames"',
-      'FROM users',
-      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
-      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
-      'WHERE users.id = $id',
-      'GROUP BY users.id'
-    ]);
+    if (result.rowCount == 1) {
+      var row = result.rows[0];
+      row.groups = [];
 
-    //query.fields = sql.fields().addSelectMap(req.fields);
-    query.$('id', +req.param('id') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount == 1) {
-        var row = result.rows[0];
-        row.groups = [];
-
-        if (row.groupIds && row.groupIds[0] != null){
-          for (var i = 0; i < row.groupIds.length; i++){
-            row.groups.push({ id: row.groupIds[i], name: row.groupNames[i] });
-          }
+      if (row.groupIds && row.groupIds[0] != null){
+        for (var i = 0; i < row.groupIds.length; i++){
+          row.groups.push({ id: row.groupIds[i], name: row.groupNames[i] });
         }
-
-        delete row.groupIds;
-        delete row.groupNames;
-
-        return res.json({ error: null, data: row });
-      } else {
-        return res.status(404).end();
       }
-    });
+
+      delete row.groupIds;
+      delete row.groupNames;
+
+      return res.json({ error: null, data: row });
+    } else {
+      return res.status(404).end();
+    }
   });
 };
 
@@ -79,53 +75,49 @@ module.exports.list = function(req, res){
   var TAGS = ['list-users', req.uuid];
   logger.routes.debug(TAGS, 'fetching users ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query([
+    'SELECT users.*',
+      ', COUNT(users.id) OVER() AS "metaTotal"',
+      ', array_agg(groups.id)   AS "groupIds"',
+      ', array_agg(groups.name) AS "groupNames"',
+    'FROM users',
+    'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+    'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+    '{where}',
+    'GROUP BY users.id {limit}'
+  ]);
+
+  query.where = sql.where();
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  if (req.param('filter')) {
+    query.where.and('users.email ILIKE $emailFilter');
+    query.$('emailFilter', '%'+req.param('filter')+'%');
+  }
+
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT users.*',
-        ', COUNT(users.id) OVER() AS "metaTotal"',
-        ', array_agg(groups.id)   AS "groupIds"',
-        ', array_agg(groups.name) AS "groupNames"',
-      'FROM users',
-      'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
-      'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
-      '{where}',
-      'GROUP BY users.id {limit}'
-    ]);
+    var rows = dataResult.rows;
 
-    query.where = sql.where();
-    query.limit = sql.limit(req.query.limit, req.query.offset);
+    rows = rows.map(function(r){
+      r.groups = [];
 
-    if (req.param('filter')) {
-      query.where.and('users.email ILIKE $emailFilter');
-      query.$('emailFilter', '%'+req.param('filter')+'%');
-    }
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var rows = dataResult.rows;
-
-      rows = rows.map(function(r){
-        r.groups = [];
-
-        if (r.groupIds && r.groupIds[0] != null){
-          for (var i = 0; i < r.groupIds.length; i++){
-            r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
-          }
+      if (r.groupIds && r.groupIds[0] != null){
+        for (var i = 0; i < r.groupIds.length; i++){
+          r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
         }
+      }
 
-        delete r.groupIds;
-        delete r.groupNames;
+      delete r.groupIds;
+      delete r.groupNames;
 
-        return r;
-      });
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
-      return res.json({ error: null, data: rows, meta: { total:total } });
+      return r;
     });
+
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+    return res.json({ error: null, data: rows, meta: { total:total } });
   });
 };
 
@@ -198,17 +190,13 @@ module.exports.del = function(req, res){
   var TAGS = ['del-user', req.uuid];
   logger.routes.debug(TAGS, 'deleting user ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM users WHERE id=$id');
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('DELETE FROM users WHERE id=$id');
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
