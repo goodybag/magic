@@ -32,50 +32,6 @@ exports.pg = pg;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
-// TODO: I don't think this is using the connection pool
-// find out best way to do this
-
-var activePoolIds = {};
-var pool = pooler.Pool({
-  name: 'postgres'
-, max: 10
-, create: function(callback) {
-    new pg.Client(config.postgresConnStr).connect(function(err, client) {
-
-      if(err) return callback(err);
-
-      // monkey-patch the client query function to do logging
-      var clientQueryFn = client.query;
-      client.query = function() {
-        logger.debug(client.logTags, arguments[0], arguments[1]);
-        clientQueryFn.apply(this, arguments);
-      };
-
-      client.on('error', function(e) {
-        self.emit('error', e, client);
-        pool.destroy(client);
-      });
-
-      client.on('drain', function() {
-        if (client.assignedPoolId) {
-          delete activePoolIds[client.assignedPoolId];
-        }
-        if (config.outputActivePoolIds) console.log('ACTIVE POOL IDS', Object.keys(activePoolIds));
-        pool.release(client);
-      });
-
-      callback(err, client);
-    });
-  }
-, destroy: function(client) {
-    client.end();
-  }
-, max: 30
-, idleTimeoutMillis: 30 * 1000
-, reapIntervalMillis: 1000
-});
-
-var unnamedPoolidCounter = 0;
 exports.getClient = function(logTags, callback){
   if (typeof logTags == 'function') {
     callback = logTags;
