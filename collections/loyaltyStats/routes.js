@@ -50,117 +50,113 @@ module.exports.list = function(req, res){
   if (!req.session.user)
     return res.error(errors.auth.NOT_AUTHENTICATED);
 
-  db.getClient(TAGS, function(error, client){
+  // get stats
+  var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where} {limit}');
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  query.fields = sql.fields().add('"userLoyaltyStats".*');
+  query.fields.add('businesses.name AS "businessName"');
+  query.fields.add('"businessLoyaltySettings".reward AS reward');
+  query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
+  query.fields.add('"businessLoyaltySettings"."punchesRequiredToBecomeElite" AS "punchesRequiredToBecomeElite"');
+  query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
+  query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
+  query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
+
+  query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
+  query.loyaltyJoin = 'JOIN "businessLoyaltySettings" ON "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
+  query.userJoin = 'JOIN users ON users.id = "userLoyaltyStats"."userId"';
+
+  query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
+
+  if (!req.param('businessId'))
+    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
+
+  query.$('userId', req.param('userId') || req.session.user.id);
+
+  if (req.param('businessId')){
+    query.where.and('"userLoyaltyStats"."businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  db.query(query, function(error, rows, result){
+
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // get stats
-    var query = sql.query('SELECT {fields} FROM "userLoyaltyStats" {busJoin} {loyaltyJoin} {userJoin} {where} {limit}');
-    query.limit = sql.limit(req.query.limit, req.query.offset);
+    var total = (result.rows[0]) ? result.rows[0].metaTotal : 0;
 
-    query.fields = sql.fields().add('"userLoyaltyStats".*');
-    query.fields.add('businesses.name AS "businessName"');
-    query.fields.add('"businessLoyaltySettings".reward AS reward');
-    query.fields.add('"businessLoyaltySettings"."photoUrl" AS "photoUrl"');
-    query.fields.add('"businessLoyaltySettings"."punchesRequiredToBecomeElite" AS "punchesRequiredToBecomeElite"');
-    query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
-    query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
-    query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
-
-    query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
-    query.loyaltyJoin = 'JOIN "businessLoyaltySettings" ON "userLoyaltyStats"."businessId" = "businessLoyaltySettings"."businessId"';
-    query.userJoin = 'JOIN users ON users.id = "userLoyaltyStats"."userId"';
-
-    query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
-
-    if (!req.param('businessId'))
-      query.where.and('"userLoyaltyStats"."totalPunches" > 0');
-
-    query.$('userId', req.param('userId') || req.session.user.id);
-
-    if (req.param('businessId')){
-      query.where.and('"userLoyaltyStats"."businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
+    if (result.rows.length > 0){
+      return res.json({
+        error: null
+      , data: req.param('businessId') ? result.rows[0] : result.rows
+      , meta: { total:total }
+      });
+    } else if (!req.param('businessId')){
+      return res.json({ error: null , data: [] , meta: { total: 0 } });
     }
 
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
+    // They've requested either a loyaltystat that hasn't been created yet
+    // Or a business that doesn't exist
+    // Or a business that hasn't setup their loyalty program
+    // First, check the two latter
+    query = [
+      'select businesses.id from businesses'
+    ,   'join "businessLoyaltySettings"'
+    ,     'on businesses.id = "businessLoyaltySettings"."businessId"'
+    , 'where businesses.id = $1'
+    ].join(' ');
 
-    client.query(query.toString(), query.$values, function(error, result){
+    db.query(query, [req.param('businessId')], function(error, rows, result){
+      if (error)
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rows.length === 0)
+        return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
-      var total = (result.rows[0]) ? result.rows[0].metaTotal : 0;
+      // Ok, the business and business loyalty setting both existed
+      // Create a default version of the record they're requesting
+      var stat = {
+        userId:           req.session.user.id
+      , businessId:       req.param('businessId')
+      , numPunches:       0
+      , totalPunches:     0
+      , numRewards:       0
 
-      if (result.rows.length > 0){
-        return res.json({
-          error: null
-        , data: req.param('businessId') ? result.rows[0] : result.rows
-        , meta: { total:total }
-        });
-      } else if (!req.param('businessId')){
-        return res.json({ error: null , data: [] , meta: { total: 0 } });
-      }
+        // If this is a tapin-auth, we know this is actually a visit
+        // Not TOTALLY accurate but mostly and will get updated eventually
+      , visitCount:       (req.header('authorization') && req.header('authorization').indexOf('Tapin') > -1) ? 1 : 0
 
-      // They've requested either a loyaltystat that hasn't been created yet
-      // Or a business that doesn't exist
-      // Or a business that hasn't setup their loyalty program
-      // First, check the two latter
-      query = [
-        'select businesses.id from businesses'
-      ,   'join "businessLoyaltySettings"'
-      ,     'on businesses.id = "businessLoyaltySettings"."businessId"'
-      , 'where businesses.id = $1'
-      ].join(' ');
+      , lastVisit:        'now()'
+      , isElite:          false
+      , dateBecameElite:  null
+      };
 
-      client.query(query, [req.param('businessId')], function(error, result){
-        if (error)
-          return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      utils.parallel({
+        stats: function(done){
+          db.api.userLoyaltyStats.setLogTags(TAGS);
+          db.api.userLoyaltyStats.insert(stat, done);
+        }
 
-        if (result.rows.length === 0)
-          return res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
+      , settings: function(done){
+          db.api.businessLoyaltySettings.setLogTags(TAGS);
+          db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
+            done(e, r); // find passes back 3 params, which messes with the parallel fn results
+          });
+        }
+      }, function(error, results){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        // Ok, the business and business loyalty setting both existed
-        // Create a default version of the record they're requesting
-        var stat = {
-          userId:           req.session.user.id
-        , businessId:       req.param('businessId')
-        , numPunches:       0
-        , totalPunches:     0
-        , numRewards:       0
+        stat.id = results.stats.id;
+        stat.lastVisit = new Date();
+        stat.reward = results.settings.reward;
+        stat.photoUrl = results.settings.photoUrl;
+        stat.regularPunchesRequired = results.settings.regularPunchesRequired;
+        stat.elitePunchesRequired = results.settings.elitePunchesRequired;
+        stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
 
-          // If this is a tapin-auth, we know this is actually a visit
-          // Not TOTALLY accurate but mostly and will get updated eventually
-        , visitCount:       (req.header('authorization') && req.header('authorization').indexOf('Tapin') > -1) ? 1 : 0
-
-        , lastVisit:        'now()'
-        , isElite:          false
-        , dateBecameElite:  null
-        };
-
-        utils.parallel({
-          stats: function(done){
-            db.api.userLoyaltyStats.setLogTags(TAGS);
-            db.api.userLoyaltyStats.insert(stat, done);
-          }
-
-        , settings: function(done){
-            db.api.businessLoyaltySettings.setLogTags(TAGS);
-            db.api.businessLoyaltySettings.findOne({ businessId: stat.businessId }, function(e, r){
-              done(e, r); // find passes back 3 params, which messes with the parallel fn results
-            });
-          }
-        }, function(error, results){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-          stat.id = results.stats.id;
-          stat.lastVisit = new Date();
-          stat.reward = results.settings.reward;
-          stat.photoUrl = results.settings.photoUrl;
-          stat.regularPunchesRequired = results.settings.regularPunchesRequired;
-          stat.elitePunchesRequired = results.settings.elitePunchesRequired;
-          stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
-
-          res.json({ error: null, data: stat, meta: { total:1 } });
-        });
+        res.json({ error: null, data: stat, meta: { total:1 } });
       });
     });
   });

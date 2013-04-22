@@ -37,283 +37,279 @@ module.exports.list = function(req, res){
       return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
     }
   }
-  // retrieve pg client
-  db.getClient(TAGS, function(error, client){
+
+  var includes = [].concat(req.query.include);
+  var includeTags = includes.indexOf('tags') !== -1;
+  var includeCats = includes.indexOf('categories') !== -1;
+  var includeColl = includes.indexOf('collections') !== -1;
+  var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+
+  // build data query
+  var query = sql.query([
+    'SELECT {fields} FROM products',
+      '{poplistJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
+      'INNER JOIN businesses ON businesses.id = products."businessId"',
+      '{where}',
+      'GROUP BY {groupby}',
+      '{sort} {limit}'
+  ]);
+  query.fields  = sql.fields()
+    .add('products.*')
+    .add('businesses.name as "businessName"')
+    .add('businesses."isGB" as "businessIsGB"');
+  query.where   = sql.where();
+  query.sort    = sql.sort(req.query.sort || (req.param('collectionId') ? '-"productsCollections"."createdAt"' : '+name'));
+  query.limit   = sql.limit(req.query.limit, req.query.offset);
+  query.groupby = sql.fields().add('products.id').add('businesses.id');
+
+  // Don't filter out unverified business products when querying by business and by collection
+  if (!req.param('businessId') && !req.param('collectionId'))
+    query.where.and('businesses."isVerified" is true');
+
+  // hasPhoto filtering
+  // :TEMP: iphone mods - only products with photos
+  if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {
+    query.where.and('"photoUrl" IS NOT NULL');
+  }
+
+  // business filtering
+  if (req.param('businessId')) { // use param() as this may come from the path or the query
+    query.where.and('products."businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+  // business tag filter
+  else if (req.param('businessType')) {
+    if (req.param('businessType') == 'other') {
+      query.where.and([
+        'NOT EXISTS',
+          '(SELECT "businessTags".id FROM "businessTags"',
+            'WHERE "businessTags"."businessId" = businesses.id',
+              'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', ['food', 'apparel']),
+          ')'
+      ].join(' '));
+    } else {
+      query.where.and([
+        'EXISTS',
+          '(SELECT "businessTags".id FROM "businessTags"',
+            'WHERE "businessTags"."businessId" = businesses.id',
+              'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', req.param('businessType')),
+          ')'
+      ].join(' '));
+    }
+  }
+
+  // location filtering
+  if (req.query.lat && req.query.lon) {
+    query.prodLocJoin = [
+      'LEFT JOIN "productLocations" ON',
+        '"productLocations"."productId" = products.id'
+    ].join(' ');
+    query.$('lat', req.query.lat);
+    query.$('lon', req.query.lon);
+    query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
+    if (req.query.range) {
+      // If querying by range, don't include null lat/lon
+      query.prodLocJoin = query.prodLocJoin.replace('LEFT', 'INNER');
+      query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
+      query.$('range', req.query.range);
+    }
+  }
+
+  // location id filtering
+  if (req.param('locationId')){
+    var joinType = "inner";
+
+    if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
+      query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
+
+    if (!query.prodLocJoin) {
+      query.prodLocJoin = [
+        '{joinType} join "productLocations"'
+        , 'ON products."id" = "productLocations"."productId"'
+        , 'and "productLocations"."locationId" = $locationId'
+      ].join(' ');
+    } else {
+      query.prodLocJoin += ' AND "productLocations"."locationId" = $locationId';
+    }
+
+    query.groupby.add('"productLocations".id');
+
+    query.$('locationId', req.param('locationId'));
+
+    if (req.param('all')){
+      joinType = "left";
+      query.fields.add('"productLocations".id is not null as "isAvailable"');
+      query.prodLocJoin += [
+        'inner join "locations"'
+      , 'on "locations"."businessId" = products."businessId"'
+      , 'and locations.id = $locationId'
+      ].join(' ');
+    }
+
+    query.prodLocJoin = query.prodLocJoin.replace("{joinType}", joinType);
+  }
+
+  // tag filtering
+  if (req.query.tag) {
+    var tagsClause = sql.filtersMap(query, '"productTags".tag {=} $filter', req.query.tag);
+    query.tagJoin = [
+      'INNER JOIN "productsProductTags" ON',
+        '"productsProductTags"."productId" = products.id',
+      'INNER JOIN "productTags" ON',
+        '"productTags".id = "productsProductTags"."productTagId" AND',
+        tagsClause
+    ].join(' ');
+  }
+
+  // consumer collection filtering
+  if (req.param('collectionId')) {
+    if (req.param('collectionId') == 'all') {
+      query.collectionJoin = [
+        'INNER JOIN collections ON',
+          'collections."userId" = $userId',
+        'INNER JOIN "productsCollections" ON',
+          '"productsCollections"."productId" = products.id AND',
+          '"productsCollections"."collectionId" = collections.id'
+      ].join(' ');
+      query.$('userId', req.param('userId'));
+    } else {
+      query.collectionJoin = [
+        'INNER JOIN collections ON',
+          '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId) AND collections."userId" = $userId',
+        'INNER JOIN "productsCollections" ON',
+          '"productsCollections"."productId" = products.id AND',
+          '"productsCollections"."collectionId" = collections.id'
+      ].join(' ');
+      query.$('collectionId', req.param('collectionId'));
+      query.$('userId', req.param('userId'));
+
+    }
+    query.fields.add('"productsCollections"."createdAt" as "createdAt"');
+    query.groupby.add('"productsCollections"."createdAt"');
+  }
+
+  // tag include
+  if (includeTags) {
+    query.fields.add([
+      'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
+        'INNER JOIN "productsProductTags"',
+          'ON "productsProductTags"."productTagId" = "productTags".id',
+          'AND "productsProductTags"."productId" = products.id',
+      ')) as tags'
+    ].join(' '));
+  }
+
+  // category include
+  if (includeCats) {
+    query.fields.add([
+      'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
+        'INNER JOIN "productsProductCategories"',
+          'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
+          'AND "productsProductCategories"."productId" = products.id',
+      ')) as categories'
+    ].join(' '));
+  }
+
+  // user feelings join
+  if (req.session.user) {
+    query.feelingsJoins = [
+      'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
+      'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
+      'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId'
+    ].join(' ');
+    query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
+    query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
+    query.fields.add('("productTries".id IS NOT NULL) AS "userTried"');
+    query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
+    query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
+    query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
+    query.groupby.add('"productLikes".id');
+    query.groupby.add('"productWants".id');
+    query.groupby.add('"productTries".id');
+    query.$('userId', req.session.user.id);
+
+    if (req.param('userLikes') !== null && typeof req.param('userLikes') != 'undefined')
+      query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
+
+    if (req.param('userTried') !== null && typeof req.param('userTried') != 'undefined')
+      query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
+
+    if (req.param('userWants') !== null && typeof req.param('userWants') != 'undefined')
+      query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
+  }
+
+  // user photos join
+  if (req.session.user && includeUserPhotos) {
+    query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
+    query.$('userId', req.session.user.id);
+  }
+
+  // is in collection join
+  if (includeColl && req.session.user) {
+    query.fields.add([
+      'array(SELECT (CASE WHEN coll."pseudoKey" IS NOT NULL THEN coll."pseudoKey" ELSE coll.id::text END) FROM "productsCollections" pc, collections coll',
+        'WHERE pc."collectionId" = coll.id',
+          'AND pc."productId" = products.id',
+          'AND pc."userId" = $userId',
+      ') AS "collections"'
+    ].join(' '));
+    query.$('userId', req.session.user.id);
+  }
+
+  // custom sorts
+  if (req.query.sort) {
+    if (req.query.sort.indexOf('random') !== -1)
+      query.fields.add('random() as random'); // this is really inefficient
+    else if (req.query.sort.indexOf('popular') !== -1) {
+      query.poplistJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
+      query.fields.add('pli.id as popular');
+      query.groupby.add('pli.id');
+
+      var listid = Math.floor(Math.random()*config.algorithms.popular.numLists);
+      var onehour = 1000 * 60 * 60;
+      if (req.query.listid)
+        listid = req.query.listid;
+      else if (req.session) {
+        if (req.session.currentPopListid && req.session.currentPopListCreated && ((new Date() - new Date(req.session.currentPopListCreated)) < onehour || req.query.offset < 1))
+          listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
+        else {
+          req.session.currentPopListid = listid; // :TEMP: store current list from session
+          req.session.currentPopListCreated = new Date();
+        }
+      }
+      query.$('poplistid', listid);
+    }
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+  // run data query
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var includes = [].concat(req.query.include);
-    var includeTags = includes.indexOf('tags') !== -1;
-    var includeCats = includes.indexOf('categories') !== -1;
-    var includeColl = includes.indexOf('collections') !== -1;
-    var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
-
-    // build data query
-    var query = sql.query([
-      'SELECT {fields} FROM products',
-        '{poplistJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
-        'INNER JOIN businesses ON businesses.id = products."businessId"',
-        '{where}',
-        'GROUP BY {groupby}',
-        '{sort} {limit}'
-    ]);
-    query.fields  = sql.fields()
-      .add('products.*')
-      .add('businesses.name as "businessName"')
-      .add('businesses."isGB" as "businessIsGB"');
-    query.where   = sql.where();
-    query.sort    = sql.sort(req.query.sort || (req.param('collectionId') ? '-"productsCollections"."createdAt"' : '+name'));
-    query.limit   = sql.limit(req.query.limit, req.query.offset);
-    query.groupby = sql.fields().add('products.id').add('businesses.id');
-
-    // Don't filter out unverified business products when querying by business and by collection
-    if (!req.param('businessId') && !req.param('collectionId'))
-      query.where.and('businesses."isVerified" is true');
-
-    // hasPhoto filtering
-    // :TEMP: iphone mods - only products with photos
-    if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {
-      query.where.and('"photoUrl" IS NOT NULL');
+    var total = 0, userLikes = 0, userWants = 0, userTries = 0;
+    if (dataResult.rowCount !== 0) {
+      total = dataResult.rows[0].metaTotal;
+      userLikes = dataResult.rows[0].metaUserLikes;
+      userWants = dataResult.rows[0].metaUserWants;
+      userTries = dataResult.rows[0].metaUserTries;
     }
 
-    // business filtering
-    if (req.param('businessId')) { // use param() as this may come from the path or the query
-      query.where.and('products."businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-    // business tag filter
-    else if (req.param('businessType')) {
-      if (req.param('businessType') == 'other') {
-        query.where.and([
-          'NOT EXISTS',
-            '(SELECT "businessTags".id FROM "businessTags"',
-              'WHERE "businessTags"."businessId" = businesses.id',
-                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', ['food', 'apparel']),
-            ')'
-        ].join(' '));
-      } else {
-        query.where.and([
-          'EXISTS',
-            '(SELECT "businessTags".id FROM "businessTags"',
-              'WHERE "businessTags"."businessId" = businesses.id',
-                'AND'+sql.filtersMap(query, '"businessTags".tag {=} $filter', req.param('businessType')),
-            ')'
-        ].join(' '));
-      }
-    }
-
-    // location filtering
-    if (req.query.lat && req.query.lon) {
-      query.prodLocJoin = [
-        'LEFT JOIN "productLocations" ON',
-          '"productLocations"."productId" = products.id'
-      ].join(' ');
-      query.$('lat', req.query.lat);
-      query.$('lon', req.query.lon);
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
-      if (req.query.range) {
-        // If querying by range, don't include null lat/lon
-        query.prodLocJoin = query.prodLocJoin.replace('LEFT', 'INNER');
-        query.prodLocJoin += ' AND earth_box(ll_to_earth($lat,$lon), $range) @> ll_to_earth("productLocations".lat, "productLocations".lon)';
-        query.$('range', req.query.range);
-      }
-    }
-
-    // location id filtering
-    if (req.param('locationId')){
-      var joinType = "inner";
-
-      if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
-        query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
-
-      if (!query.prodLocJoin) {
-        query.prodLocJoin = [
-          '{joinType} join "productLocations"'
-          , 'ON products."id" = "productLocations"."productId"'
-          , 'and "productLocations"."locationId" = $locationId'
-        ].join(' ');
-      } else {
-        query.prodLocJoin += ' AND "productLocations"."locationId" = $locationId';
-      }
-
-      query.groupby.add('"productLocations".id');
-
-      query.$('locationId', req.param('locationId'));
-
-      if (req.param('all')){
-        joinType = "left";
-        query.fields.add('"productLocations".id is not null as "isAvailable"');
-        query.prodLocJoin += [
-          'inner join "locations"'
-        , 'on "locations"."businessId" = products."businessId"'
-        , 'and locations.id = $locationId'
-        ].join(' ');
-      }
-
-      query.prodLocJoin = query.prodLocJoin.replace("{joinType}", joinType);
-    }
-
-    // tag filtering
-    if (req.query.tag) {
-      var tagsClause = sql.filtersMap(query, '"productTags".tag {=} $filter', req.query.tag);
-      query.tagJoin = [
-        'INNER JOIN "productsProductTags" ON',
-          '"productsProductTags"."productId" = products.id',
-        'INNER JOIN "productTags" ON',
-          '"productTags".id = "productsProductTags"."productTagId" AND',
-          tagsClause
-      ].join(' ');
-    }
-
-    // consumer collection filtering
-    if (req.param('collectionId')) {
-      if (req.param('collectionId') == 'all') {
-        query.collectionJoin = [
-          'INNER JOIN collections ON',
-            'collections."userId" = $userId',
-          'INNER JOIN "productsCollections" ON',
-            '"productsCollections"."productId" = products.id AND',
-            '"productsCollections"."collectionId" = collections.id'
-        ].join(' ');
-        query.$('userId', req.param('userId'));
-      } else {
-        query.collectionJoin = [
-          'INNER JOIN collections ON',
-            '(collections.id::text = $collectionId OR collections."pseudoKey" = $collectionId) AND collections."userId" = $userId',
-          'INNER JOIN "productsCollections" ON',
-            '"productsCollections"."productId" = products.id AND',
-            '"productsCollections"."collectionId" = collections.id'
-        ].join(' ');
-        query.$('collectionId', req.param('collectionId'));
-        query.$('userId', req.param('userId'));
-
-      }
-      query.fields.add('"productsCollections"."createdAt" as "createdAt"');
-      query.groupby.add('"productsCollections"."createdAt"');
-    }
-
-    // tag include
-    if (includeTags) {
-      query.fields.add([
-        'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
-          'INNER JOIN "productsProductTags"',
-            'ON "productsProductTags"."productTagId" = "productTags".id',
-            'AND "productsProductTags"."productId" = products.id',
-        ')) as tags'
-      ].join(' '));
-    }
-
-    // category include
-    if (includeCats) {
-      query.fields.add([
-        'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
-          'INNER JOIN "productsProductCategories"',
-            'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
-            'AND "productsProductCategories"."productId" = products.id',
-        ')) as categories'
-      ].join(' '));
-    }
-
-    // user feelings join
-    if (req.session.user) {
-      query.feelingsJoins = [
-        'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
-        'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
-        'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId'
-      ].join(' ');
-      query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
-      query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
-      query.fields.add('("productTries".id IS NOT NULL) AS "userTried"');
-      query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
-      query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
-      query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
-      query.groupby.add('"productLikes".id');
-      query.groupby.add('"productWants".id');
-      query.groupby.add('"productTries".id');
-      query.$('userId', req.session.user.id);
-
-      if (req.param('userLikes') !== null && typeof req.param('userLikes') != 'undefined')
-        query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
-
-      if (req.param('userTried') !== null && typeof req.param('userTried') != 'undefined')
-        query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
-
-      if (req.param('userWants') !== null && typeof req.param('userWants') != 'undefined')
-        query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
-    }
-
-    // user photos join
-    if (req.session.user && includeUserPhotos) {
-      query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
-      query.$('userId', req.session.user.id);
-    }
-
-    // is in collection join
-    if (includeColl && req.session.user) {
-      query.fields.add([
-        'array(SELECT (CASE WHEN coll."pseudoKey" IS NOT NULL THEN coll."pseudoKey" ELSE coll.id::text END) FROM "productsCollections" pc, collections coll',
-          'WHERE pc."collectionId" = coll.id',
-            'AND pc."productId" = products.id',
-            'AND pc."userId" = $userId',
-        ') AS "collections"'
-      ].join(' '));
-      query.$('userId', req.session.user.id);
-    }
-
-    // custom sorts
-    if (req.query.sort) {
-      if (req.query.sort.indexOf('random') !== -1)
-        query.fields.add('random() as random'); // this is really inefficient
-      else if (req.query.sort.indexOf('popular') !== -1) {
-        query.poplistJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
-        query.fields.add('pli.id as popular');
-        query.groupby.add('pli.id');
-
-        var listid = Math.floor(Math.random()*config.algorithms.popular.numLists);
-        var onehour = 1000 * 60 * 60;
-        if (req.query.listid)
-          listid = req.query.listid;
-        else if (req.session) {
-          if (req.session.currentPopListid && req.session.currentPopListCreated && ((new Date() - new Date(req.session.currentPopListCreated)) < onehour || req.query.offset < 1))
-            listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
-          else {
-            req.session.currentPopListid = listid; // :TEMP: store current list from session
-            req.session.currentPopListCreated = new Date();
-          }
+    // parse out embedded results
+    if (includeTags || includeCats || includeUserPhotos) {
+      dataResult.rows.forEach(function(row) {
+        if (includeTags) {
+          try { row.tags = (row.tags) ? JSON.parse(row.tags) : []; } catch(e) {}
         }
-        query.$('poplistid', listid);
-      }
+        if (includeCats) {
+          try { row.categories = (row.categories) ? JSON.parse(row.categories) : []; } catch(e) {}
+        }
+        if (includeUserPhotos) {
+          try { row.photos = (row.photos) ? JSON.parse(row.photos) : []; } catch(e) {}
+        }
+      });
     }
 
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-    // run data query
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = 0, userLikes = 0, userWants = 0, userTries = 0;
-      if (dataResult.rowCount !== 0) {
-        total = dataResult.rows[0].metaTotal;
-        userLikes = dataResult.rows[0].metaUserLikes;
-        userWants = dataResult.rows[0].metaUserWants;
-        userTries = dataResult.rows[0].metaUserTries;
-      }
-
-      // parse out embedded results
-      if (includeTags || includeCats || includeUserPhotos) {
-        dataResult.rows.forEach(function(row) {
-          if (includeTags) {
-            try { row.tags = (row.tags) ? JSON.parse(row.tags) : []; } catch(e) {}
-          }
-          if (includeCats) {
-            try { row.categories = (row.categories) ? JSON.parse(row.categories) : []; } catch(e) {}
-          }
-          if (includeUserPhotos) {
-            try { row.photos = (row.photos) ? JSON.parse(row.photos) : []; } catch(e) {}
-          }
-        });
-      }
-
-      res.json({ error: null, data: dataResult.rows, meta: { total:total, userLikes:userLikes, userWants:userWants, userTries:userTries } });
-    });
+    res.json({ error: null, data: dataResult.rows, meta: { total:total, userLikes:userLikes, userWants:userWants, userTries:userTries } });
   });
 };
 
@@ -326,66 +322,62 @@ module.exports.get = function(req, res){
   var TAGS = ['get-product', req.uuid];
   logger.routes.debug(TAGS, 'fetching product');
 
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  var includes = [].concat(req.query.include);
+  var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
 
-    var includes = [].concat(req.query.include);
-    var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+  var query = sql.query([
+    'SELECT {fields},',
+      'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
+        'INNER JOIN "productsProductTags"',
+          'ON "productsProductTags"."productTagId" = "productTags".id',
+          'AND "productsProductTags"."productId" = products.id',
+      ')) as tags,',
+      'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
+        'INNER JOIN "productsProductCategories"',
+          'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
+          'AND "productsProductCategories"."productId" = products.id',
+      ')) as categories',
+    'FROM products',
+      'INNER JOIN businesses ON businesses.id = products."businessId"',
+      'WHERE products.id = $id',
+      'GROUP BY {groupby}'
+  ]);
+  query.$('id', +req.param('productId') || 0);
+  query.fields  = sql.fields();
+  query.groupby = sql.fields().add('products.id').add('businesses.id');
 
-    var query = sql.query([
-      'SELECT {fields},',
-        'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
-          'INNER JOIN "productsProductTags"',
-            'ON "productsProductTags"."productTagId" = "productTags".id',
-            'AND "productsProductTags"."productId" = products.id',
-        ')) as tags,',
-        'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
-          'INNER JOIN "productsProductCategories"',
-            'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
-            'AND "productsProductCategories"."productId" = products.id',
-        ')) as categories',
-      'FROM products',
-        'INNER JOIN businesses ON businesses.id = products."businessId"',
-        'WHERE products.id = $id',
-        'GROUP BY {groupby}'
-    ]);
-    query.$('id', +req.param('productId') || 0);
-    query.fields  = sql.fields();
-    query.groupby = sql.fields().add('products.id').add('businesses.id');
+  query.fields.add('products.*');
+  query.fields.add('businesses.name as "businessName"');
+  query.fields.add('businesses."isGB" as "businessIsGB"');
 
-    query.fields.add('products.*');
-    query.fields.add('businesses.name as "businessName"');
-    query.fields.add('businesses."isGB" as "businessIsGB"');
+  // user feelings join
+  if (req.session.user) {
+    query.fields.add('((SELECT 1 FROM "productLikes" WHERE products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId) IS NOT NULL) AS "userLikes"');
+    query.fields.add('((SELECT 1 FROM "productWants" WHERE products.id = "productWants"."productId" AND "productWants"."userId" = $userId) IS NOT NULL) AS "userWants"');
+    query.fields.add('((SELECT 1 FROM "productTries" WHERE products.id = "productTries"."productId" AND "productTries"."userId" = $userId) IS NOT NULL) AS "userTried"');
+    query.$('userId', req.session.user.id);
+  }
 
-    // user feelings join
-    if (req.session.user) {
-      query.fields.add('((SELECT 1 FROM "productLikes" WHERE products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId) IS NOT NULL) AS "userLikes"');
-      query.fields.add('((SELECT 1 FROM "productWants" WHERE products.id = "productWants"."productId" AND "productWants"."userId" = $userId) IS NOT NULL) AS "userWants"');
-      query.fields.add('((SELECT 1 FROM "productTries" WHERE products.id = "productTries"."productId" AND "productTries"."userId" = $userId) IS NOT NULL) AS "userTried"');
-      query.$('userId', req.session.user.id);
-    }
+  // user photos join
+  if (req.session.user && includeUserPhotos) {
+    query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
+    query.$('userId', req.session.user.id);
+  }
 
-    // user photos join
-    if (req.session.user && includeUserPhotos) {
-      query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
-      query.$('userId', req.session.user.id);
-    }
+  db.query(query, function(error, rows, result){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    var product = result.rows[0];
+    if (!product) return res.status(404).end();
 
-      var product = result.rows[0];
-      if (!product) return res.status(404).end();
+    if (typeof product.tags != 'undefined')
+      product.tags = (product.tags) ? JSON.parse(product.tags) : [];
+    if (typeof product.categories != 'undefined')
+      product.categories = (product.categories) ? JSON.parse(product.categories) : [];
+    if (typeof product.photos != 'undefined')
+      product.photos = (product.photos) ? JSON.parse(product.photos) : [];
 
-      if (typeof product.tags != 'undefined')
-        product.tags = (product.tags) ? JSON.parse(product.tags) : [];
-      if (typeof product.categories != 'undefined')
-        product.categories = (product.categories) ? JSON.parse(product.categories) : [];
-      if (typeof product.photos != 'undefined')
-        product.photos = (product.photos) ? JSON.parse(product.photos) : [];
-
-      return res.json({ error: null, data: product });
-    });
+    return res.json({ error: null, data: product });
   });
 };
 
@@ -834,16 +826,12 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-product', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM products WHERE id=$productId');
+  query.$('productId', +req.param('productId') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('DELETE FROM products WHERE id=$productId');
-    query.$('productId', +req.param('productId') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -856,23 +844,19 @@ module.exports.listCategories = function(req, res) {
   var TAGS = ['list-product-productcategory-relations', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of product\'s categories');
 
-  db.getClient(TAGS, function(error, client){
+  // build query
+  var query = sql.query([
+    'SELECT * FROM "productsProductCategories"',
+      'INNER JOIN "productCategories" ON "productCategories".id = "productsProductCategories"."productCategoryId"',
+      'WHERE "productsProductCategories"."productId" = $productId'
+  ]);
+  query.$('productId', +req.param('productId') || 0);
+
+  // run query
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build query
-    var query = sql.query([
-      'SELECT * FROM "productsProductCategories"',
-        'INNER JOIN "productCategories" ON "productCategories".id = "productsProductCategories"."productCategoryId"',
-        'WHERE "productsProductCategories"."productId" = $productId'
-    ]);
-    query.$('productId', +req.param('productId') || 0);
-
-    // run query
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.json({ error: null, data: result.rows });
-    });
+    return res.json({ error: null, data: result.rows });
   });
 
 };
@@ -887,26 +871,22 @@ module.exports.addCategory = function(req, res) {
 
   var inputs = { productId:req.param('productId'), productCategoryId:req.body.id };
 
-  db.getClient(TAGS, function(error, client){
+  // :TODO: make sure the product exists?
+  // :TODO: make sure product category's businessId is the same as products
+
+  var query = sql.query([
+    'INSERT INTO "productsProductCategories" ("productId", "productCategoryId")',
+      'SELECT $productId, $productCategoryId WHERE NOT EXISTS',
+        '(SELECT 1 FROM "productsProductCategories"',
+          'WHERE "productId" = $productId',
+          'AND "productCategoryId" = $productCategoryId)'
+  ]);
+  query.$('productId', inputs.productId);
+  query.$('productCategoryId', inputs.productCategoryId);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    // :TODO: make sure the product exists?
-    // :TODO: make sure product category's businessId is the same as products
-
-    var query = sql.query([
-      'INSERT INTO "productsProductCategories" ("productId", "productCategoryId")',
-        'SELECT $productId, $productCategoryId WHERE NOT EXISTS',
-          '(SELECT 1 FROM "productsProductCategories"',
-            'WHERE "productId" = $productId',
-            'AND "productCategoryId" = $productCategoryId)'
-    ]);
-    query.$('productId', inputs.productId);
-    query.$('productCategoryId', inputs.productCategoryId);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -918,27 +898,23 @@ module.exports.addCategory = function(req, res) {
 module.exports.delCategory = function(req, res) {
   var TAGS = ['delete-product-productcategory-relation', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  // :TODO: make sure the product exists?
+
+  var inputs = { productId:req.param('productId'), productCategoryId:req.param('categoryId') };
+  var error = utils.validate(inputs, db.schemas.productsProductCategories);
+  if (error) return res.error(errors.inputs.VALIDATION_FAILED), logger.routes.error(TAGS, error);
+
+  var query = sql.query([
+    'DELETE FROM "productsProductCategories"',
+      'WHERE "productId"=$productId',
+        'AND "productCategoryId"=$productCategoryId'
+  ]);
+  query.$('productId', inputs.productId);
+  query.$('productCategoryId', inputs.productCategoryId);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    // :TODO: make sure the product exists?
-
-    var inputs = { productId:req.param('productId'), productCategoryId:req.param('categoryId') };
-    var error = utils.validate(inputs, db.schemas.productsProductCategories);
-    if (error) return res.error(errors.inputs.VALIDATION_FAILED), logger.routes.error(TAGS, error);
-
-    var query = sql.query([
-      'DELETE FROM "productsProductCategories"',
-        'WHERE "productId"=$productId',
-          'AND "productCategoryId"=$productCategoryId'
-    ]);
-    query.$('productId', inputs.productId);
-    query.$('productCategoryId', inputs.productCategoryId);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 

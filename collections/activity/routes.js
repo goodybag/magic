@@ -25,22 +25,18 @@ module.exports.get = function(req, res){
   var TAGS = ['get-activity', req.uuid];
   logger.routes.debug(TAGS, 'fetching activity ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('select id, type, date, to_json(data) as data from activity where id = $id {limit}');
+  query.$('id', +req.param('id') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('select id, type, date, to_json(data) as data from activity where id = $id {limit}');
-    query.$('id', +req.param('id') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount == 1) {
-        result.rows[0].data = JSON.parse(result.rows[0].data);
-        return res.json({ error: null, data: result.rows[0] });
-      } else {
-        return res.error(errors.input.NOT_FOUND);
-      }
-    });
+    if (result.rowCount == 1) {
+      result.rows[0].data = JSON.parse(result.rows[0].data);
+      return res.json({ error: null, data: result.rows[0] });
+    } else {
+      return res.error(errors.input.NOT_FOUND);
+    }
   });
 };
 

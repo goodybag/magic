@@ -26,32 +26,28 @@ module.exports.list = function(req, res){
   var TAGS = ['list-photos', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of photos');
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT *, COUNT(*) OVER() as "metaTotal" FROM photos {where} {limit}');
+  query.where = sql.where();
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  if (req.param('businessId')) {
+    query.where.and('"businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+  if (req.param('productId')) {
+    query.where.and('"productId" = $productId');
+    query.$('productId', req.param('productId'));
+  }
+  if (req.param('userId')) {
+    query.where.and('"userId" = $userId');
+    query.$('userId', req.param('userId'));
+  }
+
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(*) OVER() as "metaTotal" FROM photos {where} {limit}');
-    query.where = sql.where();
-    query.limit = sql.limit(req.query.limit, req.query.offset);
-
-    if (req.param('businessId')) {
-      query.where.and('"businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-    if (req.param('productId')) {
-      query.where.and('"productId" = $productId');
-      query.$('productId', req.param('productId'));
-    }
-    if (req.param('userId')) {
-      query.where.and('"userId" = $userId');
-      query.$('userId', req.param('userId'));
-    }
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 
@@ -64,17 +60,14 @@ module.exports.get = function(req, res){
   var TAGS = ['get-photo', req.uuid];
   logger.routes.debug(TAGS, 'fetching photo');
 
-  db.getClient(TAGS, function(error, client){
+
+  var query = sql.query('SELECT * FROM photos WHERE id=$id');
+  query.$('id', req.param('photoId'));
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT * FROM photos WHERE id=$id');
-    query.$('id', req.param('photoId'));
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.json({ error: null, data: result.rows[0] || null});
-    });
+    return res.json({ error: null, data: result.rows[0] || null});
   });
 };
 
@@ -92,22 +85,18 @@ module.exports.create = function(req, res){
   var error = utils.validate(inputs, db.schemas.photos);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('INSERT INTO photos ({fields}) (SELECT {values} FROM products WHERE id=$productId) RETURNING id');
+  query.fields = sql.fields().addObjectKeys(inputs);
+  query.values = sql.fields().addObjectValues(inputs, query);
+
+  query.fields.add('"businessId"');
+  query.values.add('products."businessId"');
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('INSERT INTO photos ({fields}) (SELECT {values} FROM products WHERE id=$productId) RETURNING id');
-    query.fields = sql.fields().addObjectKeys(inputs);
-    query.values = sql.fields().addObjectValues(inputs, query);
-
-    query.fields.add('"businessId"');
-    query.values.add('products."businessId"');
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (result.rowCount === 0)
-        return res.error(errors.input.VALIDATION_FAILED, { productId:'Product ID specified does not exist' });
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    if (result.rowCount === 0)
+      return res.error(errors.input.VALIDATION_FAILED, { productId:'Product ID specified does not exist' });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -119,19 +108,15 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-photo', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var inputs = req.body;
+
+  var query = sql.query('UPDATE photos SET {updates} WHERE id=$photoId');
+  query.updates = sql.fields().addUpdateMap(inputs, query);
+  query.$('photoId', req.param('photoId'));
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var inputs = req.body;
-
-    var query = sql.query('UPDATE photos SET {updates} WHERE id=$photoId');
-    query.updates = sql.fields().addUpdateMap(inputs, query);
-    query.$('photoId', req.param('photoId'));
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -143,15 +128,11 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-photo', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM photos WHERE id=$id');
+  query.$('id', req.param('photoId'));
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('DELETE FROM photos WHERE id=$id');
-    query.$('id', req.param('photoId'));
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };

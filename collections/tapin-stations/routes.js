@@ -28,28 +28,24 @@ module.exports.get = function(req, res){
   var TAGS = ['get-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'fetching tapinStation ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client) {
+  var query = sql.query([
+    'SELECT {fields} FROM users',
+      'LEFT JOIN "tapinStations" ON "tapinStations".id = users.id',
+      'WHERE users.id = $id'
+  ]);
+  query.fields = sql.fields().add('users.*');
+  query.fields.add('"tapinStations".*');
+
+  query.$('id', +req.param('id') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM users',
-        'LEFT JOIN "tapinStations" ON "tapinStations".id = users.id',
-        'WHERE users.id = $id'
-    ]);
-    query.fields = sql.fields().add('users.*');
-    query.fields.add('"tapinStations".*');
-
-    query.$('id', +req.param('id') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount == 1) {
-        return res.json({ error: null, data: result.rows[0] });
-      } else {
-        return res.status(404).end();
-      }
-    });
+    if (result.rowCount == 1) {
+      return res.json({ error: null, data: result.rows[0] });
+    } else {
+      return res.status(404).end();
+    }
   });
 };
 
@@ -62,45 +58,41 @@ module.exports.list = function(req, res){
   var TAGS = ['list-tapinStations', req.uuid];
   logger.routes.debug(TAGS, 'fetching tapinStations ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  // build data query
+  var query = sql.query([
+    'SELECT {fields} FROM "tapinStations"',
+      'INNER JOIN users ON "tapinStations".id = users.id',
+      '{where} {limit}'
+  ]);
+  query.fields = sql.fields().add('users.*');
+  query.fields.add('"tapinStations".*');
+
+  query.where  = sql.where();
+  query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+  if (req.param('filter')) {
+    query.where.and('users.email ILIKE $emailFilter');
+    query.$('emailFilter', '%'+req.param('filter')+'%');
+  }
+
+  if (req.param('businessId')) {
+    query.where.and('"tapinStations"."businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+
+  if (req.param('locationId')) {
+    query.where.and('"tapinStations"."locationId" = $locationId');
+    query.$('locationId', req.param('locationId'));
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  // run data query
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    // build data query
-    var query = sql.query([
-      'SELECT {fields} FROM "tapinStations"',
-        'INNER JOIN users ON "tapinStations".id = users.id',
-        '{where} {limit}'
-    ]);
-    query.fields = sql.fields().add('users.*');
-    query.fields.add('"tapinStations".*');
-
-    query.where  = sql.where();
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
-
-    if (req.param('filter')) {
-      query.where.and('users.email ILIKE $emailFilter');
-      query.$('emailFilter', '%'+req.param('filter')+'%');
-    }
-
-    if (req.param('businessId')) {
-      query.where.and('"tapinStations"."businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-
-    if (req.param('locationId')) {
-      query.where.and('"tapinStations"."locationId" = $locationId');
-      query.$('locationId', req.param('locationId'));
-    }
-
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
-    // run data query
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 
@@ -131,18 +123,14 @@ module.exports.del = function(req, res){
   var TAGS = ['del-tapinStation', req.uuid];
   logger.routes.debug(TAGS, 'deleting tapinStation ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM users WHERE users.id = $id');
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (result.rowCount === 0) return res.status(404).end();
 
-    var query = sql.query('DELETE FROM users WHERE users.id = $id');
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (result.rowCount === 0) return res.status(404).end();
-
-      return res.json({ error: null, data: null });
-    });
+    return res.json({ error: null, data: null });
   });
 };
 

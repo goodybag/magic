@@ -139,7 +139,7 @@ module.exports = function(options, callback){
 
   // connect to postgres
   if (verbose) { console.log('Connecting to Postgres database'); }
-  pg.connect(options.postgresConnStr, function(error, pgClient) {
+  pg.connect(options.postgresConnStr, function(error, pgClient, done) {
     if (error) return callback(error);
     client = pgClient;
 
@@ -149,7 +149,7 @@ module.exports = function(options, callback){
       .then(loadIndexSchema)
       .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
       .then(function() { callback(null); }, callback)
-      .always(function() { client.end(); })
+      .always(function() { done(); })
     ;
 
   });
