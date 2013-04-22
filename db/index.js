@@ -45,6 +45,7 @@ exports.getClient = function(logTags, callback){
   }
 
   pg.connect(config.postgresConnStr, function(err, client, done) {
+    addToDomain(client);
     if(err) {
       var tag = ['unable to checkout client from the pool'];
       logger.error(client.logTags.concat(tag), err);
@@ -90,6 +91,7 @@ exports.query = function(text, params, callback) {
     params = q.values;
   }
   pg.connect(config.postgresConnStr, function(err, client, done) {
+    addToDomain(client);
     client.query(text, params, function(err, result) {
       //release the client
       done();
@@ -98,6 +100,23 @@ exports.query = function(text, params, callback) {
     });
   });
 };
+
+//TODO this needs to go in node-postgres
+var addToDomain = function(client) {
+  if(client.domain) removeFromDomain(client);
+  if(!process.domain) return;
+  process.domain.add(client);
+  process.domain.add(client.connection);
+  process.domain.add(client.connection.stream);
+};
+
+var removeFromDomain = function(client) {
+  if(!client.domain) return;
+  var d = client.domain;
+  d.remove(client.connection.stream);
+  d.remove(client.connection);
+  d.remove(client);
+}
 
 /**
  * Uses a transaction to update a record and insert if DNE
