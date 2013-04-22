@@ -21,7 +21,8 @@ before_script:
 env:
   - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test"
 node_js:
-  - "0.8.23"
+  - "0.8"
+  - "0.10"
 notifications:
   webhooks:
     - http://hubot.goodybag.com/hubot/travis?room=%23%23goodybag

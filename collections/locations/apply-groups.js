@@ -14,17 +14,12 @@ exports.manager = function(req, cb) {
   var locationId = req.param('locationId');
   var userId     = req.session.user.id;
 
+  var query = sql.query('SELECT id FROM managers WHERE id = $userId AND "locationId" = $locationId');
+  query.$('userId', userId);
+  query.$('locationId', locationId);
 
-  db.getClient(['location manager apply groups', req.uuid], function(error, client) {
-    if (error) cb(null);
-
-    var query = sql.query('SELECT id FROM managers WHERE id = $userId AND "locationId" = $locationId');
-    query.$('userId', userId);
-    query.$('locationId', locationId);
-
-    client.query(query.toString(), query.$values, function(error, result) {
-      if (error || result.rowCount === 0) return cb(null);
-      cb('manager');
-    });
+  db.query(query, function(error, rows, result) {
+    if (error || result.rowCount === 0) return cb(null);
+    cb('manager');
   });
 };

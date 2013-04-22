@@ -11,6 +11,9 @@ require('./utils');
 // ==========
 require(__dirname + '/static');
 
+// data access tests
+require(__dirname + '/data-access');
+
 // functional tests
 // ================
 // enable profiler

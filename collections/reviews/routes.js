@@ -27,40 +27,36 @@ module.exports.list = function(req, res){
   var TAGS = ['get-oddity-businesses list', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of oddity businesses', {uid: "more"});
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query([
+    'SELECT {fields} FROM "oddityLive"',
+      'INNER JOIN "oddityMeta"',
+        'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
+      '{where} {limit}'
+
+  ]);
+
+  query.fields = sql.fields().add("*");
+  query.where = sql.where()
+    .and('"oddityMeta"."toReview" = true')
+    .and('"oddityMeta"."changeColumns" = true')
+    .and('"oddityMeta"."isHidden" = false');
+  query.limit  = sql.limit(req.query.limit, req.query.offset);
+
+  // filter list by name
+
+  if (req.param('filter')) {
+    query.where.and('"oddityLive"."biz_name" ILIKE $nameFilter');
+    query.$('nameFilter', '%'+req.param('filter')+'%');
+  }
+
+  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
+  db.query(query, function(error, rows, results){
+
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query([
-      'SELECT {fields} FROM "oddityLive"',
-        'INNER JOIN "oddityMeta"',
-          'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
-        '{where} {limit}'
-
-    ]);
-
-    query.fields = sql.fields().add("*");
-    query.where = sql.where()
-      .and('"oddityMeta"."toReview" = true')
-      .and('"oddityMeta"."changeColumns" = true')
-      .and('"oddityMeta"."isHidden" = false');
-    query.limit  = sql.limit(req.query.limit, req.query.offset);
-
-    // filter list by name
-
-    if (req.param('filter')) {
-      query.where.and('"oddityLive"."biz_name" ILIKE $nameFilter');
-      query.$('nameFilter', '%'+req.param('filter')+'%');
-    }
-
-    query.fields.add('COUNT(*) OVER() as "metaTotal"');
-
-    client.query(query.toString(), query.$values, function(error, results){
-
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (results.rows[0]) ? results.rows[0].metaTotal : 0;
-      return res.json({error: null, data: results.rows, meta: {total: total}});
-    });
+    var total = (results.rows[0]) ? results.rows[0].metaTotal : 0;
+    return res.json({error: null, data: results.rows, meta: {total: total}});
   });
 };
 
@@ -73,26 +69,22 @@ module.exports.get = function(req, res){
   var TAGS = ['get-review', req.uuid];
   logger.routes.debug(TAGS, 'getting oddityMeta by id ' + req.params.id, {uid: "more"});
 
-  db.getClient(TAGS, function(error, client){
-    if(error) res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  var query = sql.query([
+    'SELECT * FROM "oddityLive"',
+      'INNER JOIN "oddityMeta"',
+        'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
+      'WHERE "oddityMeta"."toReview" = true',
+        'AND "oddityMeta"."changeColumns" = true',
+        'AND "oddityMeta"."isHidden" = false',
+        'AND "oddityMeta".id = $id'
+  ]);
+  query.$('id', +req.params.id || 0);
 
-    var query = sql.query([
-      'SELECT * FROM "oddityLive"',
-        'INNER JOIN "oddityMeta"',
-          'ON "oddityMeta"."oddityLiveId" = "oddityLive".id',
-        'WHERE "oddityMeta"."toReview" = true',
-          'AND "oddityMeta"."changeColumns" = true',
-          'AND "oddityMeta"."isHidden" = false',
-          'AND "oddityMeta".id = $id'
-    ]);
-    query.$('id', +req.params.id || 0);
+  db.query(query, function(error, rows, result){
+    if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rowCount === 0) return res.status(404).end();
-      return res.json({error: null, data: result.rows[0]})
-    });
+    if (result.rowCount === 0) return res.status(404).end();
+    return res.json({error: null, data: result.rows[0]})
   });
 };
 /**
@@ -104,38 +96,28 @@ module.exports.update = function(req, res){
   var TAGS = ['update-review', req.uuid];
   logger.routes.debug(TAGS, 'update business from to review ' + req.params.id, {uid: "more"});
 
-  db.getClient(TAGS, function(error, client){
+  var inputs = {
+    userId: req.body.userId
+  , businessId: req.body.businessId
+  , locationId: req.body.locationId
+  , toReview : req.body.toReview
+  , isHidden : req.body.isHidden ? true : false
+  , hiddenBy: req.body.hiddenBy
+  , reviewedBy: req.body.reviewedBy
+  };
+
+  var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
+  query.updates = sql.fields().addUpdateMap(inputs, query);
+  query.updates.add('"lastUpdated" = now()');
+  query.$('id', +req.params.id || 0);
+
+  db.query(query, function(error, rows, result){
     if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var inputs = {
-      userId: req.body.userId
-    , businessId: req.body.businessId
-    , locationId: req.body.locationId
-    , toReview : req.body.toReview
-    , isHidden : req.body.isHidden ? true : false
-    , hiddenBy: req.body.hiddenBy
-    , reviewedBy: req.body.reviewedBy
-    };
-
-    var query = sql.query('UPDATE "oddityMeta" SET {updates} WHERE id=$id');
-    query.updates = sql.fields().addUpdateMap(inputs, query);
-    query.updates.add('"lastUpdated" = now()');
-    query.$('id', +req.params.id || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
 module.exports.hide = function(req, res){
   var TAGS = ['hide-reviews', req.uuid];
   logger.routes.debug(TAGS, 'hide multiple businesses from to review ' , {uid: "more"});
-
-  db.getClient(TAGS, function(error, client){
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    }
-  );
 };

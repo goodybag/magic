@@ -26,24 +26,20 @@ module.exports.list = function(req, res){
   var TAGS = ['list-productTags', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of productTags');
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM "productTags" {where} {limit}');
+  query.where = sql.where();
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+
+  if (req.param('businessId')) {
+    query.where.and('"businessId" = $businessId');
+    query.$('businessId', req.param('businessId'));
+  }
+
+  db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT *, COUNT(id) OVER() as "metaTotal" FROM "productTags" {where} {limit}');
-    query.where = sql.where();
-    query.limit = sql.limit(req.query.limit, req.query.offset);
-
-    if (req.param('businessId')) {
-      query.where.and('"businessId" = $businessId');
-      query.$('businessId', req.param('businessId'));
-    }
-
-    client.query(query.toString(), query.$values, function(error, dataResult){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-      return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
-    });
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+    return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
 };
 
@@ -56,18 +52,14 @@ module.exports.get = function(req, res){
   var TAGS = ['get-productTag', req.uuid];
   logger.routes.debug(TAGS, 'fetching productTag');
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('SELECT * FROM "productTags" WHERE id=$tagId');
+  query.$('tagId', +req.param('tagId') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT * FROM "productTags" WHERE id=$tagId');
-    query.$('tagId', +req.param('tagId') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      if (result.rows.length <= 0) return res.json({ error: null, data: null });
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    if (result.rows.length <= 0) return res.json({ error: null, data: null });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -85,26 +77,19 @@ module.exports.create = function(req, res){
   var error = utils.validate(inputs, db.schemas.productTags);
   if (error) return res.error(errors.input.VALIDATION_FAILED, error), logger.routes.error(TAGS, error);
 
-  db.getClient(TAGS, function(error, client){
-    if (error){
-      logger.routes.error(TAGS, error);
-      return res.error(errors.internal.DB_FAILURE, error);
-    }
+  var query = sql.query([
+    'INSERT INTO "productTags" ("businessId", tag)',
+      'SELECT $businessId, $tag WHERE NOT EXISTS',
+        '(SELECT id from "productTags" WHERE "businessId" = $businessId AND tag = $tag)',
+      'RETURNING id'
+  ]);
+  query.$('businessId', inputs.businessId);
+  query.$('tag', inputs.tag)
 
-    var query = sql.query([
-      'INSERT INTO "productTags" ("businessId", tag)',
-        'SELECT $businessId, $tag WHERE NOT EXISTS',
-          '(SELECT id from "productTags" WHERE "businessId" = $businessId AND tag = $tag)',
-        'RETURNING id'
-    ]);
-    query.$('businessId', inputs.businessId);
-    query.$('tag', inputs.tag)
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      return res.json({ error: null, data: result.rows[0] });
-    });
+    return res.json({ error: null, data: result.rows[0] });
   });
 };
 
@@ -116,18 +101,14 @@ module.exports.create = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-productTag', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('UPDATE "productTags" SET tag=$tag WHERE id=$id AND "businessId"=$businessId');
+  query.$('tag', req.body.tag || '');
+  query.$('id', +req.param('tagId') || 0);
+  query.$('businessId', +req.param('businessId') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('UPDATE "productTags" SET tag=$tag WHERE id=$id AND "businessId"=$businessId');
-    query.$('tag', req.body.tag || '');
-    query.$('id', +req.param('tagId') || 0);
-    query.$('businessId', +req.param('businessId') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
 
@@ -139,16 +120,12 @@ module.exports.update = function(req, res){
 module.exports.del = function(req, res){
   var TAGS = ['delete-productTag', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  var query = sql.query('DELETE FROM "productTags" WHERE id=$id AND "businessId"=$businessId');
+  query.$('id', +req.param('tagId') || 0);
+  query.$('businessId', +req.param('businessId') || 0);
+
+  db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    var query = sql.query('DELETE FROM "productTags" WHERE id=$id AND "businessId"=$businessId');
-    query.$('id', +req.param('tagId') || 0);
-    query.$('businessId', +req.param('businessId') || 0);
-
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.noContent();
-    });
+    res.noContent();
   });
 };
