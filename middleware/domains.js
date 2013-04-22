@@ -11,7 +11,8 @@ module.exports = function(req, res, next) {
   domain.run(function() {
     next();
   });
-  domain.on('error', function(e) {
+  domain.once('error', function(e) {
+    console.log('DOMAIN ERROR');
     next(e);
   });
 };

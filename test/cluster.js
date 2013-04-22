@@ -24,15 +24,24 @@ describe('cluster', function() {
           //force-kill active requests
           var getError = function(cb) {
             app.request.get(app.url('/error'), function(err, res) {
-              //TODO this will change to a response 500 after domains are added
-              assert(err, 'should have received a node error');
+              if(err) return cb(err);
+              try{
+                assert.equal(res.statusCode, 500, 'should have received a 500');
+                assert.equal(res.headers['content-type'], 'application/json');
+              } catch(e) {
+                return cb(e);
+              }
               cb();
             });
           };
           var getPing = function(cb) {
             app.request.get(app.url('/ping'), function(err, res) {
-              assert.equal(err, null, 'expected 200 status on ping request but got error ' + (err||0).stack)
-              assert.equal(res.statusCode, 200, 'should have 200 status');
+              try{
+                assert.equal(err, null, 'expected 200 status on ping request but got error ' + (err||0).stack)
+                assert.equal(res.statusCode, 200, 'should have 200 status');
+              } catch(e) {
+                return cb(e);
+              }
               cb();
             });
           };
