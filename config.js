@@ -95,6 +95,12 @@ var config = {
       port: 3000
     }
 
+  , logging: {
+      enabled: true
+    , transports: {
+        console: true
+    }
+  }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
 
