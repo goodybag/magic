@@ -276,11 +276,9 @@ describe('POST /v1/oauth', function(){
     , remember: false
     };
 
-    console.log('remember false');
     tu.post('/v1/oauth', user, function(error, results, response) {
       assert(error == null);
       assert(JSON.parse(results).error == null);
-      console.log('results: ', results);
       var cookies = response.headers['set-cookie'];
       assert(cookies != null);
       assert(cookies[0].indexOf('Expires') === -1);

@@ -29,6 +29,7 @@ var config = {
 
   , 'tapins'
   , 'visits'
+  , 'heartbeats'
 
   , 'products'
   , 'productCategories'
