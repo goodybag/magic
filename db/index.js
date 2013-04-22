@@ -58,7 +58,6 @@ exports.getClient = function(logTags, callback){
       client.$query = client.query;
 
       client.query = function(text, values, callback) {
-        logger.debug(client.logTags, arguments[0], arguments[1]);
         client.$query.apply(client, arguments);
         queries.push(text);
       };
