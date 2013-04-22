@@ -367,7 +367,7 @@ module.exports.resetPassword = function(req, res){
     db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND "createdAt" > now() - INTERVAL \'20 minutes\' AND used IS NOT NULL', [req.params.token], function(error, result) {
+      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND "createdAt" > now() - INTERVAL \'20 minutes\' AND used IS NULL', [req.params.token], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         if (result.rowCount === 0)
           return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.');
