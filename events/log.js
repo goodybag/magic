@@ -122,15 +122,6 @@ module.exports = {
     });
   }
 
-, 'tapinstations.heartbeat':
-  function (tapinStationId, businessId, locationId) {
-    insert('tapinstations.heartbeat', {
-      tapinStationId : tapinStationId,
-      businessId     : businessId,
-      locationId     : locationId
-    });
-  }
-
 , 'locations.keyTagRequest':
   function (locationId) {
     insert('locations.keyTagRequest', {

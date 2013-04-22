@@ -155,6 +155,48 @@ module.exports.update = function(req, res){
   });
 };
 
+module.exports.listHeartbeats = function(req, res){
+  var TAGS = ['list tapinStations-heartbeats', req.uuid];
+
+  var
+    query   = {}
+  , fields  = db.fields.heartbeats.quoted.exclude('data')
+
+  , options = {
+      order:  '"createdAt" desc'
+    , limit:  30
+    , offset: 0
+    , fields: fields.concat('to_json(data) as data')
+    }
+  ;
+
+  if (req.param('id'))              query.userId     = req.param('id');
+  if (req.param('userId'))          query.userId     = req.param('userId');
+  if (req.param('tapinStationId'))  query.userId     = req.param('tapinStationId');
+
+  if (req.param('businessId'))      query.businessId = req.param('businessId');
+  if (req.param('locationId'))      query.locationId = req.param('locationId');
+
+  if (req.param('limit'))   options.limit   = req.param('limit');
+  if (req.param('offset'))  options.offset  = req.param('offset');
+
+  db.api.heartbeats.setLogTags(TAGS);
+  db.api.heartbeats.find(query, options, function(error, results, meta){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    results = results.map(function(r){
+      try {
+        r.data = JSON.parse(r.data);
+      } catch (e) {
+        r.data = null;
+      }
+      return r;
+    });
+
+    return res.json({ error: null, data: results, meta: meta });
+  });
+};
+
 /**
  * Emit heartbeat
  * @param  {Object} req HTTP Request Object
@@ -167,14 +209,26 @@ module.exports.createHeartbeat = function(req, res){
   var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id');
   query.$('id', +req.param('id') || 0);
 
-  db.query(query, function(error, rows, result){
+  db.query(query.toString(), query.$values, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    if (result.rowCount == 1) {
-      res.json({ error: null, data: null });
-      magic.emit('tapinstations.heartbeat', req.param('id'), result.rows[0].businessId, result.rows[0].locationId);
-    } else {
-      res.error(errors.input.NOT_FOUND);
-    }
+    if (results.length == 0) return res.error(errors.input.NOT_FOUND);
+
+    var heartbeat = {
+      userId:     req.param('id')
+    , locationId: results[0].locationId
+    , businessId: results[0].businessId
+    , data:       JSON.stringify(req.body)
+    };
+
+    var options = {
+      returning: false
+    };
+
+    db.api.heartbeats.insert(heartbeat, options, function(error){
+      if (error) return res.error(errors.internal.DB_FAILURE, error)
+
+      res.send(204);
+    });
   });
 };
