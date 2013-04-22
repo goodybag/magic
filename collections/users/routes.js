@@ -331,8 +331,8 @@ module.exports.createPasswordReset = function(req, res){
 
       var token = require("randomstring").generate();
       var query = sql.query([
-        'INSERT INTO "userPasswordResets" ("userId", token, expires, "createdAt")',
-          'VALUES ($userId, $token, now() + \'1 day\'::interval, now())'
+        'INSERT INTO "userPasswordResets" ("userId", token, "createdAt")',
+          'VALUES ($userId, $token, now())'
       ]);
       query.$('userId', userId);
       query.$('token', token);
@@ -367,16 +367,22 @@ module.exports.resetPassword = function(req, res){
     db.getClient(TAGS, function(error, client){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND expires > now()', [req.params.token], function(error, result) {
+      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND "createdAt" > now() - INTERVAL \'20 minutes\' AND used IS NOT NULL', [req.params.token], function(error, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         if (result.rowCount === 0)
           return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.');
         var userId = result.rows[0].userId;
+        var tokenId = result.rows[0].id;
 
         client.query('UPDATE users SET password=$1, "passwordSalt"=$2 WHERE id=$3', [encryptedPassword, passwordSalt, userId], function(error, result) {
           if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          res.noContent();
+          client.query('UPDATE "userPasswordResets" SET used=now() WHERE id=$1', [tokenId], function(error, result) {
+            if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+            res.noContent();
+          });
+
         });
       });
     });
