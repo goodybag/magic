@@ -13,43 +13,37 @@ describe('cluster', function() {
     });
 
     omf('http://localhost:' + port, function(app) {
-      app.get('/ping');
 
-      for(var i = 0; i < 7; i++) {
-        it('disconnects request on unhandled error', function(done) {
-          //what I want to do here is issue a few error requests and a few
-          //requests which should not error all at once.  The point is the
-          //error requests should all error and the ping requests should all
-          //200.  This tests that the shutdown/recycle behavior will not 
-          //force-kill active requests
-          var getError = function(cb) {
-            app.request.get(app.url('/error'), function(err, res) {
-              if(err) return cb(err);
-              try{
-                assert.equal(res.statusCode, 500, 'should have received a 500');
-                assert.equal(res.headers['content-type'], 'application/json');
-              } catch(e) {
-                return cb(e);
+      it('gets failures and successes', function(done) {
+        var paths = ['/ping', '/error', '/ping', '/error'];
+        paths = paths.concat(paths.concat(paths))
+        paths = paths.concat(paths.concat(paths))
+        paths = paths.concat(paths.concat(paths))
+        var req = function(path, cb) {
+          var url = app.url(path);
+          app.request.get(url, function(err, res) {
+            if(err) return cb(err);
+            if(path === '/error') {
+              if(res.statusCode != 500) {
+                return cb(new Error("Weird /error status code"));
+                console.log('/error 500');
               }
-              cb();
-            });
-          };
-          var getPing = function(cb) {
-            app.request.get(app.url('/ping'), function(err, res) {
-              try{
-                assert.equal(err, null, 'expected 200 status on ping request but got error ' + (err||0).stack)
-                assert.equal(res.statusCode, 200, 'should have 200 status');
-              } catch(e) {
-                return cb(e);
-              }
-              cb();
-            });
-          };
-          async.parallel([getError, getPing, getError, getPing], done);
-        });
+              return cb(null);
+            }
+            if(res.statusCode != 200) {
+              return cb(new Error("Weird /ping status code"));
+            }
+            console.log('/ping 200');
+            return cb(null);
+          });
+        };
+        async.forEach(paths, req, done);
+      });
+
+      for(var i = 0; i < 5; i++) {
+        app.get('/error', 500);
       }
 
-      app.get('/ping');
     });
 
     after(function(done) {
