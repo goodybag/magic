@@ -179,7 +179,7 @@ module.exports.listHeartbeats = function(req, res){
 
   if (req.param('limit'))   options.limit   = req.param('limit');
   if (req.param('offset'))  options.offset  = req.param('offset');
-  
+
   db.api.heartbeats.setLogTags(TAGS);
   db.api.heartbeats.find(query, options, function(error, results, meta){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -206,33 +206,29 @@ module.exports.createHeartbeat = function(req, res){
   var TAGS = ['tapinStations-heartbeat', req.uuid];
   logger.routes.debug(TAGS, 'emitting tapinStation ' + req.params.id + ' heartbeat');
 
-  db.getClient(TAGS, function(error, client) {
+  var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id');
+  query.$('id', +req.param('id') || 0);
+
+  db.query(query.toString(), query.$values, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    var query = sql.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id = $id');
-    query.$('id', +req.param('id') || 0);
+    if (results.length == 0) return res.error(errors.input.NOT_FOUND);
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    var heartbeat = {
+      userId:     req.param('id')
+    , locationId: results[0].locationId
+    , businessId: results[0].businessId
+    , data:       JSON.stringify(req.body)
+    };
 
-      if (result.rowCount == 0) return res.error(errors.input.NOT_FOUND);
+    var options = {
+      returning: false
+    };
 
-      var heartbeat = {
-        userId:     req.param('id')
-      , locationId: result.rows[0].locationId
-      , businessId: result.rows[0].businessId
-      , data:       JSON.stringify(req.body)
-      };
+    db.api.heartbeats.insert(heartbeat, options, function(error){
+      if (error) return res.error(errors.internal.DB_FAILURE, error)
 
-      var options = {
-        returning: false
-      };
-
-      db.api.heartbeats.insert(heartbeat, options, function(error){
-        if (error) return res.error(errors.internal.DB_FAILURE, error)
-
-        res.send(204);
-      });
+      res.send(204);
     });
   });
 };
