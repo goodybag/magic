@@ -28,7 +28,9 @@ collection:
         galleryEnabled:    { type: bool,   eg: true }
         numUnconfirmedPunchesAllowed: { type: int, eg: 1 }
   children:
+    - /tapin-stations/heartbeats
     - /tapin-stations/:id
+    - /tapin-stations/:id/heartbeats
 
 item:
   resource:
@@ -59,3 +61,20 @@ item:
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
+
+heartbeats:
+  resource:
+    type: collection
+    path: /tapin-stations/heartbeats
+  methods:
+    get:
+      desc: List Heartbeats
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      query:
+        offset:     { type: int,     eg: 5 }
+        limit:      { type: int,     eg: 5 }
+        businessId: { type: id,      eg: 1 }
+        locationId: { type: id,      eg: 1 }
+        userId:     { type: id,      eg: 1 }

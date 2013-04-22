@@ -223,6 +223,7 @@ exports.schemas = {
 
 , tapins:                    require('./schemas/tapins')
 , visits:                    require('./schemas/visits')
+, heartbeats:                require('./schemas/heartbeats')
 
 , products:                  require('./schemas/products')
 , productCategories:         require('./schemas/productCategories')

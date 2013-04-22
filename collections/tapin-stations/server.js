@@ -25,6 +25,18 @@ server.get(
 , routes.list
 );
 
+// tapinStations.listHeartbeats
+server.get(
+  '/v1/tapin-stations/heartbeats'
+, middleware.profile('GET /v1/tapin-stations/heartbeats')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.heartbeats.methods.get.query)
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales')
+, middleware.profile('create tapinStation heartbeats handler')
+, routes.listHeartbeats
+);
+
 // tapinStations.get
 server.get(
   '/v1/tapin-stations/:id'
@@ -91,15 +103,29 @@ server.del(
 , routes.del
 );
 
+// tapinStations.listHeartbeats
+server.get(
+  '/v1/tapin-stations/:id/heartbeats'
+, middleware.profile('GET /v1/tapin-stations/:id/heartbeats')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.heartbeats.methods.get.query)
+, middleware.profile('apply groups tapinStations owner')
+, middleware.applyGroups(applyGroups.owner)
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'sales', 'owner')
+, middleware.profile('create tapinStation heartbeats handler')
+, routes.listHeartbeats
+);
+
 // tapinStations.createHeartbeat
 server.post(
-  '/v1/tapin-stations/:id/heartbeat'
-, middleware.profile('POST /v1/tapin-stations/:id/heartbeat')
+  '/v1/tapin-stations/:id/heartbeats'
+, middleware.profile('POST /v1/tapin-stations/:id/heartbeats')
 , middleware.profile('apply groups tapinStations owner')
 , middleware.applyGroups(applyGroups.owner)
 , middleware.profile('auth allow')
 , middleware.auth.allow('owner')
-, middleware.profile('create tapinStation heartbeat handler')
+, middleware.profile('create tapinStation heartbeats handler')
 , routes.createHeartbeat
 );
 
