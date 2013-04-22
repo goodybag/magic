@@ -352,7 +352,7 @@ module.exports.createPasswordReset = function(req, res){
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         var emailHtml = templates.email.reset_password({
-          url : config.baseUrl + '/v1/users/password-reset/' + token
+          url : 'http://goodybag.com/#reset-password/' + token
         });
         utils.sendMail(email, config.emailFromAddress, 'Goodybag Password Reset Link', emailHtml);
 
