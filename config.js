@@ -98,7 +98,7 @@ var config = {
   , logging: {
       enabled: true
     , transports: {
-        console: true
+        devConsole: true
     }
   }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"

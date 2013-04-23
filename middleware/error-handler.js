@@ -5,8 +5,13 @@ var errorHandler = module.exports = function(app) {
   return function(err, req, res, next) {
     delete err.domain;
     //respond kindly to the offender if possible
+    log.error(err);
     try {
-      res.writeHead(500, {'content-type':'application/json', 'connection': 'close'});
+      var errorHeaders = {
+        'content-type':'application/json', 
+        'connection': 'close'
+      };
+      res.writeHead(500, errorHeaders);
       res.end(JSON.stringify({error: errors.internal.UNKNOWN, data: null}));
     } catch(e) {
       delete e.domain;

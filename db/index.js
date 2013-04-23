@@ -28,11 +28,13 @@ var
 
 require('pg-parse-float')(pg);
 exports.api = {};
-exports.pg = pg;
+pg.defaults.hideDeprecationWarnings = true;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
 exports.getClient = function(logTags, callback){
+  callback = process.domain ? process.domain.bind(callback) : callback;
+
   if (typeof logTags == 'function') {
     callback = logTags;
     logTags = null;
@@ -45,28 +47,33 @@ exports.getClient = function(logTags, callback){
   }
 
   pg.connect(config.postgresConnStr, function(err, client, done) {
+    if(err) return callback(err);
     addToDomain(client);
-    if(err) {
-      var tag = ['unable to checkout client from the pool'];
-      logger.error(client.logTags.concat(tag), err);
-      return callback(err);
-    }
     client.logTags = logTags;
+
     //monkey-patch query method
-    var queries = [];
     if(!client.$query) {
       client.$query = client.query;
 
       client.query = function(text, values, callback) {
+        //bind callbacks
+        if(process.domain) {
+          if(typeof arguments[1] == 'function') {
+            arguments[1] = process.domain.bind(arguments[1]);
+          } else if(typeof arguments[2] == 'function') {
+            arguments[2] = process.domain.bind(arguments[2])
+          } else {
+            log.warn(logTags, 'unable to find callback to bind to active domain');
+          }
+        }
         client.$query.apply(client, arguments);
-        queries.push(text);
       };
     }
+
     //TODO auto-release after a specific timeout
     var tid = setTimeout(function() {
       logger.warn(client.logTags, 'client has been checked out for too long!');
       console.log(client.logTags, 'client has been checked out for too long!');
-      console.log(queries);
     }, 1000);
     client.once('drain', function() {
       clearTimeout(tid);
@@ -89,7 +96,9 @@ exports.query = function(text, params, callback) {
     text = q.text;
     params = q.values;
   }
+  callback = process.domain ?  process.domain.bind(callback) : callback;
   pg.connect(config.postgresConnStr, function(err, client, done) {
+    if(err) return callback(err);
     addToDomain(client);
     client.query(text, params, function(err, result) {
       //release the client
