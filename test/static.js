@@ -37,4 +37,12 @@ omf(app, function(app) {
       assert.equal(body.uuid, body.domainId);
     });
   });
+
+  app.get('/error', function(res) {
+    res.has.statusCode(500);
+  });
+
+  app.get('/request-id', function(res) {
+    res.has.statusCode(200);
+  });
 });

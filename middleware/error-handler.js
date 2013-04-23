@@ -17,6 +17,10 @@ var errorHandler = module.exports = function(app) {
       delete e.domain;
       log.warn('failed to end response', e);
     }
-    app.shutdown();
+    if(app.shutdown) {
+      app.shutdown();
+    } else {
+      log.warn('app has no shutdown handler - not cleaning up properly after error');
+    }
   };
 };
