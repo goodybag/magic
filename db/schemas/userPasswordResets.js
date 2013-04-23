@@ -22,11 +22,11 @@ define(function(require){
   , token: {
       type: 'text'
     }
-  , expires: {
-      type: 'timestamp'
-    }
   , createdAt: {
-      type: 'timestamp'
+      type: 'timestamp without time zone'
+    }
+  , used: {
+      type: 'timestamp without time zone'
     }
   };
   return userPasswordReset;
