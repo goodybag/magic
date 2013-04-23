@@ -29,6 +29,7 @@ var
 require('pg-parse-float')(pg);
 exports.api = {};
 pg.defaults.hideDeprecationWarnings = true;
+pg.defaults.poolSize = 5;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
@@ -74,9 +75,12 @@ exports.getClient = function(logTags, callback){
     var tid = setTimeout(function() {
       logger.warn(client.logTags, 'client has been checked out for too long!');
       console.log(client.logTags, 'client has been checked out for too long!');
-    }, 1000);
+      //destroy the client
+      done(client);
+    }, 3000);
     client.once('drain', function() {
       clearTimeout(tid);
+      removeFromDomain(client);
       done()
     });
     callback(null, client);
@@ -97,6 +101,8 @@ exports.query = function(text, params, callback) {
     params = q.values;
   }
   callback = process.domain ?  process.domain.bind(callback) : callback;
+  //once this is upgraded to v1.0 we can use `okay` because
+  //arity checking is removed
   pg.connect(config.postgresConnStr, function(err, client, done) {
     if(err) return callback(err);
     addToDomain(client);
@@ -146,6 +152,7 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
   var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
   var stage = ''; // for logging
+  originalCb = process.domain ? process.domain.bind(originalCb) : originalCb;
 
   // checks into our upsert to see if we've finished or not
   var checkResults = function(continueCb) {

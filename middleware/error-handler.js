@@ -5,7 +5,7 @@ var errorHandler = module.exports = function(app) {
   return function(err, req, res, next) {
     delete err.domain;
     //respond kindly to the offender if possible
-    log.error(err);
+    log.error(err, err.stack);
     try {
       var errorHeaders = {
         'content-type':'application/json', 

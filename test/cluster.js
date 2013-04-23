@@ -13,8 +13,10 @@ describe('cluster', function() {
     });
 
     omf('http://localhost:' + port, function(app) {
+      app.get('/ping');
+      app.get('/ping');
 
-      it('gets failures and successes', function(done) {
+      it('gets failures and successes', false, function(done) {
         var paths = ['/ping', '/error', '/ping', '/error'];
         paths = paths.concat(paths.concat(paths))
         paths = paths.concat(paths.concat(paths))
@@ -41,8 +43,24 @@ describe('cluster', function() {
       });
 
       for(var i = 0; i < 5; i++) {
-        app.get('/error', 500);
+        //app.get('/error', 500);
       }
+
+      var getProducts = function(num, cb) {
+        app.request.get(app.url('/v1/products'), function(err, res) {
+          if(err) return cb(err);
+          if(res.statusCode != 200) return cb(new Error('GOT STATUS CODE ' + res.statusCode));
+          cb();
+        })
+      }
+
+      it('gets a lot of products', function(done) {
+        require('http').globalAgent.maxSockets = 40;
+        async.times(100, getProducts, function(err) {
+          console.log('got product 100 times')
+          done(err);
+        });
+      });
 
     });
 
