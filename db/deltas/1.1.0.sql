@@ -8,3 +8,7 @@ ALTER TABLE "userPasswordResets" DROP COLUMN expires;
 
 -- add boolean to tell if token has been used
 ALTER TABLE "userPasswordResets" ADD used timestamp without time zone;
+
+
+-- fix businesses with no protocol in url
+UPDATE businesses SET url='http://' || url WHERE url!='' AND url NOT LIKE 'http%';
