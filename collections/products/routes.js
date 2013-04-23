@@ -31,10 +31,10 @@ module.exports.list = function(req, res){
   var TAGS = ['list-products', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of products');
 
-  // if sort=distance, validate that we got lat/lon
-  if (req.query.sort && req.query.sort.indexOf('distance') !== -1) {
+  // if sort=distance|nearby, validate that we got lat/lon
+  if (req.query.sort && /(distance|nearby)/.test(req.query.sort)) {
     if (!req.query.lat || !req.query.lon) {
-      return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
+      return res.error(errors.input.VALIDATION_FAILED, 'Sort by \''+req.query.sort+'\' requires `lat` and `lon` query parameters be specified');
     }
   }
 
@@ -46,8 +46,9 @@ module.exports.list = function(req, res){
 
   // build data query
   var query = sql.query([
+    '{sortCacheWith}',
     'SELECT {fields} FROM products',
-      '{poplistJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
+      '{sortCacheJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
       'INNER JOIN businesses ON businesses.id = products."businessId"',
       '{where}',
       'GROUP BY {groupby}',
@@ -106,7 +107,10 @@ module.exports.list = function(req, res){
     ].join(' ');
     query.$('lat', req.query.lat);
     query.$('lon', req.query.lon);
-    query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
+    if (/nearby/.test(req.query.sort))
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
+    else
+      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
     if (req.query.range) {
       // If querying by range, don't include null lat/lon
       query.prodLocJoin = query.prodLocJoin.replace('LEFT', 'INNER');
@@ -258,26 +262,41 @@ module.exports.list = function(req, res){
 
   // custom sorts
   if (req.query.sort) {
-    if (req.query.sort.indexOf('random') !== -1)
+    if (/random/.test(req.query.sort))
       query.fields.add('random() as random'); // this is really inefficient
-    else if (req.query.sort.indexOf('popular') !== -1) {
-      query.poplistJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
+    else if (/popular/.test(req.query.sort)) {
+      query.sortCacheJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
       query.fields.add('pli.id as popular');
       query.groupby.add('pli.id');
 
+      // remember which list the user is looking at, but refresh the choice every hour
       var listid = Math.floor(Math.random()*config.algorithms.popular.numLists);
       var onehour = 1000 * 60 * 60;
       if (req.query.listid)
         listid = req.query.listid;
       else if (req.session) {
         if (req.session.currentPopListid && req.session.currentPopListCreated && ((new Date() - new Date(req.session.currentPopListCreated)) < onehour || req.query.offset < 1))
-          listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
+          listid = req.session.currentPopListid; // :TEMP: retrieve current list from session (if I remember right, better if replaced by a query param)
         else {
           req.session.currentPopListid = listid; // :TEMP: store current list from session
           req.session.currentPopListCreated = new Date();
         }
       }
       query.$('poplistid', listid);
+    }
+    else if (/nearby/.test(req.query.sort)) {
+      query.sortCacheWith = [
+        'WITH "deg0" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position LIMIT 30),',
+          '"deg1" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position ORDER BY random() LIMIT 10),',
+          '"deg2" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position ORDER BY random() LIMIT 20),',
+          '"deg3" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1500) @> position ORDER BY random() LIMIT 30),',
+          '"deg4" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 2000) @> position ORDER BY random() LIMIT 40),',
+          '"deg5" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 2500) @> position ORDER BY random() LIMIT 50),',
+          '"nearbyItems" AS (SELECT * FROM "deg0" UNION SELECT * FROM "deg1" UNION SELECT * FROM "deg2" UNION SELECT * FROM "deg3" UNION SELECT * FROM "deg4" UNION SELECT * FROM "deg5")'
+      ].join(' ');
+      query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
+      query.fields.add('earth_distance(ll_to_earth($lat,$lon), ni.position) as nearby');
+      query.groupby.add('ni.position');
     }
   }
 

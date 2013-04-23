@@ -267,7 +267,6 @@ describe('GET /v1/products', function() {
 
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/products?sort=name', function(err, payload, res) {
-
       assert(!err);
       assert(res.statusCode == 200);
 
@@ -320,6 +319,29 @@ describe('GET /v1/products', function() {
 
   it('should return 400 if asked to sort by distance and not given a location', function(done) {
     tu.get('/v1/products?sort=distance', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 400);
+      done();
+    });
+  });
+
+  it('should sort by nearby if also given a location', function(done) {
+    tu.get('/v1/products?lat=10&lon=10&sort=nearby', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      done();
+    });
+  });
+
+  it('should return 400 if asked to sort by nearby and not given a location', function(done) {
+    tu.get('/v1/products?sort=nearby', function(err, payload, res) {
 
       assert(!err);
       assert(res.statusCode == 400);
