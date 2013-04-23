@@ -1,5 +1,5 @@
--- 1.0.26.sql
-insert into deltas (version, date) values ('1.0.26', 'now()');
+-- 1.0.0.sql
+insert into deltas (version, date) values ('1.0.0', 'now()');
 
 -- #543 fix forgot password tokens
 
