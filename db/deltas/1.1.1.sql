@@ -9,3 +9,13 @@ UPDATE "userLoyaltyStats" u SET
 FROM "businessLoyaltySettings" b
 WHERE u."businessId" = b."businessId" AND
 (("numPunches" >= b."regularPunchesRequired" AND "isElite" IS NOT TRUE) OR ("numPunches" >= b."elitePunchesRequired" AND "isElite" IS TRUE));
+
+-- #486 partial registration
+
+CREATE TABLE "partialRegistrations" (
+       id SERIAL PRIMARY KEY,
+       "userId" integer REFERENCES users(id) ON DELETE CASCADE,
+       token text NOT NULL,
+       "createdAt" timestamp WITHOUT time zone NOT NULL,
+       used timestamp WITHOUT time zone
+);
