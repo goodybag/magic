@@ -3,6 +3,7 @@ var sinon = require('sinon');
 
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
+var magic = require('../../lib/magic');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
@@ -17,6 +18,7 @@ describe('GET /v1/users', function() {
       });
     })
   });
+
   it('should filter', function(done) {
     tu.get('/v1/users?filter=admin', function(err, results, res) {
       assert(!err);
@@ -187,14 +189,14 @@ describe('POST /v1/users', function() {
   });
 });
 
-describe('PATCH /v1/users/:id', function() {
+describe('PUT /v1/users/:id', function() {
   it('should update a user', function(done) {
     var user = {
       email: "new@email.com"
     , password: "whatever"
     };
     tu.login({ email: 'dumb@goodybag.com', password: 'password' }, function(error){
-      tu.patch('/v1/users/6', user, function(error, results, res) {
+      tu.put('/v1/users/6', user, function(error, results, res) {
         assert(res.statusCode == 204);
 
         tu.get('/v1/users/6', function(error, results) {
@@ -263,7 +265,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups:[2, 3]
     };
     tu.login({ email: 'consumer@goodybag.com', password: 'password' }, function(error, authedUser){
-      tu.patch('/v1/users/' + authedUser.id, user, function(error, results, res) {
+      tu.put('/v1/users/' + authedUser.id, user, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);
@@ -280,7 +282,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups:[1]
     };
     tu.loginAsClient(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res) {
+      tu.put('/v1/users/6', user, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -298,7 +300,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "sales@goodybag.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res){
+      tu.put('/v1/users/6', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 400);
         results = JSON.parse(results);
@@ -315,7 +317,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "sales@goodybag.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/500', user, function(error, results, res){
+      tu.put('/v1/users/500', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 404);
         tu.logout(function() {
@@ -331,7 +333,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups: [40000]
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res){
+      tu.put('/v1/users/6', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 400);
         results = JSON.parse(results);
@@ -348,7 +350,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "foo@bar.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/8', user, function(error, results, res){
+      tu.put('/v1/users/8', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 204);
 
@@ -417,7 +419,7 @@ describe('POST /v1/users/password-reset', function() {
                 tu.logout(function() {
 
                   tu.loginAsAdmin(function(error){
-                    tu.patch('/v1/users/7', { password:'password' }, function(err, results, res) {
+                    tu.put('/v1/users/7', { password:'password' }, function(err, results, res) {
                       assert(res.statusCode == 204);
                       tu.logout(done);
                     });
