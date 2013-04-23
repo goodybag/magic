@@ -247,13 +247,36 @@ module.exports.update = function(req, res){
         });
       };
 
+      var partialRegistration = function(userId, email, password, singlyId) {
+        if (email != null && password == null && singlyId == null) {
+
+          var token = require("randomstring").generate();
+          var query = sql.query([
+            'INSERT INTO "partialRegistrations" ("userId", token, "createdAt")',
+            'VALUES ($userId, $token, now())'
+          ]);
+          query.$('userId', userId);
+          query.$('token', token);
+
+          client.query(query.toString(), query.$values, function(error, result) {
+            if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+
+            var emailHtml = templates.email.partial_registration({
+              url : 'http://goodybag.com/#complete-registration/' + token
+            });
+            utils.sendMail(email, config.emailFromAddress, 'Goodybag Complete Registration', emailHtml);
+          });
+        }
+      }
+
       // start transaction
       tx.begin(function() {
 
         // build update query
         var query = sql.query([
           'UPDATE users SET {updates}',
-            'WHERE users.id = $id {emailClause}'
+            'WHERE users.id = $id {emailClause} RETURNING email, password, "singlyId"'
         ]);
         query.updates = sql.fields();
         query.$('id', req.params.id);
@@ -293,6 +316,9 @@ module.exports.update = function(req, res){
               }
             });
             return;
+          }
+          else {
+            var token = partialRegistration(req.params.id, results[0].email, results[0].password, results[0].singlyId);
           }
 
           // are we done?
