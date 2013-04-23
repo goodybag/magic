@@ -252,8 +252,8 @@ module.exports.update = function(req, res){
 
           var token = require("randomstring").generate();
           var query = sql.query([
-            'INSERT INTO "partialRegistrations" ("userId", token, "createdAt")',
-            'VALUES ($userId, $token, now())'
+            'INSERT INTO "partialRegistrations" ("userId", token)',
+            'VALUES ($userId, $token)'
           ]);
           query.$('userId', userId);
           query.$('token', token);
@@ -318,7 +318,7 @@ module.exports.update = function(req, res){
             return;
           }
           else {
-            var token = partialRegistration(req.params.id, results[0].email, results[0].password, results[0].singlyId);
+            partialRegistration(req.params.id, result.rows[0].email, result.rows[0].password, result.rows[0].singlyId);
           }
 
           // are we done?

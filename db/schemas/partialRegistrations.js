@@ -23,10 +23,11 @@ define(function(require){
     }
   , createdAt: {
       type: 'timestamp without time zone'
+    , meta: 'default now()'
     }
   , used: {
       type: 'timestamp without time zone'
     }
   };
-  return userPasswordReset;
+  return partialRegistration;
 });

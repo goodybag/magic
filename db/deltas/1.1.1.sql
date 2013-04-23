@@ -15,7 +15,7 @@ WHERE u."businessId" = b."businessId" AND
 CREATE TABLE "partialRegistrations" (
        id SERIAL PRIMARY KEY,
        "userId" integer REFERENCES users(id) ON DELETE CASCADE,
-       token text NOT NULL,
-       "createdAt" timestamp WITHOUT time zone NOT NULL,
+       token text,
+       "createdAt" timestamp WITHOUT time zone DEFAULT now(),
        used timestamp WITHOUT time zone
 );
