@@ -399,22 +399,28 @@ describe('POST /v1/users/password-reset', function() {
     tu.loginAsAdmin(function(error){
 
       tu.post('/v1/users/password-reset', { email:'tferguson@gmail.com' }, function(error, results, res) {
+        // you only get results if logged in as admin
         assert(res.statusCode == 200);
         results = JSON.parse(results);
         assert(results.data.token);
+        var token = results.data.token;
 
-        tu.post('/v1/users/password-reset/'+results.data.token, { password:'password2' }, function(error, results, res) {
+        tu.post('/v1/users/password-reset/' + token, { password:'password2' }, function(error, results, res) {
           assert(res.statusCode == 204);
 
-          tu.logout(function() {
-            tu.login({ email: 'tferguson@gmail.com', password: 'password2' }, function(error){
-              assert(!error);
-              tu.logout(function() {
+          tu.post('/v1/users/password-reset/' + token, { password:'password3' }, function(error, results, res) {
+            assert(res.statusCode == 400);
 
-                tu.loginAsAdmin(function(error){
-                  tu.patch('/v1/users/7', { password:'password' }, function(err, results, res) {
-                    assert(res.statusCode == 204);
-                    tu.logout(done);
+            tu.logout(function() {
+              tu.login({ email: 'tferguson@gmail.com', password: 'password2' }, function(error){
+                assert(!error);
+                tu.logout(function() {
+
+                  tu.loginAsAdmin(function(error){
+                    tu.patch('/v1/users/7', { password:'password' }, function(err, results, res) {
+                      assert(res.statusCode == 204);
+                      tu.logout(done);
+                    });
                   });
                 });
               });
