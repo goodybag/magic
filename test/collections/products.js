@@ -267,7 +267,6 @@ describe('GET /v1/products', function() {
 
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/products?sort=name', function(err, payload, res) {
-
       assert(!err);
       assert(res.statusCode == 200);
 
