@@ -41,6 +41,10 @@ define(function(require){
   , position: {
       type: 'earth'
     }
+  , cachedrandom: {
+      type: 'double precision'
+    , meta: 'default random()'
+    }
   , createdAt: {
       type: 'timestamp'
     , meta: 'default now()'
