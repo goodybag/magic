@@ -286,7 +286,7 @@ module.exports.list = function(req, res){
       query.sortCacheWith = [
         'WITH',
           '"oneOfEachClose" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position AND "isActive"=true LIMIT 30),',
-          '"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE "isActive"=true ORDER BY cachedrandom LIMIT 250),',
+          '"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE "isActive"=true ORDER BY cachedrandom*cachedrandom*earth_distance(ll_to_earth($lat,$lon), position) LIMIT 250),',
           '"nearbyItems" AS (SELECT * FROM "oneOfEachClose" UNION SELECT * FROM "randomSubset")'
       ].join(' ');
       query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
