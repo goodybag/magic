@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
 var magic = require('../../lib/magic');
+var db = require('../../db');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
@@ -361,6 +362,31 @@ describe('PUT /v1/users/:id', function() {
 
           tu.logout(done);
         });
+      });
+    });
+  });
+
+  it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '7777777-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test@example.com'};
+
+        magic.on('user.partialRegistration', function(user, email, token){
+          assert(email === data.email);
+          assert(user.toString() === userId.toString());
+          assert(token != null);
+          done();
+        });
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '7777777-___', data, function(err, result){});
       });
     });
   });
