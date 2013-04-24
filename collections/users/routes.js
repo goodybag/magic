@@ -11,6 +11,7 @@ var
 , templates   = require('../../templates')
 , Transaction = require('pg-transaction')
 , async       = require('async')
+, magic       = require('../../lib/magic')
 
 , logger    = {}
 ;
@@ -249,7 +250,6 @@ module.exports.update = function(req, res){
 
       var partialRegistration = function(userId, email, password, singlyId) {
         if (email != null && password == null && singlyId == null) {
-
           var token = require("randomstring").generate();
           var query = sql.query([
             'INSERT INTO "partialRegistrations" ("userId", token)',
@@ -266,6 +266,7 @@ module.exports.update = function(req, res){
               url : 'http://goodybag.com/#complete-registration/' + token
             });
             utils.sendMail(email, config.emailFromAddress, 'Goodybag Complete Registration', emailHtml);
+            magic.emit('user.partialRegistration', userId, email, token);
           });
         }
       }
