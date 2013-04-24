@@ -54,6 +54,7 @@ var config = {
 
   , 'poplistItems'
   , 'requests'
+  , 'partialRegistrations'
   ]
 , fixtureFile: 'test'
 };
