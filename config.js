@@ -22,11 +22,6 @@ var config = {
   , http: {
       port: 3000
     }
-  , repl: {
-      enabled: true
-    , prompt: "gb-api> "
-    , port: 4337
-    }
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 
@@ -198,9 +193,6 @@ var config = {
   , postgresConnStr: process.env['DATABASE_URL']
   , outputActivePoolIds: false
   , emailEnabled: true
-  , repl: {
-      enabled: false
-    }
   }
 
 , production: {
@@ -213,7 +205,6 @@ var config = {
   , postgresConnStr: process.env['DATABASE_URL']
   , outputActivePoolIds: false
   , emailEnabled: true
-  , repl: { enabled: false }
 
   , facebook: {
       id: "152282721508707"
