@@ -247,7 +247,7 @@ exports.schemas = {
 , activity:                  require('./schemas/activity')
 
 , poplistItems:              require('./schemas/poplistItems')
-
+, nearbyGridItems:           require('./schemas/nearbyGridItems')
 , requests:                  require('./schemas/requests')
 };
 
