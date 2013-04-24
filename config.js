@@ -99,7 +99,6 @@ var config = {
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
 
-  , outputActivePoolIds: false
   , emailEnabled: false
   }
 
@@ -114,7 +113,6 @@ var config = {
     }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
-  , outputActivePoolIds: false
 
   , facebook: {
       id:     "159340790837933"
@@ -191,7 +189,6 @@ var config = {
 
   , baseUrl: 'http://magic.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
-  , outputActivePoolIds: false
   , emailEnabled: true
   }
 
@@ -203,7 +200,6 @@ var config = {
   , http: { port: process.env['PORT'] || 5000 }
   , baseUrl: 'http://magic.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
-  , outputActivePoolIds: false
   , emailEnabled: true
 
   , facebook: {
