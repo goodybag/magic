@@ -22,6 +22,10 @@ var config = {
   , http: {
       port: 3000
     }
+  , pg: {
+    hideDeprecationWarnings: true
+  , poolSize: 5
+  }
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 

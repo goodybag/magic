@@ -26,10 +26,11 @@ var
 , ok = require('okay')
 ;
 
+//apply the parse-float plugin to node-postgres
 require('pg-parse-float')(pg);
 exports.api = {};
-pg.defaults.hideDeprecationWarnings = true;
-pg.defaults.poolSize = 5;
+pg.defaults.hideDeprecationWarnings = config.pg.hideDeprecationWarnings;
+pg.defaults.poolSize = config.pg.poolSize;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
