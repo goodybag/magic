@@ -284,13 +284,10 @@ module.exports.list = function(req, res){
     else if (/distance/.test(req.query.sort)) {
       // filter the products to select from by INNER JOINing a random subset of products in the nearby grid locations
       query.sortCacheWith = [
-        'WITH "deg0" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position LIMIT 30),',
-          '"deg1" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position ORDER BY random() LIMIT 10),',
-          '"deg2" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position ORDER BY random() LIMIT 20),',
-          '"deg3" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1500) @> position ORDER BY random() LIMIT 30),',
-          '"deg4" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 2000) @> position ORDER BY random() LIMIT 40),',
-          '"deg5" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 2500) @> position ORDER BY random() LIMIT 50),',
-          '"nearbyItems" AS (SELECT * FROM "deg0" UNION SELECT * FROM "deg1" UNION SELECT * FROM "deg2" UNION SELECT * FROM "deg3" UNION SELECT * FROM "deg4" UNION SELECT * FROM "deg5")'
+        'WITH',
+          '"oneOfEachClose" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position AND "isActive"=true LIMIT 30),',
+          '"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 10000) @> position AND "isActive"=true ORDER BY cachedrandom LIMIT 1000),',
+          '"nearbyItems" AS (SELECT * FROM "oneOfEachClose" UNION SELECT * FROM "randomSubset")'
       ].join(' ');
       query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
       // the distance field is set by the lat/lon query-param handling; no need to duplicate here
