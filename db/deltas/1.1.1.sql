@@ -9,3 +9,17 @@ UPDATE "userLoyaltyStats" u SET
 FROM "businessLoyaltySettings" b
 WHERE u."businessId" = b."businessId" AND
 (("numPunches" >= b."regularPunchesRequired" AND "isElite" IS NOT TRUE) OR ("numPunches" >= b."elitePunchesRequired" AND "isElite" IS TRUE));
+
+-- #511 nearby algorithm
+
+CREATE TABLE "nearbyGridItems" (
+	"id" serial primary key,
+	"productId" int references products(id) on delete cascade,
+	"locationId" int references locations(id) on delete cascade,
+	"businessId" int references businesses(id) on delete cascade,
+	"lat" double precision,
+	"lon" double precision,
+	"position" earth,
+	"createdAt" timestamp default now(),
+	"isActive" bool default true
+);
