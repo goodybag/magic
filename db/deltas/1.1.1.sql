@@ -24,7 +24,7 @@ CREATE TABLE "nearbyGridItems" (
 	"isActive" bool default true
 );
 
-# 552 - Food tags
+-- #552 - Food tags
 
 insert into "businessTags" ("businessId", tag) values (2107, 'food');
 insert into "businessTags" ("businessId", tag) values (2031, 'food');
