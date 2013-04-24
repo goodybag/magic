@@ -32,7 +32,7 @@ module.exports.list = function(req, res){
   logger.routes.debug(TAGS, 'fetching list of products');
 
   // if sort=distance|nearby, validate that we got lat/lon
-  if (req.query.sort && /(distance|nearby)/.test(req.query.sort)) {
+  if (req.query.sort && /distance/.test(req.query.sort)) {
     if (!req.query.lat || !req.query.lon) {
       return res.error(errors.input.VALIDATION_FAILED, 'Sort by \''+req.query.sort+'\' requires `lat` and `lon` query parameters be specified');
     }
@@ -107,10 +107,7 @@ module.exports.list = function(req, res){
     ].join(' ');
     query.$('lat', req.query.lat);
     query.$('lon', req.query.lon);
-    if (/nearby/.test(req.query.sort))
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
-    else
-      query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
+    query.fields.add('min(earth_distance(ll_to_earth($lat,$lon), "productLocations".position)) AS distance');
     if (req.query.range) {
       // If querying by range, don't include null lat/lon
       query.prodLocJoin = query.prodLocJoin.replace('LEFT', 'INNER');
@@ -284,7 +281,8 @@ module.exports.list = function(req, res){
       }
       query.$('poplistid', listid);
     }
-    else if (/nearby/.test(req.query.sort)) {
+    else if (/distance/.test(req.query.sort)) {
+      // filter the products to select from by INNER JOINing a random subset of products in the nearby grid locations
       query.sortCacheWith = [
         'WITH "deg0" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position LIMIT 30),',
           '"deg1" AS (SELECT * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 500) @> position ORDER BY random() LIMIT 10),',
@@ -295,8 +293,9 @@ module.exports.list = function(req, res){
           '"nearbyItems" AS (SELECT * FROM "deg0" UNION SELECT * FROM "deg1" UNION SELECT * FROM "deg2" UNION SELECT * FROM "deg3" UNION SELECT * FROM "deg4" UNION SELECT * FROM "deg5")'
       ].join(' ');
       query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
-      query.fields.add('earth_distance(ll_to_earth($lat,$lon), ni.position) as nearby');
-      query.groupby.add('ni.position');
+      // the distance field is set by the lat/lon query-param handling; no need to duplicate here
+      // query.fields.add('earth_distance(ll_to_earth($lat,$lon), ni.position) as distance');
+      // query.groupby.add('ni.position');
     }
   }
 

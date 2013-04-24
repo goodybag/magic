@@ -326,29 +326,6 @@ describe('GET /v1/products', function() {
     });
   });
 
-  it('should sort by nearby if also given a location', function(done) {
-    tu.get('/v1/products?lat=10&lon=10&sort=nearby', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 200);
-
-      payload = JSON.parse(payload);
-
-      assert(!payload.error);
-      assert(payload.data.length > 0);
-      done();
-    });
-  });
-
-  it('should return 400 if asked to sort by nearby and not given a location', function(done) {
-    tu.get('/v1/products?sort=nearby', function(err, payload, res) {
-
-      assert(!err);
-      assert(res.statusCode == 400);
-      done();
-    });
-  });
-
   it('should return 400 if the sort parameter is not recognized', function(done) {
     tu.get('/v1/products?sort=foobar', function(err, payload, res) {
 
