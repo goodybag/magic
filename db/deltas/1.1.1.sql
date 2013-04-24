@@ -20,6 +20,7 @@ CREATE TABLE "nearbyGridItems" (
 	"lat" double precision,
 	"lon" double precision,
 	"position" earth,
+	"cachedrandom" double precision default random(),
 	"createdAt" timestamp default now(),
 	"isActive" bool default true
 );
