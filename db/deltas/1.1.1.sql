@@ -23,3 +23,15 @@ CREATE TABLE "nearbyGridItems" (
 	"createdAt" timestamp default now(),
 	"isActive" bool default true
 );
+
+# 552 - Food tags
+
+insert into "businessTags" ("businessId", tag) values (2107, 'food');
+insert into "businessTags" ("businessId", tag) values (2031, 'food');
+insert into "businessTags" ("businessId", tag) values (2162, 'food');
+insert into "businessTags" ("businessId", tag) values (2153, 'food');
+insert into "businessTags" ("businessId", tag) values (2163, 'food');
+insert into "businessTags" ("businessId", tag) values (2087, 'food');
+insert into "businessTags" ("businessId", tag) values (2096, 'food');
+insert into "businessTags" ("businessId", tag) values (2135, 'food');
+insert into "businessTags" ("businessId", tag) values (2142, 'food');
