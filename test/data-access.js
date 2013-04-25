@@ -100,10 +100,20 @@ describe('data access', function() {
   });
 
   describe('client errors', function() {
+    //break con string to force connect error
+    before(function() {
+      this.config = require(__dirname + '/../config');
+      this.postgresConnStr = config.postgresConnStr;
+      config.postgresConnStr = 'pg://localhost:39813/1o3847';
+    });
+
+    //reset the con string
+    after(function() {
+      this.config.postgresConnStr = this.postgresConnStr;
+    });
+
     it('tons of client errors stick to the correct domain', function(done) {
-      var config = require(__dirname + '/../config');
-      config.postgresConnStr = 'pg://localhost:3810/18484'
-      async.times(50, function(count, cb) {
+        async.times(50, function(count, cb) {
         var domain = require('domain').create();
         var domain = require('domain').create();
         domain.name = 'loop' + count;
