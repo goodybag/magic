@@ -23,7 +23,7 @@ var config = {
       port: 3000
     }
   , pg: {
-    hideDeprecationWarnings: true
+    hideDeprecationWarnings: false
   , poolSize: 5
   }
   , numWorkers: os.cpus().length
@@ -115,6 +115,10 @@ var config = {
   , http: {
       port: 8986
     }
+  , pg: {
+    hideDeprecationWarnings: false
+  , poolSize: 20
+  }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
 
@@ -201,6 +205,10 @@ var config = {
       enabled: true
     , transports: { console: true }
     }
+  , pg: {
+    hideDeprecationWarnings: false
+  , poolSize: 20
+  }
   , http: { port: process.env['PORT'] || 5000 }
   , baseUrl: 'http://magic.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
