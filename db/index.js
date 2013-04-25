@@ -68,7 +68,7 @@ exports.getClient = function(logTags, callback){
       console.log(client.logTags, 'client has been checked out for too long!');
       //destroy the client
       done(client);
-    }, 3000);
+    }, 10000);
     client.once('drain', function() {
       clearTimeout(tid);
       removeFromDomain(client);
