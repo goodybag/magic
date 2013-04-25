@@ -644,7 +644,7 @@ describe('POST /v1/products', function() {
       var product = { businessId:2, name:'asdf', price:1234 };
 
       product.description = "";
-      for (var i = 0; i < 301; i++){
+      for (var i = 0; i < 451; i++){
         product.description += "a";
       }
 
