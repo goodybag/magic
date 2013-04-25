@@ -34,6 +34,23 @@ pg.defaults.poolSize = config.pg.poolSize;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
+var logQuery = function(query) {
+  var start = new Date();
+  var text = query.text;
+  query.once('end', function(result) {
+    var duration = new Date() - start;
+    var rows = (result||0).rowCount;
+    logger.debug(['db', 'query'], 'query completed in ' + duration, { duration: duration, text: text, rows: rows });
+  });
+};
+
+pg.Client.prototype.$query = pg.Client.prototype.query;
+pg.Client.prototype.query = function() {
+  var q = this.$query.apply(this, arguments);
+  logQuery(q);
+  return q;
+}
+
 exports.getClient = function(logTags, callback){
   callback = process.domain ? process.domain.bind(callback) : callback;
 
@@ -53,14 +70,6 @@ exports.getClient = function(logTags, callback){
     addToDomain(client);
     client.logTags = logTags;
 
-    //monkey-patch query method
-    if(!client.$query) {
-      client.$query = client.query;
-
-      client.query = function(text, values, callback) {
-        client.$query.apply(client, arguments);
-      };
-    }
 
     //TODO auto-release after a specific timeout
     var tid = setTimeout(function() {
