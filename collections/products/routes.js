@@ -313,13 +313,13 @@ module.exports.list = function(req, res){
     if (includeTags || includeCats || includeUserPhotos) {
       dataResult.rows.forEach(function(row) {
         if (includeTags) {
-          try { row.tags = (row.tags) ? JSON.parse(row.tags) : []; } catch(e) {}
+          try { row.tags = (row.tags) ? (row.tags) : []; } catch(e) {}
         }
         if (includeCats) {
-          try { row.categories = (row.categories) ? JSON.parse(row.categories) : []; } catch(e) {}
+          try { row.categories = (row.categories) ? (row.categories) : []; } catch(e) {}
         }
         if (includeUserPhotos) {
-          try { row.photos = (row.photos) ? JSON.parse(row.photos) : []; } catch(e) {}
+          try { row.photos = (row.photos) ? (row.photos) : []; } catch(e) {}
         }
       });
     }
@@ -386,11 +386,11 @@ module.exports.get = function(req, res){
     if (!product) return res.status(404).end();
 
     if (typeof product.tags != 'undefined')
-      product.tags = (product.tags) ? JSON.parse(product.tags) : [];
+      product.tags = (product.tags) ? (product.tags) : [];
     if (typeof product.categories != 'undefined')
-      product.categories = (product.categories) ? JSON.parse(product.categories) : [];
+      product.categories = (product.categories) ? (product.categories) : [];
     if (typeof product.photos != 'undefined')
-      product.photos = (product.photos) ? JSON.parse(product.photos) : [];
+      product.photos = (product.photos) ? (product.photos) : [];
 
     return res.json({ error: null, data: product });
   });

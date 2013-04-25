@@ -161,7 +161,7 @@ module.exports.list = function(req, res){
     if (includeLocations) {
       dataResult.rows.forEach(function(r) {
         if (typeof r.locations != 'undefined')
-          r.locations = (r.locations) ? JSON.parse(r.locations) : [];
+          r.locations = (r.locations) ? (r.locations) : [];
       });
     }
 
