@@ -54,6 +54,69 @@ describe('data access', function() {
           });
         }, done);
       });
+
+      it('tons of queries stick to the correct domain', function(done) {
+        async.times(50, function(count, cb) {
+          var domain = require('domain').create();
+          domain.name = 'loop' + count;
+          domain.on('error', cb);
+          domain.run(function() {
+            db.query('SELECT NOW()', function(err, rows) {
+              assert.ifError(err);
+              assert.strictEqual(process.domain, domain, 'error detached on success query');
+              db.query('asdlfkajsdlf', function(err, rows) {
+                assert(err);
+                assert.strictEqual(process.domain, domain, 'domain detached on error query');
+                cb();
+              })
+            })
+          });
+        }, done);
+      });
+    });
+
+    it('tons of clients and queries stick to the correct domain', function(done) {
+      async.times(50, function(count, cb) {
+        var domain = require('domain').create();
+        domain.name = 'loop'
+        domain.run(function() {
+          assert.strictEqual(process.domain, domain);
+          db.getClient(function(err, client) {
+            assert.ifError(err, 'error getting client');
+            assert.strictEqual(process.domain, domain, 'domain detached on successful get client');;
+            client.query('SELECT NOW()', function(err, rows) {
+              assert.ifError(err);
+              assert.strictEqual(process.domain, domain, 'domain detached on successful query');
+              client.query('slakdjf', function(err) {
+                assert(err);
+                assert.strictEqual(process.domain, domain, 'domain detached on error query');
+                cb();
+              });
+            });
+          });
+        });
+      }, done);
+    });
+  });
+
+  describe('client errors', function() {
+    it('tons of client errors stick to the correct domain', function(done) {
+      var config = require(__dirname + '/../config');
+      config.postgresConnStr = 'pg://localhost:3810/18484'
+      async.times(50, function(count, cb) {
+        var domain = require('domain').create();
+        var domain = require('domain').create();
+        domain.name = 'loop' + count;
+        domain.run(function() {
+          assert.strictEqual(process.domain, domain);;
+          db.getClient(function(err, client) {
+            assert(err);
+            assert.strictEqual(process.domain, domain, 'domain detach on client connect error');;
+            cb();
+          });
+        });
+      }, done);
+
     });
   });
 });

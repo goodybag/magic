@@ -42,13 +42,13 @@ exports.getClient = function(logTags, callback){
     logTags = null;
   }
   if (!logTags)
-    logTags = ['unnamed'+(unnamedPoolidCounter++)];
+    logTags = ['unnamed'];
 
   if (config.outputActivePoolIds) {
     activePoolIds[logTags[0]] = true;
   }
 
-  pg.connect(config.postgresConnStr, function(err, client, done) {
+  var handle = function(err, client, done) {
     if(err) return callback(err);
     addToDomain(client);
     client.logTags = logTags;
@@ -58,16 +58,6 @@ exports.getClient = function(logTags, callback){
       client.$query = client.query;
 
       client.query = function(text, values, callback) {
-        //bind callbacks
-        if(process.domain) {
-          if(typeof arguments[1] == 'function') {
-            arguments[1] = process.domain.bind(arguments[1]);
-          } else if(typeof arguments[2] == 'function') {
-            arguments[2] = process.domain.bind(arguments[2])
-          } else {
-            log.warn(logTags, 'unable to find callback to bind to active domain');
-          }
-        }
         client.$query.apply(client, arguments);
       };
     }
@@ -85,10 +75,21 @@ exports.getClient = function(logTags, callback){
       done()
     });
     callback(null, client);
+    
+  };
+
+  handle = process.domain.bind(handle);
+
+  var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
+  swapDomain(pool);
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    handle(err, client, done);
   });
 
   return;
 };
+
+
 
 exports.query = function(text, params, callback) {
   if(typeof params === 'function') {
@@ -101,6 +102,8 @@ exports.query = function(text, params, callback) {
     text = q.text;
     params = q.values;
   }
+  var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
+  swapDomain(pool);
   callback = process.domain ?  process.domain.bind(callback) : callback;
   //once this is upgraded to v1.0 we can use `okay` because
   //arity checking is removed
@@ -114,6 +117,16 @@ exports.query = function(text, params, callback) {
       return callback(null, result.rows, result);
     });
   });
+};
+
+var swapDomain = function(emitter) {
+  if(!emitter) return;
+  if(emitter.domain) {
+    emitter.domain.remove(emitter);
+  }
+  if(process.domain) {
+    process.domain.add(emitter);
+  }
 };
 
 //TODO this needs to go in node-postgres
