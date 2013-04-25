@@ -415,3 +415,24 @@ module.exports.resetPassword = function(req, res){
     });
   });
 };
+
+
+/**
+ * Get email of partial registration
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getPartialRegistrationEmail = function(req, res) {
+  var TAGS = ['reset-user-password', req.uuid];
+  logger.routes.debug(TAGS, 'resetting user ' + req.params.id + ' password');
+
+  db.api.partialRegistrations.findOne(
+    {token:req.params.token},
+    {fields:['email'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
+    function(error, results) {
+      if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.json({err: null, data: {email: results.email}});
+    }
+  );
+}

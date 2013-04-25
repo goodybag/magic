@@ -26,6 +26,22 @@ server.post(
 , routes.resetPassword
 );
 
+// Users.getPartialRegistrationEmail
+server.get(
+  '/v1/users/complete-registration/:token'
+, middleware.profile('GET /v1/users/complete-registration/:token')
+, middleware.profile('get partial registration email handler')
+, routes.getPartialRegistrationEmail
+);
+
+// Users.completeRegistration
+server.post(
+  '/v1/users/complete-registration/:token'
+, middleware.profile('POST /v1/users/complete-registration/:token')
+, middleware.profile('complete partial registration handler')
+, routes.completeRegistration
+);
+
 // Users.list
 server.get(
   '/v1/users'
@@ -111,5 +127,7 @@ server.del(
 , middleware.profile('delete user handler')
 , routes.del
 );
+
+
 
 module.exports = server;
