@@ -117,7 +117,7 @@ var config = {
     }
   , pg: {
     hideDeprecationWarnings: false
-  , poolSize: 20
+  , poolSize: 15
   }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
