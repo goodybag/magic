@@ -423,8 +423,8 @@ module.exports.resetPassword = function(req, res){
  * @param  {Object} res HTTP Result Object
  */
 module.exports.getPartialRegistrationEmail = function(req, res) {
-  var TAGS = ['reset-user-password', req.uuid];
-  logger.routes.debug(TAGS, 'resetting user ' + req.params.id + ' password');
+  var TAGS = ['get-partial-registration', req.uuid];
+  logger.routes.debug(TAGS, 'getting partial registration email for token: ' + req.params.token);
 
   db.api.partialRegistrations.findOne(
     {token:req.params.token},
