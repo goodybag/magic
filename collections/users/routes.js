@@ -140,23 +140,24 @@ module.exports.create = function(req, res){
 
         var query = sql.query([
           'INSERT INTO users (email, password, "passwordSalt", "cardId", "createdAt")',
-            'SELECT $email, $password, $salt, $cardId, $createdAt WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
-            'RETURNING id'
+            'VALUES ($email, $password, $salt, $cardId, $createdAt)',
+            'RETURNING *'
         ]);
         query.$('email', req.body.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
         query.$('cardId', req.body.cardId ? req.body.cardId.toUpperCase() : null);
         query.$('createdAt', 'now()');
-        client.query(query.toString(), query.$values, function(error, result) {
-          if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-          // did the insert occur?
-          if (result.rowCount === 0) {
-            // email must have already existed
+        client.query(query.toString(), query.$values, function(error, result) {
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
             tx.abort();
-            return res.error(errors.registration.EMAIL_REGISTERED);
+            logger.routes.error(TAGS, error);
+            return;
           }
+
           var newUser = result.rows[0];
 
           // add groups
@@ -253,13 +254,12 @@ module.exports.update = function(req, res){
         // build update query
         var query = sql.query([
           'UPDATE users SET {updates}',
-            'WHERE users.id = $id {emailClause}'
+            'WHERE users.id = $id'
         ]);
         query.updates = sql.fields();
         query.$('id', req.params.id);
         if (email) {
           query.updates.add('email = $email');
-          query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id AND email IS NOT NULL)'; // this makes sure the user doesn't take an email in use
           query.$('email', email);
         }
         if (password) {
@@ -277,20 +277,21 @@ module.exports.update = function(req, res){
 
         // run update query
         client.query(query.toString(), query.$values, function(error, result){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+            tx.abort();
+            logger.routes.error(TAGS, error);
+            return;
+          }
 
           // did the update occur?
           if (result.rowCount === 0) {
             tx.abort();
             // figure out what the problem was
             client.query('SELECT id FROM users WHERE id=$1', [+req.param('id') || 0], function(error, results) {
-              if (results.rowCount === 0) {
-                // id didnt exist
-                return res.status(404).end();
-              } else {
-                // email must have already existed
-                return res.error(errors.registration.EMAIL_REGISTERED);
-              }
+              if (results.rowCount === 0)
+                return res.status(404).end(); // id didnt exist
             });
             return;
           }
