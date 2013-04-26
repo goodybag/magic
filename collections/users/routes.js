@@ -466,8 +466,10 @@ module.exports.completeRegistration = function(req, res) {
     },
 
     password: function(data) {
+      if (req.body.password == null && (data.singlyToken == null || data.singlyId == null))
+        res.error({message:'you need to provide password or a facebook login'}); //TODO: real error
       if (req.body.password != null)
-        utils.encryptPassword(password, function(error, encryptedPassword, passwordSalt) {
+        utils.encryptPassword(req.body.password, function(error, encryptedPassword, passwordSalt) {
           data.password = encryptedPassword;
           data.passwordSalt = passwordSalt;
           stage.getUser(data);
@@ -502,31 +504,21 @@ module.exports.completeRegistration = function(req, res) {
           if (data[key] != null && key !== 'userId') updates[key] = data[key];
 
         db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
-          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          res.noContent(); //TODO: create a session and redirect to goodybag.com
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+            logger.routes.error(TAGS, error);
+            return;
+          }
+          res.noContent(); //TODO: create a session
         });
-
-        //TODO email uniqueness
-        /*
-        sql.query('UPDATE users u SET {updates} FROM "partialRegistrations" p WHERE p.userId=u.id AND p.token={token}');
-        var updates = {};
-        for (key in data)
-          if (data[key] != null) updates[key] = data[key];
-        query.updates = updates;
-        query.token = req.params.token;
-        db.query(query.toString(), query.$values, function(error, rows, results) {
-          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          res.noContent();
-        });
-*/
-
       });
     }
   }
 
   var data = {email: req.body.email};
-  //stage.start(data);
+  stage.start(data);
 
-  res.writeHead(501);
-  res.send();j
+  //res.writeHead(501);
+  //res.send();
 }
