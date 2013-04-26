@@ -417,11 +417,16 @@ module.exports.create = function(req, res){
 
   var stage = {
     // Once we receive the client, kick everything off by
-    clientReceived: function(error, client){
+    clientReceived: function(error, client, done){
       if (error){
         logger.routes.error(TAGS, error);
         return res.error(errors.internal.DB_FAILURE, error);
       }
+      //attach a drain listener here instead of handling the error
+      //throughout the entire callback chain below
+      //as soon as the client empties its query queue
+      //it will return itself
+      client.once('drain', done);
 
       stage.ensureCategoriesAndTags(client);
     }
@@ -616,11 +621,16 @@ module.exports.update = function(req, res){
 
   var stage = {
     // Once we receive the client, kick everything off by
-    clientReceived: function(error, client){
+    clientReceived: function(error, client, done){
       if (error){
         logger.routes.error(TAGS, error);
         return res.error(errors.internal.DB_FAILURE, error);
       }
+      //attach a drain listener here instead of handling the error
+      //throughout the entire callback chain below
+      //as soon as the client empties its query queue
+      //it will return itself
+      client.once('drain', done);
 
       stage.ensureCategoriesAndTags(client);
     }
@@ -941,7 +951,7 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var inputs = {
@@ -955,7 +965,11 @@ module.exports.updateFeelings = function(req, res) {
     // start the transaction
     var tx = new Transaction(client);
     tx.begin(function(error) {
-      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+      if (error) {
+        //destroy client if it cannot being a transaction
+        done(error);
+        return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+      }
 
       // lock the product row and get the current feelings
       var query = sql.query([
@@ -969,8 +983,14 @@ module.exports.updateFeelings = function(req, res) {
       query.$('productId', +req.param('productId') || 0);
       query.$('userId', +req.session.user.id || 0);
       tx.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
-        if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
+        if (error) {
+          done();
+          return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+        }
+        if (result.rowCount === 0) { 
+          done();
+          return res.error(errors.input.NOT_FOUND); 
+        }
 
         // fallback undefined inputs to current feelings and ensure defined inputs are boolean
         var currentFeelings = {
@@ -990,13 +1010,17 @@ module.exports.updateFeelings = function(req, res) {
         query.$('id', +req.param('productId') || 0);
 
         if (query.updates.fields.length === 0) {
+          done();
           // no updates needed
           return res.noContent(), tx.abort();
         }
 
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
-          if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) {
+            done();
+            return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+          }
 
           var feelingsQueryFn = function(table, add) {
             return function(cb) {
@@ -1014,11 +1038,18 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
-            if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+            if (error) {
+              done();
+              return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+            }
 
             // end transaction
-            tx.commit(function() {
-
+            tx.commit(function(err) {
+              if(err) {
+                //if you cannot commit, something is very wrong
+                done(err);
+              }
+              done();
               res.noContent();
 
               if (req.body.isLiked != null && req.body.isLiked != undefined){

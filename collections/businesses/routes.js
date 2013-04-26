@@ -336,7 +336,7 @@ module.exports.updateLoyalty = function(req, res){
   var TAGS = ['update-business-loyalty', req.uuid];
   logger.routes.debug(TAGS, 'updating business ' + req.params.id + ' loyalty');
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var updateQuery = sql.query('UPDATE "businessLoyaltySettings" AS main SET {updates} FROM "businessLoyaltySettings" AS old'
@@ -358,6 +358,7 @@ module.exports.updateLoyalty = function(req, res){
     , insertQuery.toString()
     , insertQuery.$values
     , function(error, result){
+        done();
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         res.noContent();
         magic.emit('loyalty.settingsUpdate', req.params.id, req.body, result.rows != null ? result.rows[0] : undefined);

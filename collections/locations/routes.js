@@ -280,7 +280,7 @@ module.exports.getAnalytics = function(req, res){
   var TAGS = ['get-location-analytics', req.uuid];
   logger.routes.debug(TAGS, 'fetching location analytics');
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var query1 = sql.query([
@@ -340,6 +340,7 @@ module.exports.getAnalytics = function(req, res){
     require('async').map(queries, function(item, next) {
       client.query(item.q, item.v, next);
     }, function(error, results) {
+      done();
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       // if (results[0].rowCount === 0) {

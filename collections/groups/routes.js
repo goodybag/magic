@@ -27,9 +27,6 @@ module.exports.get = function(req, res){
   var TAGS = ['get-groups', req.uuid];
   logger.routes.debug(TAGS, 'fetching groups ' + req.params.id);
 
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
     var query = sql.query([
       'SELECT {fields} FROM groups',
         'LEFT JOIN "usersGroups" ON "usersGroups"."groupId" = groups.id',
@@ -41,15 +38,14 @@ module.exports.get = function(req, res){
 
     query.fields.add('array_agg("usersGroups"."userId") as users');
 
-    client.query(query.toString(), query.$values, function(error, result){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  db.query(query, function(error, rows, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      if (result.rowCount == 1) {
-        return res.json({ error: null, data: result.rows[0] });
-      } else {
-        return res.status(404).end();
-      }
-    });
+    if (result.rowCount == 1) {
+      return res.json({ error: null, data: result.rows[0] });
+    } else {
+      return res.status(404).end();
+    }
   });
 };
 
@@ -134,12 +130,17 @@ module.exports.del = function(req, res){
  */
 module.exports.update = function(req, res){
   var TAGS = ['update-group', req.uuid];
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     // start transaction
     var tx = new Transaction(client);
-    tx.begin(function() {
+    tx.begin(function(err) {
+      if(error) {
+        logger.routes.error(TAGS, error);
+        tx.abort(done);
+        return res.error(errors.internal.DB_FAILURE, error);
+      }
 
       var inputs = {
         name    : req.body.name
@@ -152,11 +153,11 @@ module.exports.update = function(req, res){
 
       // run update query
       client.query(query.toString(), query.$values, function(error, result){
-        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+        if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
 
         // did the update occur?
         if (result.rowCount === 0) {
-          tx.abort();
+          tx.abort(done);
           // id didnt exist
           return res.status(404).end();
         }
@@ -165,7 +166,7 @@ module.exports.update = function(req, res){
         var query = usersGroups.delete()
           .where(usersGroups.groupId.equals(req.param('id')));
         client.query(query.toQuery(), function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
 
           // add new user relations
           async.series((req.body.users || []).map(function(userId) {
@@ -177,12 +178,19 @@ module.exports.update = function(req, res){
             // did any insert fail?
             if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
               // the target user must not have existed
-              tx.abort();
+              tx.abort(done);
               return res.error(errors.input.INVALID_USERS);
             }
 
             // done
-            tx.commit(function() { res.noContent(); });
+            tx.commit(function(error) { 
+              //destroy this connection if commit failed
+              done(error);
+              if(error) { 
+                return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              }
+              res.noContent(); 
+            });
           });
 
         });

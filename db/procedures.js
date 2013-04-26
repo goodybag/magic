@@ -363,12 +363,16 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
   module.exports.ensureNotTaken(inputs, userId, function(error, result){
     if (error) return callback(error, result);
 
-    db.getClient(TAGS, function(error, client){
+    db.getClient(TAGS, function(error, client, done){
       if (error) return callback(errors.internal.DB_FAILURE, error);
 
       var tx = new Transaction(client);
       tx.begin(function(error){
-        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        if (error) {
+          //destroy client if you cant start a transaction
+          done(error);
+          return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        }
 
         var updateRecord = function(table, callback) {
           var needsUpdate = false, data = {};
@@ -396,10 +400,13 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
 
         // the magic starts here
         updateRecord('users', function(err, result) {
-          if (err) return tx.abort(), callback(err, result);
+          if (err) return tx.abort(done), callback(err, result);
           updateRecord(extension, function(err, result) {
-            if (err) return tx.abort(), callback(err, result);
-            tx.commit(callback);
+            if (err) return tx.abort(done), callback(err, result);
+            tx.commit(function(err) {
+              done(err);
+              callback();
+            });
           });
         });
       });
