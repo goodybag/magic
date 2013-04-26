@@ -7,7 +7,8 @@ var
 , sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
-, config = require('../../config')
+, config  = require('../../config')
+, oauth   = require('../../lib/oauth')
 
 , logger  = {}
 
@@ -73,7 +74,7 @@ module.exports.oauthAuthenticate = function(req, res){
     'consumer'
   ];
 
-  if (!req.body.code && !(req.body.singlyAccessToken && req.body.singlyId) && !req.body.singlyAccessToken)
+  if (!req.body.code && !req.body.singlyAccessToken)
     return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
 
 
@@ -82,73 +83,25 @@ module.exports.oauthAuthenticate = function(req, res){
 
   var stage = {
     start: function(){
+      function done(error, user) {
+        if (error) return stage.singlyError(error); // what about db errors?
+        if (user == null) return; //TODO: proper error handling
+        if (user.userId == null)
+          stage.createOrUpdateUser(user);
+        else
+          stage.updatePendingUser(user);
+      };
+
       if (req.body.code)
-        return stage.getAccessTokenAndId(req.body.code);
+        return oauth.authWithCode(req.body.code, done);
 
       if (req.body.singlyAccessToken && req.body.singlyId)
-        return stage.getFacebookData(req.body.singlyAccessToken, {
-          singlyId: req.body.singlyId
-        , singlyAccessToken: req.body.singlyAccessToken
-        });
+        return oauth.authWithTokenAndId(req.body.singlyAccessToken, req.body.singlyId, done);
 
       if (req.body.singlyAccessToken)
-        return stage.getSinglyId(req.body.singlyAccessToken);
+        return oauth.authWithToken(req.body.singlyAccessToken, done);
 
       return res.error(errors.auth.INVALID_CODE), logger.routes.error(TAGS, errors.auth.INVALID_CODE);
-    }
-
-  , getAccessTokenAndId: function(code){
-      singly.getAccessToken(code, function(error, response, token){
-        if (error || token.error) return stage.singlyError(error || token.error);
-
-        stage.getSinglyId(token.access_token);
-      });
-    }
-
-  , getSinglyId: function(accessToken){
-      singly.get('/profiles', { access_token: accessToken }, function(error, result){
-        if (error) return stage.singlyError(error);
-
-        var user = {
-          singlyId: result.body.id
-        , singlyAccessToken: accessToken
-        };
-
-        // Get facebook data
-        if (result.body.facebook) return stage.getFacebookData(accessToken, user);
-
-        stage.createOrUpdateUser(user);
-      });
-    }
-
-  , getFacebookData: function(accessToken, user){
-      singly.get('/profiles/facebook', { access_token: accessToken }, function(error, result){
-        if (error) return stage.singlyError(error);
-
-        // Auto fill what we can
-        user.firstName = result.body.data.first_name;
-        user.lastName = result.body.data.last_name;
-
-        stage.checkIfUserIsPendingMigration(user, result.body.data.id);
-      });
-    }
-
-  , checkIfUserIsPendingMigration: function(user, fbid){
-      var
-        $query  = { facebookId: fbid, $null: ['pending'] }
-      , $update = { pending: false }
-      , options = { returning: ['userId'] }
-      ;
-
-      db.api.pendingFacebookUsers.update($query, $update, options, function(error, results){
-        if (error) return stage.dbError(error);
-
-        if (results.length === 0) return stage.createOrUpdateUser(user);
-
-        user.id = results[0].userId;
-
-        return stage.updatePendingUser(user);
-      });
     }
 
   , updatePendingUser: function(user){
