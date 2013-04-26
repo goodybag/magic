@@ -73,7 +73,7 @@ exports.getClient = function(logTags, callback){
       console.log(client.logTags, 'client has been checked out for too long!');
       //destroy the client
       done(client);
-    }, 1000);
+    }, 10000);
     //return a custom done function so we can 
     //clear our leak checker
     callback(null, client, function(c) {
