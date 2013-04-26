@@ -154,8 +154,7 @@ module.exports.create = function(req, res){
         query.$('createdAt', 'now()');
         client.query(query.toString(), query.$values, function(error, result) {
           if(error) {
-            done();
-            return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+            return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
           }
 
           // did the insert occur?
@@ -236,8 +235,7 @@ module.exports.update = function(req, res){
           .where(usersGroups.userId.equals(req.param('id')));
         client.query(query.toQuery(), function(error, result) {
           if (error) {
-            done(error);
-            return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+            return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
           }
 
           // add new group relations
@@ -294,8 +292,7 @@ module.exports.update = function(req, res){
         // run update query
         client.query(query.toString(), query.$values, function(error, result){
           if (error) {
-            done();
-            return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+            return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
           }
 
           // did the update occur?
