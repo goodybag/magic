@@ -142,24 +142,27 @@ module.exports.create = function(req, res){
 
         var query = sql.query([
           'INSERT INTO users (email, password, "passwordSalt", "cardId", "createdAt")',
-            'SELECT $email, $password, $salt, $cardId, $createdAt WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
-            'RETURNING id'
+            'VALUES ($email, $password, $salt, $cardId, $createdAt)',
+            'RETURNING *'
         ]);
         query.$('email', req.body.email);
         query.$('password', encryptedPassword);
         query.$('salt', passwordSalt);
         query.$('cardId', req.body.cardId ? req.body.cardId.toUpperCase() : null);
         query.$('createdAt', 'now()');
-        client.query(query.toString(), query.$values, function(error, result) {
-          if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-          // did the insert occur?
-          if (result.rowCount === 0) {
-            // email must have already existed
+        client.query(query.toString(), query.$values, function(error, result) {
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
             tx.abort();
-            return res.error(errors.registration.EMAIL_REGISTERED);
+            logger.routes.error(TAGS, error);
+            return;
           }
+
           var newUser = result.rows[0];
+
+          console.log('newUser', newUser);
 
           // add groups
           async.series((req.body.groups || []).map(function(groupId) {

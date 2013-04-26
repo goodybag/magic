@@ -10,3 +10,7 @@ CREATE TABLE "partialRegistrations" (
        "createdAt" timestamp WITHOUT time zone DEFAULT now(),
        used timestamp WITHOUT time zone
 );
+
+-- #556 email uniqueness
+
+ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email);
