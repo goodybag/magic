@@ -436,3 +436,51 @@ module.exports.getPartialRegistrationEmail = function(req, res) {
     }
   );
 }
+
+/**
+ * Complete partial registration
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.completeRegistration = function(req, res) {
+  var TAGS = ['complete-partial-registration', req.uuid];
+  logger.routes.debug(TAGS, 'completing partial registration for token: ' + req.params.token);
+
+  var data = {email: req.body.email};
+
+  var stage = {
+    start: function(data) {
+      if (req.body.code != null)
+        ; //TODO: abstract out the stuff from /oauth
+      stage.password(data);
+    },
+
+    password: function(data) {
+      if (req.body.password != null)
+        utils.encryptPassword(password, function(error, encryptedPassword, passwordSalt) {
+          data.password = encryptedPassword;
+          data.passwordSalt = passwordSalt;
+        });
+      stage.update(data);
+    },
+
+    update: function(data) {
+      //TODO email uniqueness
+      sql.query('UPDATE users u SET {updates} FROM "partialRegistrations" p WHERE p.userId=u.id AND p.token={token}');
+      var updates = {};
+      for (key in data)
+        if (data[key] != null) updates[key] = data[key];
+      query.updates = updates;
+      query.token = req.params.token;
+      db.query(query.toString(), query.$values, function(error, rows, results) {
+        if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        res.noContent();
+      });
+    }
+  }
+
+  //stage.start(data);
+
+  res.writeHead(501);
+  res.send();j
+}
