@@ -984,11 +984,10 @@ module.exports.updateFeelings = function(req, res) {
       query.$('userId', +req.session.user.id || 0);
       tx.query(query.toString(), query.$values, function(error, result) {
         if (error) {
-          done();
-          return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+          return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
         }
         if (result.rowCount === 0) { 
-          done();
+          tx.abort(done);
           return res.error(errors.input.NOT_FOUND); 
         }
 
@@ -1010,16 +1009,14 @@ module.exports.updateFeelings = function(req, res) {
         query.$('id', +req.param('productId') || 0);
 
         if (query.updates.fields.length === 0) {
-          done();
           // no updates needed
-          return res.noContent(), tx.abort();
+          return res.noContent(), tx.abort(done);
         }
 
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
           if (error) {
-            done();
-            return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+            return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
           }
 
           var feelingsQueryFn = function(table, add) {
@@ -1039,17 +1036,12 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
             if (error) {
-              done();
-              return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+              return res.json({ error: error, data: null }), tx.abort(done), logger.routes.error(TAGS, error);
             }
 
             // end transaction
             tx.commit(function(err) {
-              if(err) {
-                //if you cannot commit, something is very wrong
-                done(err);
-              }
-              done();
+              done(err);
               res.noContent();
 
               if (req.body.isLiked != null && req.body.isLiked != undefined){
