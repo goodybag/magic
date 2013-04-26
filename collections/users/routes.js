@@ -279,11 +279,7 @@ module.exports.update = function(req, res){
         // build update query
         var query = sql.query([
           'UPDATE users SET {updates}',
-<<<<<<< HEAD
-            'WHERE users.id = $id {emailClause} RETURNING email, password, "singlyId"'
-=======
-            'WHERE users.id = $id'
->>>>>>> 556-email-unique
+            'WHERE users.id = $id RETURNING email, password, "singlyId"'
         ]);
         query.updates = sql.fields();
         query.$('id', req.params.id);
