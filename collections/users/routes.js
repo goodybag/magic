@@ -12,6 +12,7 @@ var
 , Transaction = require('pg-transaction')
 , async       = require('async')
 , magic       = require('../../lib/magic')
+, oauth       = require('../../lib/oauth')
 
 , logger    = {}
 ;
@@ -446,13 +447,21 @@ module.exports.completeRegistration = function(req, res) {
   var TAGS = ['complete-partial-registration', req.uuid];
   logger.routes.debug(TAGS, 'completing partial registration for token: ' + req.params.token);
 
-  var data = {email: req.body.email};
-
   var stage = {
     start: function(data) {
       if (req.body.code != null)
-        ; //TODO: abstract out the stuff from /oauth
-      stage.password(data);
+        oauth.authWithCode(req.body.code, function(error, user){
+          if (error) {
+            res.error(error);
+            logger.routes.error(TAGS, error);
+            return
+          }
+          if (data.email != null) user.email = data.email;
+          data = user;
+          stage.password(data);
+        });
+      else
+        stage.password(data);
     },
 
     password: function(data) {
@@ -460,25 +469,61 @@ module.exports.completeRegistration = function(req, res) {
         utils.encryptPassword(password, function(error, encryptedPassword, passwordSalt) {
           data.password = encryptedPassword;
           data.passwordSalt = passwordSalt;
+          stage.getUser(data);
         });
-      stage.update(data);
+      else
+        stage.getUser(data);
+    },
+
+    getUser: function(data) {
+      db.api.partialRegistrations.findOne(
+        {token:req.params.token},
+        {fields:['userId', 'email', 'cardId'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
+        function(error, results) {
+          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (data.email == null) data.email = results.email;
+          data.cardId = results.cardId;
+          if (data.userId == null) data.userId = results.userId;
+          stage.update(data);
+        }
+      );
     },
 
     update: function(data) {
-      //TODO email uniqueness
-      sql.query('UPDATE users u SET {updates} FROM "partialRegistrations" p WHERE p.userId=u.id AND p.token={token}');
-      var updates = {};
-      for (key in data)
-        if (data[key] != null) updates[key] = data[key];
-      query.updates = updates;
-      query.token = req.params.token;
-      db.query(query.toString(), query.$values, function(error, rows, results) {
+      //TODO: put these two updates into a transaction
+      db.api.partialRegistrations.update({token:req.params.token}, {used:'now()'}, function(error, results) {
         if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        res.noContent();
+        if (results.rows.length !== 1)
+          ;//TODO: bad token error
+
+        var updates = {};
+        for (key in data)
+          if (data[key] != null && key !== 'userId') updates[key] = data[key];
+
+        db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
+          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          res.noContent(); //TODO: create a session and redirect to goodybag.com
+        });
+
+        //TODO email uniqueness
+        /*
+        sql.query('UPDATE users u SET {updates} FROM "partialRegistrations" p WHERE p.userId=u.id AND p.token={token}');
+        var updates = {};
+        for (key in data)
+          if (data[key] != null) updates[key] = data[key];
+        query.updates = updates;
+        query.token = req.params.token;
+        db.query(query.toString(), query.$values, function(error, rows, results) {
+          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          res.noContent();
+        });
+*/
+
       });
     }
   }
 
+  var data = {email: req.body.email};
   //stage.start(data);
 
   res.writeHead(501);
