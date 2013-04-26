@@ -137,8 +137,9 @@ module.exports.update = function(req, res){
     var tx = new Transaction(client);
     tx.begin(function(err) {
       if(error) {
+        //destroy the client
+        done(error);
         logger.routes.error(TAGS, error);
-        tx.abort(done);
         return res.error(errors.internal.DB_FAILURE, error);
       }
 
