@@ -42,6 +42,9 @@ var cliResponse = {
 var tasks = {
   genlists: function() {
     adminRoutes.rebuildPopularList(cliRequest, cliResponse);
+  },
+  gennearby: function() {
+    adminRoutes.rebuildNearbyGrid(cliRequest, cliResponse);
   }
 };
 

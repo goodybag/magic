@@ -53,6 +53,7 @@ var config = {
   , 'activity'
 
   , 'poplistItems'
+  , 'nearbyGridItems'
   , 'requests'
   , 'partialRegistrations'
   ]

@@ -267,7 +267,6 @@ describe('GET /v1/products', function() {
 
   it('should sort ASC if no prefix is given', function(done) {
     tu.get('/v1/products?sort=name', function(err, payload, res) {
-
       assert(!err);
       assert(res.statusCode == 200);
 
@@ -645,7 +644,7 @@ describe('POST /v1/products', function() {
       var product = { businessId:2, name:'asdf', price:1234 };
 
       product.description = "";
-      for (var i = 0; i < 301; i++){
+      for (var i = 0; i < 451; i++){
         product.description += "a";
       }
 

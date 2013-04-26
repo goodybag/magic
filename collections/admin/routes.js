@@ -12,6 +12,7 @@ var logger = {
 };
 
 module.exports.getRebuildPopularListInterface = function(req, res) {
+  res.type('html');
   res.send([
     '<form action="/v1/admin/algorithms/popular" method="post">Rebuild Popular List: <input type="submit" /></form>'
   ].join(''));
@@ -105,6 +106,66 @@ module.exports.rebuildPopularList = function(req, res) {
                 if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
                 res.send("popular lists updated successfully");
               });
+            });
+          });
+        });
+      });
+    });
+  });
+};
+
+module.exports.getRebuildNearbyGridInterface = function(req, res) {
+  res.type('html');
+  res.send([
+    '<form action="/v1/admin/algorithms/nearby" method="post">Rebuild Nearby Grid: <input type="submit" /></form>'
+  ].join(''));
+};
+
+module.exports.rebuildNearbyGrid = function(req, res) {
+  var TAGS = ['rebuild-nearby-grid', req.uuid];
+
+  db.getClient(TAGS, function(error, client){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var tx = new Transaction(client);
+    tx.begin(function(error) {
+      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      // lock our target
+      tx.query('SELECT id FROM "nearbyGridItems" WHERE "isActive" = true FOR UPDATE NOWAIT', function(error) {
+        // errors should actually occur if the rows were previously locked
+        if (error) return tx.abort(), console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        // deprecate old lists
+        tx.query('UPDATE "nearbyGridItems" SET "isActive" = false WHERE "isActive" = true', function(error) {
+          if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+          tx.commit(function(err) {
+            if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+            var query = [
+              'WITH "gp" AS',
+                '(SELECT',
+                    'products.id,',
+                    'row_number() OVER (PARTITION BY products."businessId" ORDER BY products.likes DESC) likerank',
+                  'FROM products',
+                  'INNER JOIN businesses ON businesses.id = products."businessId" WHERE businesses."isVerified" is true)',
+              'INSERT INTO "nearbyGridItems"',
+                  '("productId", "locationId", "businessId", lat, lon, position)',
+                'SELECT',
+                  '"gp".id as "productId",',
+                  'pl."locationId",',
+                  'pl."businessId",',
+                  '(pl.lat - MOD(pl.lat::numeric, 0.005)) AS lat,',
+                  '(pl.lon - MOD(pl.lon::numeric, 0.005)) AS lon,',
+                  'pl.position',
+                'FROM "gp"',
+                'INNER JOIN "productLocations" pl ON pl."productId" = "gp".id',
+                'WHERE "gp".likerank <= 8'
+            ].join(' ');
+            client.query(query, function(error, result) {
+                if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+                res.send("nearby grid updated successfully");
             });
           });
         });

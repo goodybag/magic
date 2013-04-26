@@ -26,57 +26,79 @@ var
 , ok = require('okay')
 ;
 
+//apply the parse-float plugin to node-postgres
 require('pg-parse-float')(pg);
 exports.api = {};
-exports.pg = pg;
+pg.defaults.hideDeprecationWarnings = config.pg.hideDeprecationWarnings;
+pg.defaults.poolSize = config.pg.poolSize;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
+var logQuery = function(query) {
+  var start = new Date();
+  var text = query.text;
+  query.once('end', function(result) {
+    var duration = new Date() - start;
+    var rows = (result||0).rowCount;
+    logger.debug(['db', 'query'], 'query completed in ' + duration, { duration: duration, text: text, rows: rows });
+  });
+};
+
+pg.Client.prototype.$query = pg.Client.prototype.query;
+pg.Client.prototype.query = function() {
+  var q = this.$query.apply(this, arguments);
+  logQuery(q);
+  return q;
+}
+
 exports.getClient = function(logTags, callback){
+  callback = process.domain ? process.domain.bind(callback) : callback;
+
   if (typeof logTags == 'function') {
     callback = logTags;
     logTags = null;
   }
   if (!logTags)
-    logTags = ['unnamed'+(unnamedPoolidCounter++)];
+    logTags = ['unnamed'];
 
   if (config.outputActivePoolIds) {
     activePoolIds[logTags[0]] = true;
   }
 
-  pg.connect(config.postgresConnStr, function(err, client, done) {
-    if(err) {
-      var tag = ['unable to checkout client from the pool'];
-      logger.error(client.logTags.concat(tag), err);
-      return callback(err);
-    }
+  var handle = function(err, client, done) {
+    if(err) return callback(err);
+    addToDomain(client);
     client.logTags = logTags;
-    //monkey-patch query method
-    var queries = [];
-    if(!client.$query) {
-      client.$query = client.query;
 
-      client.query = function(text, values, callback) {
-        logger.debug(client.logTags, arguments[0], arguments[1]);
-        client.$query.apply(client, arguments);
-        queries.push(text);
-      };
-    }
+
     //TODO auto-release after a specific timeout
     var tid = setTimeout(function() {
       logger.warn(client.logTags, 'client has been checked out for too long!');
       console.log(client.logTags, 'client has been checked out for too long!');
-      console.log(queries);
-    }, 1000);
+      //destroy the client
+      done(client);
+    }, 10000);
     client.once('drain', function() {
       clearTimeout(tid);
+      removeFromDomain(client);
       done()
     });
     callback(null, client);
+    
+  };
+
+  handle = process.domain.bind(handle);
+
+  var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
+  swapDomain(pool);
+  pg.connect(config.postgresConnStr, function(err, client, done) {
+    handle(err, client, done);
   });
 
   return;
 };
+
+
 
 exports.query = function(text, params, callback) {
   if(typeof params === 'function') {
@@ -89,7 +111,14 @@ exports.query = function(text, params, callback) {
     text = q.text;
     params = q.values;
   }
+  var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
+  swapDomain(pool);
+  callback = process.domain ?  process.domain.bind(callback) : callback;
+  //once this is upgraded to v1.0 we can use `okay` because
+  //arity checking is removed
   pg.connect(config.postgresConnStr, function(err, client, done) {
+    if(err) return callback(err);
+    addToDomain(client);
     client.query(text, params, function(err, result) {
       //release the client
       done();
@@ -98,6 +127,33 @@ exports.query = function(text, params, callback) {
     });
   });
 };
+
+var swapDomain = function(emitter) {
+  if(!emitter) return;
+  if(emitter.domain) {
+    emitter.domain.remove(emitter);
+  }
+  if(process.domain) {
+    process.domain.add(emitter);
+  }
+};
+
+//TODO this needs to go in node-postgres
+var addToDomain = function(client) {
+  if(client.domain) removeFromDomain(client);
+  if(!process.domain) return;
+  process.domain.add(client);
+  process.domain.add(client.connection);
+  process.domain.add(client.connection.stream);
+};
+
+var removeFromDomain = function(client) {
+  if(!client.domain) return;
+  var d = client.domain;
+  d.remove(client.connection.stream);
+  d.remove(client.connection);
+  d.remove(client);
+}
 
 /**
  * Uses a transaction to update a record and insert if DNE
@@ -119,6 +175,7 @@ exports.upsert = function(client, updateQuery, updateValues, insertQuery, insert
   var shouldCommitOnFinish = (!tx); // commit on finish if we're not given a transaction
   var savePointed = false;
   var stage = ''; // for logging
+  originalCb = process.domain ? process.domain.bind(originalCb) : originalCb;
 
   // checks into our upsert to see if we've finished or not
   var checkResults = function(continueCb) {
@@ -247,7 +304,7 @@ exports.schemas = {
 , activity:                  require('./schemas/activity')
 
 , poplistItems:              require('./schemas/poplistItems')
-
+, nearbyGridItems:           require('./schemas/nearbyGridItems')
 , requests:                  require('./schemas/requests')
 , partialRegistrations:      require('./schemas/partialRegistrations')
 };
