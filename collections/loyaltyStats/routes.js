@@ -170,7 +170,7 @@ module.exports.list = function(req, res){
 module.exports.update = function(req, res){
   var TAGS = ['update-loyaltystats', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     var deltaPunches = req.body.deltaPunches;
@@ -180,7 +180,11 @@ module.exports.update = function(req, res){
     // start a transaction
     var tx = new Transaction(client);
     tx.begin(function(error) {
-
+      if(error) {
+        //destroy the client if begin fails
+        done(error);
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+      }
       var args = [client, tx], updateFn;
       if (req.param('loyaltyId')){
         args.push(req.param('loyaltyId'));
@@ -193,7 +197,15 @@ module.exports.update = function(req, res){
       args.push(deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        tx.commit(function() { res.noContent(); });
+        tx.commit(function() { 
+          if(error) {
+            //destroy client if it failed to commit
+            done(error);
+            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+          }
+          done();
+          res.noContent(); 
+        });
 
         magic.emit('loyalty.punch', deltaPunches, userId, businessId, req.body.locationId, req.session.user.id);
         if (hasBecomeElite)

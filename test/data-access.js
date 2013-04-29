@@ -81,7 +81,7 @@ describe('data access', function() {
         domain.name = 'loop'
         domain.run(function() {
           assert.strictEqual(process.domain, domain);
-          db.getClient(function(err, client) {
+          db.getClient(function(err, client, done) {
             assert.ifError(err, 'error getting client');
             assert.strictEqual(process.domain, domain, 'domain detached on successful get client');;
             client.query('SELECT NOW()', function(err, rows) {
@@ -90,6 +90,7 @@ describe('data access', function() {
               client.query('slakdjf', function(err) {
                 assert(err);
                 assert.strictEqual(process.domain, domain, 'domain detached on error query');
+                done();
                 cb();
               });
             });
@@ -119,9 +120,10 @@ describe('data access', function() {
         domain.name = 'loop' + count;
         domain.run(function() {
           assert.strictEqual(process.domain, domain);;
-          db.getClient(function(err, client) {
+          db.getClient(function(err, client, done) {
             assert(err);
             assert.strictEqual(process.domain, domain, 'domain detach on client connect error');;
+            assert.equal(typeof done, 'function', 'should get no-op done function on getClient error');
             cb();
           });
         });
