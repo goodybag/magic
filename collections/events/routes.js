@@ -48,7 +48,7 @@ module.exports.list = function(req, res){
   var TAGS = ['list-events', req.uuid];
   logger.routes.debug(TAGS, 'fetching events ' + req.params.id);
 
-  var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events {where} {limit}) as e');
+  var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore)::json as data from events {where} {limit}) as e');
   query.where = sql.where();
   query.limit = sql.limit(req.query.limit, req.query.offset);
 
@@ -61,11 +61,6 @@ module.exports.list = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
-
-    dataResult.rows = dataResult.rows.map(function(r){
-      r.data = JSON.parse(r.data);
-      return r;
-    });
 
     return res.json({ error: null, data: dataResult.rows, meta: { total:total } });
   });
