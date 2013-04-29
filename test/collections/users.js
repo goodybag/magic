@@ -502,7 +502,7 @@ describe('GET /v1/users/complete-registration/:token', function() {
             assert(payload.data != null);
             assert(payload.data.email === email);
             magic.removeListener(event, eventHandler);
-            done();
+            tu.logout(done);
           });
         }
 
@@ -536,4 +536,51 @@ describe('POST /v1/users/complete-registration/:token', function() {
       done();
     });
   });
+
+  it('should complete a registration with a password'), function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000002-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000002@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password'}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 204);
+
+            var outstanding = 2;
+
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            tu.login({email:data.email, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email = data.email);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000002-___', data, function(err, result){});
+      });
+    });
+  }
 });
