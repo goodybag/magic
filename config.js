@@ -115,7 +115,8 @@ var config = {
       port: 8986
     }
   , pg: {
-    poolSize: 2
+    hideDeprecationWarnings: false
+  , poolSize: 15
   }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
