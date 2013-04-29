@@ -434,6 +434,7 @@ module.exports.getPartialRegistrationEmail = function(req, res) {
     function(error, results) {
       if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
+      if (results == null) return res.send(404); //TODO: bad token error
       res.json({err: null, data: {email: results.email}});
     }
   );
