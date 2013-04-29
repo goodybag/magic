@@ -25,14 +25,13 @@ module.exports.get = function(req, res){
   var TAGS = ['get-events', req.uuid];
   logger.routes.debug(TAGS, 'fetching user ' + req.params.id);
 
-  var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore) as data from events where id = $id {limit}) as e');
+  var query = sql.query('select e.* from (select id, type, date, to_json(data::hstore)::json as data from events where id = $id {limit}) as e');
   query.$('id', +req.param('id') || 0);
 
   db.query(query, function(error, rows, result) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     if (result.rowCount == 1) {
-      result.rows[0].data = JSON.parse(result.rows[0].data);
       return res.json({ error: null, data: result.rows[0] });
     } else {
       return res.error({ error: errors.input.NOT_FOUND, data: null });
