@@ -480,10 +480,11 @@ module.exports.completeRegistration = function(req, res) {
 
     getUser: function(data) {
       db.api.partialRegistrations.findOne(
-        {token:req.params.token},
-        {fields:['userId', 'email', 'cardId'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
+        {token:req.params.token, $null:['used']},
+        {fields:['"userId"', 'email', '"cardId"'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
         function(error, results) {
           if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (results == null) return res.send(404); //TODO: bad token error
           if (data.email == null) data.email = results.email;
           data.cardId = results.cardId;
           if (data.userId == null) data.userId = results.userId;
@@ -494,10 +495,10 @@ module.exports.completeRegistration = function(req, res) {
 
     update: function(data) {
       //TODO: put these two updates into a transaction
-      db.api.partialRegistrations.update({token:req.params.token}, {used:'now()'}, function(error, results) {
+      db.api.partialRegistrations.update({token:req.params.token}, {used:'now()'}, {returning:'id'}, function(error, results) {
         if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        if (results.rows.length !== 1)
-          ;//TODO: bad token error
+        if (results.length !== 1)
+          return res.send(404); //TODO: bad token error
 
         var updates = {};
         for (key in data)
