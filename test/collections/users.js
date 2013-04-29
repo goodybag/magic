@@ -368,7 +368,7 @@ describe('PUT /v1/users/:id', function() {
 
   it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
     tu.loginAsTablet(function(){
-      tu.tapinAuthRequest('GET', '/v1/session', '7777777-___', function(err, results, res) {
+      tu.tapinAuthRequest('GET', '/v1/session', '0000000-___', function(err, results, res) {
         // should have created a blank user
         assert(err == null);
         var payload = JSON.parse(results);
@@ -379,14 +379,19 @@ describe('PUT /v1/users/:id', function() {
         var userId = payload.meta.userId;
         var data = {email:'test@example.com'};
 
-        magic.on('user.partialRegistration', function(user, email, token){
+        var event = 'user.partialRegistration';
+
+        var callback = function(user, email, token){
           assert(email === data.email);
           assert(user.toString() === userId.toString());
           assert(token != null);
+          magic.removeListener(event, callback);
           done();
-        });
+        };
 
-        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '7777777-___', data, function(err, result){});
+        magic.on(event, callback);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000000-___', data, function(err, result){});
       });
     });
   });
@@ -470,7 +475,7 @@ describe('POST /v1/users/password-reset', function() {
 describe('GET /v1/users/complete-registration/:token', function() {
   it('should return the email of a valid token', function(done) {
     tu.loginAsTablet(function(){
-      tu.tapinAuthRequest('GET', '/v1/session', '0000000-___', function(err, results, res) {
+      tu.tapinAuthRequest('GET', '/v1/session', '0000001-___', function(err, results, res) {
         // should have created a blank user
         assert(err == null);
         var payload = JSON.parse(results);
@@ -479,9 +484,11 @@ describe('GET /v1/users/complete-registration/:token', function() {
         assert(payload.meta.isFirstTapin === true);
         assert(payload.meta.userId != null);
         var userId = payload.meta.userId;
-        var data = {email:'test@example.com'};
+        var data = {email:'test_0000001@example.com'};
 
-        magic.on('user.partialRegistration', function(user, email, token){
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
           assert(token != null);
           tu.get('/v1/users/complete-registration/' + token, function(error, results) {
             assert(error == null);
@@ -494,11 +501,14 @@ describe('GET /v1/users/complete-registration/:token', function() {
             assert(payload.error == null);
             assert(payload.data != null);
             assert(payload.data.email === email);
+            magic.removeListener(event, eventHandler);
             done();
           });
-        });
+        }
 
-        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000000-___', data, function(err, result){});
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000001-___', data, function(err, result){});
       });
     });
   });
