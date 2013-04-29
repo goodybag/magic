@@ -468,7 +468,7 @@ module.exports.completeRegistration = function(req, res) {
 
     password: function(data) {
       if (req.body.password == null && (data.singlyToken == null || data.singlyId == null))
-        res.error({message:'you need to provide password or a facebook login'}); //TODO: real error
+        return res.send(400, 'you need to provide password or a facebook login'); //TODO: real error
       if (req.body.password != null)
         utils.encryptPassword(req.body.password, function(error, encryptedPassword, passwordSalt) {
           data.password = encryptedPassword;

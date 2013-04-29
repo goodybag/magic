@@ -513,10 +513,27 @@ describe('GET /v1/users/complete-registration/:token', function() {
     });
   });
 
-    it('should return 404 for an invalid token', function(done) {
-      tu.get('/v1/users/complete-registration/bad_token', function(error, results, res) {
-        assert(res.statusCode === 404)
-        done();
-      });
+  it('should return 404 for an invalid token', function(done) {
+    tu.get('/v1/users/complete-registration/bad_token', function(error, results, res) {
+      assert(res.statusCode === 404)
+      done();
     });
+  });
+});
+
+describe('POST /v1/users/complete-registration/:token', function() {
+  it('should not accept a request with no password or singly credentials', function(done) {
+    tu.post('/v1/users/complete-registration/any_token', {}, function(error, results, res) {
+      assert(res.statusCode === 400)
+      //TODO: parse real error
+      done();
+    });
+  });
+
+  it('should return 404 for an invalid token', function(done) {
+    tu.post('/v1/users/complete-registration/bad_token', {password:'password'}, function(error, results, res) {
+      assert(res.statusCode === 404)
+      done();
+    });
+  });
 });
