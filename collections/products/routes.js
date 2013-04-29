@@ -125,9 +125,9 @@ module.exports.list = function(req, res){
 
     if (!query.prodLocJoin) {
       query.prodLocJoin = [
-        '{joinType} join "productLocations"'
+        '{joinType} JOIN "productLocations"'
         , 'ON products."id" = "productLocations"."productId"'
-        , 'and "productLocations"."locationId" = $locationId'
+        , 'AND "productLocations"."locationId" = $locationId'
       ].join(' ');
     } else {
       query.prodLocJoin += ' AND "productLocations"."locationId" = $locationId';
@@ -141,9 +141,9 @@ module.exports.list = function(req, res){
       joinType = "left";
       query.fields.add('"productLocations".id is not null as "isAvailable"');
       query.prodLocJoin += [
-        'inner join "locations"'
-      , 'on "locations"."businessId" = products."businessId"'
-      , 'and locations.id = $locationId'
+        ' INNER JOIN "locations"'
+      , 'ON "locations"."businessId" = products."businessId"'
+      , 'AND locations.id = $locationId'
       ].join(' ');
     }
 
