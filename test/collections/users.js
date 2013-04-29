@@ -466,3 +466,40 @@ describe('POST /v1/users/password-reset', function() {
     });
   });
 });
+
+describe('GET /v1/users/complete-registration/:token', function() {
+  it('should return the email of a valid token', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000000-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test@example.com'};
+
+        magic.on('user.partialRegistration', function(user, email, token){
+          assert(token != null);
+          tu.get('/v1/users/complete-registration/' + token, function(error, results) {
+            assert(error == null);
+            assert(results != null);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(e) {}
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.email === email);
+            done();
+          });
+        });
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000000-___', data, function(err, result){});
+      });
+    });
+  });
+});
