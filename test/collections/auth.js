@@ -197,7 +197,7 @@ describe('GET /v1/oauth', function() {
 });
 
 describe('POST /v1/oauth', function(){
-  this.timeout(5000);
+  this.timeout(15000);
   it('should respond with a new user id', function(done){
     // Post to our oauth
     var user = {

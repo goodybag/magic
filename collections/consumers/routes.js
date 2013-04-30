@@ -162,27 +162,27 @@ module.exports.updatePassword = function(req, res){
   var token = new Buffer(req.headers.authorization.split(/\s+/).pop() || '', 'base64').toString();
   var oldPassword = token.split(/:/).pop();
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var tx = new Transaction(client);
 
     tx.begin(function(error){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (error) return done(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var query = sql.query('SELECT * FROM users WHERE id=$id FOR UPDATE OF users');
       query.$('id', (req.param('userId') == 'session') ? req.session.user.id : req.param('userId'));
 
       tx.query(query.toString(), query.$values, function(error, result) {
-        if (error) return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        if (error) return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
         var user = result.rows[0];
         if (!user)
-          return tx.abort(), res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
+          return tx.abort(done), res.error(errors.input.NOT_FOUND), logger.routes.error(TAGS, errors.input.NOT_FOUND);
 
         utils.comparePasswords(oldPassword, user.password, function(error, isValidPassword) {
           if (!isValidPassword)
-            return tx.abort(), res.error(errors.auth.INVALID_PASSWORD);
+            return tx.abort(done), res.error(errors.auth.INVALID_PASSWORD);
 
           utils.encryptPassword(req.body.password, function(error, encryptedNewPW, newSalt) {
             var query = sql.query('UPDATE users SET password=$password, "passwordSalt"=$salt WHERE id=$id');
@@ -192,10 +192,13 @@ module.exports.updatePassword = function(req, res){
 
             tx.query(query.toString(), query.$values, function(error, result) {
               if (error)
-                return tx.abort(), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+                return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
               if (result.rowCount === 0)
-                return tx.abort(), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
-              tx.commit(function() { res.noContent(); });
+                return tx.abort(done), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
+              tx.commit(function(err) { 
+                done(err);
+                res.noContent(); 
+              });
             });
           });
         });

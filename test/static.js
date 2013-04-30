@@ -38,8 +38,10 @@ omf(app, function(app) {
     });
   });
 
-  app.get('/error', function(res) {
-    res.has.statusCode(500);
+  it('gets error', false, function() {
+    app.get('/error', function(res) {
+      res.has.statusCode(500);
+    });
   });
 
   app.get('/request-id', function(res) {

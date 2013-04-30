@@ -57,12 +57,13 @@ module.exports = function(req, res, next){
       this.status(204).end();
   };
 
-  var tx, client;
+  var tx, client, done;
   var stage = {
     start: function() {
-      db.getClient(TAGS, function(error, client_){
+      db.getClient(TAGS, function(error, client_, done_){
         if (error) return stage.dbError(error);
         client = client_;
+        done = done_;
         tx = new Transaction(client);
         tx.begin(stage.lookupUser);
       });
@@ -111,7 +112,10 @@ module.exports = function(req, res, next){
 
       client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
         if (error) return stage.dbError(error);
-        if (result.rowCount === 0) return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
+        if (result.rowCount === 0) {
+          done();
+          return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
+        }
         magic.emit('consumers.tapin', user, result.rows[0].id);
         // stage.insertVisit(user, result.rows[0].id);
         stage.end(user);
@@ -151,12 +155,14 @@ module.exports = function(req, res, next){
     }
 
   , dbError: function(error){
-      tx.abort();
+      console.log('aboring tapin auth transaction')
+      tx.abort(done);
       res.error(errors.internal.DB_FAILURE, error);
     }
 
   , end: function(user) {
-      tx.commit(function() {
+      tx.commit(function(error) {
+        done(error);
         // First groupIds
         if (!user.groupIds){
           user.groupIds = {};

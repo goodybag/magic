@@ -23,8 +23,7 @@ var config = {
       port: 3000
     }
   , pg: {
-    hideDeprecationWarnings: false
-  , poolSize: 5
+    poolSize: 5
   }
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
@@ -206,8 +205,7 @@ var config = {
     , transports: { console: true }
     }
   , pg: {
-    hideDeprecationWarnings: false
-  , poolSize: 20
+    poolSize: 20
   }
   , http: { port: process.env['PORT'] || 5000 }
   , baseUrl: 'http://magic.goodybag.com'
