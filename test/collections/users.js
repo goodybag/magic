@@ -569,7 +569,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
             tu.login({email:data.email, password:'password'}, function(error, result) {
               assert(error == null);
               assert(result != null);
-              assert(result.email = data.email);
+              assert(result.email === data.email);
               if(--outstanding <= 0) tu.logout(done);
             });
           });
@@ -616,7 +616,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
             tu.login({email:data.email, password:'password'}, function(error, result) {
               assert(error == null);
               assert(result != null);
-              assert(result.email = data.email);
+              assert(result.email === data.email);
               tu.get('/v1/consumers/' + result.id, function(error, results) {
                 assert(error == null);
                 var payload;
@@ -641,52 +641,52 @@ describe('POST /v1/users/complete-registration/:token', function() {
       });
     });
   });
-  /*
-    it('should complete a registration with a password', function(done) {
+
+  it('should complete a registration with a password and email', function(done) {
     tu.loginAsTablet(function(){
-    tu.tapinAuthRequest('GET', '/v1/session', '0000002-___', function(err, results, res) {
-    // should have created a blank user
-    assert(err == null);
-    var payload = JSON.parse(results);
-    assert(payload.error == null);
-    assert(payload.meta != null);
-    assert(payload.meta.isFirstTapin === true);
-    assert(payload.meta.userId != null);
-    var userId = payload.meta.userId;
-    var data = {email:'test_0000002@example.com'};
+      tu.tapinAuthRequest('GET', '/v1/session', '0000004-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000004@example.com'};
+        var newEmail = 'test_0000004_new@example.com';
 
-    var event = 'user.partialRegistration';
+        var event = 'user.partialRegistration';
 
-    var eventHandler = function(user, email, token){
-    assert(token != null);
-    tu.post('/v1/users/complete-registration/' + token, {password:'password'}, function(error, results, res) {
-    assert(error == null);
-    assert(res.statusCode === 204);
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password', email:newEmail}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 204);
 
-    var outstanding = 2;
+            var outstanding = 2;
 
-    //check that the token has been used and cannot be used again
-    tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
-    assert(res.statusCode === 404);
-    if(--outstanding <= 0) tu.logout(done);
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            tu.login({email:newEmail, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email == newEmail);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000004-___', data, function(err, result){});
+      });
     });
-
-    tu.login({email:data.email, password:'password'}, function(error, result) {
-    assert(error == null);
-    assert(result != null);
-    assert(result.email = data.email);
-    if(--outstanding <= 0) tu.logout(done);
-    });
-    });
-
-    magic.removeListener(event, eventHandler);
-    }
-
-    magic.on(event, eventHandler);
-
-    tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000002-___', data, function(err, result){});
-    });
-    });
-    });
-  */
+  });
 });
