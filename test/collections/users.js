@@ -562,7 +562,6 @@ describe('POST /v1/users/complete-registration/:token', function() {
 
             //check that the token has been used and cannot be used again
             tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
-              console.log(results);
               assert(res.statusCode === 404);
               if(--outstanding <= 0) tu.logout(done);
             });
@@ -624,9 +623,10 @@ describe('POST /v1/users/complete-registration/:token', function() {
                 try {
                   payload = JSON.parse(results);
                 } catch(e){}
-                console.log(payload);
                 assert(payload != null);
-                assert(payload.screenName === 'test');
+                assert(payload.error == null);
+                assert(payload.data != null);
+                assert(payload.data.screenName === 'test');
                 if(--outstanding <= 0) tu.logout(done);
               });
             });
