@@ -27,4 +27,24 @@ omf(app, function(app) {
     res.is.ok();
     res.has.header('content-type', 'application/x-shockwave-flash');
   });
+
+  app.get('/request-id', function(res) {
+    res.is.ok();
+    it('has valid body data', function() {
+      var body = JSON.parse(this.response.body);
+      assert(body, 'missing response body');
+      assert(body.uuid, 'missing response body uuid');
+      assert.equal(body.uuid, body.domainId);
+    });
+  });
+
+  it('gets error', false, function() {
+    app.get('/error', function(res) {
+      res.has.statusCode(500);
+    });
+  });
+
+  app.get('/request-id', function(res) {
+    res.has.statusCode(200);
+  });
 });

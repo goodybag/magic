@@ -1,14 +1,14 @@
 {
   "name": "magic",
-  "version": "0.0.1",
+  "version": "1.1.3",
   "description": "Goodybag API",
   "main": "app.js",
   "directories": {
     "test": "test"
   },
   "engines": {
-    "node": "0.8.x",
-    "npm": "1.1.x"
+    "node": "0.10.x",
+    "npm": "1.2.x"
   },
   "dependencies": {
     "underscore": "1.4.x",
@@ -31,14 +31,14 @@
     "noop": "0.2.x",
     "js-yaml": "2.0.x",
     "bcrypt": "0.7.x",
-    "pg": "0.14.x",
-    "pg-transaction": "0.1.x",
+    "pg": "1.1.x",
+    "pg-transaction": "git://github.com/goodybag/node-pg-transaction.git",
     "generic-pool": "2.0.x",
     "singly": "0.3.x",
     "clouseau": "https://github.com/goodybag/clouseau/tarball/master",
     "nodetime": "0.8.x",
     "mongode": "latest",
-    "okay": "~0.2.0",
+    "okay": "~0.3.0",
     "sql": "~0.9.0",
     "pg-parse-float": "0.0.x"
   },

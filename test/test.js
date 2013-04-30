@@ -44,7 +44,9 @@ before(function(done) {
       if (err) throw err;
       tu.loginAsAdmin(function() {
         tu.post('/v1/admin/algorithms/popular', {}, function() {
-          tu.logout(done);
+          tu.post('/v1/admin/algorithms/nearby', {}, function() {
+            tu.logout(done);
+          });
         });
       });
     });

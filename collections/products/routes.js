@@ -31,10 +31,10 @@ module.exports.list = function(req, res){
   var TAGS = ['list-products', req.uuid];
   logger.routes.debug(TAGS, 'fetching list of products');
 
-  // if sort=distance, validate that we got lat/lon
-  if (req.query.sort && req.query.sort.indexOf('distance') !== -1) {
+  // if sort=distance|nearby, validate that we got lat/lon
+  if (req.query.sort && /distance/.test(req.query.sort)) {
     if (!req.query.lat || !req.query.lon) {
-      return res.error(errors.input.VALIDATION_FAILED, 'Sort by \'distance\' requires `lat` and `lon` query parameters be specified');
+      return res.error(errors.input.VALIDATION_FAILED, 'Sort by \''+req.query.sort+'\' requires `lat` and `lon` query parameters be specified');
     }
   }
 
@@ -46,8 +46,9 @@ module.exports.list = function(req, res){
 
   // build data query
   var query = sql.query([
+    '{sortCacheWith}',
     'SELECT {fields} FROM products',
-      '{poplistJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
+      '{sortCacheJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
       'INNER JOIN businesses ON businesses.id = products."businessId"',
       '{where}',
       'GROUP BY {groupby}',
@@ -258,26 +259,40 @@ module.exports.list = function(req, res){
 
   // custom sorts
   if (req.query.sort) {
-    if (req.query.sort.indexOf('random') !== -1)
+    if (/random/.test(req.query.sort))
       query.fields.add('random() as random'); // this is really inefficient
-    else if (req.query.sort.indexOf('popular') !== -1) {
-      query.poplistJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
+    else if (/popular/.test(req.query.sort)) {
+      query.sortCacheJoin = 'INNER JOIN "poplistItems" pli ON pli."productId" = products.id AND pli.listid = $poplistid AND pli."isActive" = true';
       query.fields.add('pli.id as popular');
       query.groupby.add('pli.id');
 
+      // remember which list the user is looking at, but refresh the choice every hour
       var listid = Math.floor(Math.random()*config.algorithms.popular.numLists);
       var onehour = 1000 * 60 * 60;
       if (req.query.listid)
         listid = req.query.listid;
       else if (req.session) {
         if (req.session.currentPopListid && req.session.currentPopListCreated && ((new Date() - new Date(req.session.currentPopListCreated)) < onehour || req.query.offset < 1))
-          listid = req.session.currentPopListid; // :TEMP: retrieve current list from session
+          listid = req.session.currentPopListid; // :TEMP: retrieve current list from session (if I remember right, better if replaced by a query param)
         else {
           req.session.currentPopListid = listid; // :TEMP: store current list from session
           req.session.currentPopListCreated = new Date();
         }
       }
       query.$('poplistid', listid);
+    }
+    else if (/distance/.test(req.query.sort)) {
+      // filter the products to select from by INNER JOINing a random subset of products in the nearby grid locations
+      query.sortCacheWith = [
+        'WITH',
+          '"oneOfEachClose" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position AND "isActive"=true LIMIT 30),',
+          '"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE "isActive"=true ORDER BY cachedrandom*cachedrandom*earth_distance(ll_to_earth($lat,$lon), position) LIMIT 250),',
+          '"nearbyItems" AS (SELECT * FROM "oneOfEachClose" UNION SELECT * FROM "randomSubset")'
+      ].join(' ');
+      query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
+      // the distance field is set by the lat/lon query-param handling; no need to duplicate here
+      // query.fields.add('earth_distance(ll_to_earth($lat,$lon), ni.position) as distance');
+      // query.groupby.add('ni.position');
     }
   }
 
@@ -298,13 +313,13 @@ module.exports.list = function(req, res){
     if (includeTags || includeCats || includeUserPhotos) {
       dataResult.rows.forEach(function(row) {
         if (includeTags) {
-          try { row.tags = (row.tags) ? JSON.parse(row.tags) : []; } catch(e) {}
+          try { row.tags = (row.tags) ? (row.tags) : []; } catch(e) {}
         }
         if (includeCats) {
-          try { row.categories = (row.categories) ? JSON.parse(row.categories) : []; } catch(e) {}
+          try { row.categories = (row.categories) ? (row.categories) : []; } catch(e) {}
         }
         if (includeUserPhotos) {
-          try { row.photos = (row.photos) ? JSON.parse(row.photos) : []; } catch(e) {}
+          try { row.photos = (row.photos) ? (row.photos) : []; } catch(e) {}
         }
       });
     }
@@ -371,11 +386,11 @@ module.exports.get = function(req, res){
     if (!product) return res.status(404).end();
 
     if (typeof product.tags != 'undefined')
-      product.tags = (product.tags) ? JSON.parse(product.tags) : [];
+      product.tags = (product.tags) ? (product.tags) : [];
     if (typeof product.categories != 'undefined')
-      product.categories = (product.categories) ? JSON.parse(product.categories) : [];
+      product.categories = (product.categories) ? (product.categories) : [];
     if (typeof product.photos != 'undefined')
-      product.photos = (product.photos) ? JSON.parse(product.photos) : [];
+      product.photos = (product.photos) ? (product.photos) : [];
 
     return res.json({ error: null, data: product });
   });
@@ -402,11 +417,16 @@ module.exports.create = function(req, res){
 
   var stage = {
     // Once we receive the client, kick everything off by
-    clientReceived: function(error, client){
+    clientReceived: function(error, client, done){
       if (error){
         logger.routes.error(TAGS, error);
         return res.error(errors.internal.DB_FAILURE, error);
       }
+      //attach a drain listener here instead of handling the error
+      //throughout the entire callback chain below
+      //as soon as the client empties its query queue
+      //it will return itself
+      client.once('drain', done);
 
       stage.ensureCategoriesAndTags(client);
     }
@@ -601,11 +621,16 @@ module.exports.update = function(req, res){
 
   var stage = {
     // Once we receive the client, kick everything off by
-    clientReceived: function(error, client){
+    clientReceived: function(error, client, done){
       if (error){
         logger.routes.error(TAGS, error);
         return res.error(errors.internal.DB_FAILURE, error);
       }
+      //attach a drain listener here instead of handling the error
+      //throughout the entire callback chain below
+      //as soon as the client empties its query queue
+      //it will return itself
+      client.once('drain', done);
 
       stage.ensureCategoriesAndTags(client);
     }
@@ -926,7 +951,7 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
 
     var inputs = {
@@ -940,7 +965,11 @@ module.exports.updateFeelings = function(req, res) {
     // start the transaction
     var tx = new Transaction(client);
     tx.begin(function(error) {
-      if (error) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+      if (error) {
+        //destroy client if it cannot being a transaction
+        done(error);
+        return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+      }
 
       // lock the product row and get the current feelings
       var query = sql.query([
@@ -954,8 +983,13 @@ module.exports.updateFeelings = function(req, res) {
       query.$('productId', +req.param('productId') || 0);
       query.$('userId', +req.session.user.id || 0);
       tx.query(query.toString(), query.$values, function(error, result) {
-        if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
-        if (result.rowCount === 0) { return res.error(errors.input.NOT_FOUND); }
+        if (error) {
+          return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
+        }
+        if (result.rowCount === 0) { 
+          tx.abort(done);
+          return res.error(errors.input.NOT_FOUND); 
+        }
 
         // fallback undefined inputs to current feelings and ensure defined inputs are boolean
         var currentFeelings = {
@@ -976,12 +1010,14 @@ module.exports.updateFeelings = function(req, res) {
 
         if (query.updates.fields.length === 0) {
           // no updates needed
-          return res.noContent(), tx.abort();
+          return res.noContent(), tx.abort(done);
         }
 
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
-          if (error) return res.json({ error: error, data: null, meta: null }), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) {
+            return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
+          }
 
           var feelingsQueryFn = function(table, add) {
             return function(cb) {
@@ -999,11 +1035,13 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
-            if (error) return res.json({ error: error, data: null }), tx.abort(), logger.routes.error(TAGS, error);
+            if (error) {
+              return res.json({ error: error, data: null }), tx.abort(done), logger.routes.error(TAGS, error);
+            }
 
             // end transaction
-            tx.commit(function() {
-
+            tx.commit(function(err) {
+              done(err);
               res.noContent();
 
               if (req.body.isLiked != null && req.body.isLiked != undefined){

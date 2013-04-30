@@ -18,4 +18,16 @@ server.post(
 , routes.rebuildPopularList
 );
 
+server.get(
+  '/v1/admin/algorithms/nearby'
+, middleware.auth.allow('admin', 'sales')
+, routes.getRebuildNearbyGridInterface
+);
+
+server.post(
+  '/v1/admin/algorithms/nearby'
+, middleware.auth.allow('admin', 'sales')
+, routes.rebuildNearbyGrid
+);
+
 module.exports = server;

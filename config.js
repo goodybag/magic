@@ -22,11 +22,9 @@ var config = {
   , http: {
       port: 3000
     }
-  , repl: {
-      enabled: true
-    , prompt: "gb-api> "
-    , port: 4337
-    }
+  , pg: {
+    poolSize: 5
+  }
   , numWorkers: os.cpus().length
   , outputActivePoolIds: false
 
@@ -95,10 +93,15 @@ var config = {
       port: 3000
     }
 
+  , logging: {
+      enabled: true
+    , transports: {
+        devConsole: true
+    }
+  }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
 
-  , outputActivePoolIds: false
   , emailEnabled: false
   }
 
@@ -111,9 +114,12 @@ var config = {
   , http: {
       port: 8986
     }
+  , pg: {
+    hideDeprecationWarnings: false
+  , poolSize: 15
+  }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
-  , outputActivePoolIds: false
 
   , facebook: {
       id:     "159340790837933"
@@ -190,11 +196,7 @@ var config = {
 
   , baseUrl: 'http://magic.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
-  , outputActivePoolIds: false
   , emailEnabled: true
-  , repl: {
-      enabled: false
-    }
   }
 
 , production: {
@@ -202,12 +204,13 @@ var config = {
       enabled: true
     , transports: { console: true }
     }
+  , pg: {
+    poolSize: 20
+  }
   , http: { port: process.env['PORT'] || 5000 }
   , baseUrl: 'http://magic.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
-  , outputActivePoolIds: false
   , emailEnabled: true
-  , repl: { enabled: false }
 
   , facebook: {
       id: "152282721508707"

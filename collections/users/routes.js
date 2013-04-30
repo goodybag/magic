@@ -133,16 +133,20 @@ module.exports.create = function(req, res){
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS, function(error, client){
+    db.getClient(TAGS, function(error, client, done){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
-      tx.begin(function() {
-
+      tx.begin(function(error) {
+        if(error) {
+          //destroy client on error
+          done(error);
+          return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        }
         var query = sql.query([
           'INSERT INTO users (email, password, "passwordSalt", "cardId", "createdAt")',
-            'SELECT $email, $password, $salt, $cardId, $createdAt WHERE NOT EXISTS (SELECT 1 FROM users WHERE email=$email)',
-            'RETURNING id'
+            'VALUES ($email, $password, $salt, $cardId, $createdAt)',
+            'RETURNING *'
         ]);
         query.$('email', req.body.email);
         query.$('password', encryptedPassword);
@@ -150,14 +154,14 @@ module.exports.create = function(req, res){
         query.$('cardId', req.body.cardId ? req.body.cardId.toUpperCase() : null);
         query.$('createdAt', 'now()');
         client.query(query.toString(), query.$values, function(error, result) {
-          if(error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
-
-          // did the insert occur?
-          if (result.rowCount === 0) {
-            // email must have already existed
-            tx.abort();
-            return res.error(errors.registration.EMAIL_REGISTERED);
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+            tx.abort(done);
+            logger.routes.error(TAGS, error);
+            return;
           }
+
           var newUser = result.rows[0];
 
           // add groups
@@ -170,11 +174,14 @@ module.exports.create = function(req, res){
             // did any insert fail?
             if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
               // the target group must not have existed
-              tx.abort();
+              tx.abort(done);
               return res.error(errors.input.INVALID_GROUPS);
             }
 
-            tx.commit(function() { res.json({ error: null, data: newUser }); });
+            tx.commit(function(error) {
+              done(error);
+              res.json({ error: null, data: newUser });
+            });
           });
         });
       });
@@ -216,7 +223,7 @@ module.exports.update = function(req, res){
 
   utils.encryptPassword(password, function(err, encryptedPassword, passwordSalt) {
 
-    db.getClient(TAGS, function(error, client){
+    db.getClient(TAGS, function(error, client, done){
       if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
       var tx = new Transaction(client);
@@ -226,7 +233,9 @@ module.exports.update = function(req, res){
         var query = usersGroups.delete()
           .where(usersGroups.userId.equals(req.param('id')));
         client.query(query.toQuery(), function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) {
+            return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
+          }
 
           // add new group relations
           async.series((groups || []).map(function(groupId) {
@@ -238,12 +247,15 @@ module.exports.update = function(req, res){
             // did any insert fail?
             if (err || results.filter(function(r) { return r.rowCount === 0; }).length !== 0) {
               // the target group must not have existed
-              tx.abort();
+              tx.abort(done);
               return res.error(errors.input.INVALID_GROUPS);
             }
 
             // done
-            tx.commit(function() { res.noContent(); });
+            tx.commit(function(err) {
+              done(err);
+              res.noContent();
+            });
           });
         });
       };
@@ -283,7 +295,6 @@ module.exports.update = function(req, res){
         query.$('id', req.params.id);
         if (email) {
           query.updates.add('email = $email');
-          query.emailClause = 'AND $email NOT IN (SELECT email FROM users WHERE id != $id AND email IS NOT NULL)'; // this makes sure the user doesn't take an email in use
           query.$('email', email);
         }
         if (password) {
@@ -301,19 +312,28 @@ module.exports.update = function(req, res){
 
         // run update query
         client.query(query.toString(), query.$values, function(error, result){
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) {
+            // postgres error code 23505 is violation of uniqueness constraint
+            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+            tx.abort(done);
+            logger.routes.error(TAGS, error);
+            return;
+          }
 
           // did the update occur?
           if (result.rowCount === 0) {
-            tx.abort();
             // figure out what the problem was
             client.query('SELECT id FROM users WHERE id=$1', [+req.param('id') || 0], function(error, results) {
+              tx.abort(done);
+              if(error) {
+                logger.db.error(TAGS, error);
+                return res.error(errors.internal.DB_FAILURE);
+              }
               if (results.rowCount === 0) {
-                // id didnt exist
+                // id didnt exist - no user found
                 return res.status(404).end();
               } else {
-                // email must have already existed
-                return res.error(errors.registration.EMAIL_REGISTERED);
+                return res.error(errors.internal.UNKNOWN);
               }
             });
             return;
@@ -324,7 +344,10 @@ module.exports.update = function(req, res){
 
           // are we done?
           if (typeof req.body.groups == 'undefined') {
-            tx.commit(function(){ res.noContent(); });
+            tx.commit(function(error){
+              done(error);
+              res.noContent();
+            });
             return;
           }
 
@@ -345,37 +368,38 @@ module.exports.createPasswordReset = function(req, res){
   logger.routes.debug(TAGS, 'creating user ' + req.params.id + ' password reset');
 
   var email = req.body.email;
-  if (!email)
-    return res.error(errors.input.VALIDATION_FAILED, '`email` is required.');
+  if (!email) return res.error(errors.input.VALIDATION_FAILED, '`email` is required.');
 
-  db.getClient(TAGS, function(error, client){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+  db.query('SELECT id FROM users WHERE email=$1', [email], function(error, rows, result) {
+    if (error) {
+      return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    }
+    if (result.rowCount === 0) {
+      return res.error(errors.input.NOT_FOUND);
+    }
+    var userId = result.rows[0].id;
 
-    client.query('SELECT id FROM users WHERE email=$1', [email], function(error, result) {
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-      var userId = result.rows[0].id;
+    var token = require("randomstring").generate();
+    var query = sql.query([
+      'INSERT INTO "userPasswordResets" ("userId", token, "createdAt")',
+        'VALUES ($userId, $token, now())'
+    ]);
+    query.$('userId', userId);
+    query.$('token', token);
+    db.query(query, function(error, rows, result) {
+      if(error) {
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      }
 
-      var token = require("randomstring").generate();
-      var query = sql.query([
-        'INSERT INTO "userPasswordResets" ("userId", token, "createdAt")',
-          'VALUES ($userId, $token, now())'
-      ]);
-      query.$('userId', userId);
-      query.$('token', token);
-      client.query(query.toString(), query.$values, function(error, result) {
-        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-        var emailHtml = templates.email.reset_password({
-          url : 'http://goodybag.com/#reset-password/' + token
-        });
-        utils.sendMail(email, config.emailFromAddress, 'Goodybag Password Reset Link', emailHtml);
-
-        if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
-          res.json({ err:null, data:{ token:token }});
-        else
-          res.noContent();
+      var emailHtml = templates.email.reset_password({
+        url : 'http://goodybag.com/#reset-password/' + token
       });
+      utils.sendMail(email, config.emailFromAddress, 'Goodybag Password Reset Link', emailHtml);
+
+      if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
+        res.json({ err:null, data:{ token:token }});
+      else
+        res.noContent();
     });
   });
 };
@@ -390,26 +414,21 @@ module.exports.resetPassword = function(req, res){
   logger.routes.debug(TAGS, 'resetting user ' + req.params.id + ' password');
 
   utils.encryptPassword(req.body.password, function(err, encryptedPassword, passwordSalt) {
+    var queryText = 'SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND "createdAt" > now() - INTERVAL \'20 minutes\' AND used IS NULL';
+    db.query(queryText, [req.params.token], function(error, rows, result) {
+      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      if (result.rowCount === 0)
+        return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.');
+      var userId = result.rows[0].userId;
+      var tokenId = result.rows[0].id;
 
-    db.getClient(TAGS, function(error, client){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      client.query('SELECT id, "userId" FROM "userPasswordResets" WHERE token=$1 AND "createdAt" > now() - INTERVAL \'20 minutes\' AND used IS NULL', [req.params.token], function(error, result) {
+      db.query('UPDATE users SET password=$1, "passwordSalt"=$2 WHERE id=$3', [encryptedPassword, passwordSalt, userId], function(error, rows, result) {
         if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        if (result.rowCount === 0)
-          return res.error(errors.input.VALIDATION_FAILED, 'Your reset token was not found or has expired. Please request a new one.');
-        var userId = result.rows[0].userId;
-        var tokenId = result.rows[0].id;
 
-        client.query('UPDATE users SET password=$1, "passwordSalt"=$2 WHERE id=$3', [encryptedPassword, passwordSalt, userId], function(error, result) {
+        db.query('UPDATE "userPasswordResets" SET used=now() WHERE id=$1', [tokenId], function(error, rows, result) {
           if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-          client.query('UPDATE "userPasswordResets" SET used=now() WHERE id=$1', [tokenId], function(error, result) {
-            if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-            res.noContent();
-          });
-
+          res.noContent();
         });
       });
     });
