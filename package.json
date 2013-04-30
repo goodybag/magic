@@ -42,7 +42,9 @@
     "sql": "~0.9.0",
     "pg-parse-float": "0.0.x",
     "gelf": "~1.0.3",
-    "microtime": "~0.3.3"
+    "microtime": "~0.3.3",
+    "gelf-encode": "~0.1.0",
+    "udp-client": "0.1.x"
   },
   "devDependencies": {
     "better-assert": "1.0.x",
