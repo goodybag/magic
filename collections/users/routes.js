@@ -527,7 +527,4 @@ module.exports.completeRegistration = function(req, res) {
 
   var data = {email: req.body.email, screenName: req.body.screenName};
   stage.start(data);
-
-  //res.writeHead(501);
-  //res.send();
 }
