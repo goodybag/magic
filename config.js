@@ -17,6 +17,7 @@ var config = {
       , fileRotate: true
       , papertrail: true
       , loggly: true
+      , graylog2: true
       }
     }
   , http: {
@@ -107,9 +108,8 @@ var config = {
 
 , test: {
     logging: {
-      enabled: false
-    //   enabled: true
-    // , transports: { console: true }
+       enabled: true
+     , transports: { graylog2: true }
     }
   , http: {
       port: 8986
