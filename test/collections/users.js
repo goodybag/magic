@@ -533,13 +533,11 @@ describe('POST /v1/users/complete-registration/:token', function() {
   it('should return 404 for an invalid token', function(done) {
     tu.post('/v1/users/complete-registration/bad_token', {password:'password'}, function(error, results, res) {
       assert(res.statusCode === 404)
-      console.log('done');
       done();
     });
   });
 
-  it('should complete a registration with a password'), function(done) {
-    console.log('hi');
+  it('should complete a registration with a password', function(done) {
     tu.loginAsTablet(function(){
       tu.tapinAuthRequest('GET', '/v1/session', '0000002-___', function(err, results, res) {
         // should have created a blank user
@@ -555,7 +553,6 @@ describe('POST /v1/users/complete-registration/:token', function() {
         var event = 'user.partialRegistration';
 
         var eventHandler = function(user, email, token){
-          console.log('testing registration completion');
           assert(token != null);
           tu.post('/v1/users/complete-registration/' + token, {password:'password'}, function(error, results, res) {
             assert(error == null);
@@ -565,6 +562,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
 
             //check that the token has been used and cannot be used again
             tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              console.log(results);
               assert(res.statusCode === 404);
               if(--outstanding <= 0) tu.logout(done);
             });
@@ -580,15 +578,14 @@ describe('POST /v1/users/complete-registration/:token', function() {
           magic.removeListener(event, eventHandler);
         }
 
-        console.log('registering event handler')
         magic.on(event, eventHandler);
 
         tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000002-___', data, function(err, result){});
       });
     });
-  }
+  });
 
-  it('should complete a registration with a password and screen name'), function(done) {
+  it('should complete a registration with a password and screen name', function(done) {
     tu.loginAsTablet(function(){
       tu.tapinAuthRequest('GET', '/v1/session', '0000003-___', function(err, results, res) {
         // should have created a blank user
@@ -643,9 +640,9 @@ describe('POST /v1/users/complete-registration/:token', function() {
         tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000003-___', data, function(err, result){});
       });
     });
-  }
+  });
   /*
-    it('should complete a registration with a password'), function(done) {
+    it('should complete a registration with a password', function(done) {
     tu.loginAsTablet(function(){
     tu.tapinAuthRequest('GET', '/v1/session', '0000002-___', function(err, results, res) {
     // should have created a blank user
@@ -690,6 +687,6 @@ describe('POST /v1/users/complete-registration/:token', function() {
     tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000002-___', data, function(err, result){});
     });
     });
-    }
+    });
   */
 });
