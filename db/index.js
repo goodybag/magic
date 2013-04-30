@@ -61,12 +61,8 @@ exports.getClient = function(logTags, callback){
   if (!logTags)
     logTags = ['unnamed'];
 
-  if (config.outputActivePoolIds) {
-    activePoolIds[logTags[0]] = true;
-  }
-
   var handle = function(err, client, done) {
-    if(err) return callback(err);
+    if(err) return callback(err, null, function() { console.log('done called from error callback') });
     addToDomain(client);
     client.logTags = logTags;
 
@@ -78,18 +74,20 @@ exports.getClient = function(logTags, callback){
       //destroy the client
       done(client);
     }, 10000);
-    client.once('drain', function() {
+    //return a custom done function so we can 
+    //clear our leak checker
+    callback(null, client, function(c) {
       clearTimeout(tid);
       removeFromDomain(client);
-      done()
+      done(c);
     });
-    callback(null, client);
     
   };
 
   handle = process.domain.bind(handle);
 
   var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
+
   swapDomain(pool);
   pg.connect(config.postgresConnStr, function(err, client, done) {
     handle(err, client, done);

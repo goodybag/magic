@@ -52,38 +52,50 @@ module.exports.create = function(req, res){
   var tapinStationId = req.body.tapinStationId;
   var businessId = null, locationId = null;
 
-  db.getClient(TAGS, function(error, client){
+  db.getClient(TAGS, function(error, client, done){
     if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
 
     // Ensure user is registered
     var query = 'select * from users WHERE id = $1';
     client.query(query, [userId], function(error, result){
-      if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+      if (error) { 
+        done();
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+      }
 
-      if (result.rows.length === 0)
+      if (result.rows.length === 0) {
+        done();
         return res.error(errors.input.INVALID_USERS), logger.routes.error(TAGS, errors.input.INVALID_USERS);
+      }
 
-      if (!result.rows[0].email && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId))
+      if (!result.rows[0].email && !(result.rows[0].singlyAccessToken && result.rows[0].singlyId)) {
+        done();
         return res.error(errors.registration.NOT_REGISTERED), logger.routes.error(TAGS, errors.registration.NOT_REGISTERED);
+      }
 
       // start transaction
       var tx = new Transaction(client);
       tx.begin(function(error) {
-        if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+        if (error) { 
+          //destroy the client
+          done(error);
+          logger.routes.error(TAGS, error); 
+          return res.error(errors.internal.DB_FAILURE, error); 
+        }
 
         // get business
         client.query('SELECT "businessId", "locationId" FROM "tapinStations" WHERE id=$1', [tapinStationId], function(error, result) {
-          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+          if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
           businessId = result.rows[0].businessId;
           locationId = result.rows[0].locationId;
 
           // update punches
           db.procedures.setLogTags(TAGS);
           db.procedures.updateUserLoyaltyStats(client, tx, userId, businessId, deltaPunches, function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
-            if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
+            if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error);
 
             if (numRewards === 0) {
-              return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort();
+              return res.error(errors.business.NOT_ENOUGH_PUNCHES), tx.abort(done);
             }
 
             // create the redemption
@@ -94,16 +106,20 @@ module.exports.create = function(req, res){
             ] .join(' ');
             client.query(query, [businessId, locationId, userId, req.session.user.id, tapinStationId], function(error, result) {
 
-              if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+              if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error); }
 
               // update user's loyalty stats
               var query = 'UPDATE "userLoyaltyStats" SET "numRewards" = "numRewards" - 1 WHERE "userId"=$1 AND "businessId"=$2';
               client.query(query, [userId, businessId], function(error, result) {
-                if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error); }
+                if (error) { return res.error(errors.internal.DB_FAILURE, error), tx.abort(done), logger.routes.error(TAGS, error); }
 
                 // success!
                 tx.commit(function(error) {
-                  if (error) { return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); }
+                  //destroy client on commit error
+                  done(error);
+                  if (error) { 
+                    return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+                  }
 
                   res.noContent();
 
