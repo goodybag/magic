@@ -429,7 +429,7 @@ module.exports.getPartialRegistrationEmail = function(req, res) {
   logger.routes.debug(TAGS, 'getting partial registration email for token: ' + req.params.token);
 
   db.api.partialRegistrations.findOne(
-    {token:req.params.token},
+    {token:req.params.token, $null:['used']},
     {fields:['email'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
     function(error, results) {
       if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
