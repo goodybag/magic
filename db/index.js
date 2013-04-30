@@ -40,7 +40,7 @@ var logQuery = function(query) {
   query.once('end', function(result) {
     var duration = new Date() - start;
     var rows = (result||0).rowCount;
-    logger.debug(['db', 'query'], 'query completed in ' + duration, { duration: duration, text: text, rows: rows });
+    logger.debug(['db', 'query'], 'query', { duration: duration, text: text, rows: rows });
   });
 };
 
