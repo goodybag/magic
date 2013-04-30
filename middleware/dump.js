@@ -15,6 +15,7 @@ var attachFilteredHeaders = function(meta, headers) {
 var logRequest = function(req) {
   //flatten meta for graylog2
   var meta = { };
+  meta.address = req.socket.address().address;
   attachFilteredHeaders(meta, req.headers);
   for(var key in req.params) {
     meta['param-'+key] = req.params[key];
