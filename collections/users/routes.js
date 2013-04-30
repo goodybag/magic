@@ -503,7 +503,7 @@ module.exports.completeRegistration = function(req, res) {
 
         var updates = {};
         for (key in data)
-          if (data[key] != null && key !== 'userId') updates[key] = data[key];
+          if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
 
         db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
           if (error) {
@@ -512,13 +512,20 @@ module.exports.completeRegistration = function(req, res) {
             logger.routes.error(TAGS, error);
             return;
           }
-          res.noContent(); //TODO: create a session
+          if (data.screenName != null)
+            db.api.consumers.update({id:data.userId}, {screenName:data.screenName}, {}, function(error, results) {
+              if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              res.noContent();
+            });
+          else {
+            res.noContent(); //TODO: create a session
+          }
         });
       });
     }
   }
 
-  var data = {email: req.body.email};
+  var data = {email: req.body.email, screenName: req.body.screenName};
   stage.start(data);
 
   //res.writeHead(501);
