@@ -579,8 +579,6 @@ module.exports.completeRegistration = function(req, res) {
                   req.session.cookie.originalMaxAge = null;
 
                   res.noContent(); //TODO: create a session
-
-
                 });
             });
           });
