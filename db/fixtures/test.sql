@@ -113,6 +113,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11132', 'tapi
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11133', 'ts_redeem1@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'consumer_mutated@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
+INSERT INTO "users" (id, email) VALUES ('11136', 'null.password@goodybag.com');
 COMMIT;
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
