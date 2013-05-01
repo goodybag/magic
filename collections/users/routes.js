@@ -513,39 +513,66 @@ module.exports.completeRegistration = function(req, res) {
     },
 
     update: function(data) {
-      //TODO: put these two updates into a transaction
-      db.api.partialRegistrations.update({token:req.params.token}, {used:'now()'}, {returning:'id'}, function(error, results) {
-        if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-        if (results.length !== 1)
-          return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+      db.getClient(TAGS, function(error, client, done){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        var updates = {};
-        for (key in data)
-          if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
-
-        db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
-          if (error) {
-            // postgres error code 23505 is violation of uniqueness constraint
-            res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
-            logger.routes.error(TAGS, error);
-            return;
+        var tx = new Transaction(client);
+        tx.begin(function(error) {
+          if(error) {
+            //destroy client on error
+            done(error);
+            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
           }
-          if (data.screenName != null)
-            db.api.consumers.update({id:data.userId}, {screenName:data.screenName}, {}, function(error, results) {
-              if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-              res.noContent();
+
+          var useToken = sql.query('UPDATE "partialRegistrations" SET used=now() WHERE token=\'{token}\' AND used IS NULL RETURNING id');
+          useToken.token = req.params.token;
+          client.query(useToken.toString(), useToken.$values, function(error, results) {
+            if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
+            if (results.rows == null || results.rows.length !== 1)
+              return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), tx.abort(done);
+
+            var updates = {};
+            for (key in data)
+              if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
+
+            var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId}');
+            updateUser.userId = data.userId;
+            var columns = [];
+            for (key in updates)
+              columns.push('"' + key +'"=\'' + updates[key] + "'");
+            updateUser.updates = columns.join(', ');
+
+            client.query(updateUser.toString(), updateUser.$values, function(error, results) {
+              if (error) {
+                // postgres error code 23505 is violation of uniqueness constraint
+                res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+                logger.routes.error(TAGS, error);
+                tx.abort(done);
+                return;
+              }
+              if (data.screenName != null) {
+                var updateScreenName = sql.query('UPDATE consumers SET "screenName"=\'{screenName}\' WHERE id={id}');
+                updateScreenName.id = data.userId;
+                updateScreenName.screenName = data.screenName;
+                client.query(updateScreenName.toString(), updateScreenName.$values, function(error, results) {
+                  if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
+                  tx.commit(function(error) {
+                    done(error);
+                    res.noContent(); //TODO: create a session
+                  });
+                });
+              } else
+                tx.commit(function(error) {
+                  done(error);
+                  res.noContent(); //TODO: create a session
+                });
             });
-          else {
-            res.noContent(); //TODO: create a session
-          }
+          });
         });
       });
     }
   }
 
   var data = {email: req.body.email, screenName: req.body.screenName};
-  // TODO: move to validation
-  if (data.email === '') data.email = undefined;
-  if (data.screenName === '') data.screenName = undefined;
   stage.start(data);
 }
