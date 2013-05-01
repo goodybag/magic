@@ -17,7 +17,10 @@ var config = {
       , fileRotate: true
       , papertrail: true
       , loggly: true
-      , graylog2: true
+      , graylog2: {
+        host: '192.168.13.105',
+        port: 12201
+      }
       }
     }
   , http: {
