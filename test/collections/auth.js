@@ -111,6 +111,21 @@ describe('POST /v1/session', function() {
     });
   });
 
+  it('should fail to authenticate user with a null password', function(done) {
+    // First need to login
+    var user = {
+      email:    "null.password@goodybag.com",
+      password: 'anything'
+    };
+    utils.post(baseUrl + '/v1/session', user, function(error, request, results){
+      // Make sure there were no login errors
+      assert(!error);
+      assert(results.error);
+      assert(results.error.name === "INVALID_PASSWORD");
+      done();
+    });
+  });
+
   it('should use an eterna-cookie if remember is not supplied', function(done) {
     var user = {
       email: "admin@goodybag.com",
