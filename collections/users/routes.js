@@ -558,13 +558,29 @@ module.exports.completeRegistration = function(req, res) {
                   if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
                   tx.commit(function(error) {
                     done(error);
+                    // Save user in session
+                    req.session.user = {id: data.userId};
+
+                    // use session cookie
+                    req.session.cookie._expires = null;
+                    req.session.cookie.originalMaxAge = null;
                     res.noContent(); //TODO: create a session
                   });
                 });
               } else
                 tx.commit(function(error) {
                   done(error);
+
+                  // Save user in session
+                  req.session.user = {id: data.userId};
+
+                  // use session cookie
+                  req.session.cookie._expires = null;
+                  req.session.cookie.originalMaxAge = null;
+
                   res.noContent(); //TODO: create a session
+
+
                 });
             });
           });
