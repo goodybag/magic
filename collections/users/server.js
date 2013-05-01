@@ -31,6 +31,7 @@ server.get(
   '/v1/users/complete-registration/:token'
 , middleware.profile('GET /v1/users/complete-registration/:token')
 , middleware.profile('get partial registration email handler')
+, middleware.validate2.query(desc.completeRegistration.methods.get.query)
 , routes.getPartialRegistrationEmail
 );
 
@@ -39,6 +40,7 @@ server.post(
   '/v1/users/complete-registration/:token'
 , middleware.profile('POST /v1/users/complete-registration/:token')
 , middleware.profile('complete partial registration handler')
+, middleware.validate2.body(desc.completeRegistration.methods.post.body)
 , routes.completeRegistration
 );
 

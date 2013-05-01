@@ -614,3 +614,10 @@ BEGIN;
 INSERT INTO heartbeats ("userId", "businessId", "locationId", "createdAt", data) VALUES (11130, 1, 1, now(), '{"foo":"bar"}');
 INSERT INTO heartbeats ("userId", "businessId", "locationId", "createdAt", data) VALUES (11135, 39, 51, now(), '{"foo":"baz"}');
 COMMIT;
+
+
+-- partial registrations
+BEGIN;
+INSERT INTO users (id, email) VALUES (nextval('users_id_seq'), 'chaos@example.com');
+INSERT INTO "partialRegistrations" ("userId", token) VALUES (currval('users_id_seq'), 'chaos-token');
+COMMIT;

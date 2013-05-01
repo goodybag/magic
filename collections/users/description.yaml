@@ -23,6 +23,7 @@ collection:
         eg: { email: admin@goodybag.com, password: password }
   children:
     - /users/:id
+    - /users/complete-registration/:token
 item:
   resource:
     type: item
@@ -49,3 +50,20 @@ item:
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
+
+completeRegistration:
+  resource:
+    type: item
+    path: /users/complete-registration/:token
+    params:
+      token: { type: string, eg: chaos-token}
+  methods:
+    get:
+      desc: get email of partial registration
+    post:
+      desc: Complete partial registration
+      body:
+        email:          {type: email, eg: chaos@example.com}
+        password:       {type: string, required: {unless: code}, eg: password}
+        code:           {type: string, required: {unless: password}}
+        screenName:     {type: string}
