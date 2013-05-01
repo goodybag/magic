@@ -523,6 +523,7 @@ module.exports.completeRegistration = function(req, res) {
         for (key in data)
           if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
 
+        console.log('updating user: ', updates);
         db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
           if (error) {
             // postgres error code 23505 is violation of uniqueness constraint
@@ -544,5 +545,8 @@ module.exports.completeRegistration = function(req, res) {
   }
 
   var data = {email: req.body.email, screenName: req.body.screenName};
+  // TODO: move to validation
+  if (data.email === '') data.email = undefined;
+  if (data.screenName === '') data.screenName = undefined;
   stage.start(data);
 }
