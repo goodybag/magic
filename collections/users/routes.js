@@ -486,7 +486,7 @@ module.exports.completeRegistration = function(req, res) {
 
     password: function(data) {
       if (req.body.password == null && (data.singlyToken == null || data.singlyId == null))
-        return res.send(400, 'you need to provide password or a facebook login'); //TODO: real error
+        return res.send(400, 'you need to provide password or a facebook login'); //should be caught by validation
       if (req.body.password != null)
         utils.encryptPassword(req.body.password, function(error, encryptedPassword, passwordSalt) {
           data.password = encryptedPassword;
@@ -564,7 +564,7 @@ module.exports.completeRegistration = function(req, res) {
                     // use session cookie
                     req.session.cookie._expires = null;
                     req.session.cookie.originalMaxAge = null;
-                    res.noContent(); //TODO: create a session
+                    res.noContent();
                   });
                 });
               } else
@@ -578,7 +578,7 @@ module.exports.completeRegistration = function(req, res) {
                   req.session.cookie._expires = null;
                   req.session.cookie.originalMaxAge = null;
 
-                  res.noContent(); //TODO: create a session
+                  res.noContent();
                 });
             });
           });
