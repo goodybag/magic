@@ -452,7 +452,7 @@ module.exports.getPartialRegistrationEmail = function(req, res) {
     function(error, results) {
       if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-      if (results == null) return res.send(404); //TODO: bad token error
+      if (results == null) return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
       res.json({err: null, data: {email: results.email}});
     }
   );
@@ -503,7 +503,7 @@ module.exports.completeRegistration = function(req, res) {
         {fields:['"userId"', 'email', '"cardId"'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
         function(error, results) {
           if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-          if (results == null) return res.send(404); //TODO: bad token error
+          if (results == null) return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
           if (data.email == null) data.email = results.email;
           data.cardId = results.cardId;
           if (data.userId == null) data.userId = results.userId;
@@ -517,13 +517,12 @@ module.exports.completeRegistration = function(req, res) {
       db.api.partialRegistrations.update({token:req.params.token}, {used:'now()'}, {returning:'id'}, function(error, results) {
         if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
         if (results.length !== 1)
-          return res.send(404); //TODO: bad token error
+          return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
 
         var updates = {};
         for (key in data)
           if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
 
-        console.log('updating user: ', updates);
         db.api.users.update({id:data.userId}, updates, {}, function(error, results) {
           if (error) {
             // postgres error code 23505 is violation of uniqueness constraint
