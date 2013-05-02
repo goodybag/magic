@@ -536,7 +536,7 @@ module.exports.completeRegistration = function(req, res) {
               if (consumerColumns.indexOf(key) !== -1 && data[key] != null) consumerUpdates[key] = data[key];
             }
 
-            var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId}');
+            var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId} RETURNING id, email');
             updateUser.userId = data.userId;
             var columns = [];
             for (key in userUpdates)
@@ -551,6 +551,22 @@ module.exports.completeRegistration = function(req, res) {
                 tx.abort(done);
                 return;
               }
+
+              var sessionUser = (results.rows||0)[0];
+              var returnSession = function() {
+                tx.commit(function(error) {
+                  done(error);
+                  // Save user in session
+                  req.session.user = sessionUser;
+
+                  // use session cookie
+                  req.session.cookie._expires = null;
+                  req.session.cookie.originalMaxAge = null;
+                  console.log('sending response with session: ', req.session);
+                  res.json({error: null, data:sessionUser});
+                });
+              }
+
               if (data.screenName != null || data.firstName != null || data.lastName != null) {
                 var updateConsumer = sql.query('UPDATE consumers SET {updates} WHERE id={id}');
                 updateConsumer.id = data.userId;
@@ -562,31 +578,10 @@ module.exports.completeRegistration = function(req, res) {
 
                 client.query(updateConsumer.toString(), updateConsumer.$values, function(error, results) {
                   if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
-                  tx.commit(function(error) {
-                    done(error);
-                    // Save user in session
-                    req.session.user = {id: data.userId};
-
-                    // use session cookie
-                    req.session.cookie._expires = null;
-                    req.session.cookie.originalMaxAge = null;
-                    console.log('sending response with session: ', req.session);
-                    res.noContent();
-                  });
+                  returnSession();
                 });
               } else
-                tx.commit(function(error) {
-                  done(error);
-
-                  // Save user in session
-                  req.session.user = {id: data.userId};
-
-                  // use session cookie
-                  req.session.cookie._expires = null;
-                  req.session.cookie.originalMaxAge = null;
-
-                  res.noContent();
-                });
+                returnSession();
             });
           });
         });
