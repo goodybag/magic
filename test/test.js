@@ -14,6 +14,9 @@ require(__dirname + '/static');
 // data access tests
 require(__dirname + '/data-access');
 
+// logger tests
+require(__dirname + '/logger');
+
 // functional tests
 // ================
 // enable profiler
