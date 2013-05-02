@@ -471,11 +471,7 @@ module.exports.completeRegistration = function(req, res) {
     start: function(data) {
       if (req.body.code != null)
         oauth.authWithCode(req.body.code, function(error, user){
-          if (error) {
-            res.error(error);
-            logger.routes.error(TAGS, error);
-            return
-          }
+          if (error) return res.error(error), logger.routes.error(TAGS, error);
           if (data.email != null) user.email = data.email;
           data = user;
           stage.password(data);
@@ -485,7 +481,7 @@ module.exports.completeRegistration = function(req, res) {
     },
 
     password: function(data) {
-      if (req.body.password == null && (data.singlyToken == null || data.singlyId == null))
+      if (req.body.password == null && (data.singlyAccessToken == null || data.singlyId == null))
         return res.send(400, 'you need to provide password or a facebook login'); //should be caught by validation
       if (req.body.password != null)
         utils.encryptPassword(req.body.password, function(error, encryptedPassword, passwordSalt) {
@@ -531,15 +527,20 @@ module.exports.completeRegistration = function(req, res) {
             if (results.rows == null || results.rows.length !== 1)
               return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), tx.abort(done);
 
-            var updates = {};
-            for (key in data)
-              if (data[key] != null && key !== 'userId' && key !== 'screenName') updates[key] = data[key];
+            var userUpdates = {};
+            var userColumns = ['email', 'password', 'singlyId', 'singlyAccessToken', 'cardId'];
+            var consumerUpdates = {};
+            var consumerColumns = ['screenName', 'firstName', 'lastName'];
+            for (key in data) {
+              if (userColumns.indexOf(key) !== -1 && data[key] != null) userUpdates[key] = data[key];
+              if (consumerColumns.indexOf(key) !== -1 && data[key] != null) consumerUpdates[key] = data[key];
+            }
 
             var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId}');
             updateUser.userId = data.userId;
             var columns = [];
-            for (key in updates)
-              columns.push('"' + key +'"=\'' + updates[key] + "'");
+            for (key in userUpdates)
+              columns.push('"' + key +'"=\'' + userUpdates[key] + "'");
             updateUser.updates = columns.join(', ');
 
             client.query(updateUser.toString(), updateUser.$values, function(error, results) {
@@ -550,11 +551,16 @@ module.exports.completeRegistration = function(req, res) {
                 tx.abort(done);
                 return;
               }
-              if (data.screenName != null) {
-                var updateScreenName = sql.query('UPDATE consumers SET "screenName"=\'{screenName}\' WHERE id={id}');
-                updateScreenName.id = data.userId;
-                updateScreenName.screenName = data.screenName;
-                client.query(updateScreenName.toString(), updateScreenName.$values, function(error, results) {
+              if (data.screenName != null || data.firstName != null || data.lastName != null) {
+                var updateConsumer = sql.query('UPDATE consumers SET {updates} WHERE id={id}');
+                updateConsumer.id = data.userId;
+
+                var columns = [];
+                for (key in consumerUpdates)
+                  columns.push('"' + key +'"=\'' + consumerUpdates[key] + "'");
+                updateConsumer.updates = columns.join(', ');
+
+                client.query(updateConsumer.toString(), updateConsumer.$values, function(error, results) {
                   if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
                   tx.commit(function(error) {
                     done(error);
@@ -564,6 +570,7 @@ module.exports.completeRegistration = function(req, res) {
                     // use session cookie
                     req.session.cookie._expires = null;
                     req.session.cookie.originalMaxAge = null;
+                    console.log('sending response with session: ', req.session);
                     res.noContent();
                   });
                 });
