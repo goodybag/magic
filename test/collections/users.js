@@ -557,7 +557,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
           assert(token != null);
           tu.post('/v1/users/complete-registration/' + token, {password:'password'}, function(error, results, res) {
             assert(error == null);
-            assert(res.statusCode === 204);
+            assert(res.statusCode === 200);
 
             var outstanding = 2;
 
@@ -604,7 +604,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
           assert(token != null);
           tu.post('/v1/users/complete-registration/' + token, {password:'password', screenName:'test'}, function(error, results, res) {
             assert(error == null);
-            assert(res.statusCode === 204);
+            assert(res.statusCode === 200);
 
             var outstanding = 2;
 
@@ -663,7 +663,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
           assert(token != null);
           tu.post('/v1/users/complete-registration/' + token, {password:'password', email:newEmail}, function(error, results, res) {
             assert(error == null);
-            assert(res.statusCode === 204);
+            assert(res.statusCode === 200);
 
             var outstanding = 2;
 
@@ -711,7 +711,7 @@ describe('POST /v1/users/complete-registration/:token', function() {
           assert(token != null);
           tu.post('/v1/users/complete-registration/' + token, {password:'password', code:''}, function(error, results, res) {
             assert(error == null);
-            assert(res.statusCode === 204);
+            assert(res.statusCode === 200);
 
             var outstanding = 2;
 
