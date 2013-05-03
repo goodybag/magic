@@ -562,7 +562,7 @@ module.exports.completeRegistration = function(req, res) {
                   // use session cookie
                   req.session.cookie._expires = null;
                   req.session.cookie.originalMaxAge = null;
-                  console.log('sending response with session: ', req.session);
+
                   res.json({error: null, data:sessionUser});
                 });
               }
