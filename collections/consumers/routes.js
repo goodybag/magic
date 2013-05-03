@@ -392,7 +392,7 @@ module.exports.getCollection = function(req, res){
       'LEFT JOIN "productLikes" ON "productLikes"."productId" = "productsCollections"."productId" AND "productLikes"."userId" = $userId',
       'LEFT JOIN "productWants" ON "productWants"."productId" = "productsCollections"."productId" AND "productWants"."userId" = $userId',
       'LEFT JOIN "productTries" ON "productTries"."productId" = "productsCollections"."productId" AND "productTries"."userId" = $userId'
-    ].join('');
+    ].join(' ');
     query.fields
     .add('COUNT("productLikes".id) as "totalMyLikes"')
     .add('COUNT("productWants".id) as "totalMyWants"')

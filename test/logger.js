@@ -1,5 +1,7 @@
 var assert = require('assert');
 var Logger = require(__dirname + '/../lib/logger');
+var errors  = require(__dirname + '/../lib/errors');
+
 describe('logger', function() {
   var logger = new Logger('test');
   it('initializes with app name', function() {
@@ -107,6 +109,14 @@ describe('logger', function() {
         done();
       });
       logger.error('something', 'okay', new Error('omg'));
+    });
+    it('should not throw an error', function(done) {
+      try {
+        logger.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+        done();
+      } catch (err) {
+        assert(false);
+      }
     });
   });
 });

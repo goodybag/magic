@@ -5,6 +5,7 @@ var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
 var magic = require('../../lib/magic');
 var db = require('../../db');
+var fbUsers = require('../fb-test-users.js');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
@@ -368,7 +369,7 @@ describe('PUT /v1/users/:id', function() {
 
   it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
     tu.loginAsTablet(function(){
-      tu.tapinAuthRequest('GET', '/v1/session', '7777777-___', function(err, results, res) {
+      tu.tapinAuthRequest('GET', '/v1/session', '0000000-___', function(err, results, res) {
         // should have created a blank user
         assert(err == null);
         var payload = JSON.parse(results);
@@ -379,14 +380,19 @@ describe('PUT /v1/users/:id', function() {
         var userId = payload.meta.userId;
         var data = {email:'test@example.com'};
 
-        magic.on('user.partialRegistration', function(user, email, token){
+        var event = 'user.partialRegistration';
+
+        var callback = function(user, email, token){
           assert(email === data.email);
           assert(user.toString() === userId.toString());
           assert(token != null);
+          magic.removeListener(event, callback);
           done();
-        });
+        };
 
-        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '7777777-___', data, function(err, result){});
+        magic.on(event, callback);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000000-___', data, function(err, result){});
       });
     });
   });
@@ -465,4 +471,273 @@ describe('POST /v1/users/password-reset', function() {
       done();
     });
   });
+});
+
+describe('GET /v1/users/complete-registration/:token', function() {
+  it('should return the email of a valid token', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000001-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000001@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.get('/v1/users/complete-registration/' + token, function(error, results) {
+            assert(error == null);
+            assert(results != null);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(e) {}
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.email === email);
+            magic.removeListener(event, eventHandler);
+            tu.logout(done);
+          });
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000001-___', data, function(err, result){});
+      });
+    });
+  });
+
+  it('should return 404 for an invalid token', function(done) {
+    tu.get('/v1/users/complete-registration/bad_token', function(error, results, res) {
+      assert(res.statusCode === 404)
+      done();
+    });
+  });
+});
+
+describe('POST /v1/users/complete-registration/:token', function() {
+  it('should not accept a request with no password or singly credentials', function(done) {
+    tu.post('/v1/users/complete-registration/any_token', {}, function(error, results, res) {
+      assert(res.statusCode === 400)
+      //TODO: parse real error
+      done();
+    });
+  });
+
+  it('should return 404 for an invalid token', function(done) {
+    tu.post('/v1/users/complete-registration/bad_token', {password:'password'}, function(error, results, res) {
+      assert(res.statusCode === 404)
+      done();
+    });
+  });
+
+  it('should complete a registration with a password', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000002-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000002@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password'}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 200);
+
+            var outstanding = 2;
+
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            tu.login({email:data.email, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email === data.email);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000002-___', data, function(err, result){});
+      });
+    });
+  });
+
+  it('should complete a registration with a password and screen name', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000003-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000003@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password', screenName:'test'}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 200);
+
+            var outstanding = 2;
+
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            tu.login({email:data.email, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email === data.email);
+              tu.get('/v1/consumers/' + result.id, function(error, results) {
+                assert(error == null);
+                var payload;
+                try {
+                  payload = JSON.parse(results);
+                } catch(e){}
+                assert(payload != null);
+                assert(payload.error == null);
+                assert(payload.data != null);
+                assert(payload.data.screenName === 'test');
+                if(--outstanding <= 0) tu.logout(done);
+              });
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000003-___', data, function(err, result){});
+      });
+    });
+  });
+
+  it('should complete a registration with a password and email', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000004-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000004@example.com'};
+        var newEmail = 'test_0000004_new@example.com';
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password', email:newEmail}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 200);
+
+            var outstanding = 2;
+
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            tu.login({email:newEmail, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email == newEmail);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000004-___', data, function(err, result){});
+      });
+    });
+  });
+
+/*
+  it('should complete a registration with a singly code', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000005-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_0000005@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var eventHandler = function(user, email, token){
+          assert(token != null);
+          tu.post('/v1/users/complete-registration/' + token, {password:'password', code:''}, function(error, results, res) {
+            assert(error == null);
+            assert(res.statusCode === 200);
+
+            var outstanding = 2;
+
+            //check that the token has been used and cannot be used again
+            tu.get('/v1/users/complete-registration/' + token, function(error, results, res) {
+              assert(res.statusCode === 404);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+
+            //what do i do to test that the account has been created
+            tu.login({email:newEmail, password:'password'}, function(error, result) {
+              assert(error == null);
+              assert(result != null);
+              assert(result.email == newEmail);
+              if(--outstanding <= 0) tu.logout(done);
+            });
+          });
+
+          magic.removeListener(event, eventHandler);
+        }
+
+        magic.on(event, eventHandler);
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '0000005-___', data, function(err, result){});
+      });
+    });
+  });
+*/
 });

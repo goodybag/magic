@@ -12,6 +12,7 @@ var
 , Transaction = require('pg-transaction')
 , async       = require('async')
 , magic       = require('../../lib/magic')
+, oauth       = require('../../lib/oauth')
 
 , logger    = {}
 ;
@@ -434,3 +435,160 @@ module.exports.resetPassword = function(req, res){
     });
   });
 };
+
+
+/**
+ * Get email of partial registration
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.getPartialRegistrationEmail = function(req, res) {
+  var TAGS = ['get-partial-registration', req.uuid];
+  logger.routes.debug(TAGS, 'getting partial registration email for token: ' + req.params.token);
+
+  db.api.partialRegistrations.findOne(
+    {token:req.params.token, $null:['used']},
+    {fields:['email'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
+    function(error, results) {
+      if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      if (results == null) return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+      res.json({err: null, data: {email: results.email}});
+    }
+  );
+}
+
+/**
+ * Complete partial registration
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.completeRegistration = function(req, res) {
+  var TAGS = ['complete-partial-registration', req.uuid];
+  logger.routes.debug(TAGS, 'completing partial registration for token: ' + req.params.token);
+
+  var stage = {
+    start: function(data) {
+      if (req.body.code != null)
+        oauth.authWithCode(req.body.code, function(error, user){
+          if (error) return res.error(error), logger.routes.error(TAGS, error);
+          if (data.email != null) user.email = data.email;
+          data = user;
+          stage.password(data);
+        });
+      else
+        stage.password(data);
+    },
+
+    password: function(data) {
+      if (req.body.password == null && (data.singlyAccessToken == null || data.singlyId == null))
+        return res.send(400, 'you need to provide password or a facebook login'); //should be caught by validation
+      if (req.body.password != null)
+        utils.encryptPassword(req.body.password, function(error, encryptedPassword, passwordSalt) {
+          data.password = encryptedPassword;
+          data.passwordSalt = passwordSalt;
+          stage.getUser(data);
+        });
+      else
+        stage.getUser(data);
+    },
+
+    getUser: function(data) {
+      db.api.partialRegistrations.findOne(
+        {token:req.params.token, $null:['used']},
+        {fields:['"userId"', 'email', '"cardId"'], $join:{users:{'partialRegistrations.userId':'users.id'}}},
+        function(error, results) {
+          if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (results == null) return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+          if (data.email == null) data.email = results.email;
+          data.cardId = results.cardId;
+          if (data.userId == null) data.userId = results.userId;
+          stage.update(data);
+        }
+      );
+    },
+
+    update: function(data) {
+      db.getClient(TAGS, function(error, client, done){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        var tx = new Transaction(client);
+        tx.begin(function(error) {
+          if(error) {
+            //destroy client on error
+            done(error);
+            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          }
+
+          var useToken = sql.query('UPDATE "partialRegistrations" SET used=now() WHERE token=\'{token}\' AND used IS NULL RETURNING id');
+          useToken.token = req.params.token;
+          client.query(useToken.toString(), useToken.$values, function(error, results) {
+            if (error != null) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
+            if (results.rows == null || results.rows.length !== 1)
+              return res.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), logger.routes.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN), tx.abort(done);
+
+            var userUpdates = {};
+            var userColumns = ['email', 'password', 'singlyId', 'singlyAccessToken', 'cardId'];
+            var consumerUpdates = {};
+            var consumerColumns = ['screenName', 'firstName', 'lastName'];
+            for (var key in data) {
+              if (userColumns.indexOf(key) !== -1 && data[key] != null) userUpdates[key] = data[key];
+              if (consumerColumns.indexOf(key) !== -1 && data[key] != null) consumerUpdates[key] = data[key];
+            }
+
+            var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId} RETURNING id, email');
+            updateUser.userId = data.userId;
+            var columns = [];
+            for (var key in userUpdates)
+              columns.push('"' + key +'"=\'' + userUpdates[key] + "'");
+            updateUser.updates = columns.join(', ');
+
+            client.query(updateUser.toString(), updateUser.$values, function(error, results) {
+              if (error) {
+                // postgres error code 23505 is violation of uniqueness constraint
+                res.error(parseInt(error.code) === 23505 ? errors.registration.EMAIL_REGISTERED : errors.internal.DB_FAILURE, error);
+                logger.routes.error(TAGS, error);
+                tx.abort(done);
+                return;
+              }
+
+              var sessionUser = (results.rows||0)[0];
+              var returnSession = function() {
+                tx.commit(function(error) {
+                  done(error);
+                  // Save user in session
+                  req.session.user = sessionUser;
+
+                  // use session cookie
+                  req.session.cookie._expires = null;
+                  req.session.cookie.originalMaxAge = null;
+
+                  res.json({error: null, data:sessionUser});
+                });
+              }
+
+              if (data.screenName != null || data.firstName != null || data.lastName != null) {
+                var updateConsumer = sql.query('UPDATE consumers SET {updates} WHERE id={id}');
+                updateConsumer.id = data.userId;
+
+                var columns = [];
+                for (var key in consumerUpdates)
+                  columns.push('"' + key +'"=\'' + consumerUpdates[key] + "'");
+                updateConsumer.updates = columns.join(', ');
+
+                client.query(updateConsumer.toString(), updateConsumer.$values, function(error, results) {
+                  if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error), tx.abort(done);
+                  returnSession();
+                });
+              } else
+                returnSession();
+            });
+          });
+        });
+      });
+    }
+  }
+
+  var data = {email: req.body.email, screenName: req.body.screenName};
+  stage.start(data);
+}
