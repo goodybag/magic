@@ -531,7 +531,7 @@ module.exports.completeRegistration = function(req, res) {
             var userColumns = ['email', 'password', 'singlyId', 'singlyAccessToken', 'cardId'];
             var consumerUpdates = {};
             var consumerColumns = ['screenName', 'firstName', 'lastName'];
-            for (key in data) {
+            for (var key in data) {
               if (userColumns.indexOf(key) !== -1 && data[key] != null) userUpdates[key] = data[key];
               if (consumerColumns.indexOf(key) !== -1 && data[key] != null) consumerUpdates[key] = data[key];
             }
@@ -539,7 +539,7 @@ module.exports.completeRegistration = function(req, res) {
             var updateUser = sql.query('UPDATE users SET {updates} WHERE id={userId} RETURNING id, email');
             updateUser.userId = data.userId;
             var columns = [];
-            for (key in userUpdates)
+            for (var key in userUpdates)
               columns.push('"' + key +'"=\'' + userUpdates[key] + "'");
             updateUser.updates = columns.join(', ');
 
@@ -572,7 +572,7 @@ module.exports.completeRegistration = function(req, res) {
                 updateConsumer.id = data.userId;
 
                 var columns = [];
-                for (key in consumerUpdates)
+                for (var key in consumerUpdates)
                   columns.push('"' + key +'"=\'' + consumerUpdates[key] + "'");
                 updateConsumer.updates = columns.join(', ');
 
