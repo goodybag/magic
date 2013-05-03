@@ -1,5 +1,5 @@
--- 1.1.4.sql
-insert into deltas (version, date) values ('1.1.4', 'now()');-
+-- 1.2.0.sql
+insert into deltas (version, date) values ('1.2.0', 'now()');-
 
 - #486 partial registration
 
