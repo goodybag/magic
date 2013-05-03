@@ -55,6 +55,7 @@ var config = {
   , 'poplistItems'
   , 'nearbyGridItems'
   , 'requests'
+  , 'partialRegistrations'
   ]
 , fixtureFile: 'test'
 };

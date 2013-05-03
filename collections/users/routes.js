@@ -11,6 +11,7 @@ var
 , templates   = require('../../templates')
 , Transaction = require('pg-transaction')
 , async       = require('async')
+, magic       = require('../../lib/magic')
 
 , logger    = {}
 ;
@@ -177,9 +178,9 @@ module.exports.create = function(req, res){
               return res.error(errors.input.INVALID_GROUPS);
             }
 
-            tx.commit(function(error) { 
+            tx.commit(function(error) {
               done(error);
-              res.json({ error: null, data: newUser }); 
+              res.json({ error: null, data: newUser });
             });
           });
         });
@@ -251,13 +252,36 @@ module.exports.update = function(req, res){
             }
 
             // done
-            tx.commit(function(err) { 
+            tx.commit(function(err) {
               done(err);
-              res.noContent(); 
+              res.noContent();
             });
           });
         });
       };
+
+      var partialRegistration = function(userId, email, password, singlyId) {
+        if (email != null && password == null && singlyId == null) {
+          var token = require("randomstring").generate();
+          var query = sql.query([
+            'INSERT INTO "partialRegistrations" ("userId", token)',
+            'VALUES ($userId, $token)'
+          ]);
+          query.$('userId', userId);
+          query.$('token', token);
+
+          client.query(query.toString(), query.$values, function(error, result) {
+            if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+
+            var emailHtml = templates.email.partial_registration({
+              url : 'http://goodybag.com/#complete-registration/' + token
+            });
+            utils.sendMail(email, config.emailFromAddress, 'Goodybag Complete Registration', emailHtml);
+            magic.emit('user.partialRegistration', userId, email, token);
+          });
+        }
+      }
 
       // start transaction
       tx.begin(function() {
@@ -265,7 +289,7 @@ module.exports.update = function(req, res){
         // build update query
         var query = sql.query([
           'UPDATE users SET {updates}',
-            'WHERE users.id = $id'
+            'WHERE users.id = $id {emailClause} RETURNING email, password, "singlyId"'
         ]);
         query.updates = sql.fields();
         query.$('id', req.params.id);
@@ -314,12 +338,15 @@ module.exports.update = function(req, res){
             });
             return;
           }
+          else {
+            partialRegistration(req.params.id, result.rows[0].email, result.rows[0].password, result.rows[0].singlyId);
+          }
 
           // are we done?
           if (typeof req.body.groups == 'undefined') {
-            tx.commit(function(error){ 
+            tx.commit(function(error){
               done(error);
-              res.noContent(); 
+              res.noContent();
             });
             return;
           }

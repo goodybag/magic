@@ -3,6 +3,8 @@ var sinon = require('sinon');
 
 var tu = require('../../lib/test-utils');
 var utils = require('../../lib/utils');
+var magic = require('../../lib/magic');
+var db = require('../../db');
 
 describe('GET /v1/users', function() {
   it('should respond with a user listing', function(done) {
@@ -17,6 +19,7 @@ describe('GET /v1/users', function() {
       });
     })
   });
+
   it('should filter', function(done) {
     tu.get('/v1/users?filter=admin', function(err, results, res) {
       assert(!err);
@@ -187,14 +190,14 @@ describe('POST /v1/users', function() {
   });
 });
 
-describe('PATCH /v1/users/:id', function() {
+describe('PUT /v1/users/:id', function() {
   it('should update a user', function(done) {
     var user = {
       email: "new@email.com"
     , password: "whatever"
     };
     tu.login({ email: 'dumb@goodybag.com', password: 'password' }, function(error){
-      tu.patch('/v1/users/6', user, function(error, results, res) {
+      tu.put('/v1/users/6', user, function(error, results, res) {
         assert(res.statusCode == 204);
 
         tu.get('/v1/users/6', function(error, results) {
@@ -263,7 +266,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups:[2, 3]
     };
     tu.login({ email: 'consumer@goodybag.com', password: 'password' }, function(error, authedUser){
-      tu.patch('/v1/users/' + authedUser.id, user, function(error, results, res) {
+      tu.put('/v1/users/' + authedUser.id, user, function(error, results, res) {
         assert(!error);
         results = JSON.parse(results);
         assert(results.error);
@@ -280,7 +283,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups:[1]
     };
     tu.loginAsClient(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res) {
+      tu.put('/v1/users/6', user, function(error, results, res) {
         assert(!error);
         assert(res.statusCode == 403);
         results = JSON.parse(results);
@@ -298,7 +301,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "sales@goodybag.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res){
+      tu.put('/v1/users/6', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 400);
         results = JSON.parse(results);
@@ -315,7 +318,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "sales@goodybag.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/500', user, function(error, results, res){
+      tu.put('/v1/users/500', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode == 404);
         tu.logout(function() {
@@ -331,7 +334,7 @@ describe('PATCH /v1/users/:id', function() {
     , groups: [40000]
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/6', user, function(error, results, res){
+      tu.put('/v1/users/6', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 400);
         results = JSON.parse(results);
@@ -348,7 +351,7 @@ describe('PATCH /v1/users/:id', function() {
       email: "foo@bar.com"
     };
     tu.loginAsAdmin(function() {
-      tu.patch('/v1/users/8', user, function(error, results, res){
+      tu.put('/v1/users/8', user, function(error, results, res){
         assert(!error);
         assert(res.statusCode === 204);
 
@@ -359,6 +362,31 @@ describe('PATCH /v1/users/:id', function() {
 
           tu.logout(done);
         });
+      });
+    });
+  });
+
+  it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '7777777-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test@example.com'};
+
+        magic.on('user.partialRegistration', function(user, email, token){
+          assert(email === data.email);
+          assert(user.toString() === userId.toString());
+          assert(token != null);
+          done();
+        });
+
+        tu.tapinAuthRequest('PUT', '/v1/users/' + userId, '7777777-___', data, function(err, result){});
       });
     });
   });
@@ -417,7 +445,7 @@ describe('POST /v1/users/password-reset', function() {
                 tu.logout(function() {
 
                   tu.loginAsAdmin(function(error){
-                    tu.patch('/v1/users/7', { password:'password' }, function(err, results, res) {
+                    tu.put('/v1/users/7', { password:'password' }, function(err, results, res) {
                       assert(res.statusCode == 204);
                       tu.logout(done);
                     });
