@@ -229,15 +229,30 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
         return callback(errors.registration.EMAIL_REGISTERED);
       if (result.screenName && inputs.screenName && result.screenName != id)
         return callback(errors.registration.SCREENNAME_TAKEN);
-      if (result.cardId && inputs.cardId && result.cardId != id)
-        return callback(errors.registration.CARD_ID_TAKEN);
       if (result.singlyId && inputs.singlyId && result.singlyId != id)
         return callback(errors.registration.SINGLY_ID_TAKEN);
       if (result.singlyAccessToken && inputs.singlyAccessToken && result.singlyAccessToken != id)
         return callback(errors.registration.SINGLY_ACCESS_TOKEN_TAKEN);
-    }
 
-    return callback();
+      if (result.cardId && inputs.cardId && result.cardId != id) {
+        var cardQuery = sql.query('SELECT * FROM users WHERE "cardId"=$cardId');
+        cardQuery.$('cardId', inputs.cardId);
+        db.query(cardQuery, function(error, rows, result) {
+          if (error) return callback(errors.internal.DB_FAILURE, error);
+          var user = result.rows[0];
+          if (!user.email || (!user.password && !user.singlyAccessToken)) { // then the cardId is stealable
+            var nullCardQuery = sql.query('UPDATE users SET "cardId"=null WHERE "cardId"=$cardId');
+            nullCardQuery.$('cardId', inputs.cardId);
+            db.query(nullCardQuery, function(error, rows, result) {
+              if (error) return callback(errors.internal.DB_FAILURE, error);
+              return callback();
+            });
+          } else
+            return callback(errors.registration.CARD_ID_TAKEN);
+        });
+      } else
+        return callback();
+    }
   });
 };
 

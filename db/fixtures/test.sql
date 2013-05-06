@@ -89,6 +89,11 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('19'
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('20', null, null, null, '432123-AAB');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('21', 'someconsumer21@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '432123-AAC');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('22', 'someconsumer22@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '432123-AAC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('23', null, null, null, '432123-AAD');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('24', null, '$2a$10$kD1PaqDCtMuY7OGFJQtOT.LLdBokBdkhRQLKGUtqw0vX7Y1rNN08m', '$2a$10$kD1PaqDCtMuY7OGFJQtOT.', '432123-AAE');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('25', 'test_1@example.com', null, null, '432123-AAF');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('26', 'test_2@example.com', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe0UEMsLS2KTkGHU12z3b6k3KgiBoRzQm', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe', '432123-AAG');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('27', 'test_3@example.com', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe0UEMsLS2KTkGHU12z3b6k3KgiBoRzQm', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe', null);
 
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXX');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXZ');
@@ -115,6 +120,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'cons
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 INSERT INTO "users" (id, email) VALUES ('11136', 'null.password@goodybag.com');
 COMMIT;
+
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
 
 -- CONSUMERS
@@ -136,6 +142,11 @@ INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('19'
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('20', 'Unregistered', 'Consumer', 'unregistered_consumer');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('21', 'Some', 'Consumer', 'some_consumer21');
 INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('22', 'Some', 'Consumer', 'some_consumer22');
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('23', null, null, null);
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('24', null, null, null);
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('25', null, null, null);
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('26', null, null, null);
+INSERT INTO "consumers" (id, "firstName", "lastName", "screenName") VALUES ('27', null, null, null);
 COMMIT;
 
 -- MANAGERS
