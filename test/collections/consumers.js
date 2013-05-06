@@ -521,7 +521,6 @@ describe('PUT /v1/consumers/:id', function() {
     tu.loginAsAdmin(function() {
       var cardId = '432123-AAG';
       tu.put('/v1/consumers/27', {cardId:cardId}, function(error, results, res) {
-        assert(error);
         assert(res.statusCode === 412);
         tu.get('/v1/users/27', function(error, results, res) {
           assert(!error);
@@ -534,7 +533,7 @@ describe('PUT /v1/consumers/:id', function() {
           assert(payload != null);
           assert(payload.error == null);
           assert(payload.data != null);
-          assert(payload.data.cardId == null);
+          assert(payload.data.cardId == '432123-AAF'); // the card id from the last test.  test independence isn't important, right?
 
           tu.get('/v1/users/26', function(error, results, res) { // the user who previously held the cardId
             assert(!error);
