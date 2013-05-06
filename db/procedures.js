@@ -250,10 +250,9 @@ module.exports.ensureNotTaken = function(inputs, id, callback, extension){
           } else
             return callback(errors.registration.CARD_ID_TAKEN);
         });
-      }
+      } else
+        return callback();
     }
-    else
-      return callback();
   });
 };
 
