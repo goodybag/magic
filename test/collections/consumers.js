@@ -430,6 +430,161 @@ describe('PUT /v1/consumers/:id', function() {
     });
   });
 
+  it('should steal a card id if email and password are null', function(done) {
+    tu.loginAsAdmin(function() {
+      var cardId = '432123-AAD';
+      tu.put('/v1/consumers/27', {cardId:cardId}, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 204);
+        tu.get('/v1/users/27', function(error, results, res) {
+          assert(!error);
+          var payload;
+          try {
+            payload = JSON.parse(results);
+          } catch(err) {
+            assert('json parse error' === false); // put something useful in the dump
+          }
+          assert(payload != null);
+          assert(payload.error == null);
+          assert(payload.data != null);
+          assert(payload.data.cardId === cardId);
+
+          tu.get('/v1/users/23', function(error, results, res) { // the user who previously held the cardId
+            assert(!error);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(err) {
+              assert('json parse error' === false); // put something useful in the dump
+            }
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.cardId == null);
+
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
+  it('should steal a card id if email is null and password is not', function(done) {
+    tu.loginAsAdmin(function() {
+      var cardId = '432123-AAE';
+      tu.put('/v1/consumers/27', {cardId:cardId}, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 204);
+        tu.get('/v1/users/27', function(error, results, res) {
+          assert(!error);
+          var payload;
+          try {
+            payload = JSON.parse(results);
+          } catch(err) {
+            assert('json parse error' === false); // put something useful in the dump
+          }
+          assert(payload != null);
+          assert(payload.error == null);
+          assert(payload.data != null);
+          assert(payload.data.cardId === cardId);
+
+          tu.get('/v1/users/24', function(error, results, res) { // the user who previously held the cardId
+            assert(!error);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(err) {
+              assert('json parse error' === false); // put something useful in the dump
+            }
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.cardId == null);
+
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
+  it('should steal a card id if email is not null and password is null', function(done) {
+    tu.loginAsAdmin(function() {
+      var cardId = '432123-AAF';
+      tu.put('/v1/consumers/27', {cardId:cardId}, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 204);
+        tu.get('/v1/users/27', function(error, results, res) {
+          assert(!error);
+          var payload;
+          try {
+            payload = JSON.parse(results);
+          } catch(err) {
+            assert('json parse error' === false); // put something useful in the dump
+          }
+          assert(payload != null);
+          assert(payload.error == null);
+          assert(payload.data != null);
+          assert(payload.data.cardId === cardId);
+
+          tu.get('/v1/users/25', function(error, results, res) { // the user who previously held the cardId
+            assert(!error);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(err) {
+              assert('json parse error' === false); // put something useful in the dump
+            }
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.cardId == null);
+
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+
+  it('should not steal a card id if email is not null and password is not null', function(done) {
+    tu.loginAsAdmin(function() {
+      var cardId = '432123-AAG';
+      tu.put('/v1/consumers/27', {cardId:cardId}, function(error, results, res) {
+        assert(res.statusCode === 412);
+        tu.get('/v1/users/27', function(error, results, res) {
+          assert(!error);
+          var payload;
+          try {
+            payload = JSON.parse(results);
+          } catch(err) {
+            assert('json parse error' === false); // put something useful in the dump
+          }
+          assert(payload != null);
+          assert(payload.error == null);
+          assert(payload.data != null);
+          assert(payload.data.cardId == '432123-AAF'); // the card id from the last test.  test independence isn't important, right?
+
+          tu.get('/v1/users/26', function(error, results, res) { // the user who previously held the cardId
+            assert(!error);
+            var payload;
+            try {
+              payload = JSON.parse(results);
+            } catch(err) {
+              assert('json parse error' === false); // put something useful in the dump
+            }
+            assert(payload != null);
+            assert(payload.error == null);
+            assert(payload.data != null);
+            assert(payload.data.cardId === cardId);
+
+            tu.logout(done);
+          });
+        });
+      });
+    });
+  });
+>>>>>>> master
 
   // Skip this for now
   // it('should update a consumers email and password when they registered with facebook', function(done) {
