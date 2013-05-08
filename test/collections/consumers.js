@@ -402,7 +402,7 @@ describe('PUT /v1/consumers/:id', function() {
 
   it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
     tu.loginAsTablet(function(){
-      tu.tapinAuthRequest('GET', '/v1/session', '0000000-___', function(err, results, res) {
+      tu.tapinAuthRequest('GET', '/v1/session', '0000010-___', function(err, results, res) {
         // should have created a blank user
         assert(err == null);
         var payload = JSON.parse(results);
@@ -411,7 +411,7 @@ describe('PUT /v1/consumers/:id', function() {
         assert(payload.meta.isFirstTapin === true);
         assert(payload.meta.userId != null);
         var userId = payload.meta.userId;
-        var data = {email:'test@example.com'};
+        var data = {email:'test_10@example.com'};
 
         var event = 'user.partialRegistration';
 
@@ -425,7 +425,7 @@ describe('PUT /v1/consumers/:id', function() {
 
         magic.on(event, callback);
 
-        tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, '0000000-___', data, function(err, result){});
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, '0000010-___', data, function(err, result){});
       });
     });
   });
