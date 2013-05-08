@@ -55,7 +55,7 @@ module.exports.getOauthUrl = function(req, res){
     error: null
   , data: {
       url: config.singly.apiBaseUrl
-        + "/oauth/authenticate?client_id="
+        + "/oauth/authorize?client_id="
         + config.singly.clientId
         + "&redirect_uri="
         + encodeURIComponent(req.param('redirect_uri'))
