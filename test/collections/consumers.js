@@ -584,7 +584,6 @@ describe('PUT /v1/consumers/:id', function() {
       });
     });
   });
->>>>>>> master
 
   // Skip this for now
   // it('should update a consumers email and password when they registered with facebook', function(done) {
