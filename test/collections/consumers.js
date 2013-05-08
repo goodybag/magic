@@ -400,6 +400,36 @@ describe('PUT /v1/consumers/:id', function() {
     });
   });
 
+  it('should create a partialRegistration record if there is email but no password or singlyId', function(done) {
+    tu.loginAsTablet(function(){
+      tu.tapinAuthRequest('GET', '/v1/session', '0000010-___', function(err, results, res) {
+        // should have created a blank user
+        assert(err == null);
+        var payload = JSON.parse(results);
+        assert(payload.error == null);
+        assert(payload.meta != null);
+        assert(payload.meta.isFirstTapin === true);
+        assert(payload.meta.userId != null);
+        var userId = payload.meta.userId;
+        var data = {email:'test_10@example.com'};
+
+        var event = 'user.partialRegistration';
+
+        var callback = function(user, email, token){
+          assert(email === data.email);
+          assert(user.toString() === userId.toString());
+          assert(token != null);
+          magic.removeListener(event, callback);
+          done();
+        };
+
+        magic.on(event, callback);
+
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, '0000010-___', data, function(err, result){});
+      });
+    });
+  });
+
   it('should steal a card id if email and password are null', function(done) {
     tu.loginAsAdmin(function() {
       var cardId = '432123-AAD';

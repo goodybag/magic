@@ -2,6 +2,7 @@ var db = require('./index');
 var sql = require('../lib/sql');
 var errors = require('../lib/errors');
 var utils = require('../lib/utils');
+var magic = require('../lib/magic');
 var templates = require('../templates');
 var config = require('../config');
 var Transaction = require('pg-transaction');
@@ -400,15 +401,18 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
           }
           if (!needsUpdate) return callback();
 
-          var query = sql.query('UPDATE "{table}" SET {updates} WHERE id=$id');
+          var query = sql.query('UPDATE "{table}" SET {updates} WHERE id=$id {returning}');
           query.table = table;
           query.updates = sql.fields().addUpdateMap(data, query);
           query.$('id', userId);
+          if (table === 'users') query.returning = 'RETURNING email, password, "singlyId"';
 
           tx.query(query.toString(), query.$values, function(error, result){
             if (error) return callback(errors.internal.DB_FAILURE, error);
             if (result.rowCount === 0)
               return callback(errors.input.NOT_FOUND);
+            else
+              if (result.rows[0] != null) module.exports.partialRegistration(userId, result.rows[0].email, result.rows[0].password, result.rows[0].singlyId, client);
             callback();
           });
         };
@@ -428,3 +432,23 @@ module.exports.updateUser = function(group, userId, inputs, callback) {
     });
   });
 };
+
+module.exports.partialRegistration = function(userId, email, password, singlyId, client) {
+  if (email != null && password == null && singlyId == null) {
+    var token = require("randomstring").generate();
+    var query = sql.query('INSERT INTO "partialRegistrations" ("userId", token) VALUES ($userId, $token)');
+    query.$('userId', userId);
+    query.$('token', token);
+
+    client.query(query.toString(), query.$values, function(error, result) {
+      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+
+      var emailHtml = templates.email.partial_registration({
+        url : 'http://goodybag.com/#complete-registration/' + token
+      });
+      utils.sendMail(email, config.emailFromAddress, 'Goodybag Complete Registration', emailHtml);
+      magic.emit('user.partialRegistration', userId, email, token);
+    });
+  }
+}
