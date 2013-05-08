@@ -17,10 +17,7 @@ var config = {
       , fileRotate: true
       , papertrail: true
       , loggly: true
-      , graylog2: {
-        host: '192.168.13.105',
-        port: 12201
-      }
+      , gelf: true
       }
     }
   , http: {
@@ -85,6 +82,12 @@ var config = {
     , port: 24616
     }
 
+  , gelf: {
+      host: 'logs.goodybag.com'
+    , port: 12201
+    , app: 'magic'
+  }
+
   , facebook: {
       id: "159340790837933"
     , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
@@ -101,7 +104,13 @@ var config = {
       enabled: true
     , transports: {
         devConsole: true
+      , gelf: true
+      }
     }
+  , gelf: {
+      host: 'logs.goodybag.com'
+    , port: 12201
+    , app: 'magic-dev'
   }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
@@ -111,8 +120,10 @@ var config = {
 
 , test: {
     logging: {
-       enabled: true
-     , transports: { graylog2: true }
+       enabled: true,
+       transports: {
+         gelf: true
+       }
     }
   , http: {
       port: 8986
@@ -120,6 +131,14 @@ var config = {
   , pg: {
     hideDeprecationWarnings: false
   , poolSize: 15
+  }
+  //send packets to localhost so they don't
+  //all go to the production log server & needlessly
+  //fill it with waste data
+  , gelf: {
+      host: '127.0.0.1'
+    , port: 12201
+    , app: 'magic-test'
   }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
@@ -200,6 +219,11 @@ var config = {
   , baseUrl: 'http://magic.staging.goodybag.com'
   , postgresConnStr: process.env['DATABASE_URL']
   , emailEnabled: true
+  , gelf: {
+      host: 'logs.goodybag.com'
+    , port: 12201
+    , app: 'magic-staging'
+  }
   }
 
 , production: {
