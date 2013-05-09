@@ -78,3 +78,4 @@ heartbeats:
         businessId: { type: id,      eg: 1 }
         locationId: { type: id,      eg: 1 }
         userId:     { type: id,      eg: 1 }
+        type:       { type: string,  eg: system }
