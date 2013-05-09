@@ -27,7 +27,7 @@ module.exports = {
 
 , owner: {
     read:   ['notes', 'isEnabled']
-  , update: ['notes']
+  , update: ['notes', 'productId', 'url']
   }
 
 , businessOwner: {
