@@ -170,15 +170,17 @@ module.exports.listHeartbeats = function(req, res){
     }
   ;
 
-  if (req.param('id'))              query.userId     = req.param('id');
-  if (req.param('userId'))          query.userId     = req.param('userId');
-  if (req.param('tapinStationId'))  query.userId     = req.param('tapinStationId');
+  if (req.param('id'))              query.userId      = req.param('id');
+  if (req.param('userId'))          query.userId      = req.param('userId');
+  if (req.param('tapinStationId'))  query.userId      = req.param('tapinStationId');
 
-  if (req.param('businessId'))      query.businessId = req.param('businessId');
-  if (req.param('locationId'))      query.locationId = req.param('locationId');
+  if (req.param('businessId'))      query.businessId  = req.param('businessId');
+  if (req.param('locationId'))      query.locationId  = req.param('locationId');
 
-  if (req.param('limit'))   options.limit   = req.param('limit');
-  if (req.param('offset'))  options.offset  = req.param('offset');
+  if (req.param('limit'))           options.limit     = req.param('limit');
+  if (req.param('offset'))          options.offset    = req.param('offset');
+
+  if (req.param('type'))            query.type        = req.param('type');
 
   db.api.heartbeats.setLogTags(TAGS);
   db.api.heartbeats.find(query, options, function(error, results, meta){
@@ -219,6 +221,7 @@ module.exports.createHeartbeat = function(req, res){
     , locationId: results[0].locationId
     , businessId: results[0].businessId
     , data:       JSON.stringify(req.body)
+    , type:       req.body.type
     };
 
     var options = {
