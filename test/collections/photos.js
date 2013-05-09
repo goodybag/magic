@@ -56,6 +56,8 @@ describe('GET /v1/businesses/:id/photos', function() {
       assert(!payload.error);
       assert(payload.data.length > 1);
       assert(payload.meta.total > 1);
+      var photo = payload.data[0];
+      assert(photo.createdAt, 'photo should have a createdAt date');
       done();
     });
   });
@@ -101,6 +103,7 @@ describe('GET /v1/photos/:id', function() {
 
       assert(!payload.error);
       assert(payload.data.id == 1);
+      assert(payload.data.createdAt, 'should have a createdAt date');
       done();
     });
   });
