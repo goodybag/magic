@@ -208,7 +208,7 @@ var config = {
       enabled: true
     , transports: {
         console: true
-      , papertrail: true
+      , gelf: true
       , loggly: true
       }
     }
@@ -229,7 +229,10 @@ var config = {
 , production: {
     logging: {
       enabled: true
-    , transports: { console: true }
+    , transports: { 
+        console: true
+      , gelf: true
+      }
     }
   , pg: {
     poolSize: 20
