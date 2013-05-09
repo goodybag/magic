@@ -14,7 +14,7 @@ var all = [
 
 module.exports = {
   world: {
-    read:   ['id', 'businessId', 'productId', 'productName', 'userId', 'url']
+    read:   ['id', 'businessId', 'productId', 'productName', 'userId', 'url', 'createdAt']
   , create: []
   , update: []
   }

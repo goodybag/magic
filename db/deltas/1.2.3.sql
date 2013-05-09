@@ -11,3 +11,13 @@ create table "heartbeats" (
 , "createdAt"             timestamp without time zone default now()
 , "data"                  text
 );
+
+
+ALTER TABLE "photos"
+  ALTER COLUMN "createdAt" SET DEFAULT now();
+
+UPDATE "photos" 
+  SET "createdAt" = NOW() WHERE "createdAt" IS NULL;
+
+ALTER TABLE "photos"
+  ALTER COLUMN "createdAt" SET NOT NULL;
