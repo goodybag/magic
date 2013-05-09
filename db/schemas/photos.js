@@ -43,6 +43,7 @@ define(function(require){
     }
   , createdAt: {
       type: 'timestamp'
+    , meta: 'NOT NULL DEFAULT NOW()'
     }
   };
   return photos;
