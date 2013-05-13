@@ -33,7 +33,10 @@ var cliRequest = {
   query:{}
 };
 var cliResponse = {
-  error: function() { console.error.apply(console, arguments); },
+  error: function() {
+    console.error.apply(console, arguments);
+    process.exit(0)
+  },
   send: function() {
     console.log.apply(console, arguments);
     process.exit(0);

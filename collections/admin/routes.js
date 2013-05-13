@@ -6,6 +6,7 @@ var db          = require('../../db');
 var Transaction = require('pg-transaction');
 var async       = require('async');
 var config      = require('../../config');
+var errors      = require('../../lib/errors');
 
 var logger = {
   routes: require('../../lib/logger')({app: 'api', component: 'routes'})
@@ -23,7 +24,7 @@ module.exports.rebuildPopularList = function(req, res) {
 
   db.getClient(TAGS, function(error, client, done){
     if (error) {
-      return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
     }
 
     var tx = new Transaction(client);
@@ -31,26 +32,26 @@ module.exports.rebuildPopularList = function(req, res) {
       if (error) {
         //remove this client. can't call begin - that's bad bad
         done(error);
-        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
       }
 
       // lock our target
       tx.query('SELECT id FROM "poplistItems" WHERE "isActive" = true FOR UPDATE NOWAIT', function(error) {
         // errors should actually occur if the rows were previously locked
         if (error) {
-          return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          return tx.abort(done), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
         }
 
         // deprecate old lists
         tx.query('UPDATE "poplistItems" SET "isActive" = false WHERE "isActive" = true', function(error) {
           if (error) {
-            return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+            return tx.abort(done), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
           }
 
           tx.commit(function(err) {
             if (error){
               done(client);
-              return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
             }
 
             var fullList = [];
@@ -59,10 +60,10 @@ module.exports.rebuildPopularList = function(req, res) {
               client.query('SELECT id, "businessId" as bid FROM products WHERE "photoUrl" IS NOT NULL ORDER BY products.likes DESC', function(error, results) {
                 if (error) {
                   done();
-                  return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+                  return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
                 }
                 done();
-                if (results.rowCount === 0) return res.error(errors.internal.DB_FAILURE, 'no products returned'), logger.routes.error(TAGS, 'Error while selecting products: no products returned');
+                if (results.rowCount === 0) return logger.routes.error(TAGS, 'Error while selecting products: no products returned'), res.error(errors.internal.DB_FAILURE, 'no products returned');
 
                 var products = results.rows;
                 var makeSample = function(n, x, y) {
@@ -120,7 +121,8 @@ module.exports.rebuildPopularList = function(req, res) {
             // make the lists
             async.each(range(config.algorithms.popular.numLists), makeList, function(error) {
               insertListItems(client, fullList, function(error) {
-                if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+                if (error) return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
+                logger.routes.info(TAGS, "popular lists updated successfully");
                 res.send("popular lists updated successfully");
               });
             });
@@ -148,21 +150,21 @@ module.exports.rebuildNearbyGrid = function(req, res) {
     tx.begin(function(error) {
       if (error) {
         done(client);
-        return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+        return console.log(error), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
       }
 
       // lock our target
       tx.query('SELECT id FROM "nearbyGridItems" WHERE "isActive" = true FOR UPDATE NOWAIT', function(error) {
         // errors should actually occur if the rows were previously locked
         if (error) 
-          return tx.abort(done), console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          return tx.abort(done), console.log(error), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
 
         // deprecate old lists
         tx.query('UPDATE "nearbyGridItems" SET "isActive" = false WHERE "isActive" = true', function(error) {
-          if (error) return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+          if (error) return tx.abort(done), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
 
           tx.commit(function(err) {
-            if (error) return done(err), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+            if (error) return done(err), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
 
             var query = [
               'WITH "gp" AS',
@@ -186,7 +188,8 @@ module.exports.rebuildNearbyGrid = function(req, res) {
             ].join(' ');
             client.query(query, function(error, result) {
               done();
-              if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+              if (error) return console.log(error), logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
+              logger.routes.info(TAGS, "nearby grid updated successfully");
               res.send("nearby grid updated successfully");
             });
           });
