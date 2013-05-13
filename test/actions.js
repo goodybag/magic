@@ -137,4 +137,21 @@ omf(app, function(app) {
       });
     });
   });
+
+  describe('multiple actions', function() {
+    var action1 = {
+      type: 'van-dam-movie'
+    };
+    var action2 = {
+      type: 'james-bond-movie',
+      userId: 1
+    };
+    var actions = [action1, action2];
+    var options = {json: actions};
+    assertActions(options, 2, function() {
+      it('saves types', function() {
+        assert.equal(this.rows[0].type, action1.type);
+      });
+    });
+  });
 });
