@@ -4,13 +4,13 @@ var noop = require('noop');
 var moment = require('moment');
 var omf = require('omf');
 var ok = require('okay');
-var db = require(__dirname + '/../db');
+var db = require(__dirname + '/../../db');
 
 var tableName = 'actions';
 var actions = db.tables.actions;
 
 var url = '/v1/actions';
-var app = require(__dirname + '/../lib/server').createAppServer()
+var app = require(__dirname + '/../../lib/app');
 omf(app, function(app) {
   var assertActions = function(options, count, more) {
     more = more || global.noop;

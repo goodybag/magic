@@ -59,7 +59,7 @@ before(function(done) {
   });
 });
 
-require('./actions');
+require('./collections/actions');
 require('./collections/charities');
 require('./collections/businesses');
 require('./collections/locations');
@@ -112,6 +112,7 @@ function loadDescription(collection, cb) {
     cb(new doci.Resource(data[k]));
   }
 }
+loadDescription('actions', doChaos);
 loadDescription('activity', doChaos);
 loadDescription('businesses', doChaos);
 loadDescription('cashiers', doChaos);

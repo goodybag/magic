@@ -1,8 +1,12 @@
-var util = require('util');
-var logger = require(__dirname + '/../lib/logger')('actions');
-var express = require('express');
+var
+  db      = require(__dirname + '/../../db')
+, util    = require('util')
+, logger  = {}
+;
 
-var db = require(__dirname + '/../db');
+// Setup loggers
+logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
+logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 var actions = db.tables.actions;
 
@@ -33,9 +37,12 @@ var insertActions = function(body) {
   });
 }
 
-var actionsApp = module.exports = express();
-
-actionsApp.post('/v1/actions', function(req, res, next) {
+/**
+ * Get event
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.post = function(req, res){
   //return 204 no content right away
   //send empty json because some http clients can't
   //handle how awesome 204 is without a response body
@@ -45,4 +52,4 @@ actionsApp.post('/v1/actions', function(req, res, next) {
   process.nextTick(function() {
     insertActions(body);
   });
-});
+};
