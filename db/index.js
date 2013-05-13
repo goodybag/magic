@@ -84,7 +84,7 @@ exports.getClient = function(logTags, callback){
     
   };
 
-  handle = process.domain.bind(handle);
+  handle = process.domain ? process.domain.bind(handle) : handle;
 
   var pool = pg.pools.all[JSON.stringify(config.postgresConnStr)];
 
