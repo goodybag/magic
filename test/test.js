@@ -59,6 +59,7 @@ before(function(done) {
   });
 });
 
+require('./actions');
 require('./collections/charities');
 require('./collections/businesses');
 require('./collections/locations');

@@ -3,80 +3,15 @@ process.env['GB_ENV'] = 'test';
 var noop = require('noop');
 var moment = require('moment');
 var omf = require('omf');
-var express = require('express');
-var app = express();
 var ok = require('okay');
+var db = require(__dirname + '/../db');
 
 var tableName = 'actions';
-var db = require(__dirname + '/../db');
-var sql = require('sql');
-
-
-var actions = sql.define({
-  name: 'actions',
-  columns: [
-    'type', 'dateTime', 'userId', 'productId', 
-    'source', 'sourceVersion', 'deviceId', 'locationId', 'data']
-});
-
-var validBody = function(body) {
-  return body && body.type;
-};
-var express = require('express');
-var actionsApp = express();
-actionsApp.post('/v1/actions', function(req, res, next) {
-  //return 204 no content right away
-  //send empty json because some http clients can't
-  //handle how awesome 204 is without a response body
-  res.writeHead(204, {'content-type':'application/json'});
-  res.end('{}');
-  var body = req.body;
-  if(validBody(body)) {
-    process.nextTick(function() {
-      //clean posted body
-      var row = {
-        type: body.type,
-        dateTime: body.dateTime || new Date(),
-        userId: body.userId,
-        productId: body.productId,
-        source: body.source,
-        sourceVersion: body.sourceVersion,
-        deviceId: body.deviceId,
-        locationId: body.locationId,
-        data: body.data
-      };
-      db.query(actions.insert(row), function(err, rows, result) {
-        if(err) console.log(err);
-      });
-    });
-  }
-})
-
-app.use(express.bodyParser());
-app.use(actionsApp);
+var actions = db.tables.actions;
 
 var url = '/v1/actions';
+var app = require(__dirname + '/../lib/server').createAppServer()
 omf(app, function(app) {
-  before(function(done) {
-    var columns = [
-      '"type" text',
-      '"dateTime" TIMESTAMP DEFAULT NOW()',
-      '"userId" INT',
-      '"productId" INT',
-      '"source" TEXT',
-      '"sourceVersion" TEXT',
-      '"deviceId" INT',
-      '"locationId" INT',
-      '"data" JSON'
-    ]
-    var q = 'CREATE TABLE IF NOT EXISTS ' + tableName + '(' + columns.join(' ,') + ')';
-    db.query(q, done);
-  });
-  after(function() {
-    db.query('DROP TABLE actions');
-    require('pg').end();
-  });
-
   var assertActions = function(options, count, more) {
     more = more || global.noop;
     before(function(done) {

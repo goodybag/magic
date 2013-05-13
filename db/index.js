@@ -305,6 +305,7 @@ exports.schemas = {
 , nearbyGridItems:           require('./schemas/nearbyGridItems')
 , requests:                  require('./schemas/requests')
 , partialRegistrations:      require('./schemas/partialRegistrations')
+, actions:                   require('./schemas/actions')
 };
 
 exports.fields = fields;
