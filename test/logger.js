@@ -111,12 +111,22 @@ describe('logger', function() {
       logger.error('something', 'okay', new Error('omg'));
     });
     it('should not throw an error', function(done) {
-      try {
-        logger.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+      logger.once('gelf', function(msg) {
+        assert.equal(msg.short_message, 'INVALID_PARTIAL_REGISTRATION_TOKEN');
+        assert.equal(msg._type, 'auth');
+        assert.equal(msg._code, '0016');
         done();
-      } catch (err) {
-        assert(false);
-      }
+      });
+      logger.error(errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
+    });
+    it('logs custom error objects properly',  function(done) {
+      logger.once('gelf', function(msg) {
+        assert.equal(msg.short_message, 'INVALID_PARTIAL_REGISTRATION_TOKEN');
+        assert.equal(msg._type, 'auth');
+        assert.equal(msg._code, '0016');
+        done();
+      });
+      logger.error(['something'], errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
     });
   });
 });
