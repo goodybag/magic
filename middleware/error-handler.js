@@ -11,12 +11,22 @@ var errorHandler = module.exports = function(app) {
         'content-type':'application/json', 
         'connection': 'close'
       };
-      res.writeHead(500, errorHeaders);
+      if(!res.headersSent) {
+        res.writeHead(500, errorHeaders);
+      }
       res.end(JSON.stringify({error: errors.internal.UNKNOWN, data: null}));
     } catch(e) {
       delete e.domain;
       log.warn('failed to end response', e);
     }
+    setTimeout(function() {
+      log.info('trying to terminate connected socket');
+      try {
+        res.socket.destroy();
+      } catch(e) {
+        log.warn('could not destroy socket');
+      }
+    }, 100);
     if(app.shutdown) {
       app.shutdown();
     } else {
