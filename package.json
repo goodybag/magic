@@ -19,7 +19,6 @@
     "winston-papertrail": "0.0.6",
     "winston-loggly": "0.6.x",
     "nodemailer": "0.3.x",
-    "pubnub": "https://github.com/pfraze/pubnub-nodejs/tarball/master",
     "validator": "0.4.x",
     "async": "0.2.x",
     "when": "1.7.x",
@@ -43,7 +42,8 @@
     "pg-parse-float": "0.0.x",
     "microtime": "~0.3.3",
     "gelf-encode": "0.2.x",
-    "udp-client": "0.1.x"
+    "udp-client": "0.1.x",
+    "pubnub": "~3.4.4"
   },
   "devDependencies": {
     "better-assert": "1.0.x",
