@@ -110,11 +110,18 @@ module.exports = function(req, res, next){
         //now we have the tapinStation, set some request variables we can use later
         req.data('locationId', tapinStation.locationId);
         req.data('businessId', tapinStation.businessId);
+        req.data('tapinStationId', tapinStation.id);
 
         var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
         var insertValues = [user.id, tapinStationUser.id, cardId];
         db.query(insertQuery, insertValues, ok(stage.dbError, function(rows) {
-          magic.emit('consumers.tapin', user, rows[0].id);
+          var event = {
+            userId: user.id,
+            tapinId: rows[0].id,
+            tapinStationId: tapinStation.id,
+            locationId: tapinStation.locationId
+          }
+          magic.emit('consumers.tapin', event);
           stage.end(user);
         }));
       }));

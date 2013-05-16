@@ -55,8 +55,8 @@ module.exports = {
   }
 
 , 'consumers.tapin':
-  function (user, tapinStationId) {
-    insert('consumers.tapin', { userId:user.id, tapinStationId:tapinStationId });
+  function (event) {
+    insert('consumers.tapin', event);
   }
 
 , 'products.like':
