@@ -15,7 +15,9 @@ var
 
 module.exports = {
   'products.like':
-  function (userId, productId){
+  function (event){
+    var userId = event.userId;
+    var productId = event.productId;
     var
       inputs = {}
     , TAGS = ['activity-products-like-event']
@@ -76,7 +78,9 @@ module.exports = {
   }
 
 , 'products.want':
-  function (userId, productId){
+  function (event){
+    var userId = event.userId;
+    var productId = event.productId;
     var
       inputs = {}
     , TAGS = ['activity-products-want-event']
@@ -137,7 +141,9 @@ module.exports = {
   }
 
 , 'products.try':
-  function (userId, productId){
+  function (event){
+    var userId = event.userId;
+    var productId = event.productId;
     var
       inputs = {}
 
