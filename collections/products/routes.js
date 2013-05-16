@@ -43,10 +43,11 @@ module.exports.list = function(req, res){
   var includeCats = includes.indexOf('categories') !== -1;
   var includeColl = includes.indexOf('collections') !== -1;
   var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+  var withs = [];
 
   // build data query
   var query = sql.query([
-    '{sortCacheWith}',
+    '{withs}',
     'SELECT {fields} FROM products',
       '{sortCacheJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
       'INNER JOIN businesses ON businesses.id = products."businessId"',
@@ -64,7 +65,7 @@ module.exports.list = function(req, res){
   query.groupby = sql.fields().add('products.id').add('businesses.id');
 
   // Don't filter out unverified business products when querying by business and by collection
-  if (!req.param('businessId') && !req.param('collectionId'))
+  if (!req.param('businessId') && !req.param('collectionId') && !req.param('locationId'))
     query.where.and('businesses."isVerified" is true');
 
   // hasPhoto filtering
@@ -247,13 +248,17 @@ module.exports.list = function(req, res){
 
   // is in collection join
   if (includeColl && req.session.user) {
-    query.fields.add([
-      'array(SELECT (CASE WHEN coll."pseudoKey" IS NOT NULL THEN coll."pseudoKey" ELSE coll.id::text END) FROM "productsCollections" pc, collections coll',
-        'WHERE pc."collectionId" = coll.id',
-          'AND pc."productId" = products.id',
-          'AND pc."userId" = $userId',
-      ') AS "collections"'
-    ].join(' '));
+    withs.push([
+      'prod_coll as (SELECT'
+    , '  (CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END) as id,'
+    , '  "productId"'
+    , '  FROM "productsCollections"'
+    , '  LEFT JOIN collections ON'
+    , '    "productsCollections"."collectionId" = collections.id'
+    , '  WHERE "productsCollections"."userId" = $userId)'
+    ].join('\n'));
+
+    query.fields.add('array( select id from prod_coll where "productId" = products.id ) AS "collections"');
     query.$('userId', req.session.user.id);
   }
 
@@ -283,12 +288,9 @@ module.exports.list = function(req, res){
     }
     else if (/distance/.test(req.query.sort)) {
       // filter the products to select from by INNER JOINing a random subset of products in the nearby grid locations
-      query.sortCacheWith = [
-        'WITH',
-          '"oneOfEachClose" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position AND "isActive"=true LIMIT 30),',
-          '"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE "isActive"=true ORDER BY cachedrandom*cachedrandom*earth_distance(ll_to_earth($lat,$lon), position) LIMIT 250),',
-          '"nearbyItems" AS (SELECT * FROM "oneOfEachClose" UNION SELECT * FROM "randomSubset")'
-      ].join(' ');
+      withs.push('"oneOfEachClose" AS (SELECT DISTINCT ON ("businessId") * FROM "nearbyGridItems" WHERE earth_box(ll_to_earth($lat,$lon), 1000) @> position AND "isActive"=true LIMIT 30)');
+      withs.push('"randomSubset" AS (SELECT * FROM "nearbyGridItems" WHERE "isActive"=true ORDER BY cachedrandom*cachedrandom*earth_distance(ll_to_earth($lat,$lon), position) LIMIT 250)');
+      withs.push('"nearbyItems" AS (SELECT * FROM "oneOfEachClose" UNION SELECT * FROM "randomSubset")');
       query.sortCacheJoin = 'INNER JOIN "nearbyItems" ni ON ni."productId" = products.id AND ni."isActive" = true';
       // the distance field is set by the lat/lon query-param handling; no need to duplicate here
       // query.fields.add('earth_distance(ll_to_earth($lat,$lon), ni.position) as distance');
@@ -301,6 +303,8 @@ module.exports.list = function(req, res){
     query.where.and('products.name ILIKE $nameFilter');
     query.$('nameFilter', '%' + req.param('filter') + '%');
   }
+
+  if (withs.length > 0) query.withs = 'WITH ' + withs.join(',\n');
 
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
