@@ -56,6 +56,7 @@ var config = {
   , 'nearbyGridItems'
   , 'requests'
   , 'partialRegistrations'
+  , 'actions'
   ]
 , fixtureFile: 'test'
 };

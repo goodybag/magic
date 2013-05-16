@@ -1,0 +1,7 @@
+collection:
+  resource:
+    type: collection
+    path: /actions
+  methods:
+    post:
+      desc: Add Action
