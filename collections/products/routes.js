@@ -64,7 +64,7 @@ module.exports.list = function(req, res){
   query.groupby = sql.fields().add('products.id').add('businesses.id');
 
   // Don't filter out unverified business products when querying by business and by collection
-  if (!req.param('businessId') && !req.param('collectionId'))
+  if (!req.param('businessId') && !req.param('collectionId') && !req.param('locationId'))
     query.where.and('businesses."isVerified" is true');
 
   // hasPhoto filtering
@@ -986,9 +986,9 @@ module.exports.updateFeelings = function(req, res) {
         if (error) {
           return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
         }
-        if (result.rowCount === 0) { 
+        if (result.rowCount === 0) {
           tx.abort(done);
-          return res.error(errors.input.NOT_FOUND); 
+          return res.error(errors.input.NOT_FOUND);
         }
 
         // fallback undefined inputs to current feelings and ensure defined inputs are boolean

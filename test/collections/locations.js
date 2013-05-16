@@ -715,6 +715,35 @@ describe('/v1/locations/:id/products', function() {
     });
   });
 
+  it('should list products when specifying a locationId even if the business is unverified', function(done){
+
+    var data = [{ name: 'My Little Bidness', isVerified: false }];
+    tu.populate('businesses', data, function(error, businesses){
+      assert(!error);
+
+      var bid = businesses[0];
+      data = [{ name: 'My Little Location', businessId: bid, isEnabled: true }];
+      tu.populate('locations', data, function(error, locations){
+        assert(!error);
+
+        var lid = locations[0];
+        data = [{ name: 'My Little Product', businessId: bid }];
+        tu.populate('products', data, function(error, products){
+          assert(!error);
+
+          tu.get('/v1/locations/' + lid + '/products', function(error, results, res){
+            assert(!error);
+
+            assert(res.statusCode == 200);
+
+            results = JSON.parse(results);
+            assert(results.data.length == 1);
+            done();
+          });
+        });
+      });
+    });
+  });
 });
 
 describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
