@@ -366,7 +366,7 @@ describe('GET /v1/locations/:locationId/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 1);
-      assert(payload.data[0].id == 1);
+      assert(payload.data[0].id);
       assert(payload.data[0].businessId);
       assert(payload.data[0].name);
       assert(payload.meta.total > 1);
