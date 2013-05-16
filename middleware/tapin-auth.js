@@ -1,10 +1,11 @@
 var
   db          = require('../db')
 , utils       = require('../lib/utils')
-, logger      = require('../lib/logger')
+, logger      = require('../lib/logger')('tapin-auth')
 , errors      = require('../lib/errors')
 , magic       = require('../lib/magic')
 , Transaction = require('pg-transaction')
+, ok = require('okay')
 
 , users       = db.tables.users
 , consumers   = db.tables.consumers
@@ -57,16 +58,9 @@ module.exports = function(req, res, next){
       this.status(204).end();
   };
 
-  var tx, client, done;
   var stage = {
     start: function() {
-      db.getClient(TAGS, function(error, client_, done_){
-        if (error) return stage.dbError(error);
-        client = client_;
-        done = done_;
-        tx = new Transaction(client);
-        tx.begin(stage.lookupUser);
-      });
+      stage.lookupUser();
     }
 
   , lookupUser: function() {
@@ -80,7 +74,7 @@ module.exports = function(req, res, next){
           'GROUP BY users.id'
       ].join(' ');
 
-      client.query(query, [cardId], function(error, result){
+      db.query(query, [cardId], function(error, rows, result){
         if (error) return stage.dbError(error);
         var user = result.rows[0];
         if (!user) stage.createUser();
@@ -103,78 +97,36 @@ module.exports = function(req, res, next){
     }
 
   , insertTapin: function(user) {
-      var query = [
-        'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime")',
-          'SELECT $1, "tapinStations".id, $2, now() FROM "tapinStations"',
-            'WHERE "tapinStations".id = $3',
-          'RETURNING id'
-      ].join(' ');
-
-      client.query(query, [user.id, cardId, tapinStationUser.id], function(error, result) {
-        if (error) return stage.dbError(error);
-        if (result.rowCount === 0) {
-          done();
+      //fetch tapinStation row
+      var q = 'SELECT * from "tapinStations" WHERE "tapinStations".id = $1';
+      var q = db.tables.tapinStations.where(tapinStations.id.equals(tapinStationUser.id));
+      db.query(q, ok(stage.dbError, function(rows) {
+        if(rows.length < 1) {
+          logger.error('auth failure - tapin station not found', {user: user, tapinStationUser: tapinStationUser});
           return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
         }
-        magic.emit('consumers.tapin', user, result.rows[0].id);
-        // stage.insertVisit(user, result.rows[0].id);
-        stage.end(user);
-      });
+        var tapinStation = rows[0];
+
+        //now we have the tapinStation, set some request variables we can use later
+        req.data('locationId', tapinStation.locationId);
+        req.data('businessId', tapinStation.businessId);
+
+        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
+        var insertValues = [user.id, tapinStationUser.id, cardId];
+        db.query(insertQuery, insertValues, ok(stage.dbError, function(rows) {
+          magic.emit('consumers.tapin', user, rows[0].id);
+          stage.end(user);
+        }));
+      }));
     }
-
-  , insertVisit: function(user, tapinId) {
-      if (user.groups.indexOf('consumer') === -1) return stage.end(user);
-
-      // only inserts if no visit occured in the last 3 hours
-      var query = [
-        'INSERT INTO visits ("tapinId", "businessId", "locationId", "tapinStationId", "userId", "isFirstVisit", "dateTime")',
-          'WITH "lastVisit" AS (',
-            'SELECT "dateTime" FROM visits',
-              'WHERE visits."userId" = $2',
-              'ORDER BY visits.id DESC',
-            ')',
-          'SELECT $1, "businessId", "locationId", $3, $2, ("lastVisit"."dateTime" IS NULL), now() FROM "tapinStations"',
-            'LEFT JOIN "lastVisit" ON true',
-            'WHERE id = $3',
-            'AND (',
-              '"lastVisit"."dateTime" <= now() - \'3 hours\'::interval',
-              'OR "lastVisit"."dateTime" IS NULL',
-            ')',
-          'RETURNING id, "businessId", "locationId", "isFirstVisit"'
-      ].join(' ');
-      client.query(query, [tapinId, user.id, tapinStationUser.id], function(error, result) {
-        if (error) return stage.dbError(error);
-
-        // No visit
-        if (result.rows.length === 0) return stage.end(user);
-
-        var visit = result.rows[0];
-        magic.emit('consumers.visit', user.id, visit.id, visit.businessId, visit.locationId, visit.isFirstVisit);
-        stage.end(user);
-      });
-    }
-
   , dbError: function(error){
-      console.log('aboring tapin auth transaction')
-      tx.abort(done);
+      logger.error('database error', error);
       res.error(errors.internal.DB_FAILURE, error);
     }
 
   , end: function(user) {
-      tx.commit(function(error) {
-        done(error);
-        // First groupIds
-        if (!user.groupIds){
-          user.groupIds = {};
-          for (var i = user.groups.length - 1; i >= 0; i--){
-            if (user[user.groups[i] + 'Id'])
-              user.groupIds[user.groups[i]] = user[user.groups[i] + 'Id'];
-          }
-        }
-
-        req.session.user = user;
-        next();
-      });
+      req.session.user = user;
+      next();
     }
   };
 
