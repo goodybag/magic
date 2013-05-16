@@ -55,38 +55,38 @@ module.exports = {
   }
 
 , 'consumers.tapin':
-  function (user, tapinStationId) {
-    insert('consumers.tapin', { userId:user.id, tapinStationId:tapinStationId });
+  function (event) {
+    insert('consumers.tapin', event);
   }
 
 , 'products.like':
-  function (userId, productId){
-    insert('products.like', { userId: userId, productId: productId });
+  function (event){
+    insert('products.like', event);
   }
 
 , 'products.try':
-  function (userId, productId){
-    insert('products.try', { userId: userId, productId: productId });
+  function (event){
+    insert('products.try', event);
   }
 
 , 'products.want':
-  function (userId, productId){
-    insert('products.want', { userId: userId, productId: productId });
+  function (event){
+    insert('products.want', event);
   }
 
 , 'products.unlike':
-  function (userId, productId){
-    insert('products.unlike', { userId: userId, productId: productId });
+  function (event){
+    insert('products.unlike', event);
   }
 
 , 'products.untry':
-  function (userId, productId){
-    insert('products.untry', { userId: userId, productId: productId });
+  function (event){
+    insert('products.untry', event);
   }
 
 , 'products.unwant':
-  function (userId, productId){
-    insert('products.unwant', { userId: userId, productId: productId });
+  function (event){
+    insert('products.unwant', event);
   }
 
 , 'loyalty.punch':

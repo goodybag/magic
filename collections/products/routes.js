@@ -1047,12 +1047,17 @@ module.exports.updateFeelings = function(req, res) {
             tx.commit(function(err) {
               done(err);
               res.noContent();
+              var message = {
+                userId: req.session.user.id,
+                productId: req.param('productId'),
+                locationId: req.data('locationId') || ''
+              };
 
               if (req.body.isLiked != null && req.body.isLiked != undefined){
                 if (req.body.isLiked != currentFeelings.isLiked){
                   magic.emit(
                     'products.' + (req.body.isLiked ? '' : 'un') + 'like'
-                  , req.session.user.id, req.param('productId'));
+                  , message);
                 }
               }
 
@@ -1060,7 +1065,7 @@ module.exports.updateFeelings = function(req, res) {
                 if (req.body.isTried != currentFeelings.isTried){
                   magic.emit(
                     'products.' + (req.body.isTried ? '' : 'un') + 'try'
-                  , req.session.user.id, req.param('productId'));
+                  , message);
                 }
               }
 
@@ -1068,7 +1073,7 @@ module.exports.updateFeelings = function(req, res) {
                 if (req.body.isWanted != currentFeelings.isWanted){
                   magic.emit(
                     'products.' + (req.body.isWanted ? '' : 'un') + 'want'
-                  , req.session.user.id, req.param('productId'));
+                  , message);
                 }
               }
             });
