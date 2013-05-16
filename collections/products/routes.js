@@ -250,7 +250,7 @@ module.exports.list = function(req, res){
   if (includeColl && req.session.user) {
     withs.push([
       'prod_coll as (SELECT'
-    , '  (CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END),'
+    , '  (CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END) as id,'
     , '  "productId"'
     , '  FROM "productsCollections"'
     , '  LEFT JOIN collections ON'
