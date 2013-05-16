@@ -298,9 +298,16 @@ module.exports.list = function(req, res){
     }
   }
 
+  // name filter
+  if (req.param('filter')){
+    query.where.and('products.name ILIKE $nameFilter');
+    query.$('nameFilter', '%' + req.param('filter') + '%');
+  }
+
   if (withs.length > 0) query.withs = 'WITH ' + withs.join(',\n');
 
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
   // run data query
   db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
