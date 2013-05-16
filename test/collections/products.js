@@ -335,6 +335,22 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should filter products by name', function(done){
+
+    tu.populate('products', [{ name: '__blah__', businessId: 1 }], function(error, pids){
+      assert(!error);
+
+      tu.get('/v1/products?filter=__bla', function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.length == 1);
+        done();
+      });
+    });
+
+  });
+
 });
 
 describe('GET /v1/locations/:locationId/products', function() {

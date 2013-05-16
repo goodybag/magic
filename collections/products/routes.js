@@ -296,7 +296,14 @@ module.exports.list = function(req, res){
     }
   }
 
+  // name filter
+  if (req.param('filter')){
+    query.where.and('products.name ILIKE $nameFilter');
+    query.$('nameFilter', '%' + req.param('filter') + '%');
+  }
+
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
+
   // run data query
   db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -986,9 +993,9 @@ module.exports.updateFeelings = function(req, res) {
         if (error) {
           return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
         }
-        if (result.rowCount === 0) { 
+        if (result.rowCount === 0) {
           tx.abort(done);
-          return res.error(errors.input.NOT_FOUND); 
+          return res.error(errors.input.NOT_FOUND);
         }
 
         // fallback undefined inputs to current feelings and ensure defined inputs are boolean
