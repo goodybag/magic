@@ -302,9 +302,8 @@ module.exports.list = function(req, res){
 
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
   // run data query
-  console.log(query.toString(), query.values);
   db.query(query, function(error, rows, dataResult){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var total = 0, userLikes = 0, userWants = 0, userTries = 0;
     if (dataResult.rowCount !== 0) {
