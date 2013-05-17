@@ -335,6 +335,22 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should filter products by name', function(done){
+
+    tu.populate('products', [{ name: '__blah__', businessId: 1 }], function(error, pids){
+      assert(!error);
+
+      tu.get('/v1/products?filter=__bla', function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        assert(results.data.length == 1);
+        done();
+      });
+    });
+
+  });
+
 });
 
 describe('GET /v1/locations/:locationId/products', function() {
@@ -350,10 +366,9 @@ describe('GET /v1/locations/:locationId/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 1);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].inSpotlight == undefined);
+      assert(payload.data[0].id);
+      assert(payload.data[0].businessId);
+      assert(payload.data[0].name);
       assert(payload.meta.total > 1);
       done();
     });
@@ -370,10 +385,9 @@ describe('GET /v1/locations/:locationId/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 1);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].inSpotlight == true);
+      assert(payload.data[0].id);
+      assert(payload.data[0].businessId);
+      assert(payload.data[0].name);
       assert(payload.meta.total > 1);
       done();
     });
@@ -390,10 +404,9 @@ describe('GET /v1/locations/:locationId/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 1);
-      assert(payload.data[0].id == 1);
-      assert(payload.data[0].businessId == 1);
-      assert(payload.data[0].name == 'Product 1');
-      assert(payload.data[0].isAvailable == true);
+      assert(payload.data[0].id);
+      assert(payload.data[0].businessId);
+      assert(payload.data[0].name);
       assert(payload.data.filter(function(p){ return !p.isAvailable; }).length > 0);
 
       assert(payload.meta.total > 1);
