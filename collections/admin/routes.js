@@ -62,8 +62,7 @@ module.exports.rebuildPopularList = function(req, res) {
                   done();
                   return logger.routes.error(TAGS, error), res.error(errors.internal.DB_FAILURE, error);
                 }
-                done();
-                if (results.rowCount === 0) return logger.routes.error(TAGS, 'Error while selecting products: no products returned'), res.error(errors.internal.DB_FAILURE, 'no products returned');
+                if (results.rowCount === 0) return done(), logger.routes.error(TAGS, 'Error while selecting products: no products returned'), res.error(errors.internal.DB_FAILURE, 'no products returned');
 
                 var products = results.rows;
                 var makeSample = function(n, x, y) {
@@ -219,19 +218,13 @@ function shuffle(array) {
 }
 
 function insertListItems(client, list, cb) {
-  var doNext = function() {
+    var query = 'INSERT INTO "poplistItems" (listid, "productId", "createdAt", "isActive") VALUES ';
     var item = list.pop();
-    if (!item) { return cb(); }
-
-    client.query(
-      'INSERT INTO "poplistItems" (listid, "productId", "createdAt", "isActive") SELECT $1, $2, now(), true',
-      [item.listid, item.pid],
-      function(err, result) {
-        if (err) return cb(err);
-        if (result.rowCount === 0) return cb('Failed to insert item', item);
-        doNext();
-      }
-    );
-  };
-  doNext();
+    while(item) {
+        query += '('+item.listid+', '+item.pid+', now(), true)';
+        item = list.pop();
+        if (item)
+            query +=', ';
+    }
+    client.query(query, cb);
 }
