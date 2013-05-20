@@ -603,11 +603,22 @@ describe('GET /v1/products/:id', function() {
 
   it('should include user photos if requested', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
-      tu.get('/v1/products?include=userPhotos', function(err, payload, res) {
+      tu.get('/v1/products/1?include=userPhotos', function(err, payload, res) {
         assert(res.statusCode == 200);
         payload = JSON.parse(payload);
-        assert(payload.data[0].photos);
+        assert(payload.data.photos);
         done();
+      });
+    });
+  });
+
+  it('should include collections if requested', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/products/1?include=collections', function(err, payload, res) {
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        assert(Array.isArray(payload.data.collections));
+        tu.logout(done);
       });
     });
   });

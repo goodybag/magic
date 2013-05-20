@@ -350,8 +350,12 @@ module.exports.get = function(req, res){
 
   var includes = [].concat(req.query.include);
   var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+  var includeColl = includes.indexOf('collections') !== -1;
+
+  var withs = [];
 
   var query = sql.query([
+    '{withs}',
     'SELECT {fields},',
       'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
         'INNER JOIN "productsProductTags"',
@@ -365,6 +369,7 @@ module.exports.get = function(req, res){
       ')) as categories',
     'FROM products',
       'INNER JOIN businesses ON businesses.id = products."businessId"',
+      '{collectionJoin}',
       'WHERE products.id = $id',
       'GROUP BY {groupby}'
   ]);
@@ -389,6 +394,24 @@ module.exports.get = function(req, res){
     query.fields.add('array_to_json(array(SELECT row_to_json("photos".*) from "photos" WHERE "userId" = $userId AND "productId" = products.id)) as photos');
     query.$('userId', req.session.user.id);
   }
+
+  // is in collection join
+  if (includeColl && req.session.user) {
+    withs.push([
+      'prod_coll as (SELECT'
+    , '  (CASE WHEN collections."pseudoKey" IS NOT NULL THEN collections."pseudoKey" ELSE collections.id::text END) as id,'
+    , '  "productId"'
+    , '  FROM "productsCollections"'
+    , '  LEFT JOIN collections ON'
+    , '    "productsCollections"."collectionId" = collections.id'
+    , '  WHERE "productsCollections"."userId" = $userId)'
+    ].join('\n'));
+
+    query.fields.add('array( select id from prod_coll where "productId" = products.id ) AS "collections"');
+    query.$('userId', req.session.user.id);
+  }
+
+  if (withs.length > 0) query.withs = 'WITH ' + withs.join(',\n');
 
   db.query(query, function(error, rows, result){
     if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
