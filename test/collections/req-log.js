@@ -31,4 +31,22 @@ describe('GET /v1', function() {
       });
     });
   });
+
+  it('should make a tapin-auth like request and use the users id as the userId rather than tapin station id', function(done){
+    tu.login({ email:'tapin_station_0@goodybag.com', password:'password' }, function(error, user) {
+      assert(!error);
+
+      tu.tapinAuthRequest('POST', '/v1/products/3/feelings', '432123-ZZC', { isLiked: true }, function(error, payload, res){
+        assert(res.statusCode == 200);
+        payload = JSON.parse(payload);
+        var uid = payload.meta.userId;
+
+        db.api.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
+          assert(!error);
+          assert(obj.userId == uid);
+          tu.logout(done);
+        });
+      });
+    });
+  });
 });
