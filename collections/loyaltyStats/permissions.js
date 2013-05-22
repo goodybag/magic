@@ -18,6 +18,7 @@ var all = [
 , 'regularPunchesRequired'
 , 'elitePunchesRequired'
 , 'punchesRequiredToBecomeElite'
+, 'requiredItem'
 ];
 
 module.exports = {
@@ -48,6 +49,7 @@ module.exports = {
     , 'regularPunchesRequired'
     , 'elitePunchesRequired'
     , 'punchesRequiredToBecomeElite'
+    , 'requiredItem'
     ]
   }
 

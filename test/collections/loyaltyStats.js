@@ -18,6 +18,7 @@ describe('GET /v1/loyalty', function() {
         assert(payload.data[0].totalPunches === 23);
         assert(payload.data[0].visitCount === 40);
         assert(payload.data[0].isRegistered === true);
+        assert(payload.data[0].requiredItem);
         tu.logout(done);
       });
     });
