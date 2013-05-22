@@ -61,6 +61,7 @@ module.exports.list = function(req, res){
   query.fields.add('"businessLoyaltySettings"."punchesRequiredToBecomeElite" AS "punchesRequiredToBecomeElite"');
   query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
   query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
+  query.fields.add('"businessLoyaltySettings"."requiredItem" AS "requiredItem"');
   query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
   query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';
@@ -183,7 +184,7 @@ module.exports.update = function(req, res){
       if(error) {
         //destroy the client if begin fails
         done(error);
-        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+        return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       }
       var args = [client, tx], updateFn;
       if (req.param('loyaltyId')){
@@ -197,14 +198,14 @@ module.exports.update = function(req, res){
       args.push(deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        tx.commit(function() { 
+        tx.commit(function() {
           if(error) {
             //destroy client if it failed to commit
             done(error);
-            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error); 
+            return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
           }
           done();
-          res.noContent(); 
+          res.noContent();
         });
 
         magic.emit('loyalty.punch', deltaPunches, userId, businessId, req.body.locationId, req.session.user.id);
