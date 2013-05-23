@@ -70,7 +70,9 @@ module.exports.list = function(req, res){
 
   // hasPhoto filtering
   // :TEMP: iphone mods - only products with photos
-  if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {
+  if (req.param('hasPhoto') != undefined && (req.param('hasPhoto') == false || req.param('hasPhoto') == "false" || req.param('hasPhoto') == "0")){
+    query.where.and('("photoUrl" is null or "photoUrl" = \'\')');
+  } else if (req.param('hasPhoto') || (/iPhone/.test(req.headers['user-agent']) && RegExp('^/v1/products').test(req.path))) {
     query.where.and('"photoUrl" IS NOT NULL');
   }
 
