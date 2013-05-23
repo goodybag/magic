@@ -62,6 +62,7 @@ module.exports.list = function(req, res){
   query.fields.add('"businessLoyaltySettings"."elitePunchesRequired" AS "elitePunchesRequired"');
   query.fields.add('"businessLoyaltySettings"."regularPunchesRequired" AS "regularPunchesRequired"');
   query.fields.add('"businessLoyaltySettings"."requiredItem" AS "requiredItem"');
+  query.fields.add('"businesses"."logoUrl" AS "businessLogo"');
   query.fields.add('(users.email IS NOT NULL OR users."singlyAccessToken" IS NOT NULL) AS "isRegistered"');
 
   query.busJoin = 'JOIN businesses ON "userLoyaltyStats"."businessId" = businesses.id';

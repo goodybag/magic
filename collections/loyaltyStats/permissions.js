@@ -19,6 +19,7 @@ var all = [
 , 'elitePunchesRequired'
 , 'punchesRequiredToBecomeElite'
 , 'requiredItem'
+, 'businessLogo'
 ];
 
 module.exports = {
@@ -50,6 +51,7 @@ module.exports = {
     , 'elitePunchesRequired'
     , 'punchesRequiredToBecomeElite'
     , 'requiredItem'
+    , 'businessLogo'
     ]
   }
 
