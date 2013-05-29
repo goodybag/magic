@@ -166,6 +166,7 @@ collectionProductsCollection:
         userLikes:  { type: bool,    eg: false }
         userTried:  { type: bool,    eg: false }
         userWants:  { type: bool,    eg: false }
+        filter:     { type: string,  eg: pizza }
     post:
       desc: Add Product to Consumer Collection
       auth:
