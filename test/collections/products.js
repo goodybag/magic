@@ -298,11 +298,10 @@ describe('GET /v1/products', function() {
       assert(res.statusCode == 200);
 
       payload = JSON.parse(payload);
-
       assert(!payload.error);
-      assert(payload.data[0].name > payload.data[1].name);
-      assert(payload.data[1].name > payload.data[2].name);
-      assert(payload.data[2].name > payload.data[3].name);
+      assert(payload.data[0].name.toLowerCase() >= payload.data[1].name.toLowerCase());
+      assert(payload.data[1].name.toLowerCase() >= payload.data[2].name.toLowerCase());
+      assert(payload.data[2].name.toLowerCase() >= payload.data[3].name.toLowerCase());
       assert(payload.meta.total > 1);
       done();
     });
