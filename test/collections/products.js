@@ -299,6 +299,7 @@ describe('GET /v1/products', function() {
 
       payload = JSON.parse(payload);
       assert(!payload.error);
+      console.log(payload.data);
       assert(payload.data[0].name >= payload.data[1].name);
       assert(payload.data[1].name >= payload.data[2].name);
       assert(payload.data[2].name >= payload.data[3].name);
