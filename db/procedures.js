@@ -445,7 +445,7 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
 
 
       var emailHtml = templates.email.partial_registration({
-        url : 'http://goodybag.com/#complete-registration/' + token
+        url : 'http://www.goodybag.com/#complete-registration/' + token
       });
       utils.sendMail(email, config.emailFromAddress, 'Goodybag Complete Registration', emailHtml);
       magic.emit('user.partialRegistration', userId, email, token);
