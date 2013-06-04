@@ -478,17 +478,31 @@ module.exports.submitKeyTagRequest = function(req, res){
 
 module.exports.menuSections = {};
 
+// Here's basically the query we need to do
+// select
+//   "menuSections".*
+// , array_to_json( array_agg( prods.product ) )
+// from "menuSections"
+// left join "menuSectionsProducts"
+//   on "menuSections".id = "menuSectionsProducts"."sectionId"
+// left join (
+//   select id, row_to_json(p) as product from products p
+// ) prods on prods.id = "menuSectionsProducts"."productId"
+// group by "menuSections".id;
+
 module.exports.menuSections.list = function(req, res){
   var TAGS = ['get-menu-sections', req.uuid];
   logger.routes.debug(TAGS, 'fetching locztion menu');
 
   var includes = [].concat(req.query.include);
 
+  var joins = [];
+
   var query = sql.query([
     'select {fields} from "menuSections'
-  , '  {productsJoin}'
+  , '  {joins}'
   , '  {where}'
-  , '  {order} {sort} {limit}'
+  , '  {sort} {offset} {limit}'
   ]);
 
   query.$('locationId', req.param('locationId'));
@@ -500,19 +514,36 @@ module.exports.menuSections.list = function(req, res){
     .add('"menuSections".*')
     .add('COUNT(*) OVER() as "metaTotal"');
 
+  // Offset limit
+  query.offset = 'offset ' + req.param('offset') || 0;
+  if (req.param('limit')) query.limit = 'limit ' + req.param('limit');
+
   // Include Products
   if (includes.indexOf('products') > -1){
     // Embed the product record into each section records
-    sql.fields.add('row_to_json(product) as product');
+    sql.fields.add('array_to_json( array_agg( prods.product ) )');
 
-
+    joins.push([
+      'left join ('
+    , '  select id, row_to_json(p) as product from products p '
+    , ') prods on prods.id = "menuSectionsProducts"."productId"'
+    ].join('\n'));
   }
+
+  if (joins.length > 0) query.joins = joins.join('\n')
 
   db.query(query, function(error, result){
     if (error)
       return res.error(errors.internal.DB_FAILURE, error),
         logger.routes.error(TAGS, error);
 
+    if (result.rowCount == 0)
+      return res.json({ error: null, data: [], meta: { total: 0 } });
 
+    res.json({
+      error: null
+    , data: result.rows
+    , meta: { total: result.rows[0].metaTotal }
+    });
   });
 };
