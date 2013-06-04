@@ -475,3 +475,44 @@ module.exports.submitKeyTagRequest = function(req, res){
     res.noContent();
   });
 };
+
+module.exports.menuSections = {};
+
+module.exports.menuSections.list = function(req, res){
+  var TAGS = ['get-menu-sections', req.uuid];
+  logger.routes.debug(TAGS, 'fetching locztion menu');
+
+  var includes = [].concat(req.query.include);
+
+  var query = sql.query([
+    'select {fields} from "menuSections'
+  , '  {productsJoin}'
+  , '  {where}'
+  , '  {order} {sort} {limit}'
+  ]);
+
+  query.$('locationId', req.param('locationId'));
+
+  query.where = sql.where()
+    .and('"menuSections"."locationId" = $locationId');
+
+  sql.fields  = sql.fields()
+    .add('"menuSections".*')
+    .add('COUNT(*) OVER() as "metaTotal"');
+
+  // Include Products
+  if (includes.indexOf('products') > -1){
+    // Embed the product record into each section records
+    sql.fields.add('row_to_json(product) as product');
+
+
+  }
+
+  db.query(query, function(error, result){
+    if (error)
+      return res.error(errors.internal.DB_FAILURE, error),
+        logger.routes.error(TAGS, error);
+
+
+  });
+};

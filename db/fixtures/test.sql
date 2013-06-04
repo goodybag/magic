@@ -633,3 +633,32 @@ BEGIN;
 INSERT INTO users (id, email) VALUES (nextval('users_id_seq'), 'chaos@example.com');
 INSERT INTO "partialRegistrations" ("userId", token) VALUES (currval('users_id_seq'), 'chaos-token');
 COMMIT;
+
+-- menuSections
+
+BEGIN;
+-- Using amys
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (1, 39, 'Appetizers', 1, 'true');
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (2, 39, 'Sandwiches', 2, 'true');
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (3, 39, 'Salads', 3, 'true');
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (4, 39, 'Seafood', 3, 'true');
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (5, 39, 'Poop', 4, 'true');
+INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (6, 39, 'Desserts', 4, 'true');
+COMMIT;
+
+-- menuSectionsProductds
+
+BEGIN;
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (1, 46175, 51, 1);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (1, 46183, 51, 2);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (2, 46172, 51, 3);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (2, 46173, 51, 4);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (3, 46174, 51, 5);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (3, 46177, 51, 6);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (4, 46178, 51, 7);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (4, 46179, 51, 8);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (5, 46180, 51, 9);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (5, 46184, 51, 10);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (6, 46185, 51, 11);
+insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (6, 46186, 51, 12);
+COMMIT;

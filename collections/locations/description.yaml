@@ -178,3 +178,23 @@ keytagRequestsCollection:
         eg: { email: admin@goodybag.com, password: password }
   children:
     - /locations/:locationId/products/:productId
+
+menuSections:
+  resource:
+    type: collection
+    path: /locations/:locationId/menu-sections
+    params:
+      locationId: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get menu for location
+    post:
+      desc: Add new section to location menu
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        businessId:     { type: int,      eg: 1 }
+        name:           { type: string,   eg: Burgers }
+        order:          { type: int,      eg: 5 }
+        isEnabled:      { type: boolean,  eg: true}
