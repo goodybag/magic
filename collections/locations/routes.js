@@ -578,3 +578,30 @@ module.exports.menuSections.list = function(req, res){
     });
   });
 };
+
+module.exports.menuSections.create = function(req, res){
+  var TAGS = ['create-menu-sections', req.uuid];
+
+  db.api.menuSections.setLogTags(TAGS);
+
+  var products;
+  if (products = req.body.products) delete req.body.products;
+
+  // isEnabled = true by default
+  if (req.body.isEnabled == null || req.body.isEnabled == undefined)
+    req.body.isEnabled = true;
+
+  db.api.menuSections.insert(req.body, function(error, result){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.json({ error: null, data: result });
+
+    if (!products) return;
+
+    // Insert each menuSectionsProducts record
+    for (var i = 0, l = products.length; i < l; ++i){
+      products[i].sectionId = result.id;
+      db.api.menuSectionsProducts.insert(products[i]);
+    }
+  });
+};

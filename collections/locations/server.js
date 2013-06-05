@@ -225,4 +225,15 @@ server.get(
 , routes.menuSections.list
 );
 
+// Locations.createMenuSection
+server.post(
+  '/v1/locations/:locationId/menu-sections'
+, middleware.profile('POST /v1/locations/:locationId/menu-sections')
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('create location menu-sections handler')
+, routes.menuSections.create
+);
+
 module.exports = server;

@@ -58,3 +58,20 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
     });
   });
 });
+
+// describe('POST /v1/locations/:lid/menu-sections', function() {
+//   it('should create a menu section', function(done){
+//     var lid = 1;
+//     var section = {
+//       name: 'My Menu Section'
+//     , order: 1
+//     , businessId: 1
+//     };
+
+//     tu.post('/v1/locations/' + lid + '/menu-sections', function(error, payload, response){
+//       assert(!error);
+//       assert(response.statusCode == 200);
+
+//     });
+//   });
+// });

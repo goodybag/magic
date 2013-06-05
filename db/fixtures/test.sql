@@ -645,6 +645,7 @@ INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALU
 INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (5, 39, 'Poop', 4, 'true');
 INSERT INTO "menuSections" (id, "businessId", "name", "order", "isEnabled") VALUES (6, 39, 'Desserts', 4, 'true');
 COMMIT;
+SELECT setval('"menuSections_id_seq"', (SELECT MAX(id) from "menuSections"));
 
 -- menuSectionsProductds
 
@@ -662,3 +663,4 @@ insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "ord
 insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (6, 46185, 51, 11);
 insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (6, 46186, 51, 12);
 COMMIT;
+SELECT setval('"menuSectionsProducts_id_seq"', (SELECT MAX(id) from "menuSectionsProducts"));
