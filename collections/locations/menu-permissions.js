@@ -1,5 +1,7 @@
 var db = require('../../db');
 
+var write = ['products', 'products.id', 'products.order'].concat(db.fields.menuSections.plain)
+
 module.exports = {
   world: {
     // Use all db fields, but add reference to products
@@ -10,13 +12,13 @@ module.exports = {
 
 , sales: {
     read:   true
-  , create: true
-  , update: true
+  , create: write
+  , update: write
   }
 
 , admin: {
     read:   true
-  , create: true
-  , update: true
+  , create: write
+  , update: write
   }
 };

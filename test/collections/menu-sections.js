@@ -59,19 +59,47 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
   });
 });
 
-// describe('POST /v1/locations/:lid/menu-sections', function() {
-//   it('should create a menu section', function(done){
-//     var lid = 1;
-//     var section = {
-//       name: 'My Menu Section'
-//     , order: 1
-//     , businessId: 1
-//     };
+describe('POST /v1/locations/:lid/menu-sections', function() {
+  it('should create a menu section', function(done){
+    var lid = 1;
+    var section = {
+      name: 'My Menu Section'
+    , order: 1
+    , businessId: 1
+    };
 
-//     tu.post('/v1/locations/' + lid + '/menu-sections', function(error, payload, response){
-//       assert(!error);
-//       assert(response.statusCode == 200);
+    tu.loginAsAdmin(function(){
+      tu.post('/v1/locations/' + lid + '/menu-sections', section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 200);
 
-//     });
-//   });
-// });
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should create a menu section and also add products', function(done){
+    var lid = 1;
+    var section = {
+      name: 'My Menu Section 2'
+    , order: 2
+    , businessId: 1
+    , products: [
+        { id: 1, order: 1 }
+      , { id: 4, order: 3 }
+      , { id: 5, order: 2 }
+      ]
+    };
+
+    tu.loginAsAdmin(function(){
+      tu.post('/v1/locations/' + lid + '/menu-sections', section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 200);
+
+        tu.get('/v1/locations/' + )
+
+        tu.logout(done);
+      });
+    });
+  });
+});

@@ -229,7 +229,12 @@ server.get(
 server.post(
   '/v1/locations/:locationId/menu-sections'
 , middleware.profile('POST /v1/locations/:locationId/menu-sections')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.manager)
+, middleware.profile('auth check')
 , middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.menuSections.methods.post.body)
 , middleware.profile('permissions')
 , middleware.permissions(menuPermissions)
 , middleware.profile('create location menu-sections handler')

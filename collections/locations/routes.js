@@ -6,6 +6,7 @@
 var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
+, async   = require('async')
 , sql     = require('../../lib/sql')
 , errors  = require('../../lib/errors')
 , magic   = require('../../lib/magic')
@@ -586,22 +587,37 @@ module.exports.menuSections.create = function(req, res){
 
   var products;
   if (products = req.body.products) delete req.body.products;
-
+console.log("##############################", req.body, products, "#####################");
   // isEnabled = true by default
   if (req.body.isEnabled == null || req.body.isEnabled == undefined)
     req.body.isEnabled = true;
 
   db.api.menuSections.insert(req.body, function(error, result){
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-    res.json({ error: null, data: result });
+    (function(next){
+      if (!products) return next();
 
-    if (!products) return;
+      // Insert each menuSectionsProducts record
+      var fns = [], msp;
+      for (var i = 0, l = products.length; i < l; ++i){
+        msp = {
+          sectionId:  result.id
+        , productId:  products[i].id
+        , order:      products[i].order
+        };
 
-    // Insert each menuSectionsProducts record
-    for (var i = 0, l = products.length; i < l; ++i){
-      products[i].sectionId = result.id;
-      db.api.menuSectionsProducts.insert(products[i]);
-    }
+        fns.push(function(done){
+          db.api.menuSectionsProducts.insert(msp, function(error, results, result){
+            done(error, results);
+          });
+        });
+
+        async.parallel(fns, next);
+      }
+    })(function(error){
+      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+      res.json({ error: null, data: result.length > 0 ? result[0] : null });
+    });
   });
 };

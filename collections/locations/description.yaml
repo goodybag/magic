@@ -197,4 +197,5 @@ menuSections:
         businessId:     { type: int,      eg: 1 }
         name:           { type: string,   eg: Burgers }
         order:          { type: int,      eg: 5 }
-        isEnabled:      { type: boolean,  eg: true}
+        isEnabled:      { type: bool,     eg: true }
+        products:       { type: object*,  eg: [{ id: 1, order: 1 }] }
