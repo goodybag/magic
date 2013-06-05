@@ -20,20 +20,6 @@ var
 exports.owner = function(req, cb) {
   if (!req.session || !req.session.user) return cb(null);
 
-  var userId = req.param('id');
-
-  var query = managers.select(
-    managers.id
-  ).where(
-    managers.id.equals(req.session.user.id)
-  ).toQuery();
-
-  db.query(query, function(error, rows, result){
-    if (error) return cb(null);
-
-    if (result.rows.length === 0) return cb(null);
-    if (result.rows[0].id != userId) return cb(null);
-
-    cb('owner');
-  });
+  var userId = parseInt(req.param('id'));
+  return cb(userId === req.session.user.id ? 'owner' : null);
 };

@@ -82,6 +82,45 @@ describe('GET /v1/managers/:id', function() {
     });
   });
 
+
+  it('should respond with 403 if not a manager', function(done) {
+    tu.loginAsConsumer(function() {
+      tu.get('/v1/managers/11110', function(error, results, res) {
+        assert(!error, 'expected no error but got ' + JSON.stringify(error));
+        assert(res.statusCode === 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should fetch manager record if owner of record', function(done) {
+    var owner = { email: 'some_manager@gmail.com', password: 'password' };
+    tu.login(owner, function() {
+      tu.get('/v1/managers/11110', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode !== 403);
+        assert(results);
+        var data = JSON.parse(results).data;
+        assert(data.id === 11110);
+        assert(data.businessId === 1);
+        assert(data.locationId === 1);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should respond with 403 if not owner manager', function(done) {
+    var owner = { email: 'some_manager2@gmail.com', password: 'password' };
+    tu.login(owner, function() {
+      tu.get('/v1/managers/11110', function(error, results, res) {
+        assert(!error, 'expected no error but got ' + JSON.stringify(error));
+        assert(res.statusCode === 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+
   it('should respond 404 if the id is not in the database', function(done){
     tu.loginAsAdmin(function(){
       tu.get('/v1/managers/500', function(error, results, res){
