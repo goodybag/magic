@@ -481,18 +481,27 @@ module.exports.menuSections = {};
 // Here's basically the query we need to do
 // select
 //   "menuSections".*
-// , array_to_json( array_agg( prods.product ) )
+// , array_to_json( array_agg( prods.product ) ) as products
 // from "menuSections"
 // left join "menuSectionsProducts"
 //   on "menuSections".id = "menuSectionsProducts"."sectionId"
 // left join (
-//   select id, row_to_json(p) as product from products p
+//   select
+//     p.id
+//   , row_to_json(p) as product
+//   , "menuSectionsProducts".order as order
+//   from products p
+//     left join "menuSectionsProducts"
+//       on "menuSectionsProducts"."productId" = p.id
+//   order by "menuSectionsProducts".order asc
 // ) prods on prods.id = "menuSectionsProducts"."productId"
-// group by "menuSections".id;
+// where "menuSectionsProducts"."locationId" = $1
+// group by "menuSections".id
+// order by "menuSections".order asc;
 
 module.exports.menuSections.list = function(req, res){
   var TAGS = ['get-menu-sections', req.uuid];
-  logger.routes.debug(TAGS, 'fetching locztion menu');
+  logger.routes.debug(TAGS, 'fetching location menu');
 
   var includes = [].concat(req.query.include);
 
@@ -502,7 +511,7 @@ module.exports.menuSections.list = function(req, res){
     'select {fields} from "menuSections'
   , '  {joins}'
   , '  {where}'
-  , '  {sort} {offset} {limit}'
+  , '  {offset} {limit} {group} {order}'
   ]);
 
   query.$('locationId', req.param('locationId'));
@@ -518,15 +527,33 @@ module.exports.menuSections.list = function(req, res){
   query.offset = 'offset ' + req.param('offset') || 0;
   if (req.param('limit')) query.limit = 'limit ' + req.param('limit');
 
+  // Group by
+  query.group = 'group by "menuSections".id';
+
+  // Order
+  query.order = '"menuSections".order asc';
+
   // Include Products
   if (includes.indexOf('products') > -1){
     // Embed the product record into each section records
-    sql.fields.add('array_to_json( array_agg( prods.product ) )');
+    sql.fields.add('array_to_json( array_agg( prods.product ) ) as products');
 
+    // Join to get menuSection->Product relation
     joins.push([
-      'left join ('
-    , '  select id, row_to_json(p) as product from products p '
-    , ') prods on prods.id = "menuSectionsProducts"."productId"'
+      'left join "menuSectionsProducts"'
+    , '  on "menuSections".id = "menuSectionsProducts"."sectionId"'
+    ].join('\n'));
+
+    // Sub-query to get products as an ordered JSON array
+    joins.push([
+      'select'
+    , '  p.id'
+    , ', row_to_json(p) as product'
+    , ', "menuSectionsProducts".order as order'
+    , 'from products p'
+    , '  left join "menuSectionsProducts"'
+    , '    on "menuSectionsProducts"."productId" = p.id'
+    , 'order by "menuSectionsProducts".order asc'
     ].join('\n'));
   }
 
@@ -534,7 +561,7 @@ module.exports.menuSections.list = function(req, res){
 
   db.query(query, function(error, result){
     if (error)
-      return res.error(errors.internal.DB_FAILURE, error),
+      return console.log(query.toString(), error), res.error(errors.internal.DB_FAILURE, error),
         logger.routes.error(TAGS, error);
 
     if (result.rowCount == 0)

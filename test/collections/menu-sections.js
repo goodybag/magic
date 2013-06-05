@@ -38,11 +38,10 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
       payload.data.forEach(function(section){
         assert( Array.isArray( section.products ))
 
-        // Each product should have the normal shtuff
-        section.products.forEach(function(product){
-          assert(product.id);
-          assert(product.name);
-        });
+        // Products should be in order
+        for (var i = 0, l = section.products.length - 1; i < l; ++i){
+          assert( section.products[i].order <= section.products[i + 1].order );
+        }
       });
 
       done();
