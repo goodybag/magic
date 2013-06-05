@@ -194,8 +194,42 @@ menuSections:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
+        businessId:     { type: int,      eg: 1,        required: true }
+        name:           { type: string,   eg: Burgers,  required: true }
+        order:          { type: int,      eg: 5,        required: true }
+        isEnabled:      { type: bool,     eg: true }
+        products:       { type: object*,  eg: [{ id: 1, order: 1, locationId: 1 }] }
+
+menuSectionItem:
+  resource:
+    type: item
+    path: /locations/:locationId/menu-sections/:menuSectionId
+    params:
+      locationId: { type: int, eg: 1 }
+      menuSectionId: { type: int, eg: 1 }
+  methods:
+    get:
+      desc: Get menu section
+    delete:
+      desc: Removes menu section
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+    put:
+      desc: Update menu section
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
         businessId:     { type: int,      eg: 1 }
         name:           { type: string,   eg: Burgers }
         order:          { type: int,      eg: 5 }
         isEnabled:      { type: bool,     eg: true }
-        products:       { type: object*,  eg: [{ id: 1, order: 1 }] }
+    post:
+      desc: Add new items to section
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        productId:      { type: int,      eg: 1, required: true }
+        order:          { type: int,      eg: 1, required: true }

@@ -1,6 +1,12 @@
 var assert = require('better-assert');
 var tu = require('../../lib/test-utils');
 
+/**
+ * TODO:
+ * Add permissioning and owner tests
+ * Add some fail tests
+ */
+
 describe('GET /v1/locations/:lid/menu-sections', function() {
   it('should get menu sections', function(done){
     var lid = 51;
@@ -42,7 +48,7 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
       assert(response.statusCode == 200);
 
       payload = JSON.parse(payload);
-
+console.log(payload.data);
       // Each section should have a products array
       payload.data.forEach(function(section){
         assert( Array.isArray( section.products ))
@@ -85,9 +91,9 @@ describe('POST /v1/locations/:lid/menu-sections', function() {
     , order: 2
     , businessId: 1
     , products: [
-        { id: 1, order: 1 }
-      , { id: 4, order: 3 }
-      , { id: 5, order: 2 }
+        { id: 1, locationId: lid, order: 1 }
+      , { id: 4, locationId: lid, order: 3 }
+      , { id: 5, locationId: lid, order: 2 }
       ]
     };
 
@@ -96,10 +102,99 @@ describe('POST /v1/locations/:lid/menu-sections', function() {
         assert(!error);
         assert(response.statusCode == 200);
 
-        tu.get('/v1/locations/' + )
+        payload = JSON.parse(payload);
 
-        tu.logout(done);
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + payload.data.id, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          payload.data.name == section.name;
+
+          tu.logout(done);
+        });
       });
     });
+  });
+});
+
+describe('GET /v1/locations/:lid/menu-sections/:sectionId', function() {
+  it('should get a menu section', function(done){
+    var lid = 51, msid = 1;
+    tu.get('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
+      assert(!error);
+      assert(response.statusCode == 200);
+      payload = JSON.parse(payload);
+      assert(payload.data.id == msid);
+      done();
+    });
+  });
+});
+
+describe('PUT /v1/locations/:lid/menu-sections/:sectionId', function() {
+  it('should update a menu section', function(done){
+    var lid = 51, msid = 1;
+    var section = {
+      name: 'blah blah'
+    , order: 17
+    };
+    tu.loginAsAdmin(function(){
+      tu.put('/v1/locations/' + lid + '/menu-sections/' + msid, section, function(error, payload, response){
+        console.log(payload, response.statusCode);
+        assert(!error);
+        assert(response.statusCode == 204);
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.id == msid);
+          assert(payload.data.name == section.name);
+          assert(payload.data.order == section.order);
+          tu.logout(done);
+        });
+      });
+    })
+  });
+});
+
+describe('POST /v1/locations/:lid/menu-sections/:sectionId', function() {
+  it('should get a menu section', function(done){
+    var lid = 51, msid = 1;
+    // Add a product that previously wasnt in the list
+    var item = { productId: 46187, order: 7 }
+    tu.loginAsAdmin(function(){
+      tu.post('/v1/locations/' + lid + '/menu-sections/' + msid, item, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 200);
+
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + msid + '?include=products', function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(
+            payload.data.products.filter(function(product){
+              return product.id == item.productId;
+            }).length == 1
+          );
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should bitch about the product not belonging to the business', function(done){
+    /**
+     * TODOTODODOTODODOTODODODOTODO
+     */
+    // var lid = 51, msid = 1;
+    // // Add a product that previously wasnt in the list
+    // var item = { productId: 1, order: 7 }
+    // tu.loginAsAdmin(function(){
+    //   tu.post('/v1/locations/' + lid + '/menu-sections/' + msid, item, function(error, payload, response){
+    //     assert(!error);
+    //     assert(response.statusCode == 200);
+    //   });
+    // });
   });
 });

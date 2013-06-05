@@ -1,6 +1,6 @@
 var db = require('../../db');
 
-var write = ['products', 'products.id', 'products.order'].concat(db.fields.menuSections.plain)
+var write = ['products', 'products.id', 'products.order', 'products.locationId'].concat(db.fields.menuSections.plain)
 
 module.exports = {
   world: {
@@ -11,6 +11,12 @@ module.exports = {
   }
 
 , sales: {
+    read:   true
+  , create: write
+  , update: write
+  }
+
+, manager: {
     read:   true
   , create: write
   , update: write

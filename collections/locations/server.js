@@ -241,4 +241,56 @@ server.post(
 , routes.menuSections.create
 );
 
+// Locations.getMenuSection
+server.get(
+  '/v1/locations/:locationId/menu-sections/:sectionId'
+, middleware.profile('GET /v1/locations/:locationId/menu-sections/:sectionId')
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('get location menu-section handler')
+, routes.menuSections.list
+);
+
+// Locations.updateMenuSection
+server.put(
+  '/v1/locations/:locationId/menu-sections/:sectionId'
+, middleware.profile('PUT /v1/locations/:locationId/menu-sections/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.manager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.menuSectionItem.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('update location menu-sections handler')
+, routes.menuSections.update
+);
+
+// Locations.menuSectionAddItem
+server.post(
+  '/v1/locations/:locationId/menu-sections/:sectionId'
+, middleware.profile('POST /v1/locations/:locationId/menu-sections/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.manager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.menuSectionItem.methods.post.body)
+, middleware.profile('add menu-sections item handler')
+, routes.menuSections.addItem
+);
+
+// Locations.removeMenuSection
+server.del(
+  '/v1/locations/:locationId/menu-sections/:sectionId'
+, middleware.profile('DELETE /v1/locations/:locationId/menu-sections/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.manager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.profile('delete location menu-sections handler')
+, routes.menuSections.remove
+);
+
 module.exports = server;

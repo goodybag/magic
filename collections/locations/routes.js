@@ -527,6 +527,12 @@ module.exports.menuSections.list = function(req, res){
     .add(db.fields.menuSections.withTable)
     .add('COUNT(*) OVER() as "metaTotal"');
 
+  // Is single?
+  if (req.param('sectionId')){
+    query.where.and('"menuSectionsProducts"."sectionId" = $sectionId');
+    query.$('sectionId', req.param('sectionId'))
+  }
+
   // Offset limit
   if (req.param('offset')) query.offset = 'offset ' + req.param('offset');
   if (req.param('limit'))  query.limit  = 'limit ' + req.param('limit');
@@ -574,7 +580,7 @@ module.exports.menuSections.list = function(req, res){
 
     res.json({
       error: null
-    , data: results
+    , data: req.param('sectionId') ? results[0] : results
     , meta: { total: results[0].metaTotal }
     });
   });
@@ -587,7 +593,7 @@ module.exports.menuSections.create = function(req, res){
 
   var products;
   if (products = req.body.products) delete req.body.products;
-console.log("##############################", req.body, products, "#####################");
+
   // isEnabled = true by default
   if (req.body.isEnabled == null || req.body.isEnabled == undefined)
     req.body.isEnabled = true;
@@ -602,7 +608,8 @@ console.log("##############################", req.body, products, "#############
       var fns = [], msp;
       for (var i = 0, l = products.length; i < l; ++i){
         msp = {
-          sectionId:  result.id
+          sectionId:  result[0].id
+        , locationId: req.param('locationId')
         , productId:  products[i].id
         , order:      products[i].order
         };
@@ -619,5 +626,51 @@ console.log("##############################", req.body, products, "#############
       if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
       res.json({ error: null, data: result.length > 0 ? result[0] : null });
     });
+  });
+};
+
+module.exports.menuSections.update = function(req, res){
+  var TAGS = ['update-menu-section', req.uuid];
+
+  db.api.menuSections.setLogTags(TAGS);
+
+  if (req.body.id) delete req.body.id;
+
+
+  db.api.menuSections.update(req.param('sectionId'), req.body, function(error, result){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.noContent();
+  });
+};
+
+module.exports.menuSections.remove = function(req, res){
+  var TAGS = ['remove-menu-section', req.uuid];
+
+  db.api.menuSections.setLogTags(TAGS);
+
+  db.api.menuSections.remove(req.param('sectionId'), function(error, result){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.noContent();
+  });
+};
+
+module.exports.menuSections.addItem = function(req, res){
+  var TAGS = ['update-menu-section', req.uuid];
+
+  db.api.menuSectionsProducts.setLogTags(TAGS);
+
+  var item = {
+    locationId: req.param('locationId')
+  , sectionId:  req.param('sectionId')
+  , productId:  req.body.productId
+  , order:      req.body.order
+  };
+
+  db.api.menuSectionsProducts.insert(item, function(error, result){
+    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    res.json({ error: null, data: result[0] });
   });
 };
