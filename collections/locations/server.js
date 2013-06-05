@@ -6,6 +6,7 @@ var server = require('express')();
 var middleware = require('../../middleware');
 var routes = require('./routes');
 var permissions = require('./permissions');
+var menuPermissions = require('./menu-permissions');
 var applyGroups = require('./apply-groups');
 var desc = require('./description')
 
@@ -209,6 +210,19 @@ server.post(
 , middleware.auth.allow('admin', 'sales', 'manager')
 , middleware.profile('request key tag handler')
 , routes.submitKeyTagRequest
+);
+
+// Locations.getMenu
+server.get(
+  '/v1/locations/:locationId/menu-sections'
+, middleware.profile('GET /v1/locations/:locationId/menu-sections')
+, middleware.profile('query defaults')
+  // Just get the entire result set
+, middleware.defaults.query({ limit : 1000 })
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('get location menu-sections handler')
+, routes.menuSections.list
 );
 
 module.exports = server;

@@ -478,27 +478,6 @@ module.exports.submitKeyTagRequest = function(req, res){
 
 module.exports.menuSections = {};
 
-// Here's basically the query we need to do
-// select
-//   "menuSections".*
-// , array_to_json( array_agg( prods.product ) ) as products
-// from "menuSections"
-// left join "menuSectionsProducts"
-//   on "menuSections".id = "menuSectionsProducts"."sectionId"
-// left join (
-//   select
-//     p.id
-//   , row_to_json(p) as product
-//   , "menuSectionsProducts".order as order
-//   from products p
-//     left join "menuSectionsProducts"
-//       on "menuSectionsProducts"."productId" = p.id
-//   order by "menuSectionsProducts".order asc
-// ) prods on prods.id = "menuSectionsProducts"."productId"
-// where "menuSectionsProducts"."locationId" = $1
-// group by "menuSections".id
-// order by "menuSections".order asc;
-
 module.exports.menuSections.list = function(req, res){
   var TAGS = ['get-menu-sections', req.uuid];
   logger.routes.debug(TAGS, 'fetching location menu');
@@ -507,46 +486,70 @@ module.exports.menuSections.list = function(req, res){
 
   var joins = [];
 
+
+  // Here's basically the query we need to do
+  // select
+  //   "menuSections".*
+  // , array_to_json( array_agg( prods.product ) ) as products
+  // from "menuSections"
+  // left join "menuSectionsProducts"
+  //   on "menuSections".id = "menuSectionsProducts"."sectionId"
+  // left join (
+  //   select
+  //     p.id
+  //   , row_to_json(p) as product
+  //   , "menuSectionsProducts".order as order
+  //   from products p
+  //     left join "menuSectionsProducts"
+  //       on "menuSectionsProducts"."productId" = p.id
+  //   order by "menuSectionsProducts".order asc
+  // ) prods on prods.id = "menuSectionsProducts"."productId"
+  // where "menuSectionsProducts"."locationId" = $1
+  // group by "menuSections".id
+  // order by "menuSections".order asc;
+
   var query = sql.query([
-    'select {fields} from "menuSections'
+    'select {fields} from "menuSections"'
   , '  {joins}'
   , '  {where}'
-  , '  {offset} {limit} {group} {order}'
+  , '  {group} {order} {offset} {limit}'
   ]);
 
   query.$('locationId', req.param('locationId'));
 
+  // Where what what
   query.where = sql.where()
-    .and('"menuSections"."locationId" = $locationId');
+    .and('"menuSectionsProducts"."locationId" = $locationId');
 
-  sql.fields  = sql.fields()
-    .add('"menuSections".*')
+  // Add dem' fields
+  query.fields = sql.fields()
+    .add(db.fields.menuSections.withTable)
     .add('COUNT(*) OVER() as "metaTotal"');
 
   // Offset limit
-  query.offset = 'offset ' + req.param('offset') || 0;
-  if (req.param('limit')) query.limit = 'limit ' + req.param('limit');
+  if (req.param('offset')) query.offset = 'offset ' + req.param('offset');
+  if (req.param('limit'))  query.limit  = 'limit ' + req.param('limit');
 
   // Group by
   query.group = 'group by "menuSections".id';
 
   // Order
-  query.order = '"menuSections".order asc';
+  query.order = 'order by "menuSections".order asc';
+
+  // Join to get menuSection->Product relation
+  joins.push([
+    'left join "menuSectionsProducts"'
+  , '  on "menuSections".id = "menuSectionsProducts"."sectionId"'
+  ].join('\n'));
 
   // Include Products
   if (includes.indexOf('products') > -1){
     // Embed the product record into each section records
-    sql.fields.add('array_to_json( array_agg( prods.product ) ) as products');
-
-    // Join to get menuSection->Product relation
-    joins.push([
-      'left join "menuSectionsProducts"'
-    , '  on "menuSections".id = "menuSectionsProducts"."sectionId"'
-    ].join('\n'));
+    query.fields.add('array_to_json( array_agg( prods.product ) ) as products');
 
     // Sub-query to get products as an ordered JSON array
     joins.push([
-      'select'
+      'left join ( select'
     , '  p.id'
     , ', row_to_json(p) as product'
     , ', "menuSectionsProducts".order as order'
@@ -554,14 +557,15 @@ module.exports.menuSections.list = function(req, res){
     , '  left join "menuSectionsProducts"'
     , '    on "menuSectionsProducts"."productId" = p.id'
     , 'order by "menuSectionsProducts".order asc'
+    , ') prods on prods.id = "menuSectionsProducts"."productId"'
     ].join('\n'));
   }
 
   if (joins.length > 0) query.joins = joins.join('\n')
 
-  db.query(query, function(error, result){
+  db.query(query, function(error, results, result){
     if (error)
-      return console.log(query.toString(), error), res.error(errors.internal.DB_FAILURE, error),
+      return console.log(error), res.error(errors.internal.DB_FAILURE, error),
         logger.routes.error(TAGS, error);
 
     if (result.rowCount == 0)
@@ -569,8 +573,8 @@ module.exports.menuSections.list = function(req, res){
 
     res.json({
       error: null
-    , data: result.rows
-    , meta: { total: result.rows[0].metaTotal }
+    , data: results
+    , meta: { total: results[0].metaTotal }
     });
   });
 };
