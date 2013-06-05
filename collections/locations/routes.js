@@ -575,8 +575,12 @@ module.exports.menuSections.list = function(req, res){
       return console.log(error), res.error(errors.internal.DB_FAILURE, error),
         logger.routes.error(TAGS, error);
 
-    if (result.rowCount == 0)
-      return res.json({ error: null, data: [], meta: { total: 0 } });
+    if (result.rowCount == 0){
+      if (req.param('sectionId'))
+        return res.status(404).end(), console.log("rowcount is 0 and sectionId specified", req.param('sectionId'))
+      else
+        return res.json({ error: null, data: [], meta: { total: 0 } });
+    }
 
     res.json({
       error: null

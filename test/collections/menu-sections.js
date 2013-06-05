@@ -48,7 +48,7 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
       assert(response.statusCode == 200);
 
       payload = JSON.parse(payload);
-console.log(payload.data);
+
       // Each section should have a products array
       payload.data.forEach(function(section){
         assert( Array.isArray( section.products ))
@@ -141,7 +141,6 @@ describe('PUT /v1/locations/:lid/menu-sections/:sectionId', function() {
     };
     tu.loginAsAdmin(function(){
       tu.put('/v1/locations/' + lid + '/menu-sections/' + msid, section, function(error, payload, response){
-        console.log(payload, response.statusCode);
         assert(!error);
         assert(response.statusCode == 204);
         tu.get('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
@@ -151,6 +150,22 @@ describe('PUT /v1/locations/:lid/menu-sections/:sectionId', function() {
           assert(payload.data.id == msid);
           assert(payload.data.name == section.name);
           assert(payload.data.order == section.order);
+          tu.logout(done);
+        });
+      });
+    })
+  });
+});
+
+describe('DELETE /v1/locations/:lid/menu-sections/:sectionId', function() {
+  it('should update a menu section', function(done){
+    var lid = 51, msid = 2;
+    tu.loginAsAdmin(function(){
+      tu.del('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 204);
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
+          assert(response.statusCode == 404);
           tu.logout(done);
         });
       });
@@ -183,10 +198,10 @@ describe('POST /v1/locations/:lid/menu-sections/:sectionId', function() {
     });
   });
 
-  it('should bitch about the product not belonging to the business', function(done){
-    /**
-     * TODOTODODOTODODOTODODODOTODO
-     */
+  /**
+   * TODOTODODOTODODOTODODODOTODO
+   */
+  // it('should bitch about the product not belonging to the business', function(done){
     // var lid = 51, msid = 1;
     // // Add a product that previously wasnt in the list
     // var item = { productId: 1, order: 7 }
@@ -196,5 +211,5 @@ describe('POST /v1/locations/:lid/menu-sections/:sectionId', function() {
     //     assert(response.statusCode == 200);
     //   });
     // });
-  });
+  // });
 });

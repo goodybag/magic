@@ -205,8 +205,8 @@ menuSectionItem:
     type: item
     path: /locations/:locationId/menu-sections/:menuSectionId
     params:
-      locationId: { type: int, eg: 1 }
-      menuSectionId: { type: int, eg: 1 }
+      locationId:     { type: int, eg: 51 }
+      menuSectionId:  { type: int, eg: 1 }
   methods:
     get:
       desc: Get menu section
