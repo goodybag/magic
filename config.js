@@ -223,13 +223,36 @@ var config = {
       host: 'logs.goodybag.com'
     , port: 12201
     , app: 'magic-staging'
-  }
+    }
+
+  , facebook: {
+      id: "159340790837933"
+    , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
+    , openGraphUrl: "https://graph.facebook.com/"
+    }
+
+  , singly: {
+      clientId: "61c5aa33341cc78f4baf5e140374aed1"
+    , clientSecret: "f75b4f3c213b8539935ad88da572b726"
+    , callbackUrl: "http://goodybag.com/"
+    , apiBaseUrl: "https://api.singly.com"
+
+      // Should probably make the url a template and make a util
+      // function that performs this logic
+    , applyFacebookTokenUrl: function(token){
+        return "https://api.singly.com/auth/facebook/apply"
+        + "?client_id="     + config.defaults.singly.clientId
+        + "&client_secret=" + config.defaults.singly.clientSecret
+        + "&token="         + token
+        ;
+      }
+    }
   }
 
 , production: {
     logging: {
       enabled: true
-    , transports: { 
+    , transports: {
         console: true
       , gelf: true
       }
