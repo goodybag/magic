@@ -137,7 +137,6 @@ describe('POST /v1/locations/:lid/highlights', function() {
     tu.login(creds, function(){
       tu.post('/v1/locations/' + lid + '/highlights', highlight, function(error, payload, response){
         assert(!error);
-        console.log(payload);
         assert(response.statusCode == 200);
 
         payload = JSON.parse(payload);
