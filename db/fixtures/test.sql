@@ -119,6 +119,9 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11133', 'ts_r
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'consumer_mutated@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 INSERT INTO "users" (id, email) VALUES ('11136', 'null.password@goodybag.com');
+
+-- amy's
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11138', 'amys_manager@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 COMMIT;
 
 SELECT setval('users_id_seq', (SELECT MAX(id) from "users")); -- advance the sequence past the IDs just used
@@ -158,6 +161,7 @@ INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11112', '1', '1
 INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11113', '1', '1');
 INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11114', '1', '4');
 INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11115', '2', '2');
+INSERT INTO "managers" (id, "businessId", "locationId") VALUES ('11138', '39', '51');
 COMMIT;
 
 -- CASHIERS
@@ -257,6 +261,7 @@ INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11112', '11112', '1
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11113', '11113', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11114', '11114', '11110');
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11115', '11115', '11110');
+INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11116', '11138', '11110');
 
 -- -- cashier
 INSERT INTO "usersGroups" (id, "userId", "groupId") VALUES ('11120', '11120', '11111');

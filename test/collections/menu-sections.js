@@ -3,8 +3,8 @@ var tu = require('../../lib/test-utils');
 
 /**
  * TODO:
- * Add permissioning and owner tests
- * Add some fail tests
+ * Product permissioning
+ *   - Technically you could add products to your menu that do not belong to you
  */
 
 describe('GET /v1/locations/:lid/menu-sections', function() {
@@ -34,6 +34,7 @@ describe('GET /v1/locations/:lid/menu-sections', function() {
 
   it('should get menu sections and include products', function(done){
     var lid = 51;
+    // I couldn't get the sql query to embed the order into the product record
     var orderBySection = {
       "1":  [46175, 46183]
     , "2":  [46172, 46173]
@@ -79,7 +80,13 @@ describe('POST /v1/locations/:lid/menu-sections', function() {
         assert(!error);
         assert(response.statusCode == 200);
 
-        tu.logout(done);
+        payload = JSON.parse(payload);
+
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + payload.data.id, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          tu.logout(done);
+        });
       });
     });
   });
@@ -98,6 +105,66 @@ describe('POST /v1/locations/:lid/menu-sections', function() {
     };
 
     tu.loginAsAdmin(function(){
+      tu.post('/v1/locations/' + lid + '/menu-sections', section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + payload.data.id, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+
+          payload = JSON.parse(payload);
+
+          payload.data.name == section.name;
+
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should create a menu section as a manager', function(done){
+    var creds = { email: 'amys_manager@goodybag.com', password: 'password' };
+    var lid = 51;
+    var section = {
+      name: 'My Menu Section 3'
+    , order: 1
+    , businessId: 39
+    };
+
+    tu.login(creds, function(){
+      tu.post('/v1/locations/' + lid + '/menu-sections', section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 200);
+
+        payload = JSON.parse(payload);
+
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + payload.data.id, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          tu.logout(done);
+        });
+      });
+    });
+  });
+
+  it('should create a menu section and also add products as a manager', function(done){
+    var creds = { email: 'amys_manager@goodybag.com', password: 'password' };
+    var lid = 51;
+    var section = {
+      name: 'My Menu Section 4'
+    , order: 2
+    , businessId: 39
+    , products: [
+        { id: 1, locationId: lid, order: 1 }
+      , { id: 4, locationId: lid, order: 3 }
+      , { id: 5, locationId: lid, order: 2 }
+      ]
+    };
+
+    tu.login(creds, function(){
       tu.post('/v1/locations/' + lid + '/menu-sections', section, function(error, payload, response){
         assert(!error);
         assert(response.statusCode == 200);
@@ -152,6 +219,48 @@ describe('PUT /v1/locations/:lid/menu-sections/:sectionId', function() {
           assert(payload.data.order == section.order);
           tu.logout(done);
         });
+      });
+    })
+  });
+
+  it('should update a menu section as a manager', function(done){
+    var creds = { email: 'amys_manager@goodybag.com', password: 'password' };
+    var lid = 51, msid = 1;
+    var section = {
+      name: 'blah blah'
+    , order: 17
+    };
+    tu.login(creds, function(){
+      tu.put('/v1/locations/' + lid + '/menu-sections/' + msid, section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 204);
+        tu.get('/v1/locations/' + lid + '/menu-sections/' + msid, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.id == msid);
+          assert(payload.data.name == section.name);
+          assert(payload.data.order == section.order);
+          tu.logout(done);
+        });
+      });
+    })
+  });
+
+  it('should not be allowed to update', function(done){
+    var creds = { email: 'some_manager@gmail.com', password: 'password' };
+    var lid = 51, msid = 1;
+    var section = {
+      name: 'blah blah'
+    , order: 17
+    };
+    tu.login(creds, function(){
+      tu.put('/v1/locations/' + lid + '/menu-sections/' + msid, section, function(error, payload, response){
+        assert(!error);
+        assert(response.statusCode == 403);
+        payload = JSON.parse(payload);
+        assert(payload.error.name == 'NOT_ALLOWED');
+        tu.logout(done);
       });
     })
   });
