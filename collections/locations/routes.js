@@ -13,10 +13,11 @@ var
 
 , logger  = {}
 
-, schemas    = db.schemas
+, schemas = db.schemas
 ;
 
 module.exports.menuSections = require('./menu-sections-routes');
+module.exports.highlights = require('./highlights-routes');
 
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});

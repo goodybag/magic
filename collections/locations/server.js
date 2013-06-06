@@ -260,7 +260,7 @@ server.put(
 , middleware.profile('auth check')
 , middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validation')
-, middleware.validate2.body(desc.menuSectionItem.methods.put.body)
+, middleware.validate2.body(desc.menuSection.methods.put.body)
 , middleware.profile('permissions')
 , middleware.permissions(menuPermissions)
 , middleware.profile('update location menu-sections handler')
@@ -276,7 +276,7 @@ server.post(
 , middleware.profile('auth check')
 , middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validation')
-, middleware.validate2.body(desc.menuSectionItem.methods.post.body)
+, middleware.validate2.body(desc.menuSection.methods.post.body)
 , middleware.profile('add menu-sections item handler')
 , routes.menuSections.addItem
 );
@@ -291,6 +291,87 @@ server.del(
 , middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('delete location menu-sections handler')
 , routes.menuSections.remove
+);
+
+// Locations.getHighlights
+server.get(
+  '/v1/locations/:locationId/highlights'
+, middleware.profile('GET /v1/locations/:locationId/highlights')
+, middleware.profile('query defaults')
+  // Just get the entire result set
+, middleware.defaults.query({ limit : 1000 })
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('get location highlights handler')
+, routes.highlights.list
+);
+
+// Locations.createHighlight
+server.post(
+  '/v1/locations/:locationId/highlights'
+, middleware.profile('POST /v1/locations/:locationId/highlights')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.locationManager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.highlights.methods.post.body)
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('create location highlights handler')
+, routes.highlights.create
+);
+
+// Locations.getHighlight
+server.get(
+  '/v1/locations/:locationId/highlights/:sectionId'
+, middleware.profile('GET /v1/locations/:locationId/highlights/:sectionId')
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('get location menu-section handler')
+, routes.highlights.list
+);
+
+// Locations.updateHighlight
+server.put(
+  '/v1/locations/:locationId/highlights/:sectionId'
+, middleware.profile('PUT /v1/locations/:locationId/highlights/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.locationManager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.highlight.methods.put.body)
+, middleware.profile('permissions')
+, middleware.permissions(menuPermissions)
+, middleware.profile('update location highlights handler')
+, routes.highlights.update
+);
+
+// Locations.menuHighlightItem
+server.post(
+  '/v1/locations/:locationId/highlights/:sectionId'
+, middleware.profile('POST /v1/locations/:locationId/highlights/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.locationManager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.profile('validation')
+, middleware.validate2.body(desc.highlight.methods.post.body)
+, middleware.profile('add highlights item handler')
+, routes.highlights.addItem
+);
+
+// Locations.removeHighlight
+server.del(
+  '/v1/locations/:locationId/highlights/:sectionId'
+, middleware.profile('DELETE /v1/locations/:locationId/highlights/:sectionId')
+, middleware.profile('apply groups')
+, middleware.applyGroups(applyGroups.locationManager)
+, middleware.profile('auth check')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.profile('delete location highlights handler')
+, routes.highlights.remove
 );
 
 module.exports = server;

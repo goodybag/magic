@@ -669,3 +669,34 @@ insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "ord
 insert into "menuSectionsProducts" ("sectionId", "productId", "locationId", "order") values (6, 46186, 51, 12);
 COMMIT;
 SELECT setval('"menuSectionsProducts_id_seq"', (SELECT MAX(id) from "menuSectionsProducts"));
+
+-- highlights
+
+BEGIN;
+-- Using amys
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (1, 39, 'Special 1', 1, 'true');
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (2, 39, 'Special 2', 2, 'true');
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (3, 39, 'Special 3', 3, 'true');
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (4, 39, 'Special 4', 3, 'true');
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (5, 39, 'Special 5', 4, 'true');
+INSERT INTO "highlights" (id, "businessId", "name", "order", "isEnabled") VALUES (6, 39, 'Special 6', 4, 'true');
+COMMIT;
+SELECT setval('"highlights_id_seq"', (SELECT MAX(id) from "highlights"));
+
+-- highlightsProductds
+
+BEGIN;
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (1, 46175, 51, 1);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (1, 46183, 51, 2);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (2, 46172, 51, 3);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (2, 46173, 51, 4);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (3, 46174, 51, 5);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (3, 46177, 51, 6);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (4, 46178, 51, 7);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (4, 46179, 51, 8);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (5, 46180, 51, 9);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (5, 46184, 51, 10);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (6, 46185, 51, 11);
+insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (6, 46186, 51, 12);
+COMMIT;
+SELECT setval('"highlightsProducts_id_seq"', (SELECT MAX(id) from "highlightsProducts"));

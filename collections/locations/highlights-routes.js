@@ -20,46 +20,46 @@ logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
 
 module.exports.list = function(req, res){
-  var TAGS = ['get-menu-sections', req.uuid];
-  logger.routes.debug(TAGS, 'fetching location menu');
+  var TAGS = ['get-highlights', req.uuid];
+  logger.routes.debug(TAGS, 'fetching location highlights');
 
   var includes = [].concat(req.query.include);
 
   var joins = [];
 
   var query = sql.query([
-    'select {fields} from "menuSections"'
+    'select {fields} from "highlights"'
   , '  {joins}'
   , '  {where}'
   , '  {group} {order} {offset} {limit}'
   ]);
 
-  // only add locationId if we're not querying by sectionId
+  // only add locationId if we're not querying by highlightId
   if (
     req.param('locationId') &&
-    !req.param('sectionId')
+    !req.param('highlightId')
   ) query.$('locationId', req.param('locationId'));
 
-  if (req.param('sectionId')) query.$('sectionId', req.param('sectionId'));
+  if (req.param('highlightId')) query.$('highlightId', req.param('highlightId'));
 
   // Where what what
   query.where = sql.where();
 
   // Add dem' fields
   query.fields = sql.fields()
-    .add(db.fields.menuSections.withTable)
+    .add(db.fields.highlights.withTable)
     .add('COUNT(*) OVER() as "metaTotal"');
 
   // Is single?
-  if (req.param('sectionId')){
-    query.where.and('"menuSections"."id" = $sectionId');
+  if (req.param('highlightId')){
+    query.where.and('"highlights"."id" = $highlightId');
 
   // Else we need some location/business joins to get bizId
   } else {
     joins.push('left join "locations" on "locations"."id" = $locationId');
     joins.push('left join "businesses" on "locations"."businessId" = "businesses"."id"');
 
-    query.where.and('"menuSections"."businessId" = "businesses"."id"');
+    query.where.and('"highlights"."businessId" = "businesses"."id"');
   }
 
   // Offset limit
@@ -67,20 +67,20 @@ module.exports.list = function(req, res){
   if (req.param('limit'))  query.limit  = 'limit ' + req.param('limit');
 
   // Group by
-  query.group = 'group by "menuSections".id';
+  query.group = 'group by "highlights".id';
 
   // Order
-  query.order = 'order by "menuSections".order asc';
+  query.order = 'order by "highlights".order asc';
 
   // Include Products
   if (includes.indexOf('products') > -1){
-    // Join to get menuSection->Product relation
+    // Join to get highlight->Product relation
     joins.push([
-      'left outer join "menuSectionsProducts"'
-    , '  on "menuSections".id = "menuSectionsProducts"."sectionId"'
+      'left outer join "highlightsProducts"'
+    , '  on "highlights".id = "highlightsProducts"."highlightId"'
     ].join('\n'));
 
-    // Embed the product record into each section records
+    // Embed the product record into each highlight records
     query.fields.add('array_to_json( array_agg( prods.product ) ) as products');
 
     // Sub-query to get products as an ordered JSON array
@@ -88,12 +88,12 @@ module.exports.list = function(req, res){
       'left join ( select'
     , '  p.id'
     , ', row_to_json(p) as product'
-    , ', "menuSectionsProducts".order as order'
+    , ', "highlightsProducts".order as order'
     , 'from products p'
-    , '  left join "menuSectionsProducts"'
-    , '    on "menuSectionsProducts"."productId" = p.id'
-    , 'order by "menuSectionsProducts".order asc'
-    , ') prods on prods.id = "menuSectionsProducts"."productId"'
+    , '  left join "highlightsProducts"'
+    , '    on "highlightsProducts"."productId" = p.id'
+    , 'order by "highlightsProducts".order asc'
+    , ') prods on prods.id = "highlightsProducts"."productId"'
     ].join('\n'));
   }
 
@@ -105,7 +105,7 @@ module.exports.list = function(req, res){
         logger.routes.error(TAGS, error);
 
     if (result.rowCount == 0){
-      if (req.param('sectionId'))
+      if (req.param('highlightId'))
         return res.status(404).end();
       else
         return res.json({ error: null, data: [], meta: { total: 0 } });
@@ -113,16 +113,16 @@ module.exports.list = function(req, res){
 
     res.json({
       error: null
-    , data: req.param('sectionId') ? results[0] : results
+    , data: req.param('highlightId') ? results[0] : results
     , meta: { total: results[0].metaTotal }
     });
   });
 };
 
 module.exports.create = function(req, res){
-  var TAGS = ['create-menu-sections', req.uuid];
+  var TAGS = ['create-highlight', req.uuid];
 
-  db.api.menuSections.setLogTags(TAGS);
+  db.api.highlights.setLogTags(TAGS);
 
   var products;
   if (products = req.body.products) delete req.body.products;
@@ -131,24 +131,24 @@ module.exports.create = function(req, res){
   if (req.body.isEnabled == null || req.body.isEnabled == undefined)
     req.body.isEnabled = true;
 
-  db.api.menuSections.insert(req.body, function(error, result){
+  db.api.highlights.insert(req.body, function(error, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     (function(next){
       if (!products) return next();
 
-      // Insert each menuSectionsProducts record
+      // Insert each highlightsProducts record
       var fns = [], msp;
       for (var i = 0, l = products.length; i < l; ++i){
         msp = {
-          sectionId:  result[0].id
+          highlightId:  result[0].id
         , locationId: req.param('locationId')
         , productId:  products[i].id
         , order:      products[i].order
         };
 
         fns.push(function(done){
-          db.api.menuSectionsProducts.insert(msp, function(error, results, result){
+          db.api.highlightsProducts.insert(msp, function(error, results, result){
             done(error, results);
           });
         });
@@ -163,14 +163,14 @@ module.exports.create = function(req, res){
 };
 
 module.exports.update = function(req, res){
-  var TAGS = ['update-menu-section', req.uuid];
+  var TAGS = ['update-highlight', req.uuid];
 
-  db.api.menuSections.setLogTags(TAGS);
+  db.api.highlights.setLogTags(TAGS);
 
   if (req.body.id) delete req.body.id;
 
 
-  db.api.menuSections.update(req.param('sectionId'), req.body, function(error, result){
+  db.api.highlights.update(req.param('highlightId'), req.body, function(error, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.noContent();
@@ -178,11 +178,11 @@ module.exports.update = function(req, res){
 };
 
 module.exports.remove = function(req, res){
-  var TAGS = ['remove-menu-section', req.uuid];
+  var TAGS = ['remove-highlight', req.uuid];
 
-  db.api.menuSections.setLogTags(TAGS);
+  db.api.highlights.setLogTags(TAGS);
 
-  db.api.menuSections.remove(req.param('sectionId'), function(error, result){
+  db.api.highlights.remove(req.param('highlightId'), function(error, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.noContent();
@@ -190,18 +190,18 @@ module.exports.remove = function(req, res){
 };
 
 module.exports.addItem = function(req, res){
-  var TAGS = ['update-menu-section', req.uuid];
+  var TAGS = ['update-highlight', req.uuid];
 
-  db.api.menuSectionsProducts.setLogTags(TAGS);
+  db.api.highlightsProducts.setLogTags(TAGS);
 
   var item = {
     locationId: req.param('locationId')
-  , sectionId:  req.param('sectionId')
+  , highlightId:  req.param('highlightId')
   , productId:  req.body.productId
   , order:      req.body.order
   };
 
-  db.api.menuSectionsProducts.insert(item, function(error, result){
+  db.api.highlightsProducts.insert(item, function(error, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     res.json({ error: null, data: result[0] });
