@@ -16,6 +16,8 @@ var
 , schemas    = db.schemas
 ;
 
+module.exports.menuSections = require('./menu-sections-routes');
+
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
@@ -121,7 +123,7 @@ module.exports.list = function(req, res){
 
   // run data query
   db.query(query, function(error, rows, dataResult){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
     if (dataResult.rowCount === 0 && req.param('businessId')) {
       return db.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, rows, bizResult) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -474,207 +476,5 @@ module.exports.submitKeyTagRequest = function(req, res){
     magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
 
     res.noContent();
-  });
-};
-
-module.exports.menuSections = {};
-
-module.exports.menuSections.list = function(req, res){
-  var TAGS = ['get-menu-sections', req.uuid];
-  logger.routes.debug(TAGS, 'fetching location menu');
-
-  var includes = [].concat(req.query.include);
-
-  var joins = [];
-
-
-  // Here's basically the query we need to do
-  // select
-  //   "menuSections".*
-  // , array_to_json( array_agg( prods.product ) ) as products
-  // from "menuSections"
-  // left join "menuSectionsProducts"
-  //   on "menuSections".id = "menuSectionsProducts"."sectionId"
-  // left join (
-  //   select
-  //     p.id
-  //   , row_to_json(p) as product
-  //   , "menuSectionsProducts".order as order
-  //   from products p
-  //     left join "menuSectionsProducts"
-  //       on "menuSectionsProducts"."productId" = p.id
-  //   order by "menuSectionsProducts".order asc
-  // ) prods on prods.id = "menuSectionsProducts"."productId"
-  // where "menuSectionsProducts"."locationId" = $1
-  // group by "menuSections".id
-  // order by "menuSections".order asc;
-
-  var query = sql.query([
-    'select {fields} from "menuSections"'
-  , '  {joins}'
-  , '  {where}'
-  , '  {group} {order} {offset} {limit}'
-  ]);
-
-  query.$('locationId', req.param('locationId'));
-
-  // Where what what
-  query.where = sql.where()
-    .and('"menuSectionsProducts"."locationId" = $locationId');
-
-  // Add dem' fields
-  query.fields = sql.fields()
-    .add(db.fields.menuSections.withTable)
-    .add('COUNT(*) OVER() as "metaTotal"');
-
-  // Is single?
-  if (req.param('sectionId')){
-    query.where.and('"menuSectionsProducts"."sectionId" = $sectionId');
-    query.$('sectionId', req.param('sectionId'))
-  }
-
-  // Offset limit
-  if (req.param('offset')) query.offset = 'offset ' + req.param('offset');
-  if (req.param('limit'))  query.limit  = 'limit ' + req.param('limit');
-
-  // Group by
-  query.group = 'group by "menuSections".id';
-
-  // Order
-  query.order = 'order by "menuSections".order asc';
-
-  // Join to get menuSection->Product relation
-  joins.push([
-    'left join "menuSectionsProducts"'
-  , '  on "menuSections".id = "menuSectionsProducts"."sectionId"'
-  ].join('\n'));
-
-  // Include Products
-  if (includes.indexOf('products') > -1){
-    // Embed the product record into each section records
-    query.fields.add('array_to_json( array_agg( prods.product ) ) as products');
-
-    // Sub-query to get products as an ordered JSON array
-    joins.push([
-      'left join ( select'
-    , '  p.id'
-    , ', row_to_json(p) as product'
-    , ', "menuSectionsProducts".order as order'
-    , 'from products p'
-    , '  left join "menuSectionsProducts"'
-    , '    on "menuSectionsProducts"."productId" = p.id'
-    , 'order by "menuSectionsProducts".order asc'
-    , ') prods on prods.id = "menuSectionsProducts"."productId"'
-    ].join('\n'));
-  }
-
-  if (joins.length > 0) query.joins = joins.join('\n')
-
-  db.query(query, function(error, results, result){
-    if (error)
-      return console.log(error), res.error(errors.internal.DB_FAILURE, error),
-        logger.routes.error(TAGS, error);
-
-    if (result.rowCount == 0){
-      if (req.param('sectionId'))
-        return res.status(404).end(), console.log("rowcount is 0 and sectionId specified", req.param('sectionId'))
-      else
-        return res.json({ error: null, data: [], meta: { total: 0 } });
-    }
-
-    res.json({
-      error: null
-    , data: req.param('sectionId') ? results[0] : results
-    , meta: { total: results[0].metaTotal }
-    });
-  });
-};
-
-module.exports.menuSections.create = function(req, res){
-  var TAGS = ['create-menu-sections', req.uuid];
-
-  db.api.menuSections.setLogTags(TAGS);
-
-  var products;
-  if (products = req.body.products) delete req.body.products;
-
-  // isEnabled = true by default
-  if (req.body.isEnabled == null || req.body.isEnabled == undefined)
-    req.body.isEnabled = true;
-
-  db.api.menuSections.insert(req.body, function(error, result){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    (function(next){
-      if (!products) return next();
-
-      // Insert each menuSectionsProducts record
-      var fns = [], msp;
-      for (var i = 0, l = products.length; i < l; ++i){
-        msp = {
-          sectionId:  result[0].id
-        , locationId: req.param('locationId')
-        , productId:  products[i].id
-        , order:      products[i].order
-        };
-
-        fns.push(function(done){
-          db.api.menuSectionsProducts.insert(msp, function(error, results, result){
-            done(error, results);
-          });
-        });
-
-        async.parallel(fns, next);
-      }
-    })(function(error){
-      if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-      res.json({ error: null, data: result.length > 0 ? result[0] : null });
-    });
-  });
-};
-
-module.exports.menuSections.update = function(req, res){
-  var TAGS = ['update-menu-section', req.uuid];
-
-  db.api.menuSections.setLogTags(TAGS);
-
-  if (req.body.id) delete req.body.id;
-
-
-  db.api.menuSections.update(req.param('sectionId'), req.body, function(error, result){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    res.noContent();
-  });
-};
-
-module.exports.menuSections.remove = function(req, res){
-  var TAGS = ['remove-menu-section', req.uuid];
-
-  db.api.menuSections.setLogTags(TAGS);
-
-  db.api.menuSections.remove(req.param('sectionId'), function(error, result){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    res.noContent();
-  });
-};
-
-module.exports.menuSections.addItem = function(req, res){
-  var TAGS = ['update-menu-section', req.uuid];
-
-  db.api.menuSectionsProducts.setLogTags(TAGS);
-
-  var item = {
-    locationId: req.param('locationId')
-  , sectionId:  req.param('sectionId')
-  , productId:  req.body.productId
-  , order:      req.body.order
-  };
-
-  db.api.menuSectionsProducts.insert(item, function(error, result){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-    res.json({ error: null, data: result[0] });
   });
 };

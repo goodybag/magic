@@ -104,7 +104,7 @@ server.get(
   '/v1/locations/:locationId'
 , middleware.profile('GET /v1/locations/:locationId')
 , middleware.profile('permissions')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.permissions(permissions)
 , middleware.profile('get location handler')
 , routes.get
@@ -153,9 +153,9 @@ server.get(
   '/v1/locations/:locationId/analytics'
 , middleware.profile('GET /v1/locations/:locationId/analytics')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('get location analytics handler')
 , routes.getAnalytics
 );
@@ -165,9 +165,9 @@ server.post(
   '/v1/locations/:locationId/products'
 , middleware.profile('GET /v1/locations/:locationId/products')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.productsCollection.methods.post.body)
 , middleware.profile('add product to location handler')
@@ -179,9 +179,9 @@ server.put(
   '/v1/locations/:locationId/products/:productId'
 , middleware.profile('PUT /v1/locations/:locationId/products/:productId')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.productsItem.methods.put.body)
 , middleware.profile('update product at location handler')
@@ -193,9 +193,9 @@ server.del(
   '/v1/locations/:locationId/products/:productId'
 , middleware.profile('DELETE /v1/locations/:locationId/products/:productId')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('remove product from location handler')
 , routes.removeProduct
 );
@@ -205,9 +205,9 @@ server.post(
   '/v1/locations/:locationId/key-tag-requests'
 , middleware.profile('POST /v1/locations/:locationId/key-tag-requests')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('request key tag handler')
 , routes.submitKeyTagRequest
 );
@@ -230,9 +230,9 @@ server.post(
   '/v1/locations/:locationId/menu-sections'
 , middleware.profile('POST /v1/locations/:locationId/menu-sections')
 , middleware.profile('apply groups')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validation')
 , middleware.validate2.body(desc.menuSections.methods.post.body)
 , middleware.profile('permissions')
@@ -256,9 +256,9 @@ server.put(
   '/v1/locations/:locationId/menu-sections/:sectionId'
 , middleware.profile('PUT /v1/locations/:locationId/menu-sections/:sectionId')
 , middleware.profile('apply groups')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validation')
 , middleware.validate2.body(desc.menuSectionItem.methods.put.body)
 , middleware.profile('permissions')
@@ -272,9 +272,9 @@ server.post(
   '/v1/locations/:locationId/menu-sections/:sectionId'
 , middleware.profile('POST /v1/locations/:locationId/menu-sections/:sectionId')
 , middleware.profile('apply groups')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('validation')
 , middleware.validate2.body(desc.menuSectionItem.methods.post.body)
 , middleware.profile('add menu-sections item handler')
@@ -286,9 +286,9 @@ server.del(
   '/v1/locations/:locationId/menu-sections/:sectionId'
 , middleware.profile('DELETE /v1/locations/:locationId/menu-sections/:sectionId')
 , middleware.profile('apply groups')
-, middleware.applyGroups(applyGroups.manager)
+, middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
-, middleware.auth.allow('admin', 'sales', 'manager')
+, middleware.auth.allow('admin', 'sales', 'location-manager')
 , middleware.profile('delete location menu-sections handler')
 , routes.menuSections.remove
 );
