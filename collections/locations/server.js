@@ -324,18 +324,18 @@ server.post(
 
 // Locations.getHighlight
 server.get(
-  '/v1/locations/:locationId/highlights/:sectionId'
-, middleware.profile('GET /v1/locations/:locationId/highlights/:sectionId')
+  '/v1/locations/:locationId/highlights/:highlightId'
+, middleware.profile('GET /v1/locations/:locationId/highlights/:highlightId')
 , middleware.profile('permissions')
 , middleware.permissions(menuPermissions)
-, middleware.profile('get location menu-section handler')
+, middleware.profile('get location menu-highlight handler')
 , routes.highlights.list
 );
 
 // Locations.updateHighlight
 server.put(
-  '/v1/locations/:locationId/highlights/:sectionId'
-, middleware.profile('PUT /v1/locations/:locationId/highlights/:sectionId')
+  '/v1/locations/:locationId/highlights/:highlightId'
+, middleware.profile('PUT /v1/locations/:locationId/highlights/:highlightId')
 , middleware.profile('apply groups')
 , middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
@@ -350,8 +350,8 @@ server.put(
 
 // Locations.menuHighlightItem
 server.post(
-  '/v1/locations/:locationId/highlights/:sectionId'
-, middleware.profile('POST /v1/locations/:locationId/highlights/:sectionId')
+  '/v1/locations/:locationId/highlights/:highlightId'
+, middleware.profile('POST /v1/locations/:locationId/highlights/:highlightId')
 , middleware.profile('apply groups')
 , middleware.applyGroups(applyGroups.locationManager)
 , middleware.profile('auth check')
@@ -364,7 +364,7 @@ server.post(
 
 // Locations.removeHighlight
 server.del(
-  '/v1/locations/:locationId/highlights/:sectionId'
+  '/v1/locations/:locationId/highlights/:highlightId'
 , middleware.profile('DELETE /v1/locations/:locationId/highlights/:sectionId')
 , middleware.profile('apply groups')
 , middleware.applyGroups(applyGroups.locationManager)
