@@ -13,3 +13,5 @@ item:
         from:  { type: email, eg: test@goodybag.com, required: true }
         subject: { type: string }
         body: { type: string }
+        cc: { type: email, eg: test@goodybag.com }
+        bcc: { type: email, eg: test@goodybag.com }
