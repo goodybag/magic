@@ -12,7 +12,9 @@ describe('POST /v1/email', function() {
       to: 'test@goodybag.com',
       from: 'brian@goodybag.com',
       subject: 'subject!',
-      body: 'hello!'
+      body: 'hello!',
+      cc: 'boom@example.com',
+      bcc: 'bcc@goodybag.com'
     };
     var testSend = function(user, done) {
       var sent = false;
@@ -22,6 +24,8 @@ describe('POST /v1/email', function() {
         assert(msg.from === body.from);
         assert(msg.html === body.body);
         assert(msg.subject === body.subject);
+        assert(msg.cc == body.cc);
+        assert(msg.bcc == body.bcc);
         sent = true;
       });
       tu.login(user, ok(done, function() {
