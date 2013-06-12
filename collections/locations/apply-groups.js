@@ -25,14 +25,18 @@ exports.manager = function(req, cb) {
 };
 
 //applies group 'ownerManager' to this request
-//if the user is the manager of this location OR of the entire business
+//if the user is the manager of any location of this business
 exports.ownerManager = function(req, cb) {
   if (!req.session.user) return cb(null);
+
+  var query = sql.query([
+    'SELECT managers.id',
+    'FROM locations ',
+    'JOIN businesses ON locations."businessId" = businesses.id',
+    'JOIN managers ON businesses.id = managers."businessId"',
+    'WHERE managers.id = $userId AND locations.id = $locationId',
+  ''].join(' '))
   
-  var query = sql.query('SELECT managers.id FROM managers ' +
-                        ' JOIN businesses on managers."businessId" = businesses.id ' +
-                        ' JOIN locations on locations."businessId" = businesses.id ' +
-                        ' WHERE ( managers.id = $userId ) AND (managers."locationId" = $locationId OR managers."locationId" IS NULL)');
   var locationId = req.param('locationId');
   var userId     = req.session.user.id;
 
