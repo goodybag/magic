@@ -211,4 +211,11 @@ server.post(
 , routes.submitKeyTagRequest
 );
 
+server.get(
+  '/v1/locations/:locationId/measures'
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
+, routes.measures
+);
+
 module.exports = server;
