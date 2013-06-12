@@ -113,6 +113,7 @@ module.exports.rebuildPopularList = function(req, res) {
                   ;
 
                 fullList = fullList.concat(list);
+                done();
                 cb();
               });
             };
