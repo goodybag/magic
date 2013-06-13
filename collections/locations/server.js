@@ -114,7 +114,8 @@ server.put(
   '/v1/locations/:locationId'
 , middleware.profile('PUT /v1/locations/:locationId')
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales')
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')

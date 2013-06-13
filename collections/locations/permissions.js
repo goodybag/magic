@@ -45,6 +45,11 @@ module.exports = {
     read: ['lastKeyTagRequest', 'keyTagRequestPending']
   }
 
+, ownerManager: {
+    read:   true
+  , update: true
+  }
+
 , sales: {
     read:   true
   , create: true

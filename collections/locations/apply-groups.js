@@ -43,7 +43,9 @@ exports.ownerManager = function(req, cb) {
   query.$('userId', userId);
   query.$('locationId', locationId);
   db.query(query, function(error, rows) {
-    if(error || !rows.length) return cb(null);
+    if(error || !rows.length) {
+      return cb(null);
+    }
     return cb('ownerManager');
   });
 };

@@ -428,7 +428,7 @@ describe('POST /v1/locations', function() {
     });
   });
 
-  it('should respond with the id of a new location', function(done) {
+  it('should respond with the id of a new location with different time formats', function(done) {
     tu.loginAsSales(function(error, user){
       var bus = {
         businessId:2,
@@ -445,7 +445,7 @@ describe('POST /v1/locations', function() {
         endMonday:'24:00',
         // Closed
         startTuesday:'00:00',
-        endTuesday:'00:00',
+        endTuesday:'13:00',
         startWednesday:'11:00 am',
         endWednesday:'5:00 pm',
         startThursday:'11:00 AM',
@@ -502,6 +502,25 @@ describe('PATCH /v1/locations/:id', function() {
       });
     });
   });
+
+  it('can be modified by manager for entire business', function(done) {
+    tu.populate('businesses', [{ name:'Business blah' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location bla', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('managers', [{ email:'all-biz-manager2@gmail.com', password:'password', businessId:bids[0]  }], function() {
+          tu.logout(ok(done, function() {
+            var user = {email: 'all-biz-manager2@gmail.com', password: 'password'}
+            tu.login(user, ok(done, function() {
+              tu.patch('/v1/locations/' + lids[0], {name: 'zoom'}, ok(done, function(result, res) {
+                assert(res.statusCode === 204);
+                tu.logout(done);
+              }));
+            }));
+          }))
+        });
+      });
+    });
+  });
+
 
   it('should respond to a locations key tag request', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
