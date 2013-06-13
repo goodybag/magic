@@ -199,4 +199,11 @@ server.put(
 , routes.update
 );
 
+server.get(
+  '/v1/businesses/:id/measures'
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
+, routes.measures
+);
+
 module.exports = server;
