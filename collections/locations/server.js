@@ -114,7 +114,8 @@ server.put(
   '/v1/locations/:locationId'
 , middleware.profile('PUT /v1/locations/:locationId')
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales')
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
@@ -209,6 +210,13 @@ server.post(
 , middleware.auth.allow('admin', 'sales', 'manager')
 , middleware.profile('request key tag handler')
 , routes.submitKeyTagRequest
+);
+
+server.get(
+  '/v1/locations/:locationId/measures'
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
+, routes.measures
 );
 
 module.exports = server;
