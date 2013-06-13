@@ -129,3 +129,14 @@ contact:
         email:                        { type: email,  required: true, eg: steve@biz.goodybag.com }
         zip:                          { type: int,    required: true, eg: 75189 }
         comments:                     { type: string, eg: These are my comments!! How are you? }
+
+measures:
+  resource:
+    type: item
+    path: /businesses/:id/measures
+  method:
+    get:
+      desc: Get business measures
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }

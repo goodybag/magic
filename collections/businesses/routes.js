@@ -12,6 +12,8 @@ var
 , logger  = {}
 
 , schemas = db.schemas
+, analytics = require('../../lib/business-analytics')
+, ok = require('okay')
 ;
 
 // Setup loggers
@@ -421,4 +423,13 @@ module.exports.listContactRequests = function(req, res){
 
     res.json({ error: null, data: results });
   });
+};
+
+//get initial measures of a business
+//for initial version of bizpanel
+module.exports.measures = function(req, res, next) {
+  var businessId = req.params.id;
+  analytics.forBusiness(businessId, ok(function(result) {
+    res.json({error: null, data: result});
+  }));
 };

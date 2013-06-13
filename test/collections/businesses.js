@@ -753,3 +753,34 @@ describe('POST /v1/businesses/contact-requests', function(){
     });
   });
 });
+
+describe('GET /v1/businesses/measures', function() {
+  it('should deny non-business-owner', function(done) { 
+    //this manager owns businessId:2 locationId:2
+    var user = { email: 'manager_redeem3@gmail.com', password: 'password' };
+    tu.login(user, function() {
+      tu.get('/v1/businesses/1/measures', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should get resource for ownerManager', function(done) {
+    //this manager owns businessId:2 locationId:2
+    var user = { email: 'some_manager@gmail.com', password: 'password' };
+    tu.login(user, function() {
+      tu.get('/v1/businesses/1/measures', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode !== 403);
+        var data = JSON.parse(results).data;
+        assert(data.totalLikes === 4);
+        assert(data.totalUsers === 0);
+        assert(data.totalPunches === 0);
+        tu.logout(done);
+      });
+    });
+    
+  });
+});

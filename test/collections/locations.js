@@ -4,6 +4,7 @@ var
 , utils   = require('./../../lib/utils')
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
+, ok = require('okay')
 ;
 
 describe('GET /v1/locations', function() {
@@ -427,7 +428,7 @@ describe('POST /v1/locations', function() {
     });
   });
 
-  it('should respond with the id of a new location', function(done) {
+  it('should respond with the id of a new location with different time formats', function(done) {
     tu.loginAsSales(function(error, user){
       var bus = {
         businessId:2,
@@ -444,7 +445,7 @@ describe('POST /v1/locations', function() {
         endMonday:'24:00',
         // Closed
         startTuesday:'00:00',
-        endTuesday:'00:00',
+        endTuesday:'13:00',
         startWednesday:'11:00 am',
         endWednesday:'5:00 pm',
         startThursday:'11:00 AM',
@@ -501,6 +502,25 @@ describe('PATCH /v1/locations/:id', function() {
       });
     });
   });
+
+  it('can be modified by manager for entire business', function(done) {
+    tu.populate('businesses', [{ name:'Business blah' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location bla', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('managers', [{ email:'all-biz-manager2@gmail.com', password:'password', businessId:bids[0]  }], function() {
+          tu.logout(ok(done, function() {
+            var user = {email: 'all-biz-manager2@gmail.com', password: 'password'}
+            tu.login(user, ok(done, function() {
+              tu.patch('/v1/locations/' + lids[0], {name: 'zoom'}, ok(done, function(result, res) {
+                assert(res.statusCode === 204);
+                tu.logout(done);
+              }));
+            }));
+          }))
+        });
+      });
+    });
+  });
+
 
   it('should respond to a locations key tag request', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
@@ -774,5 +794,51 @@ describe('POST /v1/locations/:locationsId/key-tag-requests', function() {
         });
       });
     });
+  });
+});
+
+describe('GET /v1/locations/:locationsId/measures', function() {
+
+  it('can be fetched by manager for entire business', function(done) {
+    tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
+      tu.populate('locations', [{ name:'Location 1', businessId:bids[0], isEnabled:true }], function(err, lids) {
+        tu.populate('managers', [{ email:'all-biz-manager@gmail.com', password:'password', businessId:bids[0]  }], function() {
+          tu.logout(ok(done, function() {
+            var user = {email: 'all-biz-manager@gmail.com', password: 'password'}
+            tu.login(user, ok(done, function() {
+              tu.get('/v1/locations/' + lids[0] + '/measures', ok(done, function(result, res) {
+                assert(res.statusCode === 200);
+                tu.logout(done);
+              }));
+            }));
+          }))
+        });
+      });
+    });
+  });
+
+  it('can be fetched by location manager', function(done) {
+    tu.login({email: 'some_manager@gmail.com', password: 'password'}, ok(done, function() {
+      tu.get('/v1/locations/1/measures', ok(done, function(result, res) {
+        assert(res.statusCode === 200);
+        var data = JSON.parse(result).data;
+        assert(data.totalUsers === 0);
+        assert(data.totalLikes === 0);
+        assert(data.totalPunches === 0);
+        tu.logout(done);
+      }));
+    }));
+  });
+
+  it('cannot be fetch by non-owner', function(done) {
+    var user = { email: 'manager_redeem3@gmail.com', password: 'password' };
+    tu.logout(ok(done, function() {
+      tu.login(user, ok(done, function() {
+        tu.get('/v1/locations/1/measures', ok(function(results, res) {
+          assert(res.statusCode === 403);
+          tu.logout(done);
+        }));
+      }));
+    }));
   });
 });
