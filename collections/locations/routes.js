@@ -13,7 +13,8 @@ var
 
 , logger  = {}
 
-, schemas = db.schemas
+, schemas    = db.schemas
+, analytics = require('../../lib/business-analytics')
 ;
 
 module.exports.menuSections = require('./menu-sections-routes');
@@ -477,5 +478,15 @@ module.exports.submitKeyTagRequest = function(req, res){
     magic.emit('locations.keyTagRequest', { locationId: req.param('locationId') });
 
     res.noContent();
+  });
+};
+
+module.exports.measures = function(req, res) {
+  analytics.forLocation(req.params.locationId, function(error, result) {
+    if(error) {
+      logger.routes.error('problem running analytics for location', error);
+      return res.error(errors.internal.DB_FAILURE, error);
+    }
+    res.json({error: null, data: result});
   });
 };

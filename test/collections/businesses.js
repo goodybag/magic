@@ -5,6 +5,7 @@ var
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
 , perms   = require('../../collections/businesses/permissions')
+, ok      = require('okay')
 ;
 
 describe('GET /v1/businesses', function() {
@@ -699,6 +700,21 @@ describe('PATCH /v1/businesses/:id', function(){
   });
 });
 
+it('should work because user is business manager', function(done) {
+  var user = {email: 'some_manager@gmail.com', password: 'password'};
+  var business = {
+    name: 'new biz name',
+    url: 'http://blah.com',
+    logoUrl: 'http://bla.com/img.jpg'
+  };
+  tu.login(user, ok(done, function() {
+    tu.patch('/v1/businesses/' + 1, business, ok(done, function(result, res) {
+      assert(res.statusCode === 204);
+      tu.logout(done);
+    }));
+  }));
+});
+
 describe('GET /v1/businesses/contact-requests', function(){
   it('should respond with a list of business contact entries', function(done){
     tu.loginAsAdmin(function(){
@@ -751,5 +767,36 @@ describe('POST /v1/businesses/contact-requests', function(){
       assert(res.statusCode == 400);
       tu.logout(done);
     });
+  });
+});
+
+describe('GET /v1/businesses/measures', function() {
+  it('should deny non-business-owner', function(done) { 
+    //this manager owns businessId:2 locationId:2
+    var user = { email: 'manager_redeem3@gmail.com', password: 'password' };
+    tu.login(user, function() {
+      tu.get('/v1/businesses/1/measures', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 403);
+        tu.logout(done);
+      });
+    });
+  });
+
+  it('should get resource for ownerManager', function(done) {
+    //this manager owns businessId:2 locationId:2
+    var user = { email: 'some_manager@gmail.com', password: 'password' };
+    tu.login(user, function() {
+      tu.get('/v1/businesses/1/measures', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode !== 403);
+        var data = JSON.parse(results).data;
+        assert(data.totalLikes === 4);
+        assert(data.totalUsers === 0);
+        assert(data.totalPunches === 0);
+        tu.logout(done);
+      });
+    });
+    
   });
 });

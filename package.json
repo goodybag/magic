@@ -1,6 +1,6 @@
 {
   "name": "magic",
-  "version": "1.2.10",
+  "version": "1.2.16",
   "description": "Goodybag API",
   "main": "app.js",
   "directories": {
@@ -38,7 +38,7 @@
     "nodetime": "0.8.x",
     "mongode": "latest",
     "okay": "~0.3.0",
-    "sql": "~0.9.0",
+    "sql": "0.22.x",
     "pg-parse-float": "0.0.x",
     "microtime": "~0.3.3",
     "gelf-encode": "0.2.x",

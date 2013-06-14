@@ -59,6 +59,7 @@ before(function(done) {
   });
 });
 
+require('./collections/email');
 require('./collections/charities');
 require('./collections/businesses');
 require('./collections/locations');
@@ -131,6 +132,7 @@ loadDescription('redemptions', doChaos);
 loadDescription('reviews', doChaos);
 loadDescription('tapin-stations', doChaos);
 loadDescription('users', doChaos);
+loadDescription('email', doChaos);
 
 
 describe('GET /v1/debug/profile', function() {

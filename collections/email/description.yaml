@@ -1,0 +1,17 @@
+item:
+  resource:
+    type: item
+    path: /email
+  methods:
+    post:
+      desc: Send email
+      auth:
+        required: true
+        eg: { email: admin@goodybag.com, password: password }
+      body:
+        to:  { type: email, eg: test@goodybag.com, required: true }
+        from:  { type: email, eg: test@goodybag.com, required: true }
+        subject: { type: string }
+        body: { type: string }
+        cc: { type: email, eg: test@goodybag.com }
+        bcc: { type: email, eg: test@goodybag.com }
