@@ -56,6 +56,11 @@ var config = {
   , 'nearbyGridItems'
   , 'requests'
   , 'partialRegistrations'
+
+  , 'menuSections'
+  , 'menuSectionsProducts'
+  , 'highlights'
+  , 'highlightsProducts'
   ]
 , fixtureFile: 'test'
 };

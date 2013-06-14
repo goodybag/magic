@@ -80,6 +80,8 @@ require('./collections/redemptions');
 require('./collections/events');
 require('./collections/activity');
 require('./collections/req-log');
+require('./collections/menu-sections');
+require('./collections/highlights');
 
 // require('./events/pubnub');
 

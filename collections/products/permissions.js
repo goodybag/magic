@@ -22,6 +22,7 @@ var all = [
 , 'userLikes'
 , 'userWants'
 , 'userTried'
+, 'order'       // used on the menu
 ];
 
 module.exports = {
@@ -48,6 +49,7 @@ module.exports = {
     , 'userLikes'
     , 'userWants'
     , 'userTried'
+    , 'order'
     ]
   , create: []
   , update: []

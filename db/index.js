@@ -74,14 +74,14 @@ exports.getClient = function(logTags, callback){
       //destroy the client
       done(client);
     }, 10000);
-    //return a custom done function so we can 
+    //return a custom done function so we can
     //clear our leak checker
     callback(null, client, function(c) {
       clearTimeout(tid);
       removeFromDomain(client);
       done(c);
     });
-    
+
   };
 
   handle = process.domain ? process.domain.bind(handle) : handle;
@@ -305,6 +305,11 @@ exports.schemas = {
 , nearbyGridItems:           require('./schemas/nearbyGridItems')
 , requests:                  require('./schemas/requests')
 , partialRegistrations:      require('./schemas/partialRegistrations')
+
+, menuSections:              require('./schemas/menuSections')
+, menuSectionsProducts:      require('./schemas/menuSectionsProducts')
+, highlights:                require('./schemas/highlights')
+, highlightsProducts:        require('./schemas/highlightsProducts')
 };
 
 exports.fields = fields;

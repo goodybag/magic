@@ -6,6 +6,7 @@
 var
   db      = require('../../db')
 , utils   = require('../../lib/utils')
+, async   = require('async')
 , sql     = require('../../lib/sql')
 , errors  = require('../../lib/errors')
 , magic   = require('../../lib/magic')
@@ -15,6 +16,9 @@ var
 , schemas    = db.schemas
 , analytics = require('../../lib/business-analytics')
 ;
+
+module.exports.menuSections = require('./menu-sections-routes');
+module.exports.highlights = require('./highlights-routes');
 
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
@@ -121,7 +125,7 @@ module.exports.list = function(req, res){
 
   // run data query
   db.query(query, function(error, rows, dataResult){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
     if (dataResult.rowCount === 0 && req.param('businessId')) {
       return db.query('SELECT id FROM businesses WHERE businesses.id = $1', [req.param('businessId')], function(error, rows, bizResult) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
