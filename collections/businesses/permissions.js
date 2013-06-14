@@ -13,9 +13,9 @@ module.exports.business = {
     create: ['name']
   }
 
-, owner: {
+, ownerManager: {
     read:   ['street1', 'street2', 'city', 'state', 'zip']
-  , update: ['name', 'url', 'menuDescription', 'street1', 'street2', 'city', 'state', 'zip']
+  , update: ['name', 'url', 'menuDescription', 'street1', 'street2', 'city', 'state', 'zip', 'logoUrl']
   }
 
 , sales: {

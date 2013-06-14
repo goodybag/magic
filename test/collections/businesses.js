@@ -5,6 +5,7 @@ var
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
 , perms   = require('../../collections/businesses/permissions')
+, ok      = require('okay')
 ;
 
 describe('GET /v1/businesses', function() {
@@ -697,6 +698,21 @@ describe('PATCH /v1/businesses/:id', function(){
       });
     });
   });
+});
+
+it('should work because user is business manager', function(done) {
+  var user = {email: 'some_manager@gmail.com', password: 'password'};
+  var business = {
+    name: 'new biz name',
+    url: 'http://blah.com',
+    logoUrl: 'http://bla.com/img.jpg'
+  };
+  tu.login(user, ok(done, function() {
+    tu.patch('/v1/businesses/' + 1, business, ok(done, function(result, res) {
+      assert(res.statusCode === 204);
+      tu.logout(done);
+    }));
+  }));
 });
 
 describe('GET /v1/businesses/contact-requests', function(){
