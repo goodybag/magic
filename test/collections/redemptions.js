@@ -88,27 +88,29 @@ describe('POST /v1/redemptions', function() {
   });
 
   it('should use the elite requirement if the consumer is elite', function(done) {
-    tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
-      tu.get('/v1/loyalty', function(err, payload, res) {
+    tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function(error, user) {
+      var loyaltyUrl = '/v1/consumers/' + user.id + '/loyalty/1';
+      tu.get(loyaltyUrl, function(err, payload, res) {
         assert(res.statusCode == 200);
         var orgStats = JSON.parse(payload).data;
 
         tu.logout(function() {
-          tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function() {
+          tu.login({ email:'manager_redeem1@gmail.com', password:'password' }, function(err, user) {
             tu.post('/v1/redemptions', { deltaPunches:2, userId:12, tapinStationId:11133 }, function(err, payload, res) {
               assert(!err);
+
               assert(res.statusCode == 204);
 
               tu.logout(function() {
                 tu.login({ email:'consumer_redeem2@gmail.com', password:'password' }, function() {
 
-                  tu.get('/v1/loyalty', function(err, payload, res) {
+                  tu.get(loyaltyUrl, function(err, payload, res) {
                     assert(res.statusCode == 200);
 
                     payload = JSON.parse(payload);
-                    assert(payload.data[0].numPunches === orgStats[0].numPunches + 2);
-                    assert(payload.data[0].totalPunches === orgStats[0].totalPunches + 2);
-                    assert(payload.data[0].visitCount === orgStats[0].visitCount);
+                    assert(payload.data.numPunches === orgStats.numPunches + 2);
+                    assert(payload.data.totalPunches === orgStats.totalPunches + 2);
+                    assert(payload.data.visitCount === orgStats.visitCount);
 
                     tu.logout(done);
                   });
