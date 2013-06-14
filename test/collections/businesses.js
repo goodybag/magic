@@ -704,11 +704,12 @@ it('should work because user is business manager', function(done) {
   var user = {email: 'some_manager@gmail.com', password: 'password'};
   var business = {
     name: 'new biz name',
-    url: 'http://blah.com'
+    url: 'http://blah.com',
+    logoUrl: 'http://bla.com/img.jpg'
   };
   tu.login(user, ok(done, function() {
     tu.patch('/v1/businesses/' + 1, business, ok(done, function(result, res) {
-      assert(res.statusCode < 299);
+      assert(res.statusCode === 204);
       tu.logout(done);
     }));
   }));
