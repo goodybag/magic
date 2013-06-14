@@ -15,7 +15,7 @@ module.exports.business = {
 
 , ownerManager: {
     read:   ['street1', 'street2', 'city', 'state', 'zip']
-  , update: ['name', 'url', 'menuDescription', 'street1', 'street2', 'city', 'state', 'zip']
+  , update: ['name', 'url', 'menuDescription', 'street1', 'street2', 'city', 'state', 'zip', 'logoUrl']
   }
 
 , sales: {
