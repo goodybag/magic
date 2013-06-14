@@ -190,7 +190,8 @@ server.put(
   '/v1/businesses/:id'
 , middleware.profile('PUT /v1/businesses/:id')
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales')
+, middleware.applyGroups(applyGroups.ownerManager)
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('permissions')
 , middleware.permissions(permissions.business)
 , middleware.profile('validate body')
