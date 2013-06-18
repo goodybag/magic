@@ -31,6 +31,8 @@ var
 
       // required validation
       if (typeof v == 'undefined' || v === '' || v === null) {
+        if (schema[k].optional) continue;
+
         if (schema[k].required){
           if (typeof schema[k].required === "boolean")
             errors[k] = 'Required.';

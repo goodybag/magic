@@ -34,9 +34,12 @@ for (var i = files.length - 1, dir; i >= 0; i--){
   if (!fs.statSync(dir = __dirname + '/../collections/' + files[i]).isDirectory())
     continue;
 
-  if (!fs.existsSync(dir + '/permissions.js')) continue;
+  // I know this is hacky, but it works for now
+  if (fs.existsSync(dir + '/permissions.js'))
+    collections[files[i]] = require(dir + '/permissions');
 
-  collections[files[i]] = require(dir + '/permissions');
+  if (fs.existsSync(dir + '/menu-permissions.js'))
+    collections.menuPermissions = require(dir + '/menu-permissions');
 }
 
 // Expand references
@@ -167,7 +170,6 @@ module.exports = function(allPerms){
     res.json = function(result){
       // If there's an error, don't filter
       if (result.error) return json.apply(res, arguments);
-
       // If they have full read access, just filter out meta fields
       if (perms.read === true) {
         if (result.data) {
