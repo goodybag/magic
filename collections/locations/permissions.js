@@ -15,14 +15,7 @@ module.exports = {
     , 'state'
     , 'zip'
     , 'country'
-    ]
-  , create: []
-  , update: []
-  }
-
-, default: {
-    read:   [
-      'phone'
+    , 'phone'
     , 'fax'
     , 'startSunday'
     , 'endSunday'
@@ -39,6 +32,12 @@ module.exports = {
     , 'startSaturday'
     , 'endSaturday'
     ]
+  , create: []
+  , update: []
+  }
+
+, default: {
+    read:   []
   }
 
 , manager: {
