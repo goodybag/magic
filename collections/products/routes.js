@@ -65,8 +65,10 @@ module.exports.list = function(req, res){
   query.groupby = sql.fields().add('products.id').add('businesses.id');
 
   // Don't filter out unverified business products when querying by business and by collection
-  if (!req.param('businessId') && !req.param('collectionId') && !req.param('locationId'))
+  if (!req.param('businessId') && !req.param('collectionId') && !req.param('locationId')) {
     query.where.and('businesses."isVerified" is true');
+    query.where.and('businesses."isDeleted" is false');
+  }
 
   // hasPhoto filtering
   // :TEMP: iphone mods - only products with photos
