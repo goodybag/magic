@@ -10,6 +10,26 @@ var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 var desc        = require('./description.yaml');
 
+// Users.createCardupdate
+server.post(
+  '/v1/consumers/cardupdate'
+, middleware.profile('POST /v1/consumers/cardupdate')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'tablet')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.cardUpdatesCollection.methods.post.body)
+, middleware.profile('create card update handler')
+, routes.createCardupdate
+);
+
+// Users.cardupdate
+server.post(
+  '/v1/consumers/cardupdate/:token'
+, middleware.profile('POST /v1/consumers/cardupdate/:token')
+, middleware.profile('update card handler')
+, routes.updateCard
+);
+
 // Users.createPasswordReset
 server.post(
   '/v1/users/password-reset'
