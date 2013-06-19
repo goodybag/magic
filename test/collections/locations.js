@@ -848,7 +848,7 @@ describe('GET /v1/locations/:locationsId/measures', function() {
         assert(res.statusCode === 200);
         var data = JSON.parse(result).data;
         assert(data.totalUsers === 0);
-        assert(data.totalLikes === 0);
+        assert(data.totalLikes === 1);
         assert(data.totalPunches === 0);
         tu.logout(done);
       }));

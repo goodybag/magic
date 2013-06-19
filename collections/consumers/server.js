@@ -14,6 +14,8 @@ var desc        = require('./description.yaml');
 server.post(
   '/v1/consumers/cardupdate'
 , middleware.profile('POST /v1/consumers/cardupdate')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'tablet')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.cardUpdatesCollection.methods.post.body)
 , middleware.profile('create card update handler')
