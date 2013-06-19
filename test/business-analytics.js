@@ -8,7 +8,7 @@ describe('business-analytics', function() {
     it('returns results', function(done) {
       analytics.forBusiness(2, ok(done, function(result) {
         assert(result);
-        assert.equal(result.totalLikes, 0, 'result should have total likes')
+        assert.equal(result.totalLikes, 1, 'result should have total likes of 1 but got ' + result.totalLikes);
         assert.equal(result.totalPunches, 0, 'result should have 0 punches but found ' + result.totalPunches)
         assert.equal(result.totalUsers, 0, 'result should have total users likes')
         done();
@@ -20,7 +20,7 @@ describe('business-analytics', function() {
     it('returns results', function(done) {
       analytics.forLocation(1, ok(done, function(result) {
         assert(result);
-        assert.equal(result.totalLikes, 12, 'result should have total likes of ' + 0 + ' but got ' + result.totalLikes)
+        assert.equal(result.totalLikes, 1, 'result should have total likes of ' + 1 + ' but got ' + result.totalLikes)
         assert.equal(result.totalPunches, 0, 'result should have total punches of ' + 0 + ' but got ' + result.totalPunches);
         assert.equal(result.totalUsers, 0, 'result should have total users of ' + 0 + ' but got ' + result.totalUsers)
         done();

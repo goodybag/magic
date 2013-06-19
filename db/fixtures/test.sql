@@ -584,6 +584,7 @@ INSERT INTO events (id, type, date, data) VALUES (17, 'consumers.becameElite', N
 INSERT INTO events (id, type, date, data) VALUES (18, 'consumers.becameElite', NOW() - '2 days'::interval, '"userId"=>"2", "businessId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (19, 'consumers.becameElite', NOW() - '2 weeks'::interval, '"userId"=>"3", "businessId"=>"1"');
 INSERT INTO events (id, type, date, data) VALUES (20, 'consumers.becameElite', NOW() - '2 months'::interval, '"userId"=>"4", "businessId"=>"1"');
+INSERT INTO events (id, type, date, data) VALUES (21, 'products.like', NOW() - '2 months'::interval, '"userId"=>"4", "businessId"=>"2", "locationId"=>"1"');
 COMMIT;
 SELECT setval('"events_id_seq"', (SELECT MAX(id) from "events")); -- advance the sequence past the IDs just used
 
