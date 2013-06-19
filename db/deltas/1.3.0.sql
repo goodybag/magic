@@ -34,3 +34,7 @@ create table "highlightsProducts" (
   "locationId"        int references locations(id) on delete cascade,
   "order"             int
 );
+
+-- #623 - Phone Number Formatting
+
+UPDATE locations SET phone=translate(phone, '()- t.', '') WHERE phone IS NOT NULL;
