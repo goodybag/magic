@@ -137,6 +137,31 @@ describe('GET /v1/locations', function() {
     });
   });
 
+  it('should show hours even if not logged in', function(done) {
+    tu.get('/v1/locations', function(err, payload, res) {
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+
+      payload.data.forEach(function(location){
+        [
+          'Monday'
+        , 'Tuesday'
+        , 'Wednesday'
+        , 'Thursday'
+        , 'Friday'
+        , 'Saturday'
+        , 'Sunday'
+        ].forEach(function(day){
+          assert(('start' + day) in location);
+          assert(('end' + day) in location);
+        });
+      });
+
+      done();
+    });
+  });
+
   it('should sort by distance if also given a location', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
       tu.populate('locations', [{ name:'First', businessId:bids[0], lat:5, lon:5, isEnabled:true }, { name:'Second', businessId:bids[0], lat:5.001, lon:5.001, isEnabled:true }], function() {
