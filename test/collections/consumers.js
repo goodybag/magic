@@ -1197,6 +1197,80 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
   });
 });
 
+describe('The consumer cardupdate flow', function(){
+
+  it('should update a consumers cardId given that the consumer did not previously have a cardId', function(done){
+
+    var consumer = {
+      email:      'ccc1@gmail.com'
+    , firstName:  'Test'
+    , lastName:   'Testling'
+    , password:   'password'
+    };
+
+    var cardId = '309146-UEW';
+
+    utils.stage({
+
+      'start':
+      // First populate the consumer
+      function(next){
+        tu.populate('consumers', [consumer], function(error, ids){
+          assert(!error);
+          assert(ids.length > 0);
+
+          consumer.id = ids[0];
+
+          next('Tapin with new card');
+        });
+      }
+
+      , 'Tapin with new card':
+        // Consumer does some action requiring a tapin with a new card
+        // a new user should be created
+        function(next, finish){
+          tu.loginAsTablet(function(error, tablet){
+            assert(!error);
+
+            tu.tapinAuthRequest('GET', '/v1/session', cardId, function(error, results, res){
+              assert(!error);
+              results = JSON.parse(results);
+
+              assert(results.meta.isFirstTapin);
+
+              assert(results.meta.userId);
+
+              next('Perform email update', results.meta.userId);
+            });
+          });
+        }
+
+      , 'Perform email update':
+        // Tablet recognizes it was a new user and wants to update the new users
+        // record with the email they entered at the tablet
+        // However, the email they put in already exists so put in a cardupdate
+        function(userId, next, finish){
+          var update = { email: consumer.eamil };
+          tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, cardId, update, function(error, results, res){
+            assert(!error);
+            assert(res.statusCode == 400);
+            results = JSON.parse(results);
+            assert(results.error.name == 'EMAIL_TAKEN');
+
+            next('Submit cardupdate request');
+          });
+        }
+
+      , 'end':
+        function(){
+          tu.logout(done);
+        }
+
+    })();
+
+  });
+});
+
 describe('POST /v1/consumers/cardupdate', function() {
   it('should get a token on cardUpdate and then update the cardId with the token', function(done) {
     tu.loginAsAdmin(function(error){
