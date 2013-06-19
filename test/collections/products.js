@@ -74,7 +74,11 @@ describe('GET /v1/products', function() {
               assert(!err);
               assert(res.statusCode == 200);
 
-              payload = JSON.parse(payload);
+              try{
+                payload = JSON.parse(payload);
+              } catch(e) {
+                assert(false, 'Unable to parse payload as json. it should be json.');
+              }
 
               assert(!payload.error);
               assert(payload.data.length > 1);
