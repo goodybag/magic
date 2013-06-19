@@ -1,5 +1,6 @@
 var assert = require('better-assert');
 var sinon = require('sinon');
+var ok = require('okay');
 
 var tu = require('../../lib/test-utils');
 
@@ -49,6 +50,44 @@ describe('GET /v1/products', function() {
           }).length == 0)
 
           tu.del('/v1/products/' + pid, done);
+        });
+      });
+    });
+  });
+
+  it('should respond with a product listing that does not include products from isDeleted businesses', function(done) {
+    var data = [{ name: 'blakjsdkljfasjdf', isVerified: true }]
+    tu.populate('businesses', data, function(err, bids) {
+      assert(!err);
+      var data = [{ name: 'something', businessId: bids[0] }];
+      tu.populate('products', data, function(err, ids){
+
+        assert(!err);
+        var pid = ids[0];
+
+        tu.loginAsAdmin(function() {
+          var url = '/v1/businesses/' + bids[0];
+          tu.del(url, ok(done, function(payload, res) {
+            assert(res.statusCode == 204);
+            tu.get('/v1/products?limit=10000', function(err, payload, res) {
+
+              assert(!err);
+              assert(res.statusCode == 200);
+
+              payload = JSON.parse(payload);
+
+              assert(!payload.error);
+              assert(payload.data.length > 1);
+              var productsFromDeletedBusiness = payload.data.filter(function(p){
+                return p.id == pid;
+              });
+              assert(productsFromDeletedBusiness.length == 0);
+
+              tu.del('/v1/products/' + pid, ok(done, function() {
+                tu.logout(done);
+              }));
+            });
+          }));
         });
       });
     });
