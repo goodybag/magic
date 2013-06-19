@@ -16,6 +16,9 @@ require(__dirname + '/data-access');
 
 // logger tests
 require(__dirname + '/logger');
+//
+// business analytics tests
+require(__dirname + '/business-analytics');
 
 // functional tests
 // ================
