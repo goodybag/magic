@@ -756,8 +756,8 @@ describe('GET /v1/users/card-updates/:token', function(){
         assert(false, 'Unable to parse payload as json. it should be json.');
       }
 
-      assert(payload.data.oldCardId.length == '918273-UTU');
-      assert(payload.data.newCardId.length == '918273-UTA');
+      assert(payload.data.oldCardId == '918273-UTU');
+      assert(payload.data.newCardId == '918273-UTA');
 
       done();
     });
@@ -794,9 +794,14 @@ describe('DELETE /v1/users/card-updates/:token', function(){
       assert(!error)
       assert(response.statusCode == 204);
 
-      db.consumerCardUpdates.findOne({})
+      db.api.consumerCardUpdates.findOne({ token: token }, function(error, result){
+        assert(!error);
 
-      done();
+        assert(new Date(result.expires) < new Date());
+
+        done();
+      });
+
     });
   });
 
@@ -825,20 +830,15 @@ describe('DELETE /v1/users/card-updates/:token', function(){
 
 describe('POST /v1/users/card-updates', function(){
   it('should create a card update request', function(done){
-    tu.post('/v1/users/card-updates', function(error, payload, response){
-      assert(!error)
-      assert(response.statusCode == 200);
+    tu.loginAsTablet(function(error, user){
+      var body = { email: 'tferguson@gmail.com', cardId: '978812-RWE' };
+      tu.post('/v1/users/card-updates', body, function(error, payload, response){
+        assert(!error)
+        assert(response.statusCode == 200);
 
-      try {
-        payload = JSON.parse(payload);
-      } catch(e) {
-        assert(false, 'Unable to parse payload as json. it should be json.');
-      }
-
-      assert(payload.data.token);
-
-      done();
-    });
+        tu.logout(done);
+      });
+    })
   });
 });
 
@@ -847,7 +847,7 @@ describe('POST /v1/users/card-updates/:token', function(){
     var token = 'c';
     var userId = 28;
 
-    tu.post('/v1/users/card-updates/' + token, function(error, payload, response){
+    tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
       assert(!error)
       assert(response.statusCode == 204);
 
@@ -865,7 +865,7 @@ describe('POST /v1/users/card-updates/:token', function(){
     var token = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
     var userId = 28;
 
-    tu.post('/v1/users/card-updates/' + token, function(error, payload, response){
+    tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
       assert(!error)
       assert(response.statusCode == 404);
 
@@ -877,6 +877,7 @@ describe('POST /v1/users/card-updates/:token', function(){
 describe('The consumer cardupdate flow', function(){
 
   it('should update a consumers cardId given that the consumer did not previously have a cardId', function(done){
+    this.timeout(6000)
 
     var businessId  = 1;
     var locationId  = 1;
@@ -959,12 +960,12 @@ describe('The consumer cardupdate flow', function(){
       // record with the email they entered at the tablet
       // However, the email they put in already exists so put in a cardupdate
       function(userId, next, finish){
-        var update = { email: consumer.eamil };
+        var update = { email: consumer.email };
         tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, cardId, update, function(error, results, res){
           assert(!error);
           assert(res.statusCode == 400);
           results = JSON.parse(results);
-          assert(results.error.name == 'EMAIL_TAKEN');
+          assert(results.error.name == 'EMAIL_REGISTERED');
 
           next('Submit cardupdate request');
         });
@@ -978,10 +979,10 @@ describe('The consumer cardupdate flow', function(){
           assert(!error);
           assert(response.statusCode == 200);
           payload = JSON.parse(payload);
-          assert(payload.token);
+          assert(payload.data.token);
 
           tu.logout(function(){
-            next('Consume token', payload.token);
+            next('Consume token', payload.data.token);
           });
         });
       }
@@ -990,7 +991,7 @@ describe('The consumer cardupdate flow', function(){
       // Ideally, the user would be going to our website with the token in the URL
       // The website would post to /users/card-updates/:token
       function(token, next, finish){
-        tu.post('/v1/users/card-updates/' + token, function(error, payload, response){
+        tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
           assert(!error);
           assert(response.statusCode == 204);
 
@@ -1002,7 +1003,7 @@ describe('The consumer cardupdate flow', function(){
       function(next, finish){
         db.api.users.findOne(consumer.generatedId, function(error, generatedUser){
           assert(!error);
-          assert(generatedUser);
+          assert(!generatedUser);
 
           next('Ensure users cardId has been updated')
         });
@@ -1032,11 +1033,8 @@ describe('The consumer cardupdate flow', function(){
           finish();
         });
       }
-
-    , 'end':
-      function(){
-        tu.logout(done);
-      }
-    })();
+    })(function(){
+      tu.logout(done);
+    });
   });
 });

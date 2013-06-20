@@ -576,13 +576,12 @@ module.exports.completeRegistration = function(req, res) {
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.createCardupdate = function(req, res){
+module.exports.createCardUpdate = function(req, res){
   var TAGS = ['create-consumer-cardupdate-token', req.uuid];
   logger.routes.debug(TAGS, 'creating consumer cardupdate token');
 
   var email = req.body.email;
   var newCardId = req.body.cardId;
-
   var query = 'SELECT users.id, users."cardId" FROM users WHERE users.email = $1';
   db.query(query, [email], function(error, rows, result) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
@@ -605,12 +604,10 @@ module.exports.createCardupdate = function(req, res){
       var emailHtml = templates.email.cardupdate({
         url : 'http://www.goodybag.com/#/card-updates/' + token
       });
+
       utils.sendMail(email, config.emailFromAddress, 'Your New Goodybag Card', emailHtml);
 
-      if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
-        res.json({ err:null, data:{ token:token }});
-      else
-        res.noContent();
+      res.json({ err: null, data: { token:token }});
     });
   });
 };
@@ -620,11 +617,11 @@ module.exports.createCardupdate = function(req, res){
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.getCardupdate = function(req, res){
+module.exports.getCardUpdate = function(req, res){
   var TAGS = ['create-consumer-cardupdate-token', req.uuid];
   logger.routes.debug(TAGS, 'creating consumer cardupdate token');
 
-  db.consumerCardUpdates.setLogTags(TAGS);
+  db.api.consumerCardUpdates.setLogTags(TAGS);
 
   var $query = {
     token: req.param('token')
@@ -647,13 +644,16 @@ module.exports.getCardupdate = function(req, res){
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.deleteCardupdate = function(req, res){
+module.exports.deleteCardUpdate = function(req, res){
   var TAGS = ['create-consumer-cardupdate-token', req.uuid];
   logger.routes.debug(TAGS, 'creating consumer cardupdate token');
 
-  db.consumerCardUpdates.setLogTags(TAGS);
+  db.api.consumerCardUpdates.setLogTags(TAGS);
 
-  var $query = { token: req.param('token') };
+  var $query = {
+    token: req.param('token')
+  , $gt: { expires: 'now()' }
+  };
 
   var $update = { expires: 'now()' };
 
@@ -679,20 +679,38 @@ module.exports.updateCard = function(req, res){
   var TAGS = ['update-consumer-card', req.uuid];
   logger.routes.debug(TAGS, 'changing consumer card');
 
+  var query = [
+    'select '
+  , '  "consumerCardUpdates"."userId" as "userAId"'
+  , ', "consumerCardUpdates"."newCardId"'
+  , ', users.id as "userBId"'
+  , 'from "consumerCardUpdates"'
+  , 'left join users on users."cardId" = "consumerCardUpdates"."newCardId"'
+  , 'where token = $1 and expires > now()'
+  ].join('\n');
+
   // get cardupdate info
-  db.query('SELECT "userId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, rows, result) {
+  db.query(query, [req.params.token], function(error, rows, result) {
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-    if (result.rowCount === 0) {
-      return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.');
+
+    if (result.rowCount === 0) return res.status(404).end();
+
+    if (result.rows[0].userBId){
+      var options = { userMerge: ['cardId'] };
+      db.procedures.mergeAccounts(result.rows[0].userAId, result.rows[0].userBId, options, function(error){
+        if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        return res.noContent();
+      });
+    } else {
+      var targetConsumerId = result.rows[0].userAId;
+      var newCardId = result.rows[0].newCardId;
+
+      db.query('UPDATE users SET "cardId"=$1 WHERE id = $2', [newCardId, targetConsumerId], function(error, rows, result) {
+        if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+        res.noContent();
+      });
     }
-
-    var targetConsumerId = result.rows[0].userId;
-    var newCardId = result.rows[0].newCardId;
-
-    db.query('UPDATE users SET "cardId"=$1 WHERE id = $2', [newCardId, targetConsumerId], function(error, rows, result) {
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
   });
 };

@@ -720,7 +720,7 @@ insert into "consumerCardUpdates" (
 , '918273-UTA'
 , '918273-UTU'
 , 'a'
-, 'now() + interval 1000 day'
+, now() + interval '1000 days'
 , 'now()'
 );
 insert into "consumerCardUpdates" (
@@ -754,7 +754,7 @@ insert into "consumerCardUpdates" (
 , '918273-UTA'
 , '918273-UTU'
 , 'c'
-, 'now() + interval 1000 day'
+, now() + interval '1000 days'
 , 'now()'
 );
 insert into "consumerCardUpdates" (
@@ -771,7 +771,24 @@ insert into "consumerCardUpdates" (
 , '918273-UTA'
 , '918273-UTU'
 , 'd'
-, 'now() + interval 1000 day'
+, now() + interval '1000 days'
+, 'now()'
+);
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  5
+, 28
+, '918274-UTA'
+, '918274-UTU'
+, 'e'
+, now() + interval '1000 days'
 , 'now()'
 );
 COMMIT;

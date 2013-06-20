@@ -2,6 +2,7 @@ var db = require('./index');
 var sql = require('../lib/sql');
 var errors = require('../lib/errors');
 var utils = require('../lib/utils');
+var async = require('async');
 var magic = require('../lib/magic');
 var templates = require('../templates');
 var config = require('../config');
@@ -29,7 +30,6 @@ var consumeLogTags = function() {
  * @return undefined
  */
 module.exports.updateUserLoyaltyStats = function(client, tx, userId, businessId, deltaPunches, cb) {
-
   // run stats upsert
   db.upsert(client,
     ['UPDATE "userLoyaltyStats"',
@@ -459,6 +459,10 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
  *   + User Loyalty Stats
  *   + User records
  *
+ * This does not call the updateUser function, though it probably should.
+ * This was created to handle cardUpdate account merging, so it's not totally robust
+ *
+ *
  * [Options]:
  *
  * @param  {Array}    userMerge   Properties to take from userIdB
@@ -473,7 +477,9 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
 module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
   var TAGS = ['merge-accounts'];
   var local = {
-    users: new db.Api('users')
+    api: {
+      users: new db.Api('users')
+    }
   };
 
   if (typeof options == 'function'){
@@ -486,13 +492,15 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
   if (!Array.isArray(options.userMerge))
     throw new Error('options.userMerge must be an array of properties');
 
+
   utils.stage({
     'start':
     function(next, done){
-      db.getClient(function(error, client){
+      db.getClient(TAGS, function(error, client, clientDone){
         if (error) return callback(error);
 
         local.client = client;
+        local.clientDone = clientDone;
 
         next('setup transactor', client);
       });
@@ -503,8 +511,8 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
       var tx = new Transaction(client);
 
       // For new API instances, use transactor to query
-      for (var key in local)
-        local[key].setTransactor(tx);
+      for (var key in local.api)
+        local.api[key].setTransactor(tx);
 
       local.tx = tx;
 
@@ -518,7 +526,7 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
 
   , 'find user loyalty stats':
     function(next, done){
-      db.userLoyaltyStats.find({ userId: userIdB }, function(error, stats){
+      db.api.userLoyaltyStats.find({ userId: userIdB }, function(error, stats){
         if (error) return done(error);
 
         next('update user loyalty stats', stats);
@@ -527,23 +535,23 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
 
   , 'update user loyalty stats':
     function(stats, next, done){
-      var getStatFn = function(stat){
+      var getStatsFn = function(stat){
         return function(_done){
           module.exports.updateUserLoyaltyStats(
             local.client
           , local.tx
-          , stat.businessId
           , userIdA
+          , stat.businessId
           , stat.numPunches
-          , function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite){
-              if (error) return _done(err);
+          , function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite){
+              if (error) return _done(error);
 
               // Format resulting args nicely for async
               return _done(null, {
                 hasEarnedReward:  hasEarnedReward
               , numRewards:       numRewards
               , hasBecomeElite:   hasBecomeElite
-              , dateBecameElite:  dateBecameElite:
+              , dateBecameElite:  dateBecameElite
               });
             }
           );
@@ -562,7 +570,7 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
         if (options.userMerge.length > 0)
           next('update user record');
         else
-          next('delete user record'):
+          next('delete user record');
       });
     }
 
@@ -578,11 +586,10 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
       ];
 
       for (var i = 0, l = options.userMerge.length; i < l; ++i){
-        query.push('  set "users"."' + options.userMerge[i] + '" = "userB"."' + options.userMerge[i] + '"');
+        query.push('  set "' + options.userMerge[i] + '" = (select "userB"."' + options.userMerge[i] + '" from "userB" )');
       }
 
       query.push('where "users"."id" = $' + values.push(userIdA));
-
       local.tx.query(query.join('\n'), values, function(error){
         done(error);
       });
@@ -590,14 +597,14 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
 
   , 'delete user record':
     function(next, done){
-      local.users.remove(userIdB, function(error){
+      local.api.users.remove(userIdB, function(error){
         done(error);
       });
-    };
-
-  , 'end':
-    function(error){
-      callback(error);
     }
+  })(function(error){
+    if (error) local.tx.abort(callback);
+    else local.tx.commit(callback);
+
+    if (local.clientDone) local.clientDone(), console.log('client done');
   });
 };
