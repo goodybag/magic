@@ -1,5 +1,5 @@
 var
-  db          = require('../db')
+db          = require('../db')
 , utils       = require('../lib/utils')
 , logger      = require('../lib/logger')('tapin-auth')
 , errors      = require('../lib/errors')
@@ -15,13 +15,17 @@ var
 , usersGroups = db.tables.usersGroups
 ;
 
-module.exports = function(req, res, next){
-  // pull out the tapin authorization
-  var TAGS = ['middleware-tapin-auth', req.uuid];
-  var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
-  if (!authMatch) return next();
-  var cardId = authMatch[1];
+// enum
+var authTypes = {
+  phone: phoneAuth,
+  cardId: cardAuth
+}
 
+function phoneAuth(req, res, next, phone) {
+  return next();
+}
+
+function cardAuth(req, res, next, cardId) {
   // validate the id
   if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
     return res.error(errors.auth.INVALID_CARD_ID);
@@ -63,15 +67,15 @@ module.exports = function(req, res, next){
       stage.lookupUser();
     }
 
-  , lookupUser: function() {
+    , lookupUser: function() {
       var query = [
         'SELECT users.id, users.email, users."singlyId", users."singlyAccessToken",',
-            'array_agg(groups.name) as groups',
-          'FROM users',
-            'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-            'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
-          'WHERE users."cardId" = $1',
-          'GROUP BY users.id'
+        'array_agg(groups.name) as groups',
+        'FROM users',
+        'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
+        'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
+        'WHERE users."cardId" = $1',
+        'GROUP BY users.id'
       ].join(' ');
 
       db.query(query, [cardId], function(error, rows, result){
@@ -82,7 +86,7 @@ module.exports = function(req, res, next){
       });
     }
 
-  , createUser: function() {
+    , createUser: function() {
       // Flag response to send meta.isFirstTapin = true;
       isFirstTapin = true;
 
@@ -96,7 +100,7 @@ module.exports = function(req, res, next){
       });
     }
 
-  , insertTapin: function(user) {
+    , insertTapin: function(user) {
       //fetch tapinStation row
       var q = 'SELECT * from "tapinStations" WHERE "tapinStations".id = $1';
       var q = db.tables.tapinStations.where(tapinStations.id.equals(tapinStationUser.id));
@@ -126,16 +130,34 @@ module.exports = function(req, res, next){
         }));
       }));
     }
-  , dbError: function(error){
+    , dbError: function(error){
       logger.error('database error', error);
       res.error(errors.internal.DB_FAILURE, error);
     }
 
-  , end: function(user) {
+    , end: function(user) {
       req.session.user = user;
       next();
     }
   };
 
   stage.start();
+}
+
+module.exports = function(req, res, next){
+  // pull out the tapin authorization
+  var TAGS = ['middleware-tapin-auth', req.uuid];
+  var parts = req.header('authorization').split('\s+'); // split on whitespace
+  if (parts.length < 2 || parts.length > 3 || parts[0] !== 'Tapin')  return next();
+  var handler, id;
+  if (parts.length === 3) {
+    if (!(parts[1] in authTypes)) return next();
+    handler = authTypes[parts[1]];
+    id = parts[2];
+  } else {
+    handler = authTypes.cardId; // default to cardId
+    id = parts[1];
+  }
+
+  handler(req, res, next, id);
 };
