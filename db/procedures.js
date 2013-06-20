@@ -543,7 +543,7 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
           , local.tx
           , userIdA
           , stat.businessId
-          , stat.numPunches
+          , stat.totalPunches
           , function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite){
               if (error) return _done(error);
 
@@ -609,6 +609,6 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
       magic.emit('users.accountMerge', { fromId: userIdB, toId: userIdA });
     }
 
-    if (local.clientDone) local.clientDone(), console.log('client done');
+    if (local.clientDone) local.clientDone();
   });
 };

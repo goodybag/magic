@@ -882,7 +882,9 @@ describe('The consumer cardupdate flow', function(){
     var businessId  = 1;
     var locationId  = 1;
 
-    var numPunchesToGive = 4;
+    // Sorry, being lazy and just fulfilling these variables later
+    var regularPunchesRequired;
+    var numPunchesToGive;
 
     var consumer = {
       email:      'ccc1@gmail.com'
@@ -904,6 +906,20 @@ describe('The consumer cardupdate flow', function(){
           assert(ids.length > 0);
 
           consumer.id = ids[0];
+
+          next('Get business loyalty settings');
+        });
+      }
+
+    , 'Get business loyalty settings':
+      function(next, finish){
+        db.api.businessLoyaltySettings.findOne({ businessId: businessId }, function(error, result){
+          if (error) return finish(error);
+
+          regularPunchesRequired = result.regularPunchesRequired;
+
+          // Give enough punches to give a reward
+          numPunchesToGive = regularPunchesRequired + 1;
 
           next('Tapin with new card');
         });
@@ -950,8 +966,9 @@ describe('The consumer cardupdate flow', function(){
         db.api.userLoyaltyStats.findOne({ userId: userId, businessId: businessId }, function(error, stats){
           assert(!error);
 
-          assert(stats.numPunches === numPunchesToGive);
+          assert(stats.numPunches === (numPunchesToGive % regularPunchesRequired));
           assert(stats.totalPunches === numPunchesToGive);
+          assert(stats.numRewards === parseInt(numPunchesToGive / regularPunchesRequired))
         });
       }
 
@@ -1027,8 +1044,9 @@ describe('The consumer cardupdate flow', function(){
         db.api.userLoyaltyStats.findOne({ userId: consumer.id, businessId: businessId }, function(error, stats){
           assert(!error);
 
-          assert(stats.numPunches === numPunchesToGive);
+          assert(stats.numPunches === (numPunchesToGive % regularPunchesRequired));
           assert(stats.totalPunches === numPunchesToGive);
+          assert(stats.numRewards === parseInt(numPunchesToGive / regularPunchesRequired))
 
           finish();
         });
