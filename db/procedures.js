@@ -451,4 +451,153 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
       magic.emit('user.partialRegistration', userId, email, token);
     });
   }
-}
+};
+
+/**
+ * Oh man...
+ * Merge two accounts':
+ *   + User Loyalty Stats
+ *   + User records
+ *
+ * [Options]:
+ *
+ * @param  {Array}    userMerge   Properties to take from userIdB
+ *
+ * Function Arguments:
+ *
+ * @param  {Number}   userIdA     ID of the user to merge into
+ * @param  {Number}   userIdB     ID of the user to merge from
+ * @param  {Object}   options     Some options for this sheet
+ * @param  {Function} callback    Callback
+ */
+module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
+  var TAGS = ['merge-accounts'];
+  var local = {
+    users: new db.Api('users')
+  };
+
+  if (typeof options == 'function'){
+    callback = options;
+    options = {};
+  }
+
+  options.userMerge = options.userMerge || [];
+
+  if (!Array.isArray(options.userMerge))
+    throw new Error('options.userMerge must be an array of properties');
+
+  utils.stage({
+    'start':
+    function(next, done){
+      db.getClient(function(error, client){
+        if (error) return callback(error);
+
+        local.client = client;
+
+        next('setup transactor', client);
+      });
+    }
+
+  , 'setup transactor':
+    function(client, next, done){
+      var tx = new Transaction(client);
+
+      // For new API instances, use transactor to query
+      for (var key in local)
+        local[key].setTransactor(tx);
+
+      local.tx = tx;
+
+      local.tx.begin(function(error){
+        if (error) return done(error);
+
+        next('find user loyalty stats');
+      });
+
+    }
+
+  , 'find user loyalty stats':
+    function(next, done){
+      db.userLoyaltyStats.find({ userId: userIdB }, function(error, stats){
+        if (error) return done(error);
+
+        next('update user loyalty stats', stats);
+      });
+    }
+
+  , 'update user loyalty stats':
+    function(stats, next, done){
+      var getStatFn = function(stat){
+        return function(_done){
+          module.exports.updateUserLoyaltyStats(
+            local.client
+          , local.tx
+          , stat.businessId
+          , userIdA
+          , stat.numPunches
+          , function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite){
+              if (error) return _done(err);
+
+              // Format resulting args nicely for async
+              return _done(null, {
+                hasEarnedReward:  hasEarnedReward
+              , numRewards:       numRewards
+              , hasBecomeElite:   hasBecomeElite
+              , dateBecameElite:  dateBecameElite:
+              });
+            }
+          );
+        };
+      };
+
+      var fns = [];
+
+      for (var i = 0, l = stats.length; i < l; ++i){
+        fns.push( getStatsFn( stats[i] ) )
+      }
+
+      async.parallel(fns, function(error, results){
+        if (error) return done(error);
+
+        if (options.userMerge.length > 0)
+          next('update user record');
+        else
+          next('delete user record'):
+      });
+    }
+
+  , 'update user record':
+    function(next, done){
+      var values = [];
+
+      var query = [
+        'with "userB" as ('
+      , '  delete from users where id = $' + values.push(userIdB)
+      , '  returning *'
+      , ') update users'
+      ];
+
+      for (var i = 0, l = options.userMerge.length; i < l; ++i){
+        query.push('  set "users"."' + options.userMerge[i] + '" = "userB"."' + options.userMerge[i] + '"');
+      }
+
+      query.push('where "users"."id" = $' + values.push(userIdA));
+
+      local.tx.query(query.join('\n'), values, function(error){
+        done(error);
+      });
+    }
+
+  , 'delete user record':
+    function(next, done){
+      local.users.remove(userIdB, function(error){
+        done(error);
+      });
+    };
+
+  , 'end':
+    function(error){
+      callback(error);
+    }
+  });
+};
