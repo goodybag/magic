@@ -603,7 +603,10 @@ module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
     }
   })(function(error){
     if (error) local.tx.abort(callback);
-    else local.tx.commit(callback);
+    else {
+      local.tx.commit(callback);
+      magic.emit('users.accountMerge', { fromId: userIdB, toId: userIdA });
+    }
 
     if (local.clientDone) local.clientDone(), console.log('client done');
   });
