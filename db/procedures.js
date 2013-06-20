@@ -459,9 +459,10 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
  *   + User Loyalty Stats
  *   + User records
  *
- * This does not call the updateUser function, though it probably should.
  * This was created to handle cardUpdate account merging, so it's not totally robust
- *
+ * This does not call the updateUser function (add in the future for better errors)
+ * This does not take into account user extension tables (add in the future)
+ * This does not take into account user feelings thought (add in the future)
  *
  * [Options]:
  *
