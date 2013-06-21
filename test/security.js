@@ -10,9 +10,14 @@ var getServer = function(collection) {
   return require('../collections/' + collection + '/server');
 };
 
+var collections = [
+  'businesses', 
+  'locations', 
+  'productCategories',
+  'products']
 var getRoute = function(method, path) {
   var matchedRoutes = [];
-  ['businesses', 'locations', 'products'].forEach(function(collection){
+  collections.forEach(function(collection){
     var server = getServer(collection);
     if(!server) throw new Error('Could not find server for collection ' + collection);
     //find route in server
@@ -64,7 +69,7 @@ var testSecurity = module.exports = function(scenarios) {
           } else {
             request.post(url, options, ok(done, function(res) {
               if(res.statusCode != 200) {
-                return done('Expected login status code of 200 but got ' + res.statusCode + ' for user ' + scenario.user);
+                return done('Expected LOGIN status code of 200 but got ' + res.statusCode + ' for user ' + scenario.user);
               }
               done();
             }));
@@ -81,6 +86,7 @@ var testSecurity = module.exports = function(scenarios) {
           }
           request(options, ok(done, function(res) {
             if(res.statusCode != scenario.statusCode) {
+              console.log(res.body);
               return done('Expected status code ' + scenario.statusCode + ' but received ' + res.statusCode)
             }
             done();
