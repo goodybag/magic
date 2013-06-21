@@ -1,19 +1,17 @@
-var
-db          = require('../db')
-, utils       = require('../lib/utils')
-, logger      = require('../lib/logger')('tapin-auth')
-, errors      = require('../lib/errors')
-, magic       = require('../lib/magic')
-, Transaction = require('pg-transaction')
-, ok = require('okay')
+var db          = require('../db');
+var utils       = require('../lib/utils');
+var logger      = require('../lib/logger')('tapin-auth');
+var errors      = require('../lib/errors');
+var magic       = require('../lib/magic');
+var Transaction = require('pg-transaction');
+var ok          = require('okay');
 
-, users       = db.tables.users
-, consumers   = db.tables.consumers
-, managers    = db.tables.managers
-, cashiers    = db.tables.cashiers
-, groups      = db.tables.groups
-, usersGroups = db.tables.usersGroups
-;
+var users       = db.tables.users;
+var consumers   = db.tables.consumers;
+var managers    = db.tables.managers;
+var cashiers    = db.tables.cashiers;
+var groups      = db.tables.groups;
+var usersGroups = db.tables.usersGroups;
 
 // enum
 var authTypes = {
@@ -147,7 +145,9 @@ function cardAuth(req, res, next, cardId) {
 module.exports = function(req, res, next){
   // pull out the tapin authorization
   var TAGS = ['middleware-tapin-auth', req.uuid];
-  var parts = req.header('authorization').split('\s+'); // split on whitespace
+  var auth = req.header('authorization');
+  if (auth == null) return next();
+  var parts = auth.split('\s+'); // split on whitespace
   if (parts.length < 2 || parts.length > 3 || parts[0] !== 'Tapin')  return next();
   var handler, id;
   if (parts.length === 3) {
@@ -159,5 +159,6 @@ module.exports = function(req, res, next){
     id = parts[1];
   }
 
+  console.log('handling tapin:', parts);
   handler(req, res, next, id);
 };
