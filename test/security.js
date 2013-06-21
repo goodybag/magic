@@ -14,6 +14,7 @@ var collections = [
   'businesses', 
   'locations', 
   'productCategories',
+  'productTags',
   'products']
 var getRoute = function(method, path) {
   var matchedRoutes = [];
