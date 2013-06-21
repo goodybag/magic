@@ -67,6 +67,9 @@ before(function(done) {
 // but the security tests do not alter any data
 
 require('./permissions/businesses.js');
+require('./permissions/product-categories.js');
+require('./permissions/products.js');
+require('./permissions/product-tags.js');
 
 require('./collections/email');
 require('./collections/charities');
