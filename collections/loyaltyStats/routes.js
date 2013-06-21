@@ -199,7 +199,7 @@ module.exports.update = function(req, res){
       args.push(deltaPunches, function(err, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite) {
         if (error) return res.error(errors.internal.DB_FAILURE, error), tx.abort(), logger.routes.error(TAGS, error);
 
-        tx.commit(function() {
+        tx.commit(function(error) {
           if(error) {
             //destroy client if it failed to commit
             done(error);

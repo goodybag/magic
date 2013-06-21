@@ -195,9 +195,9 @@ module.exports.updatePassword = function(req, res){
                 return tx.abort(done), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
               if (result.rowCount === 0)
                 return tx.abort(done), res.error(errors.internal.DB_FAILURE, 'User record failed to update password, even after locking for transaction!'), logger.routes.error(TAGS, 'User record failed to update password, even after locking for transaction!');
-              tx.commit(function(err) { 
+              tx.commit(function(err) {
                 done(err);
-                res.noContent(); 
+                res.noContent();
               });
             });
           });
@@ -592,75 +592,5 @@ module.exports.removeCollectionProduct = function(req, res){
     res.noContent();
 
     magic.emit('consumers.removeFromCollection', req.params.userId || req.session.user.id, collectionId, productId);
-  });
-};
-
-/**
- * Create consumer cardupdate
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res HTTP Result Object
- */
-module.exports.createCardupdate = function(req, res){
-  var TAGS = ['create-consumer-cardupdate-token', req.uuid];
-  logger.routes.debug(TAGS, 'creating consumer cardupdate token');
-
-  var email = req.body.email;
-  var newCardId = req.body.cardId;
-
-  var query = 'SELECT users.id, users."cardId" FROM users WHERE users.email = $1';
-  db.query(query, [email], function(error, rows, result) {
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-    if (result.rowCount === 0) return res.error(errors.input.NOT_FOUND);
-    var userId = result.rows[0].id;
-    var oldCardId  = result.rows[0].cardId;
-
-    var token = require("randomstring").generate();
-    var query = sql.query([
-      'INSERT INTO "consumerCardUpdates" ("userId", "newCardId", "oldCardId", token, expires, "createdAt")',
-        'VALUES ($userId, $newCardId, $oldCardId, $token, now() + \'2 weeks\'::interval, now())'
-    ]);
-    query.$('userId', userId);
-    query.$('newCardId', newCardId);
-    query.$('oldCardId', oldCardId);
-    query.$('token', token);
-    db.query(query, function(error, rows, result) {
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      var emailHtml = templates.email.cardupdate({
-        url : config.baseUrl + '/v1/consumers/cardupdate/' + token
-      });
-      utils.sendMail(email, config.emailFromAddress, 'Goodybag Assign New Card Link', emailHtml);
-
-      if (req.session.user && req.session.user.groups.indexOf('admin') !== -1)
-        res.json({ err:null, data:{ token:token }});
-      else
-        res.noContent();
-    });
-  });
-};
-
-/**
- * Assign a new card to an existing user
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res HTTP Result Object
- */
-module.exports.updateCard = function(req, res){
-  var TAGS = ['update-consumer-card', req.uuid];
-  logger.routes.debug(TAGS, 'changing consumer card');
-
-  // get cardupdate info
-  db.query('SELECT "userId", "newCardId" FROM "consumerCardUpdates" WHERE token=$1 AND expires > now()', [req.params.token], function(error, rows, result) {
-    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-    if (result.rowCount === 0) {
-      return res.error(errors.input.VALIDATION_FAILED, 'Your card-update token was not found or has expired. Please request a new one.');
-    }
-    var targetConsumerId = result.rows[0].userId;
-    var newCardId = result.rows[0].newCardId;
-
-    db.query('UPDATE users SET "cardId"=$1 WHERE id = $2', [newCardId, targetConsumerId], function(error, rows, result) {
-      if(error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.noContent();
-    });
   });
 };

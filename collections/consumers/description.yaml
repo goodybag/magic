@@ -69,29 +69,6 @@ consumerPasswordItem:
         required: true
         eg: { email: admin@goodybag.com, password: password }
 
-cardUpdatesCollection:
-  resource:
-    type: collection
-    path: /consumers/cardupdate
-  methods:
-    post:
-      desc: Request Card Change
-      body:
-        email:  { type: email,  eg: a_consumer_XXX@home.com }
-        cardId: { type: cardid, eg: 610XXX-URL, min: 10, max: 10 }
-  children:
-    - /consumers/cardupdate/:token
-
-cardUpdatesItem:
-  resource:
-    type: item
-    path: /consumers/cardupdate/:token
-    params:
-      token: { type: string, eg: abcdefghijklmnopqrstuvwxyz }
-  methods:
-    post:
-      desc: Finalize Card Change
-
 collectionsCollection:
   resource:
     type: collection

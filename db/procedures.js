@@ -2,6 +2,7 @@ var db = require('./index');
 var sql = require('../lib/sql');
 var errors = require('../lib/errors');
 var utils = require('../lib/utils');
+var async = require('async');
 var magic = require('../lib/magic');
 var templates = require('../templates');
 var config = require('../config');
@@ -29,7 +30,6 @@ var consumeLogTags = function() {
  * @return undefined
  */
 module.exports.updateUserLoyaltyStats = function(client, tx, userId, businessId, deltaPunches, cb) {
-
   // run stats upsert
   db.upsert(client,
     ['UPDATE "userLoyaltyStats"',
@@ -451,4 +451,164 @@ module.exports.partialRegistration = function(userId, email, password, singlyId,
       magic.emit('user.partialRegistration', userId, email, token);
     });
   }
-}
+};
+
+/**
+ * Oh man...
+ * Merge two accounts':
+ *   + User Loyalty Stats
+ *   + User records
+ *
+ * This was created to handle cardUpdate account merging, so it's not totally robust
+ * This does not call the updateUser function (add in the future for better errors)
+ * This does not take into account user extension tables (add in the future)
+ * This does not take into account user feelings thought (add in the future)
+ *
+ * [Options]:
+ *
+ * @param  {Array}    userMerge   Properties to take from userIdB
+ *
+ * Function Arguments:
+ *
+ * @param  {Number}   userIdA     ID of the user to merge into
+ * @param  {Number}   userIdB     ID of the user to merge from
+ * @param  {Object}   options     Some options for this sheet
+ * @param  {Function} callback    Callback
+ */
+module.exports.mergeAccounts = function(userIdA, userIdB, options, callback){
+  var TAGS = ['merge-accounts'];
+  var local = {
+    api: {
+      users: new db.Api('users')
+    }
+  };
+
+  if (typeof options == 'function'){
+    callback = options;
+    options = {};
+  }
+
+  options.userMerge = options.userMerge || [];
+
+  if (!Array.isArray(options.userMerge))
+    throw new Error('options.userMerge must be an array of properties');
+
+
+  utils.stage({
+    'start':
+    function(next, done){
+      db.getClient(TAGS, function(error, client, clientDone){
+        if (error) return callback(error);
+
+        local.client = client;
+        local.clientDone = clientDone;
+
+        next('setup transactor', client);
+      });
+    }
+
+  , 'setup transactor':
+    function(client, next, done){
+      var tx = new Transaction(client);
+
+      // For new API instances, use transactor to query
+      for (var key in local.api)
+        local.api[key].setTransactor(tx);
+
+      local.tx = tx;
+
+      local.tx.begin(function(error){
+        if (error) return done(error);
+
+        next('find user loyalty stats');
+      });
+
+    }
+
+  , 'find user loyalty stats':
+    function(next, done){
+      db.api.userLoyaltyStats.find({ userId: userIdB }, function(error, stats){
+        if (error) return done(error);
+
+        next('update user loyalty stats', stats);
+      });
+    }
+
+  , 'update user loyalty stats':
+    function(stats, next, done){
+      var getStatsFn = function(stat){
+        return function(_done){
+          module.exports.updateUserLoyaltyStats(
+            local.client
+          , local.tx
+          , userIdA
+          , stat.businessId
+          , stat.totalPunches
+          , function(error, hasEarnedReward, numRewards, hasBecomeElite, dateBecameElite){
+              if (error) return _done(error);
+
+              // Format resulting args nicely for async
+              return _done(null, {
+                hasEarnedReward:  hasEarnedReward
+              , numRewards:       numRewards
+              , hasBecomeElite:   hasBecomeElite
+              , dateBecameElite:  dateBecameElite
+              });
+            }
+          );
+        };
+      };
+
+      var fns = [];
+
+      for (var i = 0, l = stats.length; i < l; ++i){
+        fns.push( getStatsFn( stats[i] ) )
+      }
+
+      async.parallel(fns, function(error, results){
+        if (error) return done(error);
+
+        if (options.userMerge.length > 0)
+          next('update user record');
+        else
+          next('delete user record');
+      });
+    }
+
+  , 'update user record':
+    function(next, done){
+      var values = [];
+
+      var query = [
+        'with "userB" as ('
+      , '  delete from users where id = $' + values.push(userIdB)
+      , '  returning *'
+      , ') update users'
+      ];
+
+      for (var i = 0, l = options.userMerge.length; i < l; ++i){
+        query.push('  set "' + options.userMerge[i] + '" = (select "userB"."' + options.userMerge[i] + '" from "userB" )');
+      }
+
+      query.push('where "users"."id" = $' + values.push(userIdA));
+      local.tx.query(query.join('\n'), values, function(error){
+        done(error);
+      });
+    }
+
+  , 'delete user record':
+    function(next, done){
+      local.api.users.remove(userIdB, function(error){
+        done(error);
+      });
+    }
+  })(function(error){
+    if (error) local.tx.abort(callback);
+    else {
+      local.tx.commit(callback);
+      magic.emit('users.accountMerge', { fromId: userIdB, toId: userIdA });
+    }
+
+    if (local.clientDone) local.clientDone();
+  });
+};

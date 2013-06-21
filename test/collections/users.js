@@ -741,3 +741,318 @@ describe('POST /v1/users/complete-registration/:token', function() {
   });
 */
 });
+
+describe('GET /v1/users/card-updates/:token', function(){
+  it('should return the users card update request', function(done){
+    var token = 'a';
+
+    tu.get('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 200);
+
+      try {
+        payload = JSON.parse(payload);
+      } catch(e) {
+        assert(false, 'Unable to parse payload as json. it should be json.');
+      }
+
+      assert(payload.data.oldCardId == '918273-UTU');
+      assert(payload.data.newCardId == '918273-UTA');
+
+      done();
+    });
+  });
+
+  it('should 404 on expired token', function(done){
+    var token = 'b';
+
+    tu.get('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 404);
+
+      done();
+    });
+  });
+
+  it('should 404 on non-existent token', function(done){
+    var token = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+
+    tu.get('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 404);
+
+      done();
+    });
+  });
+});
+
+describe('DELETE /v1/users/card-updates/:token', function(){
+  it('should cancel users card update request', function(done){
+    var token = 'd';
+
+    tu.del('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 204);
+
+      db.api.consumerCardUpdates.findOne({ token: token }, function(error, result){
+        assert(!error);
+
+        assert(new Date(result.expires) < new Date());
+
+        done();
+      });
+
+    });
+  });
+
+  it('should 404 on expired token', function(done){
+    var token = 'b';
+
+    tu.del('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 404);
+
+      done();
+    });
+  });
+
+  it('should 404 on non-existent token', function(done){
+    var token = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+
+    tu.del('/v1/users/card-updates/' + token, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 404);
+
+      done();
+    });
+  });
+});
+
+describe('POST /v1/users/card-updates', function(){
+  it('should create a card update request', function(done){
+    tu.loginAsTablet(function(error, user){
+      var body = { email: 'tferguson@gmail.com', cardId: '978812-RWE' };
+      tu.post('/v1/users/card-updates', body, function(error, payload, response){
+        assert(!error)
+        assert(response.statusCode == 200);
+
+        tu.logout(done);
+      });
+    })
+  });
+});
+
+describe('POST /v1/users/card-updates/:token', function(){
+  it('should redeem a card update request', function(done){
+    var token = 'c';
+    var userId = 28;
+
+    tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 204);
+
+      db.api.users.findOne(userId, function(error, user){
+        assert(!error);
+
+        assert(user.cardId == '918273-UTA');
+
+        done();
+      });
+    });
+  });
+
+  it('should 404 on non-existent token', function(done){
+    var token = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+    var userId = 28;
+
+    tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
+      assert(!error)
+      assert(response.statusCode == 404);
+
+      done();
+    });
+  });
+});
+
+describe('The consumer cardupdate flow', function(){
+
+  it('should update a consumers cardId given that the consumer did not previously have a cardId', function(done){
+    this.timeout(6000)
+
+    var businessId  = 1;
+    var locationId  = 1;
+
+    // Sorry, being lazy and just fulfilling these variables later
+    var regularPunchesRequired;
+    var numPunchesToGive;
+
+    var consumer = {
+      email:      'ccc1@gmail.com'
+    , firstName:  'Test'
+    , lastName:   'Testling'
+    , password:   'password'
+    };
+
+    var managerCardId = '123456-XXX';
+    var cardId = '309146-UEW';
+
+    utils.stage({
+
+      'start':
+      // First populate the consumer
+      function(next){
+        tu.populate('consumers', [consumer], function(error, ids){
+          assert(!error);
+          assert(ids.length > 0);
+
+          consumer.id = ids[0];
+
+          next('Get business loyalty settings');
+        });
+      }
+
+    , 'Get business loyalty settings':
+      function(next, finish){
+        db.api.businessLoyaltySettings.findOne({ businessId: businessId }, function(error, result){
+          if (error) return finish(error);
+
+          regularPunchesRequired = result.regularPunchesRequired;
+
+          // Give enough punches to give a reward
+          numPunchesToGive = regularPunchesRequired + 1;
+
+          next('Tapin with new card');
+        });
+      }
+
+    , 'Tapin with new card':
+      // Consumer does some action requiring a tapin with a new card
+      // a new user should be created
+      function(next, finish){
+        tu.loginAsTablet(function(error, tablet){
+          assert(!error);
+
+          tu.tapinAuthRequest('GET', '/v1/session', cardId, function(error, results, res){
+            assert(!error);
+            results = JSON.parse(results);
+
+            assert(results.meta.isFirstTapin);
+
+            assert(results.meta.userId);
+
+            consumer.generatedId = results.meta.userId;
+
+            next('Reward with a punch', results.meta.userId);
+          });
+        });
+      }
+
+    , 'Reward with a punch':
+      function(userId, next, finish){
+        var url = '/v1/consumers/' + userId + '/loyalty/' + businessId;
+        var data = { deltaPunches: numPunchesToGive, locationId: locationId };
+
+        tu.tapinAuthRequest('PUT', url, managerCardId, data, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 204);
+
+          next('Ensure Punches Are Gooda', userId)
+          next('Perform email update', userId);
+        });
+      }
+
+    , 'Ensure Punches Are Gooda':
+      function(userId, next, finish){
+        db.api.userLoyaltyStats.findOne({ userId: userId, businessId: businessId }, function(error, stats){
+          assert(!error);
+
+          assert(stats.numPunches === (numPunchesToGive % regularPunchesRequired));
+          assert(stats.totalPunches === numPunchesToGive);
+          assert(stats.numRewards === parseInt(numPunchesToGive / regularPunchesRequired))
+        });
+      }
+
+    , 'Perform email update':
+      // Tablet recognizes it was a new user and wants to update the new users
+      // record with the email they entered at the tablet
+      // However, the email they put in already exists so put in a cardupdate
+      function(userId, next, finish){
+        var update = { email: consumer.email };
+        tu.tapinAuthRequest('PUT', '/v1/consumers/' + userId, cardId, update, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 400);
+          results = JSON.parse(results);
+          assert(results.error.name == 'EMAIL_REGISTERED');
+
+          next('Submit cardupdate request');
+        });
+      }
+
+    , 'Submit cardupdate request':
+      // This would send an email to the consumer with the token
+      function(next, finish){
+        var body = { email: consumer.email, cardId: cardId };
+        tu.post('/v1/users/card-updates', body, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 200);
+          payload = JSON.parse(payload);
+          assert(payload.data.token);
+
+          tu.logout(function(){
+            next('Consume token', payload.data.token);
+          });
+        });
+      }
+
+    , 'Consume token':
+      // Ideally, the user would be going to our website with the token in the URL
+      // The website would post to /users/card-updates/:token
+      function(token, next, finish){
+        tu.post('/v1/users/card-updates/' + token, {}, function(error, payload, response){
+          assert(!error);
+          assert(response.statusCode == 204);
+
+          next('Make sure old user does not exist')
+        });
+      }
+
+    , 'Make sure old user does not exist':
+      function(next, finish){
+        db.api.users.findOne(consumer.generatedId, function(error, generatedUser){
+          assert(!error);
+          assert(!generatedUser);
+
+          next('Ensure users cardId has been updated')
+        });
+      }
+
+    , 'Ensure users cardId has been updated':
+      function(next, finish){
+        db.api.users.findOne(consumer.id, function(error, user){
+          assert(!error);
+
+          assert(user);
+
+          assert(user.cardId == cardId);
+
+          next('Ensure users loyalty stats transferred')
+        });
+      }
+
+    , 'Ensure users loyalty stats transferred':
+      function(next, finish){
+        db.api.userLoyaltyStats.findOne({ userId: consumer.id, businessId: businessId }, function(error, stats){
+          assert(!error);
+
+          assert(stats.numPunches === (numPunchesToGive % regularPunchesRequired));
+          assert(stats.totalPunches === numPunchesToGive);
+          assert(stats.numRewards === parseInt(numPunchesToGive / regularPunchesRequired))
+
+          finish();
+        });
+      }
+    })(function(){
+      tu.logout(done);
+    });
+  });
+});
