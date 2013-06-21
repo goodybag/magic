@@ -62,6 +62,12 @@ before(function(done) {
   });
 });
 
+// security tests - run first because
+// some of the users get altered in the integration tests
+// but the security tests do not alter any data
+
+require('./permissions/businesses.js');
+
 require('./collections/email');
 require('./collections/charities');
 require('./collections/businesses');
