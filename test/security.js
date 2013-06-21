@@ -10,16 +10,18 @@ var getServer = function(collection) {
   return require('../collections/' + collection + '/server');
 };
 
-var getRoute = function(collection, method, path) {
-  console.log(collection, method, path);
-  var server = getServer(collection);
-  var server = app;
-  if(!server) throw new Error('Could not find server for collection ' + collection);
-  //find route in server
-  var methodRoutes = server.routes[method.toLowerCase()];
-  var matchedRoutes = methodRoutes.filter(function(route) {
-    return route.match(path);
-  });
+var getRoute = function(method, path) {
+  var matchedRoutes = [];
+  ['businesses', 'locations', 'products'].forEach(function(collection){
+    var server = getServer(collection);
+    if(!server) throw new Error('Could not find server for collection ' + collection);
+    //find route in server
+    var methodRoutes = server.routes[method.toLowerCase()];
+    var matches = methodRoutes.filter(function(route) {
+      return route.match(path);
+    });
+    matchedRoutes = matchedRoutes.concat(matches);
+  })
   if(!matchedRoutes.length) {
     throw new Error('Could find no route matching ' + method + ' ' + path);
   }
@@ -30,7 +32,7 @@ var getRoute = function(collection, method, path) {
   return matchedRoutes.pop();
 };
 
-var testSecurity = module.exports = function(security) {
+var testSecurity = module.exports = function(scenarios) {
   describe('security', function() {
     before(function(done) {
       this.server = http.createServer(app);
@@ -42,10 +44,10 @@ var testSecurity = module.exports = function(security) {
 
     var makeSuite = function(scenario) {
       scenario.statusCode = scenario.statusCode || 204;
-      var suiteName = scenario.method + ' ' + scenario.path + ' as ' + scenario.user;
+      var suiteName = scenario.method + ' ' + scenario.path + ' as ' + (scenario.user || 'public');
       describe(suiteName, function() {
         before(function(done) {
-          var route = this.route = getRoute(collection, scenario.method, scenario.path);
+          var route = this.route = getRoute(scenario.method, scenario.path);
           //replace actual route handler with fake handler
           this.actualHandler = route.callbacks.pop();
           route.callbacks.push(function(req, res) {
@@ -57,12 +59,16 @@ var testSecurity = module.exports = function(security) {
           var url = 'http://localhost:' + this.port + '/v1/session';
           //reset the cookie jar
           request.defaults({jar: request.jar()});
-          request.post(url, options, ok(done, function(res) {
-            if(res.statusCode != 200) {
-              return done('Expected login status code of 200 but got ' + res.statusCode + ' for user ' + scenario.user);
-            }
-            done();
-          }));
+          if(!scenario.user) {
+            request.del(url, done);
+          } else {
+            request.post(url, options, ok(done, function(res) {
+              if(res.statusCode != 200) {
+                return done('Expected login status code of 200 but got ' + res.statusCode + ' for user ' + scenario.user);
+              }
+              done();
+            }));
+          }
         });
 
         it('receives status code ' + scenario.statusCode, function(done) {
@@ -89,13 +95,7 @@ var testSecurity = module.exports = function(security) {
       });
     };
 
-    for(var collection in security) {
-      var scenarios = security[collection];
-
-      for(var i = 0; i < scenarios.length; i++) {
-        makeSuite(scenarios[i]);
-      }
-    }
+    _.each(scenarios, makeSuite);
 
     after(function(done) {
       this.server.close(done);
