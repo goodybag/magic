@@ -1,10 +1,11 @@
-var assert = require('better-assert');
-var sinon = require('sinon');
-var magic = require('../../lib/magic');
+var assert  = require('better-assert');
+var sinon   = require('sinon');
+var magic   = require('../../lib/magic');
+var db      = require('../../db');
 
-var tu = require('../../lib/test-utils');
-var utils = require('../../lib/utils');
-var config = require('../../config');
+var tu      = require('../../lib/test-utils');
+var utils   = require('../../lib/utils');
+var config  = require('../../config');
 
 describe('GET /v1/consumers', function() {
   it('should respond with a consumer listing', function(done) {
@@ -1193,41 +1194,6 @@ describe('DELETE /v1/consumers/:id/collections/:collectionId/products/:productId
         assert(res.statusCode == 400);
         tu.logout(done);
       });
-    });
-  });
-});
-
-describe('POST /v1/consumers/cardupdate', function() {
-  it('should get a token on cardUpdate and then update the cardId with the token', function(done) {
-    tu.loginAsAdmin(function(error){
-
-      tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
-        assert(res.statusCode == 200);
-        results = JSON.parse(results);
-        assert(results.data.token);
-
-        tu.post('/v1/consumers/cardupdate/'+results.data.token, {}, function(error, results, res) {
-          assert(res.statusCode == 204);
-
-          tu.get('/v1/consumers/7', function(err, results, res) {
-            assert(res.statusCode == 200);
-            results = JSON.parse(results);
-            assert(results.data.cardId == '999999-ZZZ');
-
-            tu.patch('/v1/users/7', { cardId:'123456-ABC' }, function(err, results, res) {
-              assert(res.statusCode == 204);
-              tu.logout(done);
-            });
-          });
-        });
-      });
-    });
-  });
-
-  it('should not return the token if session is not with admin', function(done) {
-    tu.post('/v1/consumers/cardupdate', { email:'tferguson@gmail.com', cardId:'999999-ZZZ' }, function(error, results, res) {
-      assert(res.statusCode == 204);
-      done();
     });
   });
 });

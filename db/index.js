@@ -34,6 +34,8 @@ pg.defaults.poolSize = config.pg.poolSize;
 exports.sql = sql;
 exports.procedures = require('./procedures');
 
+exports.Api = Api;
+
 var logQuery = function(query) {
   var start = new Date();
   var text = query.text;
