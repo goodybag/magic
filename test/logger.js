@@ -130,5 +130,12 @@ describe('logger', function() {
       });
       logger.error(['something'], errors.auth.INVALID_PARTIAL_REGISTRATION_TOKEN);
     });
+    it('logs NULL error message properly', function(done) {
+      logger.once('gelf', function(msg) {
+        assert.equal(msg.short_message, 'null')
+        done();
+      });
+      logger.error(['something'], null);
+    });
   });
 });

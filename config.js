@@ -125,6 +125,11 @@ var config = {
          gelf: true
        }
     }
+  , gelf: {
+      host: 'localhost'
+    , port: 12201
+    , app: 'magic-dev'
+  }
   , http: {
       port: 8986
     }
