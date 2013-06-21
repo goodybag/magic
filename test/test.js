@@ -68,6 +68,7 @@ before(function(done) {
 
 require('./permissions/businesses.js');
 require('./permissions/product-categories.js');
+require('./permissions/products.js');
 
 require('./collections/email');
 require('./collections/charities');
