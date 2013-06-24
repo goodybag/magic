@@ -23,4 +23,9 @@ module.exports = {
   , create: true
   , update: true
   }
+, manager: {
+    read:   true
+  , create: true
+  , update: true
+  }
 };

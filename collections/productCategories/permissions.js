@@ -28,4 +28,9 @@ module.exports = {
   , create: true
   , update: true
   }
+, businessManager: {
+    read:   true
+  , create: true
+  , update: true
+  }
 };
