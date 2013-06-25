@@ -45,6 +45,7 @@ define(function(require){
     }
   , inGallery: {
       type: 'boolean'
+    , meta: 'default true'
     }
   , spotlightOrder: {
       type: 'int'
