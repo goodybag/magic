@@ -19,11 +19,11 @@ var authTypes = {
   cardId: cardAuth
 }
 
-function phoneAuth(req, res, next, phone) {
+function phoneAuth(req, res, next, TAGS, phone) {
   return next();
 }
 
-function cardAuth(req, res, next, cardId) {
+function cardAuth(req, res, next, TAGS, cardId) {
   // validate the id
   if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
     return res.error(errors.auth.INVALID_CARD_ID);
@@ -40,6 +40,7 @@ function cardAuth(req, res, next, cardId) {
   // - to restore the tapin user after the response is sent
   // - to only send noContent if we're not sending back meta data
   var origjsonFn = res.json, origendFn = res.end;
+
   res.json = function(output) {
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
@@ -49,15 +50,14 @@ function cardAuth(req, res, next, cardId) {
     req.session.user = tapinStationUser;
     origjsonFn.apply(res, arguments);
   };
+
   res.end = function(){
     req.session.user = tapinStationUser;
     origendFn.apply(res, arguments);
   };
+
   res.noContent = function() {
-    if (isFirstTapin)
-      this.json({});
-    else
-      this.status(204).end();
+    isFirstTapin ? this.json({}) : this.status(204).end();
   };
 
   var stage = {
@@ -147,7 +147,7 @@ module.exports = function(req, res, next){
   var TAGS = ['middleware-tapin-auth', req.uuid];
   var auth = req.header('authorization');
   if (auth == null) return next();
-  var parts = auth.split('\s+'); // split on whitespace
+  var parts = auth.split(/\s+/); // split on whitespace
   if (parts.length < 2 || parts.length > 3 || parts[0] !== 'Tapin')  return next();
   var handler, id;
   if (parts.length === 3) {
@@ -159,6 +159,5 @@ module.exports = function(req, res, next){
     id = parts[1];
   }
 
-  console.log('handling tapin:', parts);
-  handler(req, res, next, id);
+  handler(req, res, next, TAGS, id);
 };
