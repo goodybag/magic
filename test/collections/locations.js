@@ -5,6 +5,7 @@ var
 , tu      = require('./../../lib/test-utils')
 , config  = require('./../../config')
 , ok = require('okay')
+, _ = require('lodash')
 ;
 
 describe('GET /v1/locations', function() {
@@ -679,6 +680,53 @@ describe('GET /v1/locations/:id/analytics', function() {
 });
 
 describe('/v1/locations/:id/products', function() {
+
+  describe('spotlight information', function() {
+    var checkSpotlightInfo = function(info, cb) {
+      tu.get('/v1/locations/1/products?spotlight=true', ok(cb, function(result, res) {
+        var data = JSON.parse(result).data;
+        var product = _.find(data, {id: 1});
+        assert(product);
+        assert(product.inSpotlight === info.inSpotlight);
+        assert(product.inGallery === info.inGallery);
+        assert(product.spotlightOrder === info.spotlightOrder);
+        assert(product.galleryOrder === info.galleryOrder);
+        cb();
+      }));
+    };
+
+    it('should be able to read spotlight & gallery information', function(done) {
+      tu.loginAsAdmin(ok(done, function() {
+        var expected = {
+          inSpotlight: true,
+          inGallery: true,
+          spotlightOrder: 1,
+          galleryOrder: 2
+        };
+        checkSpotlightInfo(expected, ok(done, function() {
+          tu.logout(done);
+        }));
+      }));
+    });
+
+    it('should be able to update spotlight & gallery information', function(done) {
+      tu.loginAsAdmin(ok(done, function() {
+        var body = {
+          inSpotlight: false,
+          inGallery: true,
+          spotlightOrder: 2,
+          galleryOrder: 3
+        };
+        tu.put('/v1/locations/1/products/1', body, ok(done, function(result, res) {
+          assert(res.statusCode, 204);
+          checkSpotlightInfo(body, ok(done, function() {
+            tu.logout(done);
+          }));
+        }))
+      }));
+    });
+
+  });
 
   it('should add and remove products from a location', function(done) {
     tu.populate('businesses', [{ name:'Business 1' }], function(err, bids) {
