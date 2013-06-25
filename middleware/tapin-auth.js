@@ -20,7 +20,11 @@ var authTypes = {
 }
 
 function phoneAuth(req, res, next, TAGS, phone) {
-  return next();
+  // validate the id
+  if (/^\d{10}(ex\d{4})?$/i.test(phone) === false)
+    return res.error(errors.auth.INVALID_PHONE);
+
+  auth(req, res, next, TAGS, 'phone', phone);
 }
 
 function cardAuth(req, res, next, TAGS, cardId) {
@@ -28,6 +32,10 @@ function cardAuth(req, res, next, TAGS, cardId) {
   if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
     return res.error(errors.auth.INVALID_CARD_ID);
 
+  auth(req, res, next, TAGS, 'cardId', cardId);
+};
+
+function auth(req, res, next, TAGS, idField, id) {
   // Determines whether we should put "isFirstTapin" on meta object
   var isFirstTapin = false;
 
@@ -72,11 +80,12 @@ function cardAuth(req, res, next, TAGS, cardId) {
         'FROM users',
         'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
         'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
-        'WHERE users."cardId" = $1',
+        'WHERE users."$1" = $2',
         'GROUP BY users.id'
       ].join(' ');
 
-      db.query(query, [cardId], function(error, rows, result){
+      db.query(query, [idField, id], function(error, rows, result){
+        console.log('err:', error);
         if (error) return stage.dbError(error);
         var user = result.rows[0];
         if (!user) stage.createUser();
@@ -89,7 +98,9 @@ function cardAuth(req, res, next, TAGS, cardId) {
       isFirstTapin = true;
 
       db.procedures.setLogTags(TAGS);
-      db.procedures.registerUser('consumer', { cardId:cardId }, function(error, result) {
+      var data = {};
+      data[idField] = id;
+      db.procedures.registerUser('consumer', data, function(error, result) {
         if (error) return stage.dbError(result); // registerUser gives error details in result
 
         var user = result;
@@ -105,7 +116,7 @@ function cardAuth(req, res, next, TAGS, cardId) {
       db.query(q, ok(stage.dbError, function(rows) {
         if(rows.length < 1) {
           logger.error('auth failure - tapin station not found', {user: user, tapinStationUser: tapinStationUser});
-          return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
+          return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id or phone');
         }
         var tapinStation = rows[0];
 
@@ -114,11 +125,12 @@ function cardAuth(req, res, next, TAGS, cardId) {
         req.data('businessId', tapinStation.businessId);
         req.data('tapinStationId', tapinStation.id);
 
-        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
-        var insertValues = [user.id, tapinStationUser.id, cardId];
+        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "$1", "dateTime") VALUES ($2, $3, $4, now()) RETURNING id'
+        var insertValues = [idField, user.id, tapinStationUser.id, id];
         db.query(insertQuery, insertValues, ok(stage.dbError, function(rows) {
           var event = {
             userId: user.id,
+            type: idField,
             tapinId: rows[0].id,
             tapinStationId: tapinStation.id,
             locationId: tapinStation.locationId
