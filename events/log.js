@@ -128,4 +128,9 @@ module.exports = {
       locationId     : locationId
     });
   }
+
+, 'users.accountMerge':
+  function (data) {
+    insert('users.accountMerge', data);
+  }
 };

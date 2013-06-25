@@ -220,7 +220,7 @@ module.exports.oauthAuthenticate = function(req, res){
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
  */
-module.exports.authenticate = function(req, res){
+module.exports.authenticate = function(req, res, next){
   var TAGS = ['email-authentication', req.uuid];
 
   // First check for user existence
@@ -231,14 +231,20 @@ module.exports.authenticate = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     if (result.rows.length === 0)
-      return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, error);
+      return res.error(errors.auth.INVALID_EMAIL), logger.routes.error(TAGS, 'invalid email');
 
     var user = result.rows[0];
 
     // Compare passwords
     utils.comparePasswords(req.body.password, user.password, function(error, success){
-      if (!success)
-        return res.error(errors.auth.INVALID_PASSWORD), logger.routes.error(TAGS, error);
+      if(error) {
+        //handle the error as an unhandled route error
+        //bcrypt should not raise an error in regular circumstances
+        return next(error);
+      }
+      if (!success) {
+        return res.error(errors.auth.INVALID_PASSWORD), logger.routes.error(TAGS, 'invalid password');
+      }
 
       // Remove password
       delete user.password;

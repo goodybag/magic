@@ -10,6 +10,42 @@ var permissions = require('./permissions');
 var applyGroups = require('./apply-groups');
 var desc        = require('./description.yaml');
 
+// Users.createCardUpdate
+server.post(
+  '/v1/users/card-updates'
+, middleware.profile('POST /v1/users/card-updates')
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin', 'tapin-station')
+, middleware.profile('validate body')
+, middleware.validate2.body(desc.cardUpdatesCollection.methods.post.body)
+, middleware.profile('create card update handler')
+, routes.createCardUpdate
+);
+
+// Users.updateCard
+server.post(
+  '/v1/users/card-updates/:token'
+, middleware.profile('POST /v1/users/card-updates/:token')
+, middleware.profile('update card handler')
+, routes.updateCard
+);
+
+// Users.getCardUpdate
+server.get(
+  '/v1/users/card-updates/:token'
+, middleware.profile('get /v1/users/card-updates/:token')
+, middleware.profile('get card update handler')
+, routes.getCardUpdate
+);
+
+// Users.deleteCardUpdate
+server.del(
+  '/v1/users/card-updates/:token'
+, middleware.profile('DELETE /v1/users/card-updates/:token')
+, middleware.profile('del card update handler')
+, routes.deleteCardUpdate
+);
+
 // Users.createPasswordReset
 server.post(
   '/v1/users/password-reset'

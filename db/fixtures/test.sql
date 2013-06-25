@@ -94,6 +94,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('24'
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('25', 'test_1@example.com', null, null, '432123-AAF');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('26', 'test_2@example.com', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe0UEMsLS2KTkGHU12z3b6k3KgiBoRzQm', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe', '432123-AAG');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('27', 'test_3@example.com', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe0UEMsLS2KTkGHU12z3b6k3KgiBoRzQm', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe', null);
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('28', 'used_for_card_update_tests@goodybag.com', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe0UEMsLS2KTkGHU12z3b6k3KgiBoRzQm', '$2a$10$ydz9L7eZIEMaiQ.VAbhvDe', '918273-UTU');
 
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11110', 'some_manager@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXX');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('11111', 'some_manager2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-XXZ');
@@ -701,3 +702,95 @@ insert into "highlightsProducts" ("highlightId", "productId", "locationId", "ord
 insert into "highlightsProducts" ("highlightId", "productId", "locationId", "order") values (6, 46186, 51, 12);
 COMMIT;
 SELECT setval('"highlightsProducts_id_seq"', (SELECT MAX(id) from "highlightsProducts"));
+
+-- consumerCardUpdates
+
+BEGIN;
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  1
+, 28
+, '918273-UTA'
+, '918273-UTU'
+, 'a'
+, now() + interval '1000 days'
+, 'now()'
+);
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  2
+, 7
+, '918273-UTA'
+, '918273-UTU'
+, 'b'
+, 'now()' -- Should expire by the time we select
+, 'now()'
+);
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  3
+, 28
+, '918273-UTA'
+, '918273-UTU'
+, 'c'
+, now() + interval '1000 days'
+, 'now()'
+);
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  4
+, 28
+, '918273-UTA'
+, '918273-UTU'
+, 'd'
+, now() + interval '1000 days'
+, 'now()'
+);
+insert into "consumerCardUpdates" (
+  "id"
+, "userId"
+, "newCardId"
+, "oldCardId"
+, "token"
+, "expires"
+, "createdAt"
+) values (
+  5
+, 28
+, '918274-UTA'
+, '918274-UTU'
+, 'e'
+, now() + interval '1000 days'
+, 'now()'
+);
+COMMIT;
+SELECT setval('"consumerCardUpdates_id_seq"', (SELECT MAX(id) from "consumerCardUpdates"));
+
