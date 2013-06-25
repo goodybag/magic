@@ -3,9 +3,9 @@ var security = require('../security');
 var users = [
   ['admin@goodybag.com', 204],
   ['some_manager@gmail.com', 204],
-  ['manager_redeem3@gmail.com', 204],
+  ['manager_redeem3@gmail.com', 403],
   ['consumer@goodybag.com', 403],
-  [undefined, 403]
+  [undefined, 401]
 ]
 
 var tests = [];
@@ -48,6 +48,14 @@ users.forEach(function(def) {
     path: '/v1/products/1',
     user: user,
     body: product,
+    statusCode: statusCode
+  });
+
+  tests.push({
+    method: 'PUT',
+    path: '/v1/locations/1/products/1',
+    user: user,
+    body: { inSpotlight: true },
     statusCode: statusCode
   });
 
