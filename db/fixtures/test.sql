@@ -400,7 +400,7 @@ SELECT setval('"productsProductCategories_id_seq"', (SELECT MAX(id) from "produc
 -- PRODUCT LOCATIONS
 
 BEGIN;
-INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10), true);
+INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight", "inGallery", "spotlightOrder", "galleryOrder") VALUES ('1', '1', '1', '1', 10, 10, ll_to_earth(10, 10), true, true, 1, 2);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES ('2', '1', '1', '4', 0, 0, ll_to_earth(0, 0), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES ('3', '1', '1', '5', 0, 0, ll_to_earth(0, 0), true);
 INSERT INTO "productLocations" (id, "productId", "businessId", "locationId", lat, lon, position, "inSpotlight") VALUES ('4', '2', '2', '2', 10.001, 10.001, ll_to_earth(10.001, 10.001), true);

@@ -180,9 +180,9 @@ server.put(
   '/v1/locations/:locationId/products/:productId'
 , middleware.profile('PUT /v1/locations/:locationId/products/:productId')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.locationManager)
+, middleware.applyGroups(applyGroups.ownerManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.productsItem.methods.put.body)
 , middleware.profile('update product at location handler')
