@@ -45,14 +45,16 @@ define(function(require){
     }
   , inGallery: {
       type: 'boolean'
-    , meta: 'default true'
+    , meta: 'not null default true'
     }
   , spotlightOrder: {
       type: 'int'
+    , meta: 'not null default 0'
     , sanitizers: { ifNull: 0 }
     }
   , galleryOrder: {
       type: 'int'
+    , meta: 'not null default 0'
     , sanitizers: { ifNull: 0 }
     }
   , createdAt: {
