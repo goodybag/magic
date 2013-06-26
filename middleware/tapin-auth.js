@@ -80,12 +80,11 @@ function auth(req, res, next, TAGS, idField, id) {
         'FROM users',
         'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
         'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
-        'WHERE users."$1" = $2',
+        'WHERE users."' + idField + '" = $1',
         'GROUP BY users.id'
       ].join(' ');
 
-      db.query(query, [idField, id], function(error, rows, result){
-        console.log('err:', error);
+      db.query(query, [id], function(error, rows, result){
         if (error) return stage.dbError(error);
         var user = result.rows[0];
         if (!user) stage.createUser();
@@ -125,8 +124,8 @@ function auth(req, res, next, TAGS, idField, id) {
         req.data('businessId', tapinStation.businessId);
         req.data('tapinStationId', tapinStation.id);
 
-        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "$1", "dateTime") VALUES ($2, $3, $4, now()) RETURNING id'
-        var insertValues = [idField, user.id, tapinStationUser.id, id];
+        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "' + idField + '", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
+        var insertValues = [user.id, tapinStationUser.id, id];
         db.query(insertQuery, insertValues, ok(stage.dbError, function(rows) {
           var event = {
             userId: user.id,
