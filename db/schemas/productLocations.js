@@ -43,6 +43,20 @@ define(function(require){
   , inSpotlight: {
       type: 'boolean'
     }
+  , inGallery: {
+      type: 'boolean'
+    , meta: 'not null default true'
+    }
+  , spotlightOrder: {
+      type: 'int'
+    , meta: 'not null default 0'
+    , sanitizers: { ifNull: 0 }
+    }
+  , galleryOrder: {
+      type: 'int'
+    , meta: 'not null default 0'
+    , sanitizers: { ifNull: 0 }
+    }
   , createdAt: {
       type: 'timestamp'
     }

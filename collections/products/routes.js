@@ -125,9 +125,12 @@ module.exports.list = function(req, res){
   if (req.param('locationId')){
     var joinType = "inner";
 
-    if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1)
+    if (req.param('spotlight') || includes.indexOf('inSpotlight') > -1) {
       query.fields.add('case when "productLocations"."inSpotlight" IS NULL THEN false ELSE "productLocations"."inSpotlight" end as "inSpotlight"');
-
+      query.fields.add('"productLocations"."inGallery"');
+      query.fields.add('"productLocations"."spotlightOrder"');
+      query.fields.add('"productLocations"."galleryOrder"');
+    }
     if (!query.prodLocJoin) {
       query.prodLocJoin = [
         '{joinType} JOIN "productLocations"'

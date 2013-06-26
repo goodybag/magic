@@ -414,10 +414,6 @@ module.exports.addProduct = function(req, res){
 module.exports.updateProduct = function(req, res){
   var TAGS = ['location-update-product', req.uuid];
 
-  if (typeof req.body.inSpotlight == 'undefined') {
-    return res.error(errors.input.VALIDATION_FAILED, 'No valid values supplied for update')
-  }
-
   var query = sql.query([
     'UPDATE "productLocations" SET {updates} WHERE "locationId" = $locationId AND "productId" = $productId'
   ]);
