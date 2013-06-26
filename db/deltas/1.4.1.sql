@@ -1,5 +1,5 @@
--- 1.3.1.sql
-insert into deltas (version, date) values ('1.3.1', 'now()');
+-- 1.4.1.sql
+insert into deltas (version, date) values ('1.4.1', 'now()');
 
 -- #625 - Auth by phone number
 
