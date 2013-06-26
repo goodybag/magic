@@ -73,7 +73,7 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('4', 'client@g
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('5', 'consumer@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('6', 'dumb@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 -- !NOTE! tferguson's password does NOT have the "salt" appended to its plaintext
-INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('7', 'tferguson@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABC');
+INSERT INTO "users" (id, email, password, "passwordSalt", "cardId", phone) VALUES ('7', 'tferguson@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABC', '5125551234');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('8', 'somebody_else@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('9', 'consumer2@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
 INSERT INTO "users" (id, email, password, "passwordSalt", "cardId") VALUES ('10', 'consumer3@gmail.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e', '123456-ABD');
@@ -793,4 +793,3 @@ insert into "consumerCardUpdates" (
 );
 COMMIT;
 SELECT setval('"consumerCardUpdates_id_seq"', (SELECT MAX(id) from "consumerCardUpdates"));
-
