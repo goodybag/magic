@@ -34,6 +34,12 @@ define(function(require){
     , validators: { len:[10, 12], is: /^\d{6,7}\-\w{3}$/ }
     , sanitizers: { trim:[] }
     }
+  , phone: {
+      type: 'text'
+    , validators: {is: '\d{10}(ex\d{4})?'}
+    , sanitizers: { trim:[] }
+    , meta: 'unique'
+    }
   , createdAt: {
       type: 'timestamp'
     }

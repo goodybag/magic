@@ -18,6 +18,7 @@ collection:
         singlyAccessToken:  { type: string }
         groups:             { type: group*, eg: [1,2] }
         cardId:             { type: cardid, eg: 123456-ABC }
+        phone:              { type: string, eg: "5125551234" }
       auth:
         required: true
         eg: { email: admin@goodybag.com, password: password }
@@ -45,6 +46,7 @@ item:
         singlyId:           { type: string }
         singlyAccessToken:  { type: string }
         cardId:             { type: cardid, eg: 123456-ABC }
+        phone:              { type: string, eg: "5125551234" }
     delete:
       desc: Delete User
       auth:

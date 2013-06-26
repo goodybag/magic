@@ -8,6 +8,7 @@ var all = [
 , 'groups.name'
 , 'groupIds'
 , 'cardId'
+, 'phone'
 , 'createdAt'
 ];
 
