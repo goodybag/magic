@@ -38,6 +38,7 @@ define(function(require){
       type: 'text'
     , validators: {is: '\d{10}(ex\d{4})?'}
     , sanitizers: { trim:[] }
+    , meta: 'unique'
     }
   , createdAt: {
       type: 'timestamp'
