@@ -138,8 +138,11 @@ productsCollection:
         required: true
         eg: { email: admin@goodybag.com, password: password }
       body:
-        productId:   { type: int, eg: 1 }
-        inSpotlight: { type: bool, eg: true }
+        productId:      { type: int, eg: 1 }
+        inSpotlight:    { type: bool, eg: true }
+        spotlightOrder: { type: int, eg: 1 }
+        inGallery:      { type: bool, eg: true }
+        galleryOrder:   { type: int, eg: 1 }
   children:
     - /locations/:locationId/products/:productId
 
@@ -158,6 +161,9 @@ productsItem:
         eg: { email: admin@goodybag.com, password: password }
       body:
         inSpotlight: { type: bool, eg: true }
+        spotlightOrder: { type: int, eg: 1 }
+        inGallery:      { type: bool, eg: true }
+        galleryOrder:   { type: int, eg: 1 }
     delete:
       desc: Remove Product from Location
       auth:
