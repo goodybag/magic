@@ -1,31 +1,41 @@
-var
-  db          = require('../db')
-, utils       = require('../lib/utils')
-, logger      = require('../lib/logger')('tapin-auth')
-, errors      = require('../lib/errors')
-, magic       = require('../lib/magic')
-, Transaction = require('pg-transaction')
-, ok = require('okay')
+var db          = require('../db');
+var utils       = require('../lib/utils');
+var logger      = require('../lib/logger')('tapin-auth');
+var errors      = require('../lib/errors');
+var magic       = require('../lib/magic');
+var Transaction = require('pg-transaction');
+var ok          = require('okay');
 
-, users       = db.tables.users
-, consumers   = db.tables.consumers
-, managers    = db.tables.managers
-, cashiers    = db.tables.cashiers
-, groups      = db.tables.groups
-, usersGroups = db.tables.usersGroups
-;
+var users       = db.tables.users;
+var consumers   = db.tables.consumers;
+var managers    = db.tables.managers;
+var cashiers    = db.tables.cashiers;
+var groups      = db.tables.groups;
+var usersGroups = db.tables.usersGroups;
 
-module.exports = function(req, res, next){
-  // pull out the tapin authorization
-  var TAGS = ['middleware-tapin-auth', req.uuid];
-  var authMatch = /^Tapin (.*)$/.exec(req.header('authorization'));
-  if (!authMatch) return next();
-  var cardId = authMatch[1];
+// enum
+var authTypes = {
+  phone: phoneAuth,
+  cardId: cardAuth
+}
 
+function phoneAuth(req, res, next, TAGS, phone) {
+  // validate the id
+  if (/^\d{10}(ex\d{4})?$/i.test(phone) === false)
+    return res.error(errors.auth.INVALID_PHONE);
+
+  auth(req, res, next, TAGS, 'phone', phone);
+}
+
+function cardAuth(req, res, next, TAGS, cardId) {
   // validate the id
   if (/^[\d]{6,7}-[\w]{3}$/i.test(cardId) == false)
     return res.error(errors.auth.INVALID_CARD_ID);
 
+  auth(req, res, next, TAGS, 'cardId', cardId);
+};
+
+function auth(req, res, next, TAGS, idField, id) {
   // Determines whether we should put "isFirstTapin" on meta object
   var isFirstTapin = false;
 
@@ -38,6 +48,7 @@ module.exports = function(req, res, next){
   // - to restore the tapin user after the response is sent
   // - to only send noContent if we're not sending back meta data
   var origjsonFn = res.json, origendFn = res.end;
+
   res.json = function(output) {
     if (isFirstTapin){
       if (!output.meta) output.meta = {};
@@ -47,15 +58,14 @@ module.exports = function(req, res, next){
     req.session.user = tapinStationUser;
     origjsonFn.apply(res, arguments);
   };
+
   res.end = function(){
     req.session.user = tapinStationUser;
     origendFn.apply(res, arguments);
   };
+
   res.noContent = function() {
-    if (isFirstTapin)
-      this.json({});
-    else
-      this.status(204).end();
+    isFirstTapin ? this.json({}) : this.status(204).end();
   };
 
   var stage = {
@@ -66,15 +76,15 @@ module.exports = function(req, res, next){
   , lookupUser: function() {
       var query = [
         'SELECT users.id, users.email, users."singlyId", users."singlyAccessToken",',
-            'array_agg(groups.name) as groups',
-          'FROM users',
-            'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
-            'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
-          'WHERE users."cardId" = $1',
-          'GROUP BY users.id'
+        'array_agg(groups.name) as groups',
+        'FROM users',
+        'LEFT JOIN "usersGroups" ON "usersGroups"."userId" = users.id',
+        'LEFT JOIN groups ON "usersGroups"."groupId" = groups.id',
+        'WHERE users."' + idField + '" = $1',
+        'GROUP BY users.id'
       ].join(' ');
 
-      db.query(query, [cardId], function(error, rows, result){
+      db.query(query, [id], function(error, rows, result){
         if (error) return stage.dbError(error);
         var user = result.rows[0];
         if (!user) stage.createUser();
@@ -87,7 +97,9 @@ module.exports = function(req, res, next){
       isFirstTapin = true;
 
       db.procedures.setLogTags(TAGS);
-      db.procedures.registerUser('consumer', { cardId:cardId }, function(error, result) {
+      var data = {};
+      data[idField] = id;
+      db.procedures.registerUser('consumer', data, function(error, result) {
         if (error) return stage.dbError(result); // registerUser gives error details in result
 
         var user = result;
@@ -103,7 +115,7 @@ module.exports = function(req, res, next){
       db.query(q, ok(stage.dbError, function(rows) {
         if(rows.length < 1) {
           logger.error('auth failure - tapin station not found', {user: user, tapinStationUser: tapinStationUser});
-          return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id');
+          return res.error(errors.auth.NOT_ALLOWED, 'You must be logged in as a tapin station to authorize by card-id or phone');
         }
         var tapinStation = rows[0];
 
@@ -112,11 +124,12 @@ module.exports = function(req, res, next){
         req.data('businessId', tapinStation.businessId);
         req.data('tapinStationId', tapinStation.id);
 
-        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "cardId", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
-        var insertValues = [user.id, tapinStationUser.id, cardId];
+        var insertQuery = 'INSERT INTO tapins ("userId", "tapinStationId", "' + idField + '", "dateTime") VALUES ($1, $2, $3, now()) RETURNING id'
+        var insertValues = [user.id, tapinStationUser.id, id];
         db.query(insertQuery, insertValues, ok(stage.dbError, function(rows) {
           var event = {
             userId: user.id,
+            type: idField,
             tapinId: rows[0].id,
             tapinStationId: tapinStation.id,
             locationId: tapinStation.locationId
@@ -138,4 +151,24 @@ module.exports = function(req, res, next){
   };
 
   stage.start();
+}
+
+module.exports = function(req, res, next){
+  // pull out the tapin authorization
+  var TAGS = ['middleware-tapin-auth', req.uuid];
+  var auth = req.header('authorization');
+  if (auth == null) return next();
+  var parts = auth.split(/\s+/); // split on whitespace
+  if (parts.length < 2 || parts.length > 3 || parts[0] !== 'Tapin')  return next();
+  var handler, id;
+  if (parts.length === 3) {
+    if (!(parts[1] in authTypes)) return next();
+    handler = authTypes[parts[1]];
+    id = parts[2];
+  } else {
+    handler = authTypes.cardId; // default to cardId
+    id = parts[1];
+  }
+
+  handler(req, res, next, TAGS, id);
 };
