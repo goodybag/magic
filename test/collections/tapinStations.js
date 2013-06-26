@@ -393,9 +393,34 @@ describe('POST /v1/tapin-stations/:id/heartbeats', function() {
 });
 
 describe('GET /v1/session', function() {
-  it('should authorize a consumer based on cardId', function(done) {
+  it('should authorize a consumer based on cardId by default', function(done) {
     tu.loginAsTablet(function() {
       tu.tapinAuthRequest('GET', '/v1/session', '123456-ABC', function(err, results, res) {
+        assert(err == null);
+        var payload;
+        try {
+          payload = JSON.parse(results);
+        } catch(e) {
+          assert(false, 'Could not parse response as json');
+        }
+        assert(payload != null);
+        assert(payload.error == null);
+        assert(payload.data != null);
+        assert(payload.data.id === 7);
+        done();
+      });
+    });
+  });
+
+  it('should authorize a consumer based on cardId with explicit header', function(done) {
+    tu.loginAsTablet(function() {
+      tu.httpRequest({
+        method:'GET',
+        path:'/v1/session',
+        headers: {
+          authorization: 'Tapin cardId 123456-ABC'
+        }
+      }, null, function(err, results, res) {
         assert(err == null);
         var payload;
         try {
