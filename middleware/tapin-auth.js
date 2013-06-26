@@ -73,7 +73,7 @@ function auth(req, res, next, TAGS, idField, id) {
       stage.lookupUser();
     }
 
-    , lookupUser: function() {
+  , lookupUser: function() {
       var query = [
         'SELECT users.id, users.email, users."singlyId", users."singlyAccessToken",',
         'array_agg(groups.name) as groups',
@@ -92,7 +92,7 @@ function auth(req, res, next, TAGS, idField, id) {
       });
     }
 
-    , createUser: function() {
+  , createUser: function() {
       // Flag response to send meta.isFirstTapin = true;
       isFirstTapin = true;
 
@@ -108,7 +108,7 @@ function auth(req, res, next, TAGS, idField, id) {
       });
     }
 
-    , insertTapin: function(user) {
+  , insertTapin: function(user) {
       //fetch tapinStation row
       var q = 'SELECT * from "tapinStations" WHERE "tapinStations".id = $1';
       var q = db.tables.tapinStations.where(tapinStations.id.equals(tapinStationUser.id));
@@ -139,12 +139,12 @@ function auth(req, res, next, TAGS, idField, id) {
         }));
       }));
     }
-    , dbError: function(error){
+  , dbError: function(error){
       logger.error('database error', error);
       res.error(errors.internal.DB_FAILURE, error);
     }
 
-    , end: function(user) {
+  , end: function(user) {
       req.session.user = user;
       next();
     }
