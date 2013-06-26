@@ -391,3 +391,24 @@ describe('POST /v1/tapin-stations/:id/heartbeats', function() {
     });
   });
 });
+
+describe('GET /v1/session', function() {
+  it('should authorize a consumer based on cardId', function(done) {
+    tu.loginAsTablet(function() {
+      tu.tapinAuthRequest('GET', '/v1/session', '123456-ABC', function(err, results, res) {
+        assert(err == null);
+        var payload;
+        try {
+          payload = JSON.parse(results);
+        } catch(e) {
+          assert(false, 'Could not parse response as json');
+        }
+        assert(payload != null);
+        assert(payload.error == null);
+        assert(payload.data != null);
+        assert(payload.data.id === 7);
+        done();
+      });
+    });
+  });
+});
