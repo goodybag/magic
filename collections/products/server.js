@@ -116,6 +116,10 @@ server.post(
 server.get(
   '/v1/products/:productId'
 , middleware.profile('GET /v1/products/:productId')
+, middleware.profile('validate path')
+, middleware.validate2.path(desc.item.resource.params)
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.item.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
 , middleware.profile('get product handler')
