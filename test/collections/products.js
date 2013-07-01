@@ -683,6 +683,13 @@ describe('GET /v1/products/:id', function() {
       done();
     });
   });
+
+  it('should respond 400 if product id is larger than integer', function(done) {
+    tu.get('/v1/products/1111111111111111', function(err, payload, res) {
+      assert(res.statusCode == 400);
+      done();
+    });
+  })
 });
 
 describe('POST /v1/products', function() {

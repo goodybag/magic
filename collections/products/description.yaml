@@ -52,14 +52,14 @@ collection:
 item:
   resource:
     type: item
-    path: /products/:id
+    path: /products/:productId
     params:
-      id: { type: int, eg: 1 }
+      productId: { type: id, eg: 1 }
   methods:
     get:
       desc: Get Product
       query:
-        include:    { type: string*, eg: [userPhotos], choices: [userPhotos] }
+        include:    { type: string*, eg: [userPhotos], choices: [userPhotos, collections] }
     put:
       desc: Update Product
       auth:
