@@ -11,14 +11,17 @@
 
 var
   fs       = require('fs')
-  , pg       = require('pg')
-  , when     = require('when')
-  , pipeline = require('when/pipeline')
-  , config   = require('./config')
+, pg       = require('pg')
+, when     = require('when')
+, pipeline = require('when/pipeline')
+, sequence = require('when/sequence')
+, async    = require('async')
+, config   = require('./config')
+, copper   = require('./copper')
 
-  , client   = null
-  , verbose  = false
-  ;
+, client   = null
+, verbose  = false
+;
 
 function loadFile(log, file) {
   return function() {
@@ -126,6 +129,55 @@ function loadSqlFile(name, path, message) {
   };
 }
 
+function setupCopper(options){
+  // Get copper ready
+  if (verbose) console.log("Building Copper");
+
+  var dropTables = function(){
+    var deferred = when.defer(), sql = [];
+
+    if (copper.tables.length == 0) {
+      deferred.resolve(true);
+      return deferred.promise;
+    }
+
+    for (var i = 0, l = copper.tables.length; i < l; ++i){
+      sql.push('drop table if exists "' + copper.tables[i] + '" cascade;');
+    }
+
+    copper.query( sql.join('\n'),  function(error){
+      if (error) return deferred.reject(error);
+      console.log("Resolving first promise");
+      deferred.resolve();
+    });
+
+    return deferred.promise;
+  };
+
+
+  return sequence( [ dropTables() ].concat( fs.readdirSync( __dirname + '/' + options.copperDeltas ).sort().map(function(file){
+    var deferred = when.defer();
+
+    if ( file.substring( file.length - 3 ) != 'sql' ) {
+      deferred.resolve(true);
+      return deferred.promise;
+    }
+
+    if (verbose) console.log("  - Running Delta:", __dirname + '/' + options.copperDeltas + '/' + file);
+console.log(fs.readFileSync(__dirname + '/' + options.copperDeltas + '/' + file).toString());
+    copper.query(
+      fs.readFileSync(__dirname + '/' + options.copperDeltas + '/' + file).toString()
+    , function(error) {
+      console.log("delta complete");
+        if (error) return deferred.reject(error);
+        deferred.resolve(true);
+      }
+    );
+
+    return deferred.promise;
+  })));
+}
+
 module.exports = function(options, callback){
   if (typeof options === 'function') {
     callback = options;
@@ -135,6 +187,7 @@ module.exports = function(options, callback){
   options.postgresConnStr = options.postgresConnStr || config.postgresConnStr;
   options.schemaFiles     = options.schemaFiles     || config.schemaFiles;
   options.fixtureFile     = options.fixtureFile     || config.fixtureFile;
+  options.copperDeltas    = options.copperDeltas    || 'copper/deltas'
   verbose = options.verbose;
 
   // connect to postgres
@@ -148,9 +201,10 @@ module.exports = function(options, callback){
       .then(function() { return when.map(options.schemaFiles, loadTableSchema); })
       .then(loadIndexSchema)
       .then(loadSqlFile(options.fixtureFile, __dirname+'/fixtures/', 'Loading fixture'))
+      .then(function(){ return setupCopper(options); })
       .then(function() { callback(null); }, callback)
+      .then(null, function() { console.log('FAILURE', arguments) })
       .always(function() { done(); })
     ;
-
   });
 };

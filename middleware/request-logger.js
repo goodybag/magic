@@ -1,5 +1,5 @@
 var db = require ('../db');
-var requests = db.tables.requests;
+var requests = db.copper.requests;
 
 module.exports = function() {
   return function(req, res, next) {
