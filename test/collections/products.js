@@ -1,8 +1,7 @@
+var tu = require('../../lib/test-utils');
 var assert = require('better-assert');
 var sinon = require('sinon');
 var ok = require('okay');
-
-var tu = require('../../lib/test-utils');
 
 describe('GET /v1/products', function() {
 
@@ -537,6 +536,26 @@ describe('GET /v1/businesses/:id/products', function() {
 
       assert(!payload.error);
       assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
+      assert(payload.data.filter(function(p){ return p.tags.length > 0; }).length > 0);
+      assert(payload.data.filter(function(p){ return p.categories.length > 0; }).length > 0);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should respond with a product listing containing location data', false, function(done) {
+    tu.get('/v1/businesses/1/products?include[]=tags&include[]=categories&include[]=locations', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+      console.log(payload);
+
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(false, 'get er done');
       assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
       assert(payload.data.filter(function(p){ return p.tags.length > 0; }).length > 0);
       assert(payload.data.filter(function(p){ return p.categories.length > 0; }).length > 0);

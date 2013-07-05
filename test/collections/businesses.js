@@ -1,8 +1,8 @@
 var
   assert  = require('better-assert')
 , sinon   = require('sinon')
-, utils   = require('./../../lib/utils')
 , tu      = require('./../../lib/test-utils')
+, utils   = require('./../../lib/utils')
 , config  = require('./../../config')
 , perms   = require('../../collections/businesses/permissions')
 , ok      = require('okay')

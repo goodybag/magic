@@ -1,0 +1,2 @@
+--bail
+--globals noop,throwop,doop,PUBNUB,db,utils,errors,config,logger,users,managers,groups,userGroups,sql,cashiers,magic,tapinStations
