@@ -149,7 +149,7 @@ var config = {
     , app: 'magic-test'
   }
   , copper: {
-      connStr: 'postgres://localhost:5432/goodybag-test-copper'
+      connStr: process.env['PG_COPPER_CON'] || 'postgres://localhost:5432/goodybag-test-copper'
     }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"

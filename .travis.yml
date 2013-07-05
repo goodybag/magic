@@ -20,7 +20,7 @@ before_script:
   - psql -c 'create database "goodybag-test-copper";' -U postgres -h localhost -p 5433
   - node db
 env:
-  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test"
+  - DEBIAN_FRONTEND=noninteractive GB_ENV=test PG_CON="postgres://postgres@127.0.0.1:5433/goodybag-test PG_COPPER_CON="postgres://postgres@127.0.0.1:5433/goodybag-test-copper"
 node_js:
   - "0.10"
 notifications:
