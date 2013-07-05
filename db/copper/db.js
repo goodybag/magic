@@ -8,6 +8,7 @@ var _
   ]
 ;
 
+// Stub out a client for the apis to use
 var client = {
   query: function(query, values, callback){
     if (typeof values == 'function'){
@@ -29,7 +30,7 @@ var client = {
   }
 };
 
-// Instantiate db apis for each table, initially setting client to null
+// Instantiate db apis for each table
 for (var i = 0, l = tables.length; i < l; ++i){
   module.exports[ tables[i] ] = new DbApi( client, tables[i] );
 }
