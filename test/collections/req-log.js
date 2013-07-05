@@ -13,7 +13,8 @@ describe('GET /v1', function() {
   it('should log the request without userId or application header', function(done) {
     var state = Math.random().toString();
     tu.get('/v1?state=' + state, function(err, payload, res) {
-      db.api.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
+      db.copper.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
+        console.log(err);
         assert(err == null);
         assert(obj != null);
 
@@ -41,7 +42,7 @@ describe('GET /v1', function() {
         payload = JSON.parse(payload);
         var uid = payload.meta.userId;
 
-        db.api.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
+        db.copper.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
           assert(!error);
           assert(obj.userId == uid);
           tu.logout(done);

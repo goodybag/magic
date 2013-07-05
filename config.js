@@ -111,7 +111,10 @@ var config = {
       host: 'logs.goodybag.com'
     , port: 12201
     , app: 'magic-dev'
-  }
+    }
+  , copper: {
+      connStr: 'postgres://localhost:5432/goodybag-copper'
+    }
   , postgresConnStr:  "postgres://localhost:5432/goodybag"
   , baseUrl: 'http://localhost:3000'
 
@@ -145,6 +148,9 @@ var config = {
     , port: 12201
     , app: 'magic-test'
   }
+  , copper: {
+      connStr: process.env['PG_COPPER_CON'] || 'postgres://localhost:5432/goodybag-test-copper'
+    }
   , postgresConnStr:  process.env['PG_CON'] || "postgres://localhost:5432/goodybag-test"
   , baseUrl: "http://localhost:8986"
 
@@ -222,6 +228,9 @@ var config = {
     }
 
   , baseUrl: 'http://magic.staging.goodybag.com'
+  , copper: {
+      connStr: process.env.HEROKU_POSTGRESQL_AMBER_URL
+    }
   , postgresConnStr: process.env['DATABASE_URL']
   , emailEnabled: true
   , gelf: {
@@ -267,6 +276,9 @@ var config = {
   }
   , http: { port: process.env['PORT'] || 5000 }
   , baseUrl: 'http://magic.goodybag.com'
+  , copper: {
+      connStr: process.env.HEROKU_POSTGRESQL_COPPER_URL
+    }
   , postgresConnStr: process.env['DATABASE_URL']
   , emailEnabled: true
 

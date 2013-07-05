@@ -1,5 +1,5 @@
 var db = require ('../db');
-var requests = db.tables.requests;
+var requests = db.copper.requests;
 
 module.exports = function() {
   return function(req, res, next) {
@@ -9,9 +9,9 @@ module.exports = function() {
 
     var TAGS = ['middleware-request-logger', req.uuid];
 
-    db.api.requests.setLogTags(TAGS);
+    requests.setLogTags(TAGS);
 
-    db.api.requests.insert({
+    requests.insert({
       uuid:req.uuid,
       userId:req.session.user != null ? req.session.user.id : null,
       httpMethod:req.method,
