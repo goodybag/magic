@@ -14,7 +14,7 @@ var client = {
       callback = values;
       values = [];
     }
-console.log("Copper: ", config.copper.connStr);
+
     pg.connect( config.copper.connStr, function(error, client, done){
       if (error) return callback ? callback(error) : null;
 

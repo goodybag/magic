@@ -9,9 +9,9 @@ module.exports = function() {
 
     var TAGS = ['middleware-request-logger', req.uuid];
 
-    db.api.requests.setLogTags(TAGS);
+    requests.setLogTags(TAGS);
 
-    db.api.requests.insert({
+    requests.insert({
       uuid:req.uuid,
       userId:req.session.user != null ? req.session.user.id : null,
       httpMethod:req.method,

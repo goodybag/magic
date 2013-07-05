@@ -130,52 +130,43 @@ function loadSqlFile(name, path, message) {
 }
 
 function setupCopper(options){
+  var deferred = when.defer()
+
   // Get copper ready
   if (verbose) console.log("Building Copper");
 
-  var dropTables = function(){
-    var deferred = when.defer(), sql = [];
+  var dropTables = function(done){
+    var sql = [];
 
-    if (copper.tables.length == 0) {
-      deferred.resolve(true);
-      return deferred.promise;
-    }
+    if (copper.tables.length == 0) return done();
 
     for (var i = 0, l = copper.tables.length; i < l; ++i){
       sql.push('drop table if exists "' + copper.tables[i] + '" cascade;');
     }
 
-    copper.query( sql.join('\n'),  function(error){
-      if (error) return deferred.reject(error);
-      console.log("Resolving first promise");
-      deferred.resolve();
-    });
-
-    return deferred.promise;
+    copper.query( sql.join('\n'),  done);
   };
 
+  var onSeriesComplete = function(error, results){
+    if (error) return deferred.reject(error);
+    deferred.resolve(true);
+  };
 
-  return sequence( [ dropTables() ].concat( fs.readdirSync( __dirname + '/' + options.copperDeltas ).sort().map(function(file){
-    var deferred = when.defer();
+  // Couldn't get when.js to stop being stupid
+  async.series( [ dropTables ].concat( fs.readdirSync( __dirname + '/' + options.copperDeltas ).sort().map(function(file){
+    return function(done){
+      if ( file.substring( file.length - 3 ) != 'sql' ) return done();
 
-    if ( file.substring( file.length - 3 ) != 'sql' ) {
-      deferred.resolve(true);
-      return deferred.promise;
-    }
+      if (verbose) console.log("  - Running Delta:", __dirname + '/' + options.copperDeltas + '/' + file);
 
-    if (verbose) console.log("  - Running Delta:", __dirname + '/' + options.copperDeltas + '/' + file);
-console.log(fs.readFileSync(__dirname + '/' + options.copperDeltas + '/' + file).toString());
-    copper.query(
-      fs.readFileSync(__dirname + '/' + options.copperDeltas + '/' + file).toString()
-    , function(error) {
-      console.log("delta complete");
-        if (error) return deferred.reject(error);
-        deferred.resolve(true);
-      }
-    );
+      copper.query(
+        fs.readFileSync(__dirname + '/' + options.copperDeltas + '/' + file).toString()
+      , done
+      );
+    };
+  })), onSeriesComplete);
 
-    return deferred.promise;
-  })));
+  return deferred.promise;
 }
 
 module.exports = function(options, callback){
