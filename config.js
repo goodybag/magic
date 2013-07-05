@@ -229,7 +229,7 @@ var config = {
 
   , baseUrl: 'http://magic.staging.goodybag.com'
   , copper: {
-      connStr: process.env.HEROKU_POSTGRESQL_COPPER_URL
+      connStr: process.env.HEROKU_POSTGRESQL_AMBER_URL
     }
   , postgresConnStr: process.env['DATABASE_URL']
   , emailEnabled: true
