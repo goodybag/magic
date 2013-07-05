@@ -13,6 +13,7 @@ var
 , pooler = require('generic-pool')
 , Transaction = require('pg-transaction')
 
+, copper = require('./copper')
 , fields = require('./fields')
 
   // Promise to fullfil this variable!
@@ -35,6 +36,7 @@ exports.sql = sql;
 exports.procedures = require('./procedures');
 
 exports.Api = Api;
+exports.copper = copper;
 
 var logQuery = function(query) {
   var start = new Date();
@@ -317,7 +319,7 @@ exports.schemas = {
 exports.fields = fields;
 
 for (var key in exports.schemas){
-  exports.api[key] = new Api(key);
+  exports.api[key] = new Api(module.exports, key);
 }
 
 function buildTable(name, schema) {
