@@ -211,6 +211,8 @@ module.exports.updatePassword = function(req, res){
  * List consumer collections
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
+ *
+ * TODO: Refactor this - if offset == 0 and limit == 1, we just need to return all
  */
 module.exports.listCollections = function(req, res){
   var TAGS = ['list-consumer-collections', req.uuid];
