@@ -59,7 +59,7 @@ module.exports = {
     , 'order'
     , 'locations'
     , 'locations.locationId'
-, 'locations.productId'
+    , 'locations.productId'
     , 'locations.inSpotlight'
     , 'locations.inGallery'
     , 'locations.spotlightOrder'
