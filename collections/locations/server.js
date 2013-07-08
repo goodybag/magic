@@ -166,9 +166,9 @@ server.post(
   '/v1/locations/:locationId/products'
 , middleware.profile('GET /v1/locations/:locationId/products')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.locationManager)
+, middleware.applyGroups(applyGroups.ownerManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.productsCollection.methods.post.body)
 , middleware.profile('add product to location handler')
@@ -194,9 +194,9 @@ server.del(
   '/v1/locations/:locationId/products/:productId'
 , middleware.profile('DELETE /v1/locations/:locationId/products/:productId')
 , middleware.profile('apply groups locations manager')
-, middleware.applyGroups(applyGroups.locationManager)
+, middleware.applyGroups(applyGroups.ownerManager)
 , middleware.profile('auth allow')
-, middleware.auth.allow('admin', 'sales', 'location-manager')
+, middleware.auth.allow('admin', 'sales', 'ownerManager')
 , middleware.profile('remove product from location handler')
 , routes.removeProduct
 );
