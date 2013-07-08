@@ -747,6 +747,19 @@ describe('GET /v1/consumers/:id/collections', function() {
       });
     });
   });
+  it('should respond with a collection listing and include all collection even though offset is specified', function(done) {
+    tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
+      tu.get('/v1/consumers/7/collections?offset=0', function(error, results) {
+        assert(!error);
+        results = JSON.parse(results);
+        assert(!results.error);
+        assert(results.data.filter(function(c){
+          return c.name.toLowerCase() == "all"
+        }).length == 1);
+        tu.logout(done);
+      });
+    });
+  });
   it('should correctly populate the all collection with aggregate data', function(done) {
     tu.login({ email: 'tferguson@gmail.com', password: 'password' }, function(error){
       tu.get('/v1/consumers/7/collections?limit=1000', function(error, results, res) {
