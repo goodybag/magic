@@ -4,6 +4,7 @@ var errors = require('../lib/errors');
 var utils = require('../lib/utils');
 var async = require('async');
 var magic = require('../lib/magic');
+
 var templates = require('../templates');
 var config = require('../config');
 var Transaction = require('pg-transaction');

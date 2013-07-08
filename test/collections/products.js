@@ -1,8 +1,7 @@
+var tu = require('../../lib/test-utils');
 var assert = require('better-assert');
 var sinon = require('sinon');
 var ok = require('okay');
-
-var tu = require('../../lib/test-utils');
 
 describe('GET /v1/products', function() {
 
@@ -540,6 +539,30 @@ describe('GET /v1/businesses/:id/products', function() {
       assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
       assert(payload.data.filter(function(p){ return p.tags.length > 0; }).length > 0);
       assert(payload.data.filter(function(p){ return p.categories.length > 0; }).length > 0);
+      assert(payload.meta.total > 1);
+      done();
+    });
+  });
+
+  it('should respond with a product listing containing location visibility data', function(done) {
+    tu.get('/v1/businesses/1/products?include[]=tags&include[]=categories&include[]=locations', function(err, payload, res) {
+
+      assert(!err);
+      assert(res.statusCode == 200);
+
+      payload = JSON.parse(payload);
+      var products = payload.data;
+      assert(products.length >= 4);
+
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.data.filter(function(p){ return p.businessId == 1; }).length == payload.data.length);
+      assert(payload.data.filter(function(p){ return p.tags.length > 0; }).length > 0);
+      assert(payload.data.filter(function(p){ return p.categories.length > 0; }).length > 0);
+      assert(payload.data.filter(function(p){ return p.locations.length > 0; }).length > 0);
+      payload.data.forEach(function(product) {
+        assert(product.locations.filter(function(l) { return l.productId !== product.id }).length === 0);
+      });
       assert(payload.meta.total > 1);
       done();
     });

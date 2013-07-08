@@ -4,11 +4,12 @@
 
 var
   singly  = require('singly')
-
-  db      = require('../../db')
+, db      = require('../../db')
+, sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
+, magic       = require('../../lib/magic')
 
 , logger  = {}
 ;

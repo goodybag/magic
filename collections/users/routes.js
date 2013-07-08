@@ -17,6 +17,8 @@ var
 , logger    = {}
 ;
 
+var usersGroups = db.tables.usersGroups;
+
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});

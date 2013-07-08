@@ -1,4 +1,5 @@
 var db = require('../../db');
+var sql = require('../../lib/sql');
 
 //check to see if the user accessing this product
 //is the manager at the specific business owning the product
