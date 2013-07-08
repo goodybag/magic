@@ -218,15 +218,13 @@ module.exports.listCollections = function(req, res){
 
   var userId = req.param('userId');
   var showHidden = req.param('showHidden') || false;
-  var limit = req.param('limit');
-  var offset = req.param('offset');
+  var limit = +req.param('limit');
+  var offset = +req.param('offset') || 0;
 
   // update the limit and offset to counter for the injected "All" collection
-  var shouldInjectAll = (typeof offset == "undefined" || offset === 0);
-  if (shouldInjectAll) {
-    offset--; // don't need to skip "all" in the DB query
-    limit--; // need to make room for "all"
-  }
+  var shouldInjectAll = offset === 0;
+
+  if (offset > 0) offset--; // don't need to skip "all" in the DB query
 
   // build data query
   var query = sql.query([
@@ -322,7 +320,10 @@ module.exports.listCollections = function(req, res){
         totalMyWants : (aggResult.rows[0]) ? aggResult.rows[0].totalMyWants : 0,
         totalMyTries : (aggResult.rows[0]) ? aggResult.rows[0].totalMyTries : 0
       };
+
       dataResult.rows = [all].concat(dataResult.rows);
+
+      if (limit > 0) dataResult.rows = dataResult.rows.slice(0, limit);
 
       return res.json({ error: null, data: dataResult.rows, meta: meta });
     });
