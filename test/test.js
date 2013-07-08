@@ -27,6 +27,7 @@ require(__dirname + '/business-analytics');
 // but the security tests do not alter any data
 
 require('./permissions/businesses.js');
+require('./permissions/locations.js');
 require('./permissions/product-categories.js');
 require('./permissions/products.js');
 require('./permissions/product-tags.js');

@@ -36,22 +36,6 @@ var scenarios = [{
   method: 'GET',
   path: '/v1/businesses/1/measures',
   statusCode: 401
-},{
-  method: 'GET',
-  path: '/v1/locations/1'
-}, {
-  method: 'POST',
-  path: '/v1/locations',
-  statusCode: 401
-}, {
-  method: 'PUT',
-  path: '/v1/locations/1',
-  user: 'some_manager@gmail.com'
-}, {
-  method: 'PUT',
-  path: '/v1/locations/2',
-  user: 'some_manager@gmail.com',
-  statusCode: 403
 }];
 
 require('../security')(scenarios);
