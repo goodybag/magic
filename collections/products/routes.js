@@ -44,13 +44,14 @@ module.exports.list = function(req, res){
   var includeCats = includes.indexOf('categories') !== -1;
   var includeColl = includes.indexOf('collections') !== -1;
   var includeUserPhotos = includes.indexOf('userPhotos') !== -1;
+  var includeLocations = includes.indexOf('locations') !== -1;
   var withs = [];
 
   // build data query
   var query = sql.query([
     '{withs}',
     'SELECT {fields} FROM products',
-      '{sortCacheJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin}',
+      '{sortCacheJoin} {prodLocJoin} {tagJoin} {collectionJoin} {feelingsJoins} {inCollectionJoin} {locationsJoin}',
       'INNER JOIN businesses ON businesses.id = products."businessId"',
       '{where}',
       'GROUP BY {groupby}',
@@ -83,6 +84,14 @@ module.exports.list = function(req, res){
   if (req.param('businessId')) { // use param() as this may come from the path or the query
     query.where.and('products."businessId" = $businessId');
     query.$('businessId', req.param('businessId'));
+    if(includeLocations) {
+      query.fields.add('array_to_json(array_agg(locs.loc)) AS locations')
+      query.locationsJoin = [
+        'LEFT JOIN (',
+          'SELECT "productId", row_to_json(pl) AS loc FROM "productLocations" pl',
+        ') locs on locs."productId" = products.id'
+      ].join(' ');
+    }
   }
   // business tag filter
   else if (req.param('businessType')) {
@@ -339,6 +348,10 @@ module.exports.list = function(req, res){
         }
         if (includeUserPhotos) {
           try { row.photos = (row.photos) ? (row.photos) : []; } catch(e) {}
+        } if (includeLocations) {
+          if(!row.locations || row.locations[0] == null) {
+            row.locations = [];
+          }
         }
       });
     }
