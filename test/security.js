@@ -1,3 +1,4 @@
+var tu = require('../lib/test-utils');
 var http = require('http');
 var request = require('request');
 var omf = require('omf');
