@@ -30,16 +30,42 @@ var scenarios = [{
   },
   user: 'some_manager@gmail.com'
 }, {
-  method: 'DELETE',
-  path: '/v1/locations/2/products/1',
-  user: 'some_manager@gmail.com'
-}, {
   method: 'POST',
-  path: '/v1/locations/2/products',
+  path: '/v1/locations/4/products',
   body: {
     productId: 1
   },
   user: 'some_manager@gmail.com'
+}, {
+  method: 'DELETE',
+  path: '/v1/locations/4/products/1',
+  user: 'some_manager@gmail.com'
+}, {
+  method: 'PUT',
+  path: '/v1/locations/1/products/1',
+  user: 'some_manager@gmail.com',
+  body: {
+    inSpotlight: true
+  }
+}, {
+  method: 'PUT',
+  path: '/v1/locations/4/products/1',
+  user: 'some_manager@gmail.com',
+  body: {
+    inSpotlight: true
+  }
+}, {
+  method: 'PUT',
+  path: '/v1/locations/4/products/1',
+  body: {
+    inSpotlight: true
+  },
+  statusCode: 401
+}, {
+  method: 'DELETE',
+  path: '/v1/locations/4/products/1',
+  statusCode: 401
 }];
+
 
 require('../security')(scenarios);
