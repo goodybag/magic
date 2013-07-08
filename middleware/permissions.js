@@ -1,5 +1,6 @@
 var
   fs = require('fs')
+, errors = require('../lib/errors')
 , utils = require('../lib/utils')
 , collections = {}
 , files = fs.readdirSync(__dirname + '/../collections/')

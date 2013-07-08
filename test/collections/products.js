@@ -551,7 +551,6 @@ describe('GET /v1/businesses/:id/products', function() {
       assert(res.statusCode == 200);
 
       payload = JSON.parse(payload);
-      console.log(payload);
 
       assert(!payload.error);
       assert(payload.data.length > 0);

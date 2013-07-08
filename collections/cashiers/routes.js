@@ -5,7 +5,8 @@
 var
   singly  = require('singly')
 
-  db      = require('../../db')
+, db      = require('../../db')
+, magic   = require('../../lib/magic')
 , sql     = require('../../lib/sql')
 , utils   = require('../../lib/utils')
 , errors  = require('../../lib/errors')

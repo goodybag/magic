@@ -5,6 +5,7 @@
 var
   db          = require('../../db')
 , sql         = require('../../lib/sql')
+, usersGroups = db.tables.usersGroups
 , utils       = require('../../lib/utils')
 , errors      = require('../../lib/errors')
 , Transaction = require('pg-transaction')

@@ -11,6 +11,7 @@ var
 , magic       = require('../../lib/magic')
 , Transaction = require('pg-transaction')
 , async       = require('async')
+, config      = require('../../config')
 
 , logger  = {}
 
