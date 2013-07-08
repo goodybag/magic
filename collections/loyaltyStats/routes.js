@@ -13,6 +13,7 @@ var
 , logger  = {}
 
 , schemas          = db.schemas
+, magic       = require('../../lib/magic')
 ;
 
 // Setup loggers

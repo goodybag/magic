@@ -23,6 +23,13 @@ var all = [
 , 'userWants'
 , 'userTried'
 , 'order'       // used on the menu
+, 'locations'
+, 'locations.locationId'
+, 'locations.productId'
+, 'locations.inSpotlight'
+, 'locations.inGallery'
+, 'locations.spotlightOrder'
+, 'locations.galleryOrder'
 ];
 
 module.exports = {
@@ -50,6 +57,13 @@ module.exports = {
     , 'userWants'
     , 'userTried'
     , 'order'
+    , 'locations'
+    , 'locations.locationId'
+    , 'locations.productId'
+    , 'locations.inSpotlight'
+    , 'locations.inGallery'
+    , 'locations.spotlightOrder'
+    , 'locations.galleryOrder'
     ]
   , create: []
   , update: []

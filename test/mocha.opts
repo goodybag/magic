@@ -1,0 +1,2 @@
+--bail
+--globals noop,throwop,doop,PUBNUB

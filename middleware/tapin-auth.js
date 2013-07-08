@@ -109,6 +109,7 @@ function auth(req, res, next, TAGS, idField, id) {
     }
 
   , insertTapin: function(user) {
+      var tapinStations = db.tables.tapinStations;
       //fetch tapinStation row
       var q = 'SELECT * from "tapinStations" WHERE "tapinStations".id = $1';
       var q = db.tables.tapinStations.where(tapinStations.id.equals(tapinStationUser.id));

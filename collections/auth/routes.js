@@ -9,6 +9,7 @@ var
 , errors  = require('../../lib/errors')
 , config  = require('../../config')
 , oauth   = require('../../lib/oauth')
+, magic   = require('../../lib/magic')
 
 , logger  = {}
 

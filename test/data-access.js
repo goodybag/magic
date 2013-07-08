@@ -104,8 +104,8 @@ describe('data access', function() {
     //break con string to force connect error
     before(function() {
       this.config = require(__dirname + '/../config');
-      this.postgresConnStr = config.postgresConnStr;
-      config.postgresConnStr = 'pg://localhost:39813/1o3847';
+      this.postgresConnStr = this.config.postgresConnStr;
+      this.config.postgresConnStr = 'pg://localhost:39813/1o3847';
     });
 
     //reset the con string
