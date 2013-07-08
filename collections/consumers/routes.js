@@ -213,6 +213,7 @@ module.exports.updatePassword = function(req, res){
  * @param  {Object} res HTTP Result Object
  *
  * TODO: Refactor this - if offset == 0 and limit == 1, we just need to return all
+ * https://github.com/goodybag/magic/pull/612/files#r5071615
  */
 module.exports.listCollections = function(req, res){
   var TAGS = ['list-consumer-collections', req.uuid];
