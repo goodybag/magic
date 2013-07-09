@@ -73,6 +73,7 @@ module.exports = {
 
 , consumer: {
     create: ['businessId', 'name', 'description', 'price', 'categories', 'tags']
+  , update: ['userLikes', 'userWants', 'userTried']
   }
 
 , sales: {

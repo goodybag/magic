@@ -1,4 +1,3 @@
-
 /*
  * Product resources
  */
@@ -893,8 +892,20 @@ module.exports.update = function(req, res){
     }
   };
 
-  // Kick it off
-  db.getClient(TAGS, stage.clientReceived);
+  if (inputs.userLikes != null || inputs.userWants != null || inputs.userTried != null) {
+    // update feelings first if present
+    db.procedures.updateProductFeelings(TAGS, req.param('productId'), req.session.user.id, inputs.userLikes, inputs.userWants, inputs.userTried, req.data('locationId'), function(err, result) {
+      if (err) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+
+      delete inputs.userLikes;
+      delete inputs.userWants;
+      delete inputs.userTried;
+
+      db.getClient(TAGS, stage.clientReceived);
+    });
+  }
+  else
+    db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
@@ -1006,131 +1017,8 @@ module.exports.delCategory = function(req, res) {
 module.exports.updateFeelings = function(req, res) {
   var TAGS = ['update-product-userfeelings', req.uuid];
 
-  db.getClient(TAGS, function(error, client, done){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
-
-    var inputs = {
-      productId : req.param('productId'),
-      userId    : req.session.user.id,
-      isLiked   : req.body.isLiked,
-      isWanted  : req.body.isWanted,
-      isTried   : req.body.isTried
-    };
-
-    // start the transaction
-    var tx = new Transaction(client);
-    tx.begin(function(error) {
-      if (error) {
-        //destroy client if it cannot being a transaction
-        done(error);
-        return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
-      }
-
-      // lock the product row and get the current feelings
-      var query = sql.query([
-        'SELECT products.id AS "productId", "productLikes".id as "isLiked", "productWants".id as "isWanted", "productTries".id as "isTried"',
-          'FROM products',
-          'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
-          'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
-          'LEFT JOIN "productTries" ON "productTries"."productId" = $productId AND "productTries"."userId" = $userId',
-          'WHERE products.id = $1 FOR UPDATE OF products'
-      ]);
-      query.$('productId', +req.param('productId') || 0);
-      query.$('userId', +req.session.user.id || 0);
-      tx.query(query.toString(), query.$values, function(error, result) {
-        if (error) {
-          return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
-        }
-        if (result.rowCount === 0) {
-          tx.abort(done);
-          return res.error(errors.input.NOT_FOUND);
-        }
-
-        // fallback undefined inputs to current feelings and ensure defined inputs are boolean
-        var currentFeelings = {
-          isLiked:  result.rows[0].isLiked ? true : false,
-          isWanted: result.rows[0].isWanted ? true : false,
-          isTried:  result.rows[0].isTried ? true : false
-        };
-        inputs.isLiked  = (typeof inputs.isLiked == 'undefined') ? currentFeelings.isLiked : !!inputs.isLiked;
-        inputs.isWanted = (typeof inputs.isWanted == 'undefined') ? currentFeelings.isWanted : !!inputs.isWanted;
-        inputs.isTried  = (typeof inputs.isTried == 'undefined') ? currentFeelings.isTried : !!inputs.isTried;
-
-        var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
-        query.updates = sql.fields();
-        if (inputs.isLiked  != currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
-        if (inputs.isWanted != currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
-        if (inputs.isTried  != currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
-        query.$('id', +req.param('productId') || 0);
-
-        if (query.updates.fields.length === 0) {
-          // no updates needed
-          return res.noContent(), tx.abort(done);
-        }
-
-        // update the product count
-        tx.query(query.toString(), query.$values, function(error, result) {
-          if (error) {
-            return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
-          }
-
-          var feelingsQueryFn = function(table, add) {
-            return function(cb) {
-              if (add) {
-                tx.query('INSERT INTO "'+table+'" ("productId", "userId", "createdAt") SELECT $1, $2, now() WHERE NOT EXISTS (SELECT id FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2)', [+req.param('productId'), +req.session.user.id], cb);
-              } else {
-                tx.query('DELETE FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2', [+req.param('productId'), +req.session.user.id], cb);
-              }
-            };
-          };
-
-          // create/delete feelings
-          var queries = [];
-          if (inputs.isLiked  != currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
-          if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
-          if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
-          async.series(queries, function(err, results) {
-            if (error) {
-              return res.json({ error: error, data: null }), tx.abort(done), logger.routes.error(TAGS, error);
-            }
-
-            // end transaction
-            tx.commit(function(err) {
-              done(err);
-              res.noContent();
-              var message = {
-                userId: req.session.user.id,
-                productId: req.param('productId'),
-                locationId: req.data('locationId') || ''
-              };
-
-              if (req.body.isLiked != null && req.body.isLiked != undefined){
-                if (req.body.isLiked != currentFeelings.isLiked){
-                  magic.emit(
-                    'products.' + (req.body.isLiked ? '' : 'un') + 'like'
-                  , message);
-                }
-              }
-
-              if (req.body.isTried != null && req.body.isTried != undefined){
-                if (req.body.isTried != currentFeelings.isTried){
-                  magic.emit(
-                    'products.' + (req.body.isTried ? '' : 'un') + 'try'
-                  , message);
-                }
-              }
-
-              if (req.body.isWanted != null && req.body.isWanted != undefined){
-                if (req.body.isWanted != currentFeelings.isWanted){
-                  magic.emit(
-                    'products.' + (req.body.isWanted ? '' : 'un') + 'want'
-                  , message);
-                }
-              }
-            });
-          });
-        });
-      });
-    });
+  db.procedures.updateProductFeelings(TAGS, req.param('productId'), req.session.user.id, req.body.isLiked, req.body.isWanted, req.body.isTried, req.data('locationId'), function(err, result) {
+    if (err) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+    res.noContent();
   });
 };

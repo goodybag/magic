@@ -76,6 +76,9 @@ item:
         isVerified:      { type: bool,             eg: true }
         isArchived:      { type: bool,             eg: true }
         isEnabled:       { type: bool,             eg: true }
+        userLikes:       { type: bool,             eg: true }
+        userWants:       { type: bool,             eg: true }
+        userTried:       { type: bool,             eg: true }
     delete:
       desc: Delete Product
       auth:
