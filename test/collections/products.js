@@ -1006,7 +1006,7 @@ describe('PATCH /v1/products/:id', function() {
   });
 
   it('should update the feelings', function(done) {
-    tu.loginAsAdmin(function() {
+    tu.loginAsConsumer(function() {
       tu.get('/v1/products/1', function(err, payload, res) {
         assert(err == null);
         var result;

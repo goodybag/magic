@@ -131,7 +131,7 @@ server.put(
   '/v1/products/:productId'
 , middleware.profile('PUT /v1/products/:productId')
 , middleware.applyGroups(applyGroups.ownerManager)
-, middleware.auth.allow('admin', 'sales', 'ownerManager')
+, middleware.auth.allow('admin', 'sales', 'ownerManager', 'consumer')
 , middleware.profile('validate body')
 , middleware.validate2.body(desc.item.methods.put.body)
 , middleware.profile('permissions')
