@@ -892,8 +892,20 @@ module.exports.update = function(req, res){
     }
   };
 
-  // Kick it off
-  db.getClient(TAGS, stage.clientReceived);
+  if (inputs.userLikes != null || inputs.userWants != null || inputs.userTried != null) {
+    // update feelings first if present
+    updateFeelings(TAGS, req.param('productId'), req.session.user.id, inputs.userLikes, inputs.userWants, inputs.userTried, req.data('locationId'), function(err, result) {
+      if (err) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+
+      delete inputs.userLikes;
+      delete inputs.userWants;
+      delete inputs.userTried;
+
+      db.getClient(TAGS, stage.clientReceived);
+    });
+  }
+  else
+    db.getClient(TAGS, stage.clientReceived);
 };
 
 /**
