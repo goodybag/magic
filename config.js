@@ -93,6 +93,12 @@ var config = {
     , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
     , openGraphUrl: "https://graph.facebook.com/"
     }
+
+  , elasticsearch: {
+      host: 'http://twngkb06:c7s0q4cwhzhgl9gw@ginkgo-1645709.us-east-1.bonsai.io'
+    , index: 'staging'
+    , port: 80
+    }
   }
 
 , dev: {
