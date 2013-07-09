@@ -1,4 +1,3 @@
-
 /*
  * Product resources
  */
@@ -1021,14 +1020,14 @@ module.exports.updateFeelings = function(req, res) {
     var tx = new Transaction(client);
     tx.begin(function(error) {
       if (error) {
-        //destroy client if it cannot being a transaction
+        // destroy client if it cannot being a transaction
         done(error);
         return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
       }
 
       // lock the product row and get the current feelings
       var query = sql.query([
-        'SELECT products.id AS "productId", "productLikes".id as "isLiked", "productWants".id as "isWanted", "productTries".id as "isTried"',
+        'SELECT products.id AS "productId", "productLikes".id IS NOT NULL AS "isLiked", "productWants".id IS NOT NULL AS "isWanted", "productTries".id IS NOT NULL AS "isTried"',
           'FROM products',
           'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
           'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
@@ -1037,30 +1036,38 @@ module.exports.updateFeelings = function(req, res) {
       ]);
       query.$('productId', +req.param('productId') || 0);
       query.$('userId', +req.session.user.id || 0);
+
       tx.query(query.toString(), query.$values, function(error, result) {
-        if (error) {
-          return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
-        }
+        if (error)
+          return res.json({ error: error }), tx.abort(done), logger.routes.error(TAGS, error);
+
         if (result.rowCount === 0) {
           tx.abort(done);
           return res.error(errors.input.NOT_FOUND);
         }
 
-        // fallback undefined inputs to current feelings and ensure defined inputs are boolean
+        // _.pick(result.rows[0], ['isLiked', 'isWanted', 'isTried']);
         var currentFeelings = {
-          isLiked:  result.rows[0].isLiked ? true : false,
-          isWanted: result.rows[0].isWanted ? true : false,
-          isTried:  result.rows[0].isTried ? true : false
+          isLiked:  result.rows[0].isLiked,
+          isWanted: result.rows[0].isWanted,
+          isTried:  result.rows[0].isTried
         };
-        inputs.isLiked  = (typeof inputs.isLiked == 'undefined') ? currentFeelings.isLiked : !!inputs.isLiked;
-        inputs.isWanted = (typeof inputs.isWanted == 'undefined') ? currentFeelings.isWanted : !!inputs.isWanted;
-        inputs.isTried  = (typeof inputs.isTried == 'undefined') ? currentFeelings.isTried : !!inputs.isTried;
 
+        // fallback undefined inputs to current feelings
+        ['isLiked', 'isWanted', 'isTried'].forEach(function(prop) {
+          inputs[prop] = inputs[prop] == null ? currentFeelings[prop] : !!inputs[prop];
+        });
+
+        // adjust the count of likes, etc.
         var query = sql.query('UPDATE products SET {updates} WHERE products.id=$id');
         query.updates = sql.fields();
-        if (inputs.isLiked  != currentFeelings.isLiked)  { query.updates.add('likes = likes '+(inputs.isLiked ? '+' : '-')+' 1'); }
-        if (inputs.isWanted != currentFeelings.isWanted) { query.updates.add('wants = wants '+(inputs.isWanted ? '+' : '-')+' 1'); }
-        if (inputs.isTried  != currentFeelings.isTried)  { query.updates.add('tries = tries '+(inputs.isTried ? '+' : '-')+' 1'); }
+
+        var propCountMap = {'isLiked': 'likes', 'isWanted': 'wants', 'isTried': 'tries'};
+        for (var prop in propCountMap) {
+          if (inputs[prop] !== currentFeelings[prop])
+            query.updates.add(propCountMap[prop] + ' = ' + propCountMap[prop] + ' ' + (inputs[prop] ? '+' : '-') + ' 1');
+        }
+
         query.$('id', +req.param('productId') || 0);
 
         if (query.updates.fields.length === 0) {
@@ -1070,17 +1077,15 @@ module.exports.updateFeelings = function(req, res) {
 
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
-          if (error) {
+          if (error)
             return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
-          }
 
           var feelingsQueryFn = function(table, add) {
             return function(cb) {
-              if (add) {
+              if (add)
                 tx.query('INSERT INTO "'+table+'" ("productId", "userId", "createdAt") SELECT $1, $2, now() WHERE NOT EXISTS (SELECT id FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2)', [+req.param('productId'), +req.session.user.id], cb);
-              } else {
+              else
                 tx.query('DELETE FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2', [+req.param('productId'), +req.session.user.id], cb);
-              }
             };
           };
 
@@ -1090,9 +1095,8 @@ module.exports.updateFeelings = function(req, res) {
           if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
           if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
           async.series(queries, function(err, results) {
-            if (error) {
+            if (error)
               return res.json({ error: error, data: null }), tx.abort(done), logger.routes.error(TAGS, error);
-            }
 
             // end transaction
             tx.commit(function(err) {
@@ -1104,28 +1108,10 @@ module.exports.updateFeelings = function(req, res) {
                 locationId: req.data('locationId') || ''
               };
 
-              if (req.body.isLiked != null && req.body.isLiked != undefined){
-                if (req.body.isLiked != currentFeelings.isLiked){
-                  magic.emit(
-                    'products.' + (req.body.isLiked ? '' : 'un') + 'like'
-                  , message);
-                }
-              }
-
-              if (req.body.isTried != null && req.body.isTried != undefined){
-                if (req.body.isTried != currentFeelings.isTried){
-                  magic.emit(
-                    'products.' + (req.body.isTried ? '' : 'un') + 'try'
-                  , message);
-                }
-              }
-
-              if (req.body.isWanted != null && req.body.isWanted != undefined){
-                if (req.body.isWanted != currentFeelings.isWanted){
-                  magic.emit(
-                    'products.' + (req.body.isWanted ? '' : 'un') + 'want'
-                  , message);
-                }
+              var eventTypes = {'isWanted': 'want', 'isLiked': 'like', 'isTried': 'try'};
+              for( var prop in eventTypes) {
+                if (req.body[prop] != null && req.body[prop] !== currentFeelings[prop])
+                  magic.emit('products.' + (req.body[prop] ? '' : 'un') + eventTypes[prop], message);
               }
             });
           });
