@@ -997,54 +997,41 @@ module.exports.delCategory = function(req, res) {
   });
 };
 
-/**
- * Add/remove user feelings relations (productLikes, productWants, productTries) to the product
- * @param  {Object} req HTTP Request Object
- * @param  {Object} res [description]
- */
-module.exports.updateFeelings = function(req, res) {
-  var TAGS = ['update-product-userfeelings', req.uuid];
 
+function updateFeelings(TAGS, productId, userId, isLiked, isWanted, isTried, locationId, callback) {
   db.getClient(TAGS, function(error, client, done){
-    if (error) return res.json({ error: error, data: null }), logger.routes.error(TAGS, error);
+    if (error) return callback(error);
 
     var inputs = {
-      productId : req.param('productId'),
-      userId    : req.session.user.id,
-      isLiked   : req.body.isLiked,
-      isWanted  : req.body.isWanted,
-      isTried   : req.body.isTried
+      productId : +productId,
+      userId    : +userId,
+      isLiked   : isLiked,
+      isWanted  : isWanted,
+      isTried   : isTried
     };
 
     // start the transaction
     var tx = new Transaction(client);
     tx.begin(function(error) {
-      if (error) {
-        // destroy client if it cannot being a transaction
-        done(error);
-        return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
-      }
+      if (error) return done(error), callback(error);
 
       // lock the product row and get the current feelings
       var query = sql.query([
         'SELECT products.id AS "productId", "productLikes".id IS NOT NULL AS "isLiked", "productWants".id IS NOT NULL AS "isWanted", "productTries".id IS NOT NULL AS "isTried"',
-          'FROM products',
-          'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
-          'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
-          'LEFT JOIN "productTries" ON "productTries"."productId" = $productId AND "productTries"."userId" = $userId',
-          'WHERE products.id = $1 FOR UPDATE OF products'
+        'FROM products',
+        'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
+        'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
+        'LEFT JOIN "productTries" ON "productTries"."productId" = $productId AND "productTries"."userId" = $userId',
+        'WHERE products.id = $1 FOR UPDATE OF products'
       ]);
-      query.$('productId', +req.param('productId') || 0);
-      query.$('userId', +req.session.user.id || 0);
+      query.$('productId', inputs.productId);
+      query.$('userId',    inputs.userId);
 
       tx.query(query.toString(), query.$values, function(error, result) {
-        if (error)
-          return res.json({ error: error }), tx.abort(done), logger.routes.error(TAGS, error);
+        if (error) return callback(error), tx.abort(done);
 
-        if (result.rowCount === 0) {
-          tx.abort(done);
-          return res.error(errors.input.NOT_FOUND);
-        }
+        if (result.rowCount === 0)
+          return callback(errors.input.NOT_FOUND), tx.abort(done);
 
         // _.pick(result.rows[0], ['isLiked', 'isWanted', 'isTried']);
         var currentFeelings = {
@@ -1068,55 +1055,69 @@ module.exports.updateFeelings = function(req, res) {
             query.updates.add(propCountMap[prop] + ' = ' + propCountMap[prop] + ' ' + (inputs[prop] ? '+' : '-') + ' 1');
         }
 
-        query.$('id', +req.param('productId') || 0);
+        query.$('id', inputs.productId);
 
         if (query.updates.fields.length === 0) {
           // no updates needed
-          return res.noContent(), tx.abort(done);
+          return callback(null, null), tx.abort(done);
         }
 
         // update the product count
         tx.query(query.toString(), query.$values, function(error, result) {
-          if (error)
-            return res.json({ error: error, data: null, meta: null }), tx.abort(done), logger.routes.error(TAGS, error);
+          if (error) return callback(error), tx.abort(done);
 
           var feelingsQueryFn = function(table, add) {
             return function(cb) {
-              if (add)
-                tx.query('INSERT INTO "'+table+'" ("productId", "userId", "createdAt") SELECT $1, $2, now() WHERE NOT EXISTS (SELECT id FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2)', [+req.param('productId'), +req.session.user.id], cb);
-              else
-                tx.query('DELETE FROM "'+table+'" WHERE "productId"=$1 AND "userId"=$2', [+req.param('productId'), +req.session.user.id], cb);
+              var addQuery = 'INSERT INTO "' + table + '" ("productId", "userId", "createdAt") SELECT $1, $2, now() WHERE NOT EXISTS (SELECT id FROM "' + table + '" WHERE "productId"=$1 AND "userId"=$2)';
+              var delQuery = 'DELETE FROM "' + table + '" WHERE "productId"=$1 AND "userId"=$2';
+              tx.query(add ? addQuery : delQuery, [inputs.productId, inputs.userId], cb);
             };
           };
 
           // create/delete feelings
           var queries = [];
-          if (inputs.isLiked  != currentFeelings.isLiked)  { queries.push(feelingsQueryFn('productLikes', inputs.isLiked)); }
-          if (inputs.isWanted != currentFeelings.isWanted) { queries.push(feelingsQueryFn('productWants', inputs.isWanted)); }
-          if (inputs.isTried  != currentFeelings.isTried)  { queries.push(feelingsQueryFn('productTries', inputs.isTried)); }
+          var colNames = {isLiked: 'productLikes', isWanted: 'productWants', isTried: 'productTries'};
+          for (var prop in colNames)
+            if (inputs[prop] != currentFeelings[prop]) queries.push(feelingsQueryFn(colNames[prop], inputs[prop]));
+
           async.series(queries, function(err, results) {
-            if (error)
-              return res.json({ error: error, data: null }), tx.abort(done), logger.routes.error(TAGS, error);
+            if (error) return callback(error), tx.abort(done);
 
             // end transaction
             tx.commit(function(err) {
               done(err);
-              res.noContent();
+              callback(null, null);
+
+              // emit the events
               var message = {
-                userId: req.session.user.id,
-                productId: req.param('productId'),
-                locationId: req.data('locationId') || ''
+                userId: inputs.userId,
+                productId: inputs.productId,
+                locationId: locationId || ''
               };
 
               var eventTypes = {'isWanted': 'want', 'isLiked': 'like', 'isTried': 'try'};
               for( var prop in eventTypes) {
-                if (req.body[prop] != null && req.body[prop] !== currentFeelings[prop])
-                  magic.emit('products.' + (req.body[prop] ? '' : 'un') + eventTypes[prop], message);
+                if (inputs[prop] !== currentFeelings[prop])
+                  magic.emit('products.' + (inputs[prop] ? '' : 'un') + eventTypes[prop], message);
               }
             });
           });
         });
       });
     });
+  });
+}
+
+/**
+ * Add/remove user feelings relations (productLikes, productWants, productTries) to the product
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res [description]
+ */
+module.exports.updateFeelings = function(req, res) {
+  var TAGS = ['update-product-userfeelings', req.uuid];
+
+  updateFeelings(TAGS, req.param('productId'), req.session.user.id, req.body.isLiked, req.body.isWanted, req.body.isTried, req.data('locationId'), function(err, result) {
+    if (err) return res.json({ error: error, data: null, meta: null }), logger.routes.error(TAGS, error);
+    res.noContent();
   });
 };
