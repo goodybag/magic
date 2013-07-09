@@ -1005,6 +1005,66 @@ describe('PATCH /v1/products/:id', function() {
     });
   });
 
+  it('should update the feelings', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/products/1', function(err, payload, res) {
+        assert(err == null);
+        var result;
+        try {
+          result = JSON.parse(payload);
+        } catch(e) {
+          assert(false, 'json parse error');
+        }
+        assert(result != null);
+        assert(result.error == null);
+        assert(result.data != null);
+
+        var old = {
+          likes:     result.data.likes,
+          wants:     result.data.wants,
+          tries:     result.data.tries,
+          userLikes: result.data.userLikes,
+          userWants: result.data.userWants,
+          userTried: result.data.userTried
+        }
+
+        var data = {
+          userLikes: !old.userLikes,
+          userWants: !old.userWants,
+          userTried: !old.userTried
+        }
+
+        tu.patch('/v1/products/1', JSON.stringify(data), 'application/json', function(err, payload, res) {
+          assert(err == null);
+          assert(res.statusCode === 204);
+
+          tu.get('/v1/products/1', function(err, payload, res) {
+            var result;
+            try {
+              result = JSON.parse(payload);
+            } catch(e) {
+              assert(false, 'json parse error');
+            }
+            assert(result != null);
+            assert(result.error == null);
+            assert(result.data != null);
+
+            // assert the feelings have been updated
+            assert(result.data.userLikes === data.userLikes);
+            assert(result.data.userWants === data.userWants);
+            assert(result.data.userTried === data.userTried);
+
+            // assert the counts have been updated
+            assert(result.data.likes === old.likes + (data.userLikes ? 1 : -1));
+            assert(result.data.wants === old.wants + (data.userWants ? 1 : -1));
+            assert(result.data.tries === old.tries + (data.userTried ? 1 : -1));
+
+            done();
+          });
+        });
+      });
+    });
+  });
 });
 
 
