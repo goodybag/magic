@@ -1030,11 +1030,11 @@ function updateFeelings(TAGS, productId, userId, isLiked, isWanted, isTried, loc
       // lock the product row and get the current feelings
       var query = sql.query([
         'SELECT products.id AS "productId", "productLikes".id IS NOT NULL AS "isLiked", "productWants".id IS NOT NULL AS "isWanted", "productTries".id IS NOT NULL AS "isTried"',
-        'FROM products',
-        'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
-        'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
-        'LEFT JOIN "productTries" ON "productTries"."productId" = $productId AND "productTries"."userId" = $userId',
-        'WHERE products.id = $1 FOR UPDATE OF products'
+          'FROM products',
+          'LEFT JOIN "productLikes" ON "productLikes"."productId" = $productId AND "productLikes"."userId" = $userId',
+          'LEFT JOIN "productWants" ON "productWants"."productId" = $productId AND "productWants"."userId" = $userId',
+          'LEFT JOIN "productTries" ON "productTries"."productId" = $productId AND "productTries"."userId" = $userId',
+          'WHERE products.id = $1 FOR UPDATE OF products'
       ]);
       query.$('productId', inputs.productId);
       query.$('userId',    inputs.userId);
