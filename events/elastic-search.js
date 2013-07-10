@@ -4,29 +4,47 @@ var utils   = require('../lib/utils');
 
 module.exports = {
   'product.created':
-  function(product){}
+  function(product){
+    elastic.index( 'product', product );
+  }
 
 , 'product.updated':
-  function(product){}
+  function(product){
+    elastic.index( 'product', product );
+  }
 
 , 'product.deleted':
-  function(product){}
+  function(productId){
+    elastic.del( 'product', productId );
+  }
 
 , 'business.created':
-  function(business){}
+  function(business){
+    elastic.index( 'business', business );
+  }
 
 , 'business.updated':
-  function(business){}
+  function(business){
+    elastic.index( 'business', business );
+  }
 
 , 'business.deleted':
-  function(business){}
+  function(businessId){
+    elastic.del( 'business', businessId );
+  }
 
 , 'category.created':
-  function(category){}
+  function(category){
+    elastic.index( 'category', category );
+  }
 
 , 'category.updated':
-  function(category){}
+  function(category){
+    elastic.index( 'category', category );
+  }
 
 , 'category.deleted':
-  function(category){}
+  function(categoryId){
+    elastic.del( 'category', categoryId );
+  }
 };
