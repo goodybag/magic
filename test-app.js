@@ -1,5 +1,5 @@
 var config = require('./config');
-var Elastic = require('./lib/elastic-search');
+var Elastic = require('./lib/elastic-client');
 var elastic = new Elastic({
   host:   config.elasticsearch.host
 , index:  config.elasticsearch.index
