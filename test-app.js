@@ -1,9 +1,4 @@
-var config = require('./config');
-var Elastic = require('./lib/elastic-client');
-var elastic = new Elastic({
-  host:   config.elasticsearch.host
-, index:  config.elasticsearch.index
-});
+var elastic = require('./lib/elastic-search')
 
 // elastic.index('product', {
 //   id:   parseInt(Math.random() * 100000)
