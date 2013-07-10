@@ -99,6 +99,9 @@ module.exports.list = function(req, res){
     query.$('emailFilter', '%'+req.param('filter')+'%');
   }
 
+  if (req.param('lastName')) {
+  }
+
   db.query(query, function(error, rows, dataResult){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 

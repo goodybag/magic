@@ -30,6 +30,15 @@ describe('GET /v1/users', function() {
       done();
     });
   });
+
+  it('should search by lastname', function(done) {
+    tu.get('/v1/users?lastName=pham', function(err, results, res) {
+      assert(!err);
+      console.log(results);
+      done();
+    });
+  });
+
   it('should paginate', function(done) {
     tu.get('/v1/users?offset=1&limit=1', function(err, results, res) {
       assert(!err);
