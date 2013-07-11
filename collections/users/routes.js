@@ -134,7 +134,6 @@ module.exports.search = function(req, res) {
   });
 }
 
-
 /**
  * List users
  * @param  {Object} req HTTP Request Object

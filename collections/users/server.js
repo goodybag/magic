@@ -92,7 +92,6 @@ server.get(
 , routes.search
 );
 
-
 // Users.list
 server.get(
   '/v1/users'
