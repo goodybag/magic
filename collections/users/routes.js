@@ -83,19 +83,57 @@ module.exports.search = function(req, res) {
     , firstName = req.param('firstName');
 
   var query = sql.query([
-    'SELECT {fields}',
+    'SELECT users.*, consumers."firstName", consumers."lastName"',
+      ', COUNT(users.id) OVER() AS "metaTotal"',
       ', array_agg(groups.id)   AS "groupIds"',
       ', array_agg(groups.name) AS "groupNames"',
     'FROM users',
     'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
     'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
     'LEFT JOIN consumers      ON consumers.id = users.id',
-    'GROUP BY users.id'
+    '{where}',
+    'GROUP BY users.id, consumers."lastName", consumers."firstName"',
+    'LIMIT 20'
   ]);
 
-  console.log(query);
+  query.where = sql.where();
+  
+  if (lastName) {
+    query.where.and('consumers."lastName" ILIKE $lastName');
+    query.$('lastName', lastName);
+  }
 
-  res.json({ test: 'hi' });
+  if (firstName) {
+    query.where.and('consumers."firstName" ILIKE $firstName');
+    query.$('firstName', firstName);
+  }
+
+  db.query(query, function(error, rows, dataResult){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var rows = dataResult.rows;
+
+    rows = rows.map(function(r){
+      r.groups = [];
+
+      if (r.groupIds && r.groupIds[0] != null){
+        for (var i = 0; i < r.groupIds.length; i++){
+          r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
+        }
+      }
+
+      delete r.groupIds;
+      delete r.groupNames;
+
+      return r;
+    });
+
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+    return res.json({ error: null, data: rows, meta: { total:total } });
+  });
+  
+  //res.json({ test: 'hi' });
 }
 
 

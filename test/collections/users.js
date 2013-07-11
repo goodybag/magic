@@ -44,12 +44,58 @@ describe('GET /v1/users', function() {
 });
 
 describe('GET /v1/users/search', function() {
-  it('should search by lastname', function(done) {
-    tu.get('/v1/users/search?lastName=pham', function(err, results, res) {
+  it('should search by last name', function(done) {
+    tu.get('/v1/users/search?lastName=Ferguson', function(err, results, res) {
       assert(!err);
       var payload = JSON.parse(results);
-      console.log("Results", results);
-      console.log("Payload", payload);
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.meta.total > 0);
+      utils.each(payload.data, function(row) {
+        assert(row.lastName === 'Ferguson');
+      });
+      done();
+    });
+  });
+
+  it('should search by first name', function(done) {
+    tu.get('/v1/users/search?firstName=Turd', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.meta.total > 0);
+      utils.each(payload.data, function(row) {
+        assert(row.firstName === 'Turd');
+      });
+      done();
+    });
+  });
+
+  it('should search by first and last name', function(done) {
+    tu.get('/v1/users/search?firstName=Turd&lastName=Ferguson', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(!payload.error);
+      assert(payload.data.length > 0);
+      assert(payload.meta.total > 0);
+      utils.each(payload.data, function(row) {
+        assert(row.firstName === 'Turd');
+        assert(row.lastName === 'Ferguson');
+      });
+      done();
+    });
+  });
+
+  it('should search ignoring letter case', function(done) {
+    tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      assert(payload.data.length > 0);
+      assert(payload.meta.total > 0);
+      utils.each(payload.data, function(row) {
+        assert(row.lastName === 'Ferguson');
+      });
       done();
     });
   });
