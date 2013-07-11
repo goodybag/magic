@@ -132,8 +132,6 @@ module.exports.search = function(req, res) {
 
     return res.json({ error: null, data: rows, meta: { total:total } });
   });
-  
-  //res.json({ test: 'hi' });
 }
 
 
