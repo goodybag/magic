@@ -92,8 +92,7 @@ module.exports.search = function(req, res) {
     'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
     'LEFT JOIN consumers      ON consumers.id = users.id',
     '{where}',
-    'GROUP BY users.id, consumers."lastName", consumers."firstName"',
-    'LIMIT 20'
+    'GROUP BY users.id, consumers."lastName", consumers."firstName"'
   ]);
 
   query.where = sql.where();
