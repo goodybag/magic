@@ -14,7 +14,6 @@ describe('GET /v1', function() {
     var state = Math.random().toString();
     tu.get('/v1?state=' + state, function(err, payload, res) {
       db.copper.requests.findOne({}, {order:'ORDER BY "createdAt" desc'}, function(err, obj) {
-        console.log(err);
         assert(err == null);
         assert(obj != null);
 
