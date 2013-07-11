@@ -80,6 +80,24 @@ server.post(
 , routes.completeRegistration
 );
 
+// Users.search
+server.get(
+  '/v1/users/search'
+, middleware.profile('GET /v1/users/search')
+, middleware.profile('query defaults')
+, middleware.defaults.query({
+    limit : 20
+  })
+, middleware.profile('auth allow')
+, middleware.auth.allow('admin')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.collection.methods.get.query)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('search users by name')
+, routes.search
+);
+
 // Users.list
 server.get(
   '/v1/users'
