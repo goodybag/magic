@@ -92,10 +92,12 @@ module.exports.search = function(req, res) {
     'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
     'LEFT JOIN consumers      ON consumers.id = users.id',
     '{where}',
-    'GROUP BY users.id, consumers."lastName", consumers."firstName"'
+    'GROUP BY users.id, consumers."lastName", consumers."firstName"',
+    '{limit}'
   ]);
 
   query.where = sql.where();
+  query.limit = sql.limit(req.query.limit, req.query.offset);
   
   if (lastName) {
     query.where.and('consumers."lastName" ILIKE $lastName');

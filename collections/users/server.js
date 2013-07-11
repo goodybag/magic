@@ -84,6 +84,10 @@ server.post(
 server.get(
   '/v1/users/search'
 , middleware.profile('GET /v1/users/search')
+, middleware.profile('query defaults')
+, middleware.defaults.query({
+    limit : 20
+  })
 , middleware.profile('auth allow')
 , middleware.auth.allow('admin')
 , middleware.profile('validate query')
