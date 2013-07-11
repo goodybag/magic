@@ -94,28 +94,32 @@ describe('GET /v1/users/search', function() {
   });
 
   it('should search ignoring letter case', function(done) {
-    tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(payload.data.length > 0);
-      assert(payload.meta.total > 0);
-      utils.each(payload.data, function(row) {
-        assert(row.lastName === 'Ferguson');
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(payload.data.length > 0);
+        assert(payload.meta.total > 0);
+        utils.each(payload.data, function(row) {
+          assert(row.lastName === 'Ferguson');
+        });
+        done();
       });
-      done();
     });
   });
-  
+
   it('should search ignoring letter case', function(done) {
-    tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
-      assert(!err);
-      var payload = JSON.parse(results);
-      assert(payload.data.length > 0);
-      assert(payload.meta.total > 0);
-      utils.each(payload.data, function(row) {
-        assert(row.lastName === 'Ferguson');
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(payload.data.length > 0);
+        assert(payload.meta.total > 0);
+        utils.each(payload.data, function(row) {
+          assert(row.lastName === 'Ferguson');
+        });
+        done();
       });
-      done();
     });
   });
 });
