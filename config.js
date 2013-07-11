@@ -93,12 +93,6 @@ var config = {
     , secret: "49d2a33ae28a51d7f85b5c3a69ed0eaa"
     , openGraphUrl: "https://graph.facebook.com/"
     }
-
-  , elasticsearch: {
-      host: 'http://twngkb06:c7s0q4cwhzhgl9gw@ginkgo-1645709.us-east-1.bonsai.io'
-    , index: 'staging'
-    , port: 80
-    }
   }
 
 , dev: {
@@ -125,6 +119,12 @@ var config = {
   , baseUrl: 'http://localhost:3000'
 
   , emailEnabled: false
+
+  , elasticsearch: {
+      host: 'http://localhost'
+    , index: 'dev'
+    , port: 9200
+    }
   }
 
 , test: {
@@ -218,6 +218,12 @@ var config = {
         + token;
       }
     }
+
+  , elasticsearch: {
+      host: 'http://localhost'
+    , index: 'test'
+    , port: 9200
+    }
   }
 
 , staging: {
@@ -267,6 +273,12 @@ var config = {
         ;
       }
     }
+
+  , elasticsearch: {
+      host: 'http://twngkb06:c7s0q4cwhzhgl9gw@ginkgo-1645709.us-east-1.bonsai.io'
+    , index: 'staging'
+    , port: 80
+    }
   }
 
 , production: {
@@ -310,6 +322,12 @@ var config = {
         ;
       }
     }
+
+  , elasticsearch: {
+      host: 'http://twngkb06:c7s0q4cwhzhgl9gw@ginkgo-1645709.us-east-1.bonsai.io'
+    , index: 'prod'
+    , port: 80
+    }
   }
 };
 
@@ -325,4 +343,5 @@ var GB_ENV = process.env['GB_ENV'] = process.env['GB_ENV'] || 'dev';
 if (GB_ENV == null || !config.hasOwnProperty(GB_ENV)) GB_ENV = 'dev';
 
 module.exports = _.extend(config.defaults, config[GB_ENV]);
+module.exports.ENV = GB_ENV;
 console.log('Loading ' + GB_ENV + ' config');
