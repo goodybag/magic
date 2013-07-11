@@ -30,7 +30,6 @@ describe('GET /v1/users', function() {
       done();
     });
   });
-
   it('should paginate', function(done) {
     tu.get('/v1/users?offset=1&limit=1', function(err, results, res) {
       assert(!err);

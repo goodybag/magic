@@ -10,7 +10,7 @@ collection:
         limit:      { type: int,    eg: 5 }
         filter:     { type: string, eg: tfergu }
         lastName:   { type: string, eg: ferguson }
-        firstName:  { type: string, eg: tim }
+        firstName:  { type: string, eg: todd }
     post:
       desc: Add User
       body:
