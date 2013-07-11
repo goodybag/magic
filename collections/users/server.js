@@ -84,6 +84,10 @@ server.post(
 server.get(
   '/v1/users/search'
 , middleware.profile('GET /v1/users/search')
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.collection.methods.get.query)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
 , middleware.profile('search users by name')
 , routes.search
 );

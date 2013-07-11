@@ -10,6 +10,8 @@ var all = [
 , 'cardId'
 , 'phone'
 , 'createdAt'
+, 'firstName'
+, 'lastName'
 ];
 
 module.exports = {
