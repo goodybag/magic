@@ -71,6 +71,35 @@ module.exports.get = function(req, res){
 };
 
 /**
+ * Search users
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.search = function(req, res) {
+  var TAGS = ['search-users', req.uuid];
+  logger.routes.debug(TAGS, 'searching user');
+
+  var lastName  = req.param('lastName')
+    , firstName = req.param('firstName');
+
+  var query = sql.query([
+    'SELECT {fields}',
+      ', array_agg(groups.id)   AS "groupIds"',
+      ', array_agg(groups.name) AS "groupNames"',
+    'FROM users',
+    'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+    'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+    'LEFT JOIN consumers      ON consumers.id = users.id',
+    'GROUP BY users.id'
+  ]);
+
+  console.log(query);
+
+  res.json({ test: 'hi' });
+}
+
+
+/**
  * List users
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
@@ -97,9 +126,6 @@ module.exports.list = function(req, res){
   if (req.param('filter')) {
     query.where.and('users.email ILIKE $emailFilter');
     query.$('emailFilter', '%'+req.param('filter')+'%');
-  }
-
-  if (req.param('lastName')) {
   }
 
   db.query(query, function(error, rows, dataResult){

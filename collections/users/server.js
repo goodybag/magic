@@ -80,6 +80,15 @@ server.post(
 , routes.completeRegistration
 );
 
+// Users.search
+server.get(
+  '/v1/users/search'
+, middleware.profile('GET /v1/users/search')
+, middleware.profile('search users by name')
+, routes.search
+);
+
+
 // Users.list
 server.get(
   '/v1/users'
@@ -165,6 +174,7 @@ server.del(
 , middleware.profile('delete user handler')
 , routes.del
 );
+
 
 
 

@@ -31,14 +31,6 @@ describe('GET /v1/users', function() {
     });
   });
 
-  it('should search by lastname', function(done) {
-    tu.get('/v1/users?lastName=pham', function(err, results, res) {
-      assert(!err);
-      console.log(results);
-      done();
-    });
-  });
-
   it('should paginate', function(done) {
     tu.get('/v1/users?offset=1&limit=1', function(err, results, res) {
       assert(!err);
@@ -46,6 +38,18 @@ describe('GET /v1/users', function() {
       assert(!payload.error);
       assert(payload.data.length === 1);
       assert(payload.meta.total > 1);
+      done();
+    });
+  });
+});
+
+describe('GET /v1/users/search', function() {
+  it('should search by lastname', function(done) {
+    tu.get('/v1/users/search?lastName=pham', function(err, results, res) {
+      assert(!err);
+      var payload = JSON.parse(results);
+      console.log("Results", results);
+      console.log("Payload", payload);
       done();
     });
   });
