@@ -3,29 +3,33 @@ var elastic = require('../lib/elastic-search')
 var utils   = require('../lib/utils');
 
 module.exports = {
-  'product.created':
+  'products.create':
   function(product){
-    elastic.index( 'product', product );
+    elastic.save( 'product', product );
   }
 
-, 'product.updated':
-  function(product){
-    elastic.index( 'product', product );
-  }
-
-, 'product.deleted':
+, 'products.update':
   function(productId){
+    db.api.products.findOne( productId, function(error, product){
+      if (error) return;
+      elastic.save( 'product', product );
+    });
+  }
+
+, 'products.deleted':
+  function(productId){
+    console.log("product deleted", productId)
     elastic.del( 'product', productId );
   }
 
 , 'business.created':
   function(business){
-    elastic.index( 'business', business );
+    elastic.save( 'business', business );
   }
 
 , 'business.updated':
   function(business){
-    elastic.index( 'business', business );
+    elastic.save( 'business', business );
   }
 
 , 'business.deleted':
@@ -35,12 +39,12 @@ module.exports = {
 
 , 'category.created':
   function(category){
-    elastic.index( 'category', category );
+    elastic.save( 'category', category );
   }
 
 , 'category.updated':
   function(category){
-    elastic.index( 'category', category );
+    elastic.save( 'category', category );
   }
 
 , 'category.deleted':

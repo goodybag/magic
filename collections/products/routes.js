@@ -912,6 +912,7 @@ module.exports.del = function(req, res){
   db.query(query, function(error, rows, result){
     if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
     res.noContent();
+    magic.emit('products.deleted', +req.param('productId'));
   });
 };
 
