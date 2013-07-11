@@ -4,6 +4,21 @@ var config  = require('../config');
 var Client  = require('../lib/elastic-client');
 var elastic = require('../lib/elastic-search');
 
+before(function(done){
+
+  // Kill everything
+  elastic.removeSelf(function(error){
+    if (error) throw error;
+
+    // And bring back the index
+    elastic.ensureIndex(function(error){
+      if (error) throw error;
+
+      done();
+    });
+  });
+});
+
 describe ('Elastic Searchin', function(){
 
   describe ('General Elastic Search Module Stuff', function(){

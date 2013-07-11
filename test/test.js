@@ -19,6 +19,9 @@ require(__dirname + '/logger');
 // business analytics tests
 require(__dirname + '/business-analytics');
 
+// elastic search tests
+require(__dirname + '/elastic-search');
+
 // functional tests
 // ================
 
