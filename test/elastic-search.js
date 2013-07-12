@@ -57,7 +57,7 @@ describe ('Elastic Searchin', function(){
 
   });
 
-  describe ('Client.index', function(){
+  describe ('Client.save', function(){
 
     it ('should save a document', function(done){
       var doc = {
@@ -69,6 +69,48 @@ describe ('Elastic Searchin', function(){
         assert( !error );
         assert( result.ok == true );
         assert( result._id == doc.id );
+
+        done();
+      });
+    });
+
+    it ('should save a document and generate an ID', function(done){
+      var doc = {
+        name: 'Some Other Product'
+      };
+
+      elastic.save('product', doc, function(error, result){
+        assert( !error );
+        assert( result.ok == true );
+        assert( result._id );
+
+        done();
+      });
+    });
+
+    it ('should save a document and then update it', function(done){
+      var doc = {
+        id: 2
+      , name: 'Another Product'
+      };
+
+      elastic.save('product', doc, function(error, result){
+        assert( !error );
+        assert( result.ok == true );
+        assert( result._id == doc.id );
+
+        elastic.save('product', { id: doc.id, poop: true }, function(error, result){
+          assert( !error );
+          assert( result.ok == true );
+          assert( result._id == doc.id );
+
+          elastic.get('product', doc.id, function(error, result){
+            assert( !error );
+            assert( result.ok == true );
+            assert( result._id == doc.id );
+            assert( result._source.poop == true );
+          });
+        });
 
         done();
       });

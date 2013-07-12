@@ -18,7 +18,6 @@ module.exports = {
 
 , 'products.deleted':
   function(productId){
-    console.log("product deleted", productId)
     elastic.del( 'product', productId );
   }
 
