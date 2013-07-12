@@ -71,6 +71,71 @@ module.exports.get = function(req, res){
 };
 
 /**
+ * Search users
+ * @param  {Object} req HTTP Request Object
+ * @param  {Object} res HTTP Result Object
+ */
+module.exports.search = function(req, res) {
+  var TAGS = ['search-users', req.uuid];
+  logger.routes.debug(TAGS, 'searching user');
+
+  var lastName  = req.param('lastName')
+    , firstName = req.param('firstName');
+
+  var query = sql.query([
+    'SELECT users.*, consumers."firstName", consumers."lastName"',
+      ', COUNT(users.id) OVER() AS "metaTotal"',
+      ', array_agg(groups.id)   AS "groupIds"',
+      ', array_agg(groups.name) AS "groupNames"',
+    'FROM users',
+    'LEFT JOIN "usersGroups"  ON "usersGroups"."userId" = users.id',
+    'LEFT JOIN groups         ON groups.id = "usersGroups"."groupId"',
+    'LEFT JOIN consumers      ON consumers.id = users.id',
+    '{where}',
+    'GROUP BY users.id, consumers."lastName", consumers."firstName"',
+    '{limit}'
+  ]);
+
+  query.where = sql.where();
+  query.limit = sql.limit(req.query.limit, req.query.offset);
+  
+  if (lastName) {
+    query.where.and('consumers."lastName" ILIKE $lastName');
+    query.$('lastName', lastName);
+  }
+
+  if (firstName) {
+    query.where.and('consumers."firstName" ILIKE $firstName');
+    query.$('firstName', firstName);
+  }
+
+  db.query(query, function(error, rows, dataResult){
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+    var rows = dataResult.rows;
+
+    rows = rows.map(function(r){
+      r.groups = [];
+
+      if (r.groupIds && r.groupIds[0] != null){
+        for (var i = 0; i < r.groupIds.length; i++){
+          r.groups.push({ id: r.groupIds[i], name: r.groupNames[i] });
+        }
+      }
+
+      delete r.groupIds;
+      delete r.groupNames;
+
+      return r;
+    });
+
+    var total = (dataResult.rows[0]) ? dataResult.rows[0].metaTotal : 0;
+
+    return res.json({ error: null, data: rows, meta: { total:total } });
+  });
+}
+
+/**
  * List users
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res HTTP Result Object
