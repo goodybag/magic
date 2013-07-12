@@ -148,6 +148,25 @@ describe ('Elastic Searchin', function(){
       });
     });
 
+    it ('should not find the record', function(){
+      var doc = {
+        id: 222222322222
+      };
+
+      elastic.save('product', doc, function(error, result){
+        assert( !error );
+        assert( result.ok == true );
+        assert( result._id == doc.id );
+
+        elastic.get('product', doc.id, function(error, result){
+          assert( !error );
+          assert( result.exists == false );
+
+          done();
+        });
+      });
+    });
+
   });
 
 });
