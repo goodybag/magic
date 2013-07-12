@@ -29,7 +29,7 @@ module.exports.get = function(req, res){
 
   var query = sql.query([
                         'SELECT {fields} FROM users',
-                        'LEFT JOIN "managers" ON "managers".id = users.id',
+                        'JOIN "managers" ON "managers".id = users.id',
                         'WHERE users.id = $id'
   ]);
   query.fields = sql.fields().add('managers.*, users.*');
@@ -134,7 +134,7 @@ module.exports.del = function(req, res){
  * @param  {Object} req HTTP Request Object
  * @param  {Object} res [description]
  */
-module.exports.update = function(req, res){
+module.exports.update = function(req, res, next) {
 var TAGS = ['update-manager', req.uuid];
   logger.routes.debug(TAGS, 'updating manager ' + req.params.id);
 
@@ -143,8 +143,16 @@ var TAGS = ['update-manager', req.uuid];
     userId = req.session.user.id;
 
   db.procedures.setLogTags(TAGS);
-  db.procedures.updateUser('manager', userId, req.body, function(error, result) {
-    if (error) return res.error(error, result), logger.routes.error(TAGS, result);
-    res.noContent();
+
+  //make sure there is a record in the manager table
+  //for this user. This allows you to 'promote' a user to a manager
+  var queryText = 'INSERT INTO managers ("id") '+
+    'SELECT users.id FROM users WHERE users.id = $1 ' +
+    ' AND NOT EXISTS(SELECT managers."id" from managers WHERE managers."id" = $1)';
+  db.query(queryText, userId, function(err, rows) {
+    db.procedures.updateUser('manager', userId, req.body, function(error, result) {
+      if (error) return res.error(error, result), logger.routes.error(TAGS, result);
+      res.noContent();
+    });
   });
 };
