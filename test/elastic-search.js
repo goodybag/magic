@@ -99,16 +99,21 @@ describe ('Elastic Searchin', function(){
         assert( result.ok == true );
         assert( result._id == doc.id );
 
-        elastic.save('product', { id: doc.id, poop: true }, function(error, result){
+        doc.poop = true;
+
+        elastic.save('product', doc, function(error, result){
           assert( !error );
           assert( result.ok == true );
           assert( result._id == doc.id );
 
           elastic.get('product', doc.id, function(error, result){
             assert( !error );
-            assert( result.exists == true );
-            assert( result._id == doc.id );
-            assert( result._source.poop == true );
+
+            for (var key in result){
+              assert( key in doc );
+              assert( result[key] === doc[key] );
+            }
+
             done();
           });
         });
@@ -120,7 +125,7 @@ describe ('Elastic Searchin', function(){
 
   describe ('Client.get', function(){
 
-    it ('should get a record', function(){
+    it ('should get a record', function(done){
       var doc = {
         id: 222222222222
       , name: 'Another Product'
@@ -135,12 +140,10 @@ describe ('Elastic Searchin', function(){
 
         elastic.get('product', doc.id, function(error, result){
           assert( !error );
-          assert( result.exists == true );
-          assert( result._id == doc.id );
 
-          for (var key in result._source){
+          for (var key in result){
             assert( key in doc );
-            assert( result._source[key] === doc[key] );
+            assert( result[key] === doc[key] );
           }
 
           done();
@@ -148,9 +151,27 @@ describe ('Elastic Searchin', function(){
       });
     });
 
-    it ('should not find the record', function(){
+    it ('should not find the record', function(done){
       var doc = {
         id: 222222322222
+      };
+
+      elastic.get('product', doc.id, function(error, result){
+        assert( !error );
+        assert( !result );
+
+        done();
+      });
+    });
+
+  });
+
+  describe ('Client.del', function(){
+
+    it ('should delete a record', function(done){
+      var doc = {
+        id: 222222422222
+      , name: "To Be Deleted"
       };
 
       elastic.save('product', doc, function(error, result){
@@ -160,9 +181,19 @@ describe ('Elastic Searchin', function(){
 
         elastic.get('product', doc.id, function(error, result){
           assert( !error );
-          assert( result.exists == false );
+          assert( result );
 
-          done();
+          elastic.del('product', doc.id, function(error, result){
+            assert( !error );
+            assert( result.ok == true );
+
+            elastic.get('product', doc.id, function(error, result){
+              assert( !error );
+              assert( !result );
+
+              done();
+            });
+          });
         });
       });
     });
