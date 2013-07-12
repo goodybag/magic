@@ -121,6 +121,8 @@ INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11134', 'cons
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11135', 'tapin-station-11135@generated.goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
 INSERT INTO "users" (id, email) VALUES ('11136', 'null.password@goodybag.com');
 
+INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11140', 'not-yet-a-manager@goodybag.com', '$2a$10$NF8Hvfpiw0X6xKfm6ZPNfuv.ME8/gCzxJz1OJ3phAdCeSz/Yezzq2', '$2a$10$ap103GX.pIl2GwY7m3keEe');
+
 -- amy's
 INSERT INTO "users" (id, email, password, "passwordSalt") VALUES ('11138', 'amys_manager@goodybag.com', '$2a$04$5p9DyU2hZui5csjn.TEz4eaPEEDzXbHye71N8sjcR2XVWkWwTP2uq', '$2a$04$5p9DyU2hZui5csjn.TEz4e');
 COMMIT;

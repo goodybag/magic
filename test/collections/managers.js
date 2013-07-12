@@ -142,6 +142,17 @@ describe('GET /v1/managers/:id', function() {
       });
     });
   });
+
+  it('should respond with a 404 if the requested user is not a manager', function(done) {
+    tu.loginAsAdmin(function() {
+      //1 is the user admin@goodybag.com
+      tu.get('/v1/managers/1', function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 404);
+        tu.logout(done);
+      });
+    });
+  });
 });
 
 describe('POST /v1/managers', function() {
@@ -313,4 +324,28 @@ describe('DEL /v1/managers/:id', function() {
       });
     });
   });
+});
+
+describe('POST /v1/managers/11140 with body', function() {
+  before(function(done) {
+    tu.loginAsAdmin(done);
+  });
+  var body = {
+    locationId: null,
+    businessId: null
+  };
+  it('promotes user to manager', function(done) {
+    tu.post('/v1/managers/11140', body, function(err, res, response) {
+      assert(!err);
+      assert(response.statusCode === 204);
+      tu.get('/v1/managers/11140', function(err, res) {
+        assert(!err);
+        var manager = JSON.parse(res).data;
+        assert(manager.locationId == null);
+        assert(manager.businessId == null);
+        done();
+      });
+    });
+  });
+  after(tu.logout);
 });
