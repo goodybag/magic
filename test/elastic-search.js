@@ -61,7 +61,7 @@ describe ('Elastic Searchin', function(){
 
     it ('should save a document', function(done){
       var doc = {
-        id: 1
+        id: 111111111111
       , name: 'Some Product'
       };
 
@@ -90,7 +90,7 @@ describe ('Elastic Searchin', function(){
 
     it ('should save a document and then update it', function(done){
       var doc = {
-        id: 2
+        id: 222222222222
       , name: 'Another Product'
       };
 
@@ -106,13 +106,45 @@ describe ('Elastic Searchin', function(){
 
           elastic.get('product', doc.id, function(error, result){
             assert( !error );
-            assert( result.ok == true );
+            assert( result.exists == true );
             assert( result._id == doc.id );
             assert( result._source.poop == true );
+            done();
           });
         });
 
-        done();
+      });
+    });
+
+  });
+
+  describe ('Client.get', function(){
+
+    it ('should get a record', function(){
+      var doc = {
+        id: 222222222222
+      , name: 'Another Product'
+      , something: 'else'
+      , blah: true
+      };
+
+      elastic.save('product', doc, function(error, result){
+        assert( !error );
+        assert( result.ok == true );
+        assert( result._id == doc.id );
+
+        elastic.get('product', doc.id, function(error, result){
+          assert( !error );
+          assert( result.exists == true );
+          assert( result._id == doc.id );
+
+          for (var key in result._source){
+            assert( key in doc );
+            assert( result._source[key] === doc[key] );
+          }
+
+          done();
+        });
       });
     });
 
