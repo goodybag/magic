@@ -149,7 +149,7 @@ var TAGS = ['update-manager', req.uuid];
   var queryText = 'INSERT INTO managers ("id") '+
     'SELECT users.id FROM users WHERE users.id = $1 ' +
     ' AND NOT EXISTS(SELECT managers."id" from managers WHERE managers."id" = $1)';
-  db.query(queryText, userId, function(err, rows) {
+  db.query(queryText, [userId], function(err, rows) {
     db.procedures.updateUser('manager', userId, req.body, function(error, result) {
       if (error) return res.error(error, result), logger.routes.error(TAGS, result);
       res.noContent();
