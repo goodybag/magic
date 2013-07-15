@@ -51,36 +51,44 @@ var complete = function(error){
   process.exit(0)
 }
 
-console.log("Finding Products");
+console.log("Destroying old");
 
-db.api.products.find({}, productQueryOptions, function(error, products){
-  if (error) throw error;
+elastic.removeSelf(function(error){
+  console.log("Finding Products");
 
-  console.log("Found", products.length, "products");
-  console.log("\n\n");
+  elastic.ensureIndex(function(error){
+    if (error) throw error;
 
-  var i = 0;
+    db.api.products.find({}, productQueryOptions, function(error, products){
+      if (error) throw error;
 
-  (function(next){
-    products = products.map(function(product){
-      return function(){
-        elastic.save('product', product, next);
-      };
-    })
-  })(function(error){
-    if (error) {
-      util.print('x');
-      stats['Errors']++;
-      logs.errors.push(error);
-    } else {
-      util.print('.');
-      stats['Number Completed']++;
-    }
+      console.log("Found", products.length, "products");
+      console.log("\n\n");
 
-    if (products.length == i) return complete();
+      var i = 0;
 
-    products[i++]();
+      (function(next){
+        products = products.map(function(product){
+          return function(){
+            elastic.save('product', product, next);
+          };
+        })
+      })(function(error){
+        if (error) {
+          util.print('x');
+          stats['Errors']++;
+          logs.errors.push(error);
+        } else {
+          util.print('.');
+          stats['Number Completed']++;
+        }
+
+        if (products.length == i) return complete();
+
+        products[i++]();
+      });
+
+      products[i++]();
+    });
   });
-
-  products[i++]();
 });

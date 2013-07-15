@@ -8,7 +8,6 @@ before(function(done){
 
   // Kill everything
   elastic.removeSelf(function(error){
-    if (error) throw error;
 
     // And bring back the index
     elastic.ensureIndex(function(error){
