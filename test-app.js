@@ -7,6 +7,11 @@ var elastic = require('./lib/elastic-search')
 
 elastic.search('product', {
   query: {
-    fuzzy: { name: { value: 'Bobbaadf', min_similarity: 0.00001, boost: 1 } }
+    fuzzy: { businessname: { value: 'domino', min_similarity: 0.8 } }
+  }
+, filter: {
+    or: [
+      { term: { name: 'pizza' } }
+    ]
   }
 }, function(e, r){ console.log("search:", e,JSON.stringify(r, true, '  ')); })
