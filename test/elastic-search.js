@@ -35,6 +35,46 @@ describe ('Elastic Searchin', function(){
       assert( myClient.index == options.index );
     });
 
+    it ('should instantiate a new client with mappings', function(done){
+      var mappings;
+      var options = {
+        host:   config.elasticsearch.host
+      , port:   config.elasticsearch.port
+      , index:  config.elasticsearch.index + '-' + parseInt(Math.random()*99999).toString(36)
+
+      , indexProperties: {
+          mappings: mappings = {
+            product: {
+              properties: {
+                name: {
+                  type: 'string'
+                , analyzer: 'whitespace'
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var myClient = new Client(options);
+
+      myClient.ensureIndex(function(error){
+        assert( !error );
+
+        myClient.getMapping('product', function(error, result){
+          assert( !error );
+
+          for (var field in result.properties){
+            for (var property in result.properties[field]){
+              assert( mappings.product.properties[field][property] == result.properties[field][property] );
+            }
+          }
+
+          myClient.removeSelf(done);
+        });
+      });
+    });
+
     it ('should be able to use the elastic search module', function(){
       assert( elastic.host == config.elasticsearch.host );
       assert( elastic.index == config.elasticsearch.index );
