@@ -72,15 +72,13 @@ module.exports.list = function(req, res){
 
   query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
 
-  if (!req.param('businessId'))
-    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
-
   query.$('userId', req.param('userId') || req.session.user.id);
 
   if (req.param('businessId')){
     query.where.and('"userLoyaltyStats"."businessId" = $businessId');
     query.$('businessId', req.param('businessId'));
-  }
+  } else
+    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
 
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
@@ -105,10 +103,10 @@ module.exports.list = function(req, res){
     // Or a business that hasn't setup their loyalty program
     // First, check the two latter
     query = [
-      'select businesses.id from businesses'
-    ,   'join "businessLoyaltySettings"'
-    ,     'on businesses.id = "businessLoyaltySettings"."businessId"'
-    , 'where businesses.id = $1'
+      'select b.name, b."logoUrl", s.*'
+    ,    'from businesses b join "businessLoyaltySettings" s'
+    ,    'on (b.id = s."businessId")'
+    ,    'where b.id = $1'
     ].join(' ');
 
     db.query(query, [req.param('businessId')], function(error, rows, result){
@@ -136,6 +134,11 @@ module.exports.list = function(req, res){
       , dateBecameElite:  null
       };
 
+      var business = {
+        businessName: result.rows[0].name
+      , businessLogo: result.rows[0].logoUrl
+      }
+
       utils.parallel({
         stats: function(done){
           db.api.userLoyaltyStats.setLogTags(TAGS);
@@ -151,13 +154,16 @@ module.exports.list = function(req, res){
       }, function(error, results){
         if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
-        stat.id = results.stats.id;
-        stat.lastVisit = new Date();
-        stat.reward = results.settings.reward;
-        stat.photoUrl = results.settings.photoUrl;
-        stat.regularPunchesRequired = results.settings.regularPunchesRequired;
-        stat.elitePunchesRequired = results.settings.elitePunchesRequired;
-        stat.punchesRequiredToBecomeElite = results.settings.punchesRequiredToBecomeElite;
+        utils.extend(stat, {
+          id: results.stats.id
+        , lastVisit: new Date()
+        , reward: results.settings.reward
+        , requiredItem: results.settings.requiredItem
+        , photoUrl: results.settings.photoUrl
+        , regularPunchesRequired: results.settings.regularPunchesRequired
+        , elitePunchesRequired: results.settings.elitePunchesRequired
+        , punchesRequiredToBecomeElite: results.settings.punchesRequiredToBecomeElite
+        }, business);
 
         res.json({ error: null, data: stat, meta: { total:1 } });
       });

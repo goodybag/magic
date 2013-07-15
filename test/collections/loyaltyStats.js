@@ -191,6 +191,27 @@ describe('GET /v1/consumers/:userId/loyalty/:businessId', function(){
       }
     })(done);
   });
+
+  it('should return the full data the first time a user requests the loyalty stats for a business', function(done) {
+    tu.createNewConsumer(function(error, user) {
+      tu.get('/v1/consumers/' + user.id + '/loyalty/501', function(error, results, response) {
+        assert(!error);
+        assert(response.statusCode === 200)
+        var payload;
+        try {
+          payload = JSON.parse(results);
+        } catch(e) {
+          assert(false, 'JSON parse error');
+        }
+        assert(payload != null);
+        assert(payload.error == null);
+        assert(payload.data != null);
+        assert(payload.data.businessName === 'Biz 501');
+        assert(payload.data.businessLogo === 'http://placekitten.com/500/500');
+        done();
+      });
+    });
+  });
 });
 
 describe('GET /v1/loyalty/businesses/:businessId', function(){
