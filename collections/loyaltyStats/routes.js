@@ -72,15 +72,13 @@ module.exports.list = function(req, res){
 
   query.where = sql.where().and('"userLoyaltyStats"."userId" = $userId');
 
-  if (!req.param('businessId'))
-    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
-
   query.$('userId', req.param('userId') || req.session.user.id);
 
   if (req.param('businessId')){
     query.where.and('"userLoyaltyStats"."businessId" = $businessId');
     query.$('businessId', req.param('businessId'));
-  }
+  } else
+    query.where.and('"userLoyaltyStats"."totalPunches" > 0');
 
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
 
