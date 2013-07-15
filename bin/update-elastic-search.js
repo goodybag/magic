@@ -21,6 +21,11 @@ var productQueryOptions = {
 
 var stats = {
   'Number Completed': 0
+, 'Errors':           0
+};
+
+var logs = {
+  errors: []
 };
 
 var outputStats = function(){
@@ -31,7 +36,16 @@ var outputStats = function(){
   console.log("\n\n")
 };
 
+var outputLogs = function(){
+  console.log("\n\nLogs:\n\n");
+  for (var key in logs){
+    console.log(key, JSON.stringify(logs[key]));
+  }
+  console.log("\n\n")
+};
+
 var complete = function(error){
+  outputLogs();
   outputStats();
   if (error) throw error;
   process.exit(0)
@@ -45,17 +59,28 @@ db.api.products.find({}, productQueryOptions, function(error, products){
   console.log("Found", products.length, "products");
   console.log("\n\n");
 
-  async.series(
-    products.map(function(product){
-      return function(done){
-        elastic.save('product', product, function(error){
-          if (error) return done(error);
-          util.print('.');
-          stats['Number Completed']++;
-          done();
-        });
+  var i = 0;
+
+  (function(next){
+    products = products.map(function(product){
+      return function(){
+        elastic.save('product', product, next);
       };
     })
-  , complete
-  );
+  })(function(error){
+    if (error) {
+      util.print('x');
+      stats['Errors']++;
+      logs.errors.push(error);
+    } else {
+      util.print('.');
+      stats['Number Completed']++;
+    }
+
+    if (products.length == i) return complete();
+
+    products[i++]();
+  });
+
+  products[i++]();
 });
