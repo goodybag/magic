@@ -17,6 +17,7 @@ npm-debug.log
 
 db-setup/node_modules/
 .idea
+.jshintrc
 
 test-profile-dump.json
 test-profile.html
