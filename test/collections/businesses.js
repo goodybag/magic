@@ -683,6 +683,36 @@ describe('PATCH /v1/businesses/:id', function(){
     });
   });
 
+  it('should fail to update a business because of an invalid url', function(done) {
+    var business = {
+      name: "Poophead McGees"
+      , url: "hhttp:3#/d.oka@lol@lolcom"
+    };
+    tu.loginAsAdmin(function(error, user) {
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 400);
+        tu.logout(function() {
+          done();
+        });
+      });
+    });
+  });
+
+  it('should update a business with a valid url', function(done) {
+    var business = {
+      name: "Poophead McGees"
+      , url: "http://www.google.com"
+    };
+    tu.loginAsAdmin(function(error, user) {
+      tu.patch('/v1/businesses/' + 1, business, function(error, results, res) {
+        assert(!error);
+        assert(res.statusCode === 204);
+        done();
+      });
+    });
+  });
+
   it('should fail because user not allow to update information', function(done){
     var business = {
       name: "Poophead McGees"
