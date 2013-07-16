@@ -7,7 +7,7 @@ var db      = require('../db');
 var elastic = require('../lib/elastic-search');
 
 var options = {
-  logFile:    '../logs/elastic-search-update.log'
+  logFile:    __dirname + '/../logs/elastic-search-update.log'
 };
 
 var productQueryOptions = {

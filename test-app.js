@@ -7,20 +7,15 @@ var elastic = require('./lib/elastic-search')
 
 elastic.search('product', {
   query: {
-    match: {
-      businessName: {
-        query: "austin's"
-      // , zero_terms_query: 'all'
-      }
+    multi_match: {
+      query: "pizza"
+    , fields: ['name', 'businessName']
     }
   }
-, explain: true
+// , explain: true
 // , filter: {
-//     word_delimiter: {
-//       generate_word_parts: true
-//     }
-    // or: [
-    //   { term: { name: 'pizza' } }
-    // ]
-  // }
+//     or: [
+//       { term: { name: 'pizza' } }
+//     ]
+//   }
 }, function(e, r){ console.log("search:", e,JSON.stringify(r, true, '  ')); })
