@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
+var fs      = require('fs');
 var util    = require('util');
 var async   = require('async');
 var db      = require('../db');
 var elastic = require('../lib/elastic-search');
 
 var options = {
-  rateLimit: 50
-}
+  logFile:    '../logs/elastic-search-update.log'
+};
 
 var productQueryOptions = {
-  fields: ['products.*', 'businesses.name as businessName']
+  fields: ['products.*', 'businesses.name as "businessName"']
 
 , $leftJoin: {
     businesses: {
@@ -37,11 +38,9 @@ var outputStats = function(){
 };
 
 var outputLogs = function(){
-  console.log("\n\nLogs:\n\n");
-  for (var key in logs){
-    console.log(key, JSON.stringify(logs[key]));
-  }
-  console.log("\n\n")
+  if (logs.errors.length == 0) return;
+
+  fs.writeFileSync( options.logFile, JSON.stringify( logs.errors, true, '  ' ) );
 };
 
 var complete = function(error){
