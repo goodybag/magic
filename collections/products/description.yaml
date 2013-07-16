@@ -30,6 +30,7 @@ collection:
         hasPhoto:   { type: bool,    eg: false }
         listid:     { type: id,      eg: 1 }
         filter:     { type: string,  eg: product }
+        search:     { type: string,  eg: product }
     post:
       desc: Add Product
       auth:

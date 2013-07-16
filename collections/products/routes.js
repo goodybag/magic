@@ -8,6 +8,7 @@ var
 , utils       = require('../../lib/utils')
 , errors      = require('../../lib/errors')
 , magic       = require('../../lib/magic')
+, elastic     = require('../../lib/elastic-search')
 , Transaction = require('pg-transaction')
 , async       = require('async')
 , config      = require('../../config')
@@ -36,6 +37,43 @@ module.exports.list = function(req, res){
     if (!req.query.lat || !req.query.lon) {
       return res.error(errors.input.VALIDATION_FAILED, 'Sort by \''+req.query.sort+'\' requires `lat` and `lon` query parameters be specified');
     }
+  }
+
+  if (req.param('search')) {
+    var searchOptions = {
+      query: {
+        multi_match: {
+          query: req.param('search')
+        , fields: [
+            'name.name'
+          , 'name.partial'
+          , 'businessName.businessName'
+          , 'businessName.partial'
+          ]
+        }
+      }
+    };
+
+    return elastic.search('product', searchOptions, function(error, results){
+      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+
+      res.json({
+        error: null
+
+        // Format results more like magic does
+      , data: results.hits.hits.map(function(result){
+          result._source._type  = result._type;
+          result._source._score = result._score;
+
+          return result._source;
+        })
+
+      , meta: {
+          total:      results.hits.total
+        , max_score:  results.hits.max_score
+        }
+      });
+    });
   }
 
   var includes = [].concat(req.query.include);

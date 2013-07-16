@@ -30,6 +30,9 @@ var all = [
 , 'locations.inGallery'
 , 'locations.spotlightOrder'
 , 'locations.galleryOrder'
+  // These two used for search
+, '_type'
+, '_score'
 ];
 
 module.exports = {
@@ -64,6 +67,9 @@ module.exports = {
     , 'locations.inGallery'
     , 'locations.spotlightOrder'
     , 'locations.galleryOrder'
+      // These two used for search
+    , '_type'
+    , '_score'
     ]
   , create: []
   , update: []
