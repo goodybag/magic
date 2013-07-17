@@ -18,6 +18,8 @@ var
 , schemas    = db.schemas
 ;
 
+module.exports.search = require('./search');
+
 // Setup loggers
 logger.routes = require('../../lib/logger')({app: 'api', component: 'routes'});
 logger.db = require('../../lib/logger')({app: 'api', component: 'db'});
@@ -37,43 +39,6 @@ module.exports.list = function(req, res){
     if (!req.query.lat || !req.query.lon) {
       return res.error(errors.input.VALIDATION_FAILED, 'Sort by \''+req.query.sort+'\' requires `lat` and `lon` query parameters be specified');
     }
-  }
-
-  if (req.param('search')) {
-    var searchOptions = {
-      query: {
-        multi_match: {
-          query: req.param('search')
-        , fields: [
-            'name.name'
-          , 'name.partial'
-          , 'businessName.businessName'
-          , 'businessName.partial'
-          ]
-        }
-      }
-    };
-
-    return elastic.search('product', searchOptions, function(error, results){
-      if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
-
-      res.json({
-        error: null
-
-        // Format results more like magic does
-      , data: results.hits.hits.map(function(result){
-          result._source._type  = result._type;
-          result._source._score = result._score;
-
-          return result._source;
-        })
-
-      , meta: {
-          total:      results.hits.total
-        , max_score:  results.hits.max_score
-        }
-      });
-    });
   }
 
   var includes = [].concat(req.query.include);
@@ -102,6 +67,10 @@ module.exports.list = function(req, res){
   query.sort    = sql.sort(req.query.sort || (req.param('collectionId') ? '-"productsCollections"."createdAt"' : '+name'));
   query.limit   = sql.limit(req.query.limit, req.query.offset);
   query.groupby = sql.fields().add('products.id').add('businesses.id');
+
+  if (req.param('search')){
+    query.where.and('products.id in (' + req._search.ids.join(', ') + ')');
+  }
 
   // Don't filter out unverified business products when querying by business and by collection
   if (!req.param('businessId') && !req.param('collectionId') && !req.param('locationId')) {
@@ -472,7 +441,7 @@ module.exports.get = function(req, res){
   if (withs.length > 0) query.withs = 'WITH ' + withs.join(',\n');
 
   db.query(query, function(error, rows, result){
-    if (error) return console.log(error), res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
+    if (error) return res.error(errors.internal.DB_FAILURE, error), logger.routes.error(TAGS, error);
 
     var product = result.rows[0];
     if (!product) return res.status(404).end();

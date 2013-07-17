@@ -58,21 +58,21 @@ elastic.removeSelf(function(error){
   elastic.ensureIndex(function(error){
     if (error) throw error;
 
-    db.api.products.find({}, productQueryOptions, function(error, products){
+    var $where = {
+      // $notNull: ['photoUrl']
+    };
+
+    db.api.products.find($where, productQueryOptions, function(error, products){
       if (error) throw error;
 
       console.log("Found", products.length, "products");
       console.log("\n\n");
 
-      var i = 0;
+      var run, next, i = 0;
 
-      (function(next){
-        products = products.map(function(product){
-          return function(){
-            elastic.save('product', product, next);
-          };
-        })
-      })(function(error){
+      (run = function(callback){
+        elastic.save('product', products[i++], callback);
+      })(next = function(error){
         if (error) {
           util.print('x');
           stats['Errors']++;
@@ -84,10 +84,8 @@ elastic.removeSelf(function(error){
 
         if (products.length == i) return complete();
 
-        products[i++]();
+        run(next);
       });
-
-      products[i++]();
     });
   });
 });

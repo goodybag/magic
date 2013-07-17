@@ -19,8 +19,26 @@ server.get(
 , middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
+, middleware.profile('search')
+, middleware.search('product')
 , middleware.profile('list products handler')
 , routes.list
+);
+
+// Products.search
+server.get(
+  '/v1/products/search'
+, middleware.profile('GET /v1/products', ['include','limit','sort'])
+, middleware.profile('query defaults')
+, middleware.defaults.query({ limit : 20 })
+, middleware.profile('validate query')
+, middleware.validate2.query(desc.search.methods.get.query)
+, middleware.profile('permissions')
+, middleware.permissions(permissions)
+, middleware.profile('search')
+, middleware.search('product')
+, middleware.profile('list products handler')
+, routes.search
 );
 
 // Products.list

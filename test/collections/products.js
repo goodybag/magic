@@ -404,6 +404,27 @@ describe('GET /v1/products', function() {
 
   });
 
+  it('should elasticsearch products by name', function(done){
+
+    var data = [{ name: 'aaaaaaaaaapppple', businessId: 1 }];
+    console.log(data[0].name)
+    tu.populate('products', data, function(error, pids){
+      assert(!error);
+
+      tu.get('/v1/products?search=' + data[0].name, function(error, results, res){
+        assert(!error);
+        assert(res.statusCode == 200);
+        results = JSON.parse(results);
+        console.log(results)
+        assert(results.data.length == 1);
+        assert(results.data[0].name == results.data[0].name);
+        assert(results.data[0]._score >= 1);
+        done();
+      });
+    });
+
+  });
+
 });
 
 describe('GET /v1/locations/:locationId/products', function() {

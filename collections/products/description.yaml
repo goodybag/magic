@@ -130,3 +130,16 @@ feelingsCollection:
         isLiked:  { type: bool, eg: true }
         isWanted: { type: bool, eg: true }
         isTried:  { type: bool, eg: true }
+
+search:
+  resource:
+    type: collection
+    path: /products/search
+  methods:
+    get:
+      desc: List Products
+      query:
+        offset:     { type: int,     eg: 5, default: 0 }
+        limit:      { type: int,     eg: 5, default: 20 }
+        query:      { type: string,  eg: product }
+        bypass:     { type: bool,    eg: true }
