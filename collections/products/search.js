@@ -20,6 +20,8 @@ var
 ;
 
 module.exports = function(req, res){
+  var includes = req.param('include') || [];
+
   var searchOptions = {
     query: {
       multi_match: {
@@ -34,7 +36,7 @@ module.exports = function(req, res){
     }
 
   , size: req.param('limit')
-  , from: req.param('offset')
+  , from: req.param('offset') || 0
   };
 
   if (req.param('hasPhoto') == undefined || req.param('hasPhoto') == true) {
@@ -62,6 +64,8 @@ module.exports = function(req, res){
     .add('businesses."isGB" as "businessIsGB"');
 
   if (req.session.user) qHelpers.feelings( query, req.session.user.id );
+
+  if ( includes.indexOf('categories') > -1 ) qHelpers.categories( query );
 
   elastic.search('product', searchOptions, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error);

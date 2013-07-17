@@ -30,7 +30,6 @@ collection:
         hasPhoto:   { type: bool,    eg: false }
         listid:     { type: id,      eg: 1 }
         filter:     { type: string,  eg: product }
-        search:     { type: string,  eg: product }
     post:
       desc: Add Product
       auth:
@@ -143,3 +142,4 @@ search:
         limit:      { type: int,     eg: 5, default: 20 }
         query:      { type: string,  eg: product }
         bypass:     { type: bool,    eg: true }
+        include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, collections, userPhotos, locations] }

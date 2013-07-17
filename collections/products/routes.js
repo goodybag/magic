@@ -12,6 +12,7 @@ var
 , Transaction = require('pg-transaction')
 , async       = require('async')
 , config      = require('../../config')
+, qHelpers    = require('./query-helpers')
 
 , logger  = {}
 
@@ -214,53 +215,19 @@ module.exports.list = function(req, res){
   }
 
   // tag include
-  if (includeTags) {
-    query.fields.add([
-      'array_to_json(array(SELECT row_to_json("productTags".*) FROM "productTags"',
-        'INNER JOIN "productsProductTags"',
-          'ON "productsProductTags"."productTagId" = "productTags".id',
-          'AND "productsProductTags"."productId" = products.id',
-      ')) as tags'
-    ].join(' '));
-  }
+  if (includeTags) qHelpers.tags( query );
 
   // category include
-  if (includeCats) {
-    query.fields.add([
-      'array_to_json(array(SELECT row_to_json("productCategories".*) FROM "productCategories"',
-        'INNER JOIN "productsProductCategories"',
-          'ON "productsProductCategories"."productCategoryId" = "productCategories".id',
-          'AND "productsProductCategories"."productId" = products.id',
-      ')) as categories'
-    ].join(' '));
-  }
+  if (includeCats) qHelpers.categories( query );
 
   // user feelings join
   if (req.session.user) {
-    query.feelingsJoins = [
-      'LEFT JOIN "productLikes" ON products.id = "productLikes"."productId" AND "productLikes"."userId" = $userId',
-      'LEFT JOIN "productWants" ON products.id = "productWants"."productId" AND "productWants"."userId" = $userId',
-      'LEFT JOIN "productTries" ON products.id = "productTries"."productId" AND "productTries"."userId" = $userId'
-    ].join(' ');
-    query.fields.add('("productLikes".id IS NOT NULL) AS "userLikes"');
-    query.fields.add('("productWants".id IS NOT NULL) AS "userWants"');
-    query.fields.add('("productTries".id IS NOT NULL) AS "userTried"');
-    query.fields.add('COUNT("productWants".id) OVER() as "metaUserWants"');
-    query.fields.add('COUNT("productLikes".id) OVER() as "metaUserLikes"');
-    query.fields.add('COUNT("productTries".id) OVER() as "metaUserTries"');
-    query.groupby.add('"productLikes".id');
-    query.groupby.add('"productWants".id');
-    query.groupby.add('"productTries".id');
-    query.$('userId', req.session.user.id);
-
-    if (req.param('userLikes') !== null && typeof req.param('userLikes') != 'undefined')
-      query.where.and('"productLikes" IS ' + (utils.parseBool(req.param('userLikes')) ? 'NOT' : '' )  +' NULL');
-
-    if (req.param('userTried') !== null && typeof req.param('userTried') != 'undefined')
-      query.where.and('"productTries" IS ' + (utils.parseBool(req.param('userTried')) ? 'NOT' : '' )  +' NULL');
-
-    if (req.param('userWants') !== null && typeof req.param('userWants') != 'undefined')
-      query.where.and('"productWants" IS ' + (utils.parseBool(req.param('userWants')) ? 'NOT' : '' )  +' NULL');
+    qHelpers.feelings( query, req.session.user.id );
+    qHelpers.wltFilters( query, {
+      userLikes: req.param('userLikes')
+    , userWants: req.param('userWants')
+    , userTried: req.param('userTried')
+    });
   }
 
   // user photos join
@@ -329,7 +296,7 @@ module.exports.list = function(req, res){
 
   if (withs.length > 0) query.withs = 'WITH ' + withs.join(',\n');
 
-  query.fields.add('COUNT(*) OVER() as "metaTotal"');
+  qHelpers.total( query );
 
   // run data query
   db.query(query, function(error, rows, dataResult){

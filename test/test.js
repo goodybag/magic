@@ -79,7 +79,8 @@ var chaosBlacklist = [
   'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
   'consumers.cardUpdatesItem',
   'consumers.consumerPasswordItem',
-  'redemptions.collection'
+  'redemptions.collection',
+  'products.search'
 ];
 
 var doci = require('../lib/doci');

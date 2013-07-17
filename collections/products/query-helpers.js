@@ -56,3 +56,14 @@ module.exports.feelings = function(query, userId){
 module.exports.total = function(query){
   query.fields.add('COUNT(*) OVER() as "metaTotal"');
 };
+
+module.exports.wltFilters = function(query, data){
+  if (data.userLikes !== null && typeof data.userLikes != 'undefined')
+    query.where.and('"productLikes" IS ' + (utils.parseBool(data.userLikes) ? 'NOT' : '' )  +' NULL');
+
+  if (data.userTried !== null && typeof data.userTried != 'undefined')
+    query.where.and('"productTries" IS ' + (utils.parseBool(data.userTried) ? 'NOT' : '' )  +' NULL');
+
+  if (data.userWants !== null && typeof data.userWants != 'undefined')
+    query.where.and('"productWants" IS ' + (utils.parseBool(data.userWants) ? 'NOT' : '' )  +' NULL');
+};
