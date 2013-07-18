@@ -1,8 +1,38 @@
 var assert  = require('better-assert');
 var tu      = require('../lib/test-utils');
+var async   = require('async');
 var config  = require('../config');
 var Client  = require('../lib/elastic-client');
 var elastic = require('../lib/elastic-search');
+
+var dataPopulation = {
+  'Batch #1 - Gerdyburger Dirdyberg': {
+    product:        'Gerdyburger'
+  , business:       'Dirdyberg'
+  , numToGenerate:   20
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessName: context.business
+      });
+
+      async.series(
+        context.generated.map(function(item){
+          return function(done){ elastic.save( 'product', item, done ); }
+        }
+      )
+      , function(error){
+          if (error) return done(error);
+
+          // Give ES some time
+          setTimeout(done, 1000);
+        }
+      );
+    }
+  }
+};
 
 before(function(done){
 
@@ -13,7 +43,13 @@ before(function(done){
     elastic.ensureIndex(function(error){
       if (error) throw error;
 
-      done();
+      // Populate all data from tests
+      async.series(
+        Object.keys( dataPopulation ).map( function(key){
+          return function(done){ dataPopulation[key].fn( dataPopulation[key], done ) }
+        })
+      , done
+      )
     });
   });
 });
@@ -201,6 +237,69 @@ describe ('Elastic Searchin', function(){
 
         done();
       });
+    });
+
+  });
+
+  describe ('Client.search', function(){
+
+    it ('should search product by name', function(done){
+
+      var data = dataPopulation[ 'Batch #1 - Gerdyburger Dirdyberg' ];
+
+      var $query = {
+        query: {
+          match: {
+            name: data.product
+          }
+        }
+      };
+
+      elastic.search('product', $query, function(error, result){
+        assert( !error );
+        assert(result.hits.total >= data.generated.length)
+        // At least some of the results are in the initial data set
+        // since we may be matching other data populated iwth this being so fuzzy
+        assert(
+          result.hits.hits.some(function(hit){
+            return data.generated.map(function(p){
+              return p.name
+            }).indexOf(hit._source.name) > -1;
+          })
+        );
+        done();
+      });
+
+    });
+
+    it ('should do a partial search by product name', function(done){
+
+      var data = dataPopulation[ 'Batch #1 - Gerdyburger Dirdyberg' ];
+
+      var $query = {
+        query: {
+          multi_match: {
+            query: data.product.substring(0, 4)
+          , fields: ['name.partial']
+          }
+        }
+      };
+
+      elastic.search('product', $query, function(error, result){
+        assert( !error );
+        assert(result.hits.total >= data.generated.length)
+        // At least some of the results are in the initial data set
+        // since we may be matching other data populated iwth this being so fuzzy
+        assert(
+          result.hits.hits.some(function(hit){
+            return data.generated.map(function(p){
+              return p.name
+            }).indexOf(hit._source.name) > -1;
+          })
+        );
+        done();
+      });
+
     });
 
   });
