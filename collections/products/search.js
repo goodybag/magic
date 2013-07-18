@@ -27,8 +27,10 @@ module.exports = function(req, res){
       multi_match: {
         query: req.param('query')
       , fields: [
-          'name.name'
+          'name'
+        , 'name.name'
         , 'name.partial'
+        , 'businessName'
         , 'businessName.businessName'
         , 'businessName.partial'
         ]
@@ -71,7 +73,7 @@ module.exports = function(req, res){
     if (error) return res.error(errors.internal.DB_FAILURE, error);
 
     // Return results straight from elastic search
-    if (req.param('bypass')) {
+    if (req.param('bypass') || results.hits.total == 0) {
       return res.json({
         error: null
 

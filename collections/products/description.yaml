@@ -142,4 +142,5 @@ search:
         limit:      { type: int,     eg: 5, default: 20 }
         query:      { type: string,  eg: product }
         bypass:     { type: bool,    eg: true }
+        hasPhoto:   { type: bool,    eg: true }
         include:    { type: string*, eg: [tags, categories], choices: [tags, categories, inSpotlight, collections, userPhotos, locations] }

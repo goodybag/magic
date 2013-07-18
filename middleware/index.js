@@ -9,5 +9,4 @@ module.exports = {
 , defaults    : require('./defaults')
 , profile     : require('./profile')
 , dump        : require('./dump')
-, search      : require('./search')
 }

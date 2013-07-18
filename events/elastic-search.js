@@ -5,15 +5,36 @@ var utils   = require('../lib/utils');
 module.exports = {
   'products.create':
   function(product){
-    elastic.save( 'product', product );
+    var this_ = this;
+    // Lookup business
+    db.api.businesses.findOne( product.businessId, function(error, business){
+      if (error) return;
+
+      if (business) product.businessName = business.name;
+
+      elastic.save( 'product', product, function(error, result){
+        if (result) this_.emit('elastic-search.product.saved');
+      });
+    });
   }
 
 , 'products.update':
   function(productId){
-    db.api.products.findOne( productId, function(error, product){
-      if (error) return;
-      elastic.save( 'product', product );
-    });
+    var this_ = this;
+
+    // Lookup product
+    db.api.products.findOne( { 'products.id': productId }, {
+      fields: ['products.*', 'businesses.name as "businessName"']
+    , $leftJoin: {
+        businesses: {
+          'businesses.id': 'products.businessId'
+        }
+      }
+    }, function(error, product){
+      elastic.save( 'product', product, function(error, result){
+        if (result) this_.emit('elastic-search.product.saved');
+      });
+    })
   }
 
 , 'products.deleted':

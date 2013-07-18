@@ -19,8 +19,6 @@ server.get(
 , middleware.validate2.query(desc.collection.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('search')
-, middleware.search('product')
 , middleware.profile('list products handler')
 , routes.list
 );
@@ -35,8 +33,6 @@ server.get(
 , middleware.validate2.query(desc.search.methods.get.query)
 , middleware.profile('permissions')
 , middleware.permissions(permissions)
-, middleware.profile('search')
-, middleware.search('product')
 , middleware.profile('list products handler')
 , routes.search
 );

@@ -1,4 +1,5 @@
 var tu = require('../../lib/test-utils');
+var magic = require('../../lib/magic');
 var assert = require('better-assert');
 var sinon = require('sinon');
 var ok = require('okay');
@@ -404,26 +405,30 @@ describe('GET /v1/products', function() {
 
   });
 
-  // it('should elasticsearch products by name', function(done){
+  it('should elasticsearch products by name', function(done){
+    this.timeout(4000);
 
-  //   var data = [{ name: 'aaaaaaaaaapppple', businessId: 1 }];
-  //   console.log(data[0].name)
-  //   tu.populate('products', data, function(error, pids){
-  //     assert(!error);
+    var data = [{ name: 'aaaaaaaaaapppple', businessId: 1 }];
 
-  //     tu.get('/v1/products?search=' + data[0].name, function(error, results, res){
-  //       assert(!error);
-  //       assert(res.statusCode == 200);
-  //       results = JSON.parse(results);
-  //       console.log(results)
-  //       assert(results.data.length == 1);
-  //       assert(results.data[0].name == results.data[0].name);
-  //       assert(results.data[0]._score >= 1);
-  //       done();
-  //     });
-  //   });
+    tu.populate('products', data, function(error, pids){
+      assert(!error);
+    });
 
-  // });
+    magic.once('elastic-search.product.saved', function(){
+      // Give ES sometime to fully index
+      setTimeout(function(){
+        tu.get('/v1/products/search?hasPhoto=false&query=' + data[0].name, function(error, results, res){
+          assert(!error);
+          assert(res.statusCode == 200);
+          results = JSON.parse(results);
+          assert(results.data.length == 1);
+          assert(results.data[0].name == results.data[0].name);
+          assert(results.data[0]._score >= 1);
+          done();
+        });
+      }, 800)
+    });
+  });
 
 });
 
