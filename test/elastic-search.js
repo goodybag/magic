@@ -110,6 +110,62 @@ describe ('Elastic Searchin', function(){
       });
     });
 
+    it ('should instantiate a new client with settings and make a custom analyzer and filter', function(done){
+      var settings;
+      var options = {
+        host:   config.elasticsearch.host
+      , port:   config.elasticsearch.port
+      , index:  config.elasticsearch.index + '-' + parseInt(Math.random()*99999).toString(36)
+
+      , indexProperties: {
+          settings: settings = {
+            analysis: {
+
+              char_filter: {
+                my_custom_char_filter: {
+                  type:     'mapping'
+                , mappings: ["'=>"]
+                }
+              }
+
+            , analyzer: {
+                my_custom_analyzer: {
+                  type:         'custom'
+                , tokenizer:    'standard'
+                , filter: [
+                    'standard'
+                  , 'lowercase'
+                  , 'asciifolding'
+                  ]
+                , char_filter: ['my_custom_char_filter']
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var myClient = new Client(options);
+
+      myClient.ensureIndex(function(error){
+        assert( !error );
+
+        var input = 'This is Token\'s Analyzer';
+
+        myClient.analyze('my_custom_analyzer', input, function(error, result){
+          assert( !error );
+
+          assert(
+            result.tokens.map(function(t){
+              return t.token;
+            }).join(' ') == input.replace('\'', '').toLowerCase()
+          );
+
+          myClient.removeSelf(done);
+        });
+      });
+    });
+
     it ('should be able to use the elastic search module', function(){
       assert( elastic.host == config.elasticsearch.host );
       assert( elastic.index == config.elasticsearch.index );
@@ -281,6 +337,41 @@ describe ('Elastic Searchin', function(){
           multi_match: {
             query: data.product.substring(0, 4)
           , fields: ['name.partial']
+          }
+        }
+      };
+
+      elastic.search('product', $query, function(error, result){
+        assert( !error );
+        assert(result.hits.total >= data.generated.length)
+        // At least some of the results are in the initial data set
+        // since we may be matching other data populated iwth this being so fuzzy
+        assert(
+          result.hits.hits.some(function(hit){
+            return data.generated.map(function(p){
+              return p.name
+            }).indexOf(hit._source.name) > -1;
+          })
+        );
+        done();
+      });
+
+    });
+
+    it ('should do a search on multiple fields', function(done){
+
+      var data = dataPopulation[ 'Batch #1 - Gerdyburger Dirdyberg' ];
+
+      var $query = {
+        query: {
+          multi_match: {
+            query: data.business.substring(0, 4)
+          , fields: [
+              'name'
+            , 'name.partial'
+            , 'businessName'
+            , 'businessName.partial'
+            ]
           }
         }
       };
