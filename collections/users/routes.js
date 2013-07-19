@@ -80,7 +80,9 @@ module.exports.search = function(req, res) {
   logger.routes.debug(TAGS, 'searching user');
 
   var lastName  = req.param('lastName')
-    , firstName = req.param('firstName');
+    , firstName = req.param('firstName')
+    , email     = req.param('email')
+    ;
 
   var query = sql.query([
     'SELECT users.*, consumers."firstName", consumers."lastName"',
@@ -101,12 +103,17 @@ module.exports.search = function(req, res) {
   
   if (lastName) {
     query.where.and('consumers."lastName" ILIKE $lastName');
-    query.$('lastName', lastName);
+    query.$('lastName', '%'+lastName+'%');
   }
 
   if (firstName) {
     query.where.and('consumers."firstName" ILIKE $firstName');
-    query.$('firstName', firstName);
+    query.$('firstName', '%'+firstName+'%');
+  }  
+
+  if (email) {
+    query.where.and('users.email ILIKE $emailFilter');
+    query.$('emailFilter', '%'+email+'%');
   }
 
   db.query(query, function(error, rows, dataResult){
