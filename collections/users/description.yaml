@@ -9,6 +9,7 @@ collection:
         offset:     { type: int,    eg: 5 }
         limit:      { type: int,    eg: 5 }
         filter:     { type: string, eg: tfergu }
+        email:      { type: string, eg: user_XXX@goodybag.com }
         lastName:   { type: string, eg: ferguson }
         firstName:  { type: string, eg: todd }
     post:
