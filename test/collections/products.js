@@ -22,8 +22,55 @@ var dataPopulation = {
 
       tu.loginAsAdmin(function(error){
         async.series(
-          context.generated.map(function(item){
-            return function(done){ tu.post('/v1/products', item, done); }
+          context.generated.map(function(item, i, set){
+            return function(done){
+              tu.post('/v1/products', item, function(error, result){
+                if (error) return done(error);
+                result = JSON.parse(result);
+                set[i].id = result.data.id;
+                done(null, result);
+              });
+            }
+          }
+        )
+        , function(error){
+            if (error) return done(error);
+
+            // Give ES some time
+            tu.logout(function(){
+              setTimeout(done, 1000);
+            });
+          }
+        );
+      });
+    }
+  }
+
+, 'Batch #2 - Update Products': {
+    product:        'Update Product'
+  , businessId:      1
+  , photoUrl:       'http://myphotos.com/1.jpg'
+  , numToGenerate:   1
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessId:   context.businessId
+      , photoUrl:     context.photoUrl
+      });
+
+      tu.loginAsAdmin(function(error){
+        async.series(
+          context.generated.map(function(item, i, set){
+            return function(done){
+              tu.post('/v1/products', item, function(error, result){
+                if (error) return done(error);
+                result = JSON.parse(result);
+                context.generated[i].id = result.data.id;
+                done(null, result);
+              });
+            }
           }
         )
         , function(error){
@@ -41,7 +88,7 @@ var dataPopulation = {
 };
 
 before(function(done){
-
+this.timeout(5000);
   // Populate all data from tests
   async.series(
     Object.keys( dataPopulation ).map( function(key){
@@ -1176,6 +1223,35 @@ describe('PATCH /v1/products/:id', function() {
             done();
           });
         });
+      });
+    });
+  });
+
+  it ('should re-index elasticsearch on product update', function(done){
+    var data = dataPopulation[ 'Batch #2 - Update Products' ];
+    var $update = { name: 'Poopie Doopie Head' };
+
+    tu.loginAsAdmin(function(error){
+      assert( !error );
+      tu.put('/v1/products/' + data.generated[0].id, $update, function(error, result, res){
+        assert( !error );
+        assert( res.statusCode == 204 );
+      });
+
+      magic.once('elastic-search.product.saved', function(){
+        // Give ES Some time
+        setTimeout(function(){
+          tu.get('/v1/products/search?query=' + $update.name, function(error, result, res){
+            assert( !error );
+            assert( res.statusCode == 200 );
+            result = JSON.parse( result );
+            assert(
+              result.data.some(function(d){ return d.id == data.generated[0].id })
+            );
+
+            tu.logout( done );
+          });
+        }, 800);
       });
     });
   });

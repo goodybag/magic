@@ -31,6 +31,7 @@ module.exports = {
         }
       }
     }, function(error, product){
+      console.log(product);
       elastic.save( 'product', product, function(error, result){
         if (result) this_.emit('elastic-search.product.saved');
       });
