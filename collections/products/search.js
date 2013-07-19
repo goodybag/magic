@@ -67,7 +67,8 @@ module.exports = function(req, res){
 
   if (req.session.user) qHelpers.feelings( query, req.session.user.id );
 
-  if ( includes.indexOf('categories') > -1 ) qHelpers.categories( query );
+  if ( includes.indexOf('categories') > -1 )  qHelpers.categories( query );
+  if ( includes.indexOf('tags') > -1 )        qHelpers.tags( query );
 
   elastic.search('product', searchOptions, function(error, results){
     if (error) return res.error(errors.internal.DB_FAILURE, error);

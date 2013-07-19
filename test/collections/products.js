@@ -2,7 +2,54 @@ var tu = require('../../lib/test-utils');
 var magic = require('../../lib/magic');
 var assert = require('better-assert');
 var sinon = require('sinon');
+var async = require('async');
 var ok = require('okay');
+
+var dataPopulation = {
+  'Batch #1 - Elastic Searchin': {
+    product:        'Some Product'
+  , businessId:      1
+  , photoUrl:       'http://myphotos.com/1.jpg'
+  , numToGenerate:   20
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessId:   context.businessId
+      , photoUrl:     context.photoUrl
+      });
+
+      tu.loginAsAdmin(function(error){
+        async.series(
+          context.generated.map(function(item){
+            return function(done){ tu.post('/v1/products', item, done); }
+          }
+        )
+        , function(error){
+            if (error) return done(error);
+
+            // Give ES some time
+            tu.logout(function(){
+              setTimeout(done, 1000);
+            });
+          }
+        );
+      });
+    }
+  }
+};
+
+before(function(done){
+
+  // Populate all data from tests
+  async.series(
+    Object.keys( dataPopulation ).map( function(key){
+      return function(done){ dataPopulation[key].fn( dataPopulation[key], done ) }
+    })
+  , done
+  )
+});
 
 describe('GET /v1/products', function() {
 
@@ -418,15 +465,33 @@ describe('GET /v1/products', function() {
       // Give ES sometime to fully index
       setTimeout(function(){
         tu.get('/v1/products/search?hasPhoto=false&query=' + data[0].name, function(error, results, res){
-          assert(!error);
-          assert(res.statusCode == 200);
+          assert( !error );
+          assert( res.statusCode == 200 );
           results = JSON.parse(results);
-          assert(results.data.length == 1);
-          assert(results.data[0].name == results.data[0].name);
-          assert(results.data[0]._score >= 1);
+          assert( results.data.length == 1 );
+          assert( results.data[0].name == results.data[0].name );
+          assert( results.data[0]._score >= 1 );
           done();
         });
-      }, 800)
+      }, 1000);
+    });
+  });
+
+  it('should elasticsearch products and include categories and tags', function(done){
+    var data = dataPopulation[ 'Batch #1 - Elastic Searchin' ];
+
+    tu.get('/v1/products/search?include[]=categories&include[]=tags&query=' + data.product, function(error, results, res){
+      assert( !error );
+      assert( res.statusCode == 200 );
+      results = JSON.parse(results);
+      assert( results.data.length > 0 );
+      assert( results.data.filter(function(r){
+        return !!r.categories;
+      }).length == results.data.length );
+      assert( results.data.filter(function(r){
+        return !!r.tags;
+      }).length == results.data.length );
+      done();
     });
   });
 
