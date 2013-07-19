@@ -92,6 +92,22 @@ describe('GET /v1/users/search', function() {
     });
   });
 
+  it('should search by email address', function(done) {
+    tu.loginAsAdmin(function() {
+      tu.get('/v1/users/search?email=tferguson@gmail.com', function(err, results, res) {
+        assert(!err);
+        var payload = JSON.parse(results);
+        assert(!payload.error);
+        assert(payload.data.length > 0);
+        assert(payload.meta.total > 0);
+        utils.each(payload.data, function(row) {
+          assert(row.email.indexOf('tferguson@gmail.com') >= 0);
+        });
+        done();
+      });
+    });
+  });
+
   it('should search ignoring letter case', function(done) {
     tu.loginAsAdmin(function() {
       tu.get('/v1/users/search?lastName=fErGuSoN', function(err, results, res) {
