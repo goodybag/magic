@@ -495,6 +495,29 @@ describe('GET /v1/products', function() {
     });
   });
 
+  it('should elasticsearch products and have user feelings', function(done){
+    var data = dataPopulation[ 'Batch #1 - Elastic Searchin' ];
+
+    tu.loginAsConsumer(function(error){
+      assert( !error );
+
+      tu.get('/v1/products/search?query=' + data.product, function(error, results, res){
+        assert( !error );
+        assert( res.statusCode == 200 );
+        results = JSON.parse(results);
+        assert( results.data.length > 0 );
+        assert( results.data.filter(function(r){
+          return (
+            'userLikes' in r &&
+            'userWants' in r &&
+            'userTried' in r
+          );
+        }).length == results.data.length );
+        tu.logout( done );
+      });
+    });
+  });
+
 });
 
 describe('GET /v1/locations/:locationId/products', function() {
