@@ -13,7 +13,7 @@ module.exports = {
       if (business) product.businessName = business.name;
 
       elastic.save( 'product', product, function(error, result){
-        if (result) this_.emit('elastic-search.product.saved');
+        if (result) this_.emit( 'elastic-search.product.saved', product );
       });
     });
   }
@@ -31,16 +31,20 @@ module.exports = {
         }
       }
     }, function(error, product){
-      console.log(product);
       elastic.save( 'product', product, function(error, result){
-        if (result) this_.emit('elastic-search.product.saved');
+        if (result) this_.emit( 'elastic-search.product.saved', product );
       });
     })
   }
 
 , 'products.deleted':
   function(productId){
-    elastic.del( 'product', productId );
+    var this_ = this;
+    elastic.del( 'product', productId, function(error){
+      if (error) return;
+
+      this_.emit( 'elastic-search.product.deleted', productId );
+    });
   }
 
 , 'business.created':
