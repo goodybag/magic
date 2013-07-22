@@ -19,6 +19,9 @@ require(__dirname + '/logger');
 // business analytics tests
 require(__dirname + '/business-analytics');
 
+// elastic search tests
+require(__dirname + '/elastic-search');
+
 // functional tests
 // ================
 
@@ -76,7 +79,8 @@ var chaosBlacklist = [
   'consumers.cardUpdatesCollection', // skip these -- they have prereqs that dont work well for chaos
   'consumers.cardUpdatesItem',
   'consumers.consumerPasswordItem',
-  'redemptions.collection'
+  'redemptions.collection',
+  'products.search'
 ];
 
 var doci = require('../lib/doci');

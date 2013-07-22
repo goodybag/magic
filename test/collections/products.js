@@ -1,7 +1,142 @@
 var tu = require('../../lib/test-utils');
+var magic = require('../../lib/magic');
 var assert = require('better-assert');
 var sinon = require('sinon');
+var async = require('async');
 var ok = require('okay');
+
+var dataPopulation = {
+  'Batch #1 - Elastic Searchin': {
+    product:        'Some Product'
+  , businessId:      1
+  , photoUrl:       'http://myphotos.com/1.jpg'
+  , numToGenerate:   20
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessId:   context.businessId
+      , photoUrl:     context.photoUrl
+      });
+
+      tu.loginAsAdmin(function(error){
+        async.series(
+          context.generated.map(function(item, i, set){
+            return function(done){
+              tu.post('/v1/products', item, function(error, result){
+                if (error) return done(error);
+                result = JSON.parse(result);
+                set[i].id = result.data.id;
+                done(null, result);
+              });
+            }
+          }
+        )
+        , function(error){
+            if (error) return done(error);
+
+            // Give ES some time
+            tu.logout(function(){
+              setTimeout(done, 1000);
+            });
+          }
+        );
+      });
+    }
+  }
+
+, 'Batch #2 - Update Products': {
+    product:        'Update Product'
+  , businessId:      1
+  , photoUrl:       'http://myphotos.com/1.jpg'
+  , numToGenerate:   1
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessId:   context.businessId
+      , photoUrl:     context.photoUrl
+      });
+
+      tu.loginAsAdmin(function(error){
+        async.series(
+          context.generated.map(function(item, i, set){
+            return function(done){
+              tu.post('/v1/products', item, function(error, result){
+                if (error) return done(error);
+                result = JSON.parse(result);
+                context.generated[i].id = result.data.id;
+                done(null, result);
+              });
+            }
+          }
+        )
+        , function(error){
+            if (error) return done(error);
+
+            // Give ES some time
+            tu.logout(function(){
+              setTimeout(done, 1000);
+            });
+          }
+        );
+      });
+    }
+  }
+
+, 'Batch #3 - Delete Product': {
+    product:        'Delete Product'
+  , businessId:      1
+  , photoUrl:       'http://myphotos.com/1.jpg'
+  , numToGenerate:   1
+  , generated:       []
+
+  , fn: function(context, done){
+      for (var i = 0; i < context.numToGenerate; i++) context.generated.push({
+        name:         context.product + ' ' + (i + 1)
+      , businessId:   context.businessId
+      , photoUrl:     context.photoUrl
+      });
+
+      tu.loginAsAdmin(function(error){
+        async.series(
+          context.generated.map(function(item, i, set){
+            return function(done){
+              tu.post('/v1/products', item, function(error, result){
+                if (error) return done(error);
+                result = JSON.parse(result);
+                context.generated[i].id = result.data.id;
+                done(null, result);
+              });
+            }
+          }
+        )
+        , function(error){
+            if (error) return done(error);
+
+            // Give ES some time
+            tu.logout(function(){
+              setTimeout(done, 1000);
+            });
+          }
+        );
+      });
+    }
+  }
+};
+
+before(function(done){
+this.timeout(5000);
+  // Populate all data from tests
+  async.series(
+    Object.keys( dataPopulation ).map( function(key){
+      return function(done){ dataPopulation[key].fn( dataPopulation[key], done ) }
+    })
+  , done
+  )
+});
 
 describe('GET /v1/products', function() {
 
@@ -402,6 +537,72 @@ describe('GET /v1/products', function() {
       });
     });
 
+  });
+
+  it('should elasticsearch products by name', function(done){
+    this.timeout(4000);
+
+    var data = [{ name: 'aaaaaaaaaapppple', businessId: 1 }];
+
+    tu.populate('products', data, function(error, pids){
+      assert(!error);
+    });
+
+    magic.once('elastic-search.product.saved', function(){
+      // Give ES sometime to fully index
+      setTimeout(function(){
+        tu.get('/v1/products/search?hasPhoto=false&query=' + data[0].name, function(error, results, res){
+          assert( !error );
+          assert( res.statusCode == 200 );
+          results = JSON.parse(results);
+          assert( results.data.length == 1 );
+          assert( results.data[0].name == results.data[0].name );
+          assert( results.data[0]._score >= 1 );
+          done();
+        });
+      }, 1000);
+    });
+  });
+
+  it('should elasticsearch products and include categories and tags', function(done){
+    var data = dataPopulation[ 'Batch #1 - Elastic Searchin' ];
+
+    tu.get('/v1/products/search?include[]=categories&include[]=tags&query=' + data.product, function(error, results, res){
+      assert( !error );
+      assert( res.statusCode == 200 );
+      results = JSON.parse(results);
+      assert( results.data.length > 0 );
+      assert( results.data.filter(function(r){
+        return !!r.categories;
+      }).length == results.data.length );
+      assert( results.data.filter(function(r){
+        return !!r.tags;
+      }).length == results.data.length );
+      done();
+    });
+  });
+
+  it('should elasticsearch products and have user feelings', function(done){
+    var data = dataPopulation[ 'Batch #1 - Elastic Searchin' ];
+
+    tu.loginAsConsumer(function(error){
+      assert( !error );
+
+      tu.get('/v1/products/search?query=' + data.product, function(error, results, res){
+        assert( !error );
+        assert( res.statusCode == 200 );
+        results = JSON.parse(results);
+        assert( results.data.length > 0 );
+        assert( results.data.filter(function(r){
+          return (
+            'userLikes' in r &&
+            'userWants' in r &&
+            'userTried' in r
+          );
+        }).length == results.data.length );
+        tu.logout( done );
+      });
+    });
   });
 
 });
@@ -1065,6 +1266,35 @@ describe('PATCH /v1/products/:id', function() {
       });
     });
   });
+
+  it ('should re-index elasticsearch on product update', function(done){
+    var data = dataPopulation[ 'Batch #2 - Update Products' ];
+    var $update = { name: 'Poopie Doopie Head' };
+
+    tu.loginAsAdmin(function(error){
+      assert( !error );
+      tu.put('/v1/products/' + data.generated[0].id, $update, function(error, result, res){
+        assert( !error );
+        assert( res.statusCode == 204 );
+      });
+
+      magic.once('elastic-search.product.saved', function(){
+        // Give ES Some time
+        setTimeout(function(){
+          tu.get('/v1/products/search?query=' + $update.name, function(error, result, res){
+            assert( !error );
+            assert( res.statusCode == 200 );
+            result = JSON.parse( result );
+            assert(
+              result.data.some(function(d){ return d.id == data.generated[0].id })
+            );
+
+            tu.logout( done );
+          });
+        }, 800);
+      });
+    });
+  });
 });
 
 
@@ -1078,6 +1308,32 @@ describe('DELETE /v1/products/:id', function() {
         assert(res.statusCode == 204);
 
         tu.logout(done);
+      });
+    });
+  });
+
+  it('should delete and remove from elastic search', function(done) {
+    var data = dataPopulation[ 'Batch #3 - Delete Product' ];
+    tu.loginAsAdmin(function() {
+      tu.del('/v1/products/' + data.generated[0].id, function(err, payload, res) {
+        assert( !err );
+        assert( res.statusCode == 204 );
+      });
+
+      magic.once('elastic-search.product.deleted', function(){
+        setTimeout(function(){
+          tu.get('/v1/products/search?query=' + data.generated[0].name, function(error, result, res){
+            assert( !error );
+            assert( res.statusCode == 200 );
+            result = JSON.parse( result );
+            // The ID should no longer exist in the result set
+            assert(
+              !result.data.some(function(d){ return d.id == data.generated[0].id })
+            );
+
+            tu.logout( done );
+          });
+        });
       });
     });
   });
